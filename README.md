@@ -10,4 +10,6 @@ py manage.py runserver
 
   ssh -i "administracion-departamentos.pem" ubuntu@ec2-18-215-115-94.compute-1.amazonaws.com
 
-  source myenv/bin/activate
+
+  source venv/bin/activate
+  source administracion-departamentos/backend/facet/venv/bin/activate

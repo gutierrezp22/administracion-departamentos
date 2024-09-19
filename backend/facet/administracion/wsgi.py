@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'facet.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'administracion.settings.produccion')  # O cambiar por local si estás en desarrollo
 
 application = get_wsgi_application()
