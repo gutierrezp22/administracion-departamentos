@@ -15,7 +15,9 @@ DB_CONFIG = {
 
 # file_path = r"C:\Users\Pablo\OneDrive\Documentos\Trabajo\FACET - departamentos\administracion-departamentos\backend\facet\scripts\Planta Docente.xlsx"
 
-file_path = "/home/ubuntu/administracion-departamentos/backend/facet/scripts/Planta Docente.xlsx"
+file_path =r"D:\Prog\administracion-departamentos\administracion-departamentos\backend\facet\scripts\Planta Docente.xlsx"
+
+# file_path = "/home/ubuntu/administracion-departamentos/backend/facet/scripts/Planta Docente.xlsx"
 
 # Leer el archivo Excel
 data = pd.read_excel(file_path)

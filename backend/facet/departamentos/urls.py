@@ -22,6 +22,7 @@ router.register(r'resolucion', ResolucionViewSet)
 router.register(r'jefe-departamento', JefeDepartamentoViewSet)
 router.register(r'nodocente', NoDocenteViewSet)
 router.register(r'tipo-titulo', TipoTituloViewSet)
+router.register(r'notificacion', NotificacionViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
