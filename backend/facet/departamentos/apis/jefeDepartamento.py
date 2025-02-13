@@ -6,6 +6,15 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from ..models import JefeDepartamento
 from ..serializers import JefeDepartamentoCreateSerializer, JefeDepartamentoDetailSerializer
+from rest_framework.pagination import PageNumberPagination
+
+
+# 📌 Definir la paginación personalizada
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 10  # Número de elementos por página
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
 
 class JefeDepartamentoViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
@@ -28,12 +37,14 @@ class JefeDepartamentoViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='list_detalle')
     def list_detalle(self, request):
-        # Optimiza la consulta utilizando select_related
+        """🔹 Devuelve Jefes de Departamento paginados"""
         queryset = JefeDepartamento.objects.select_related(
             'jefe__persona', 'departamento', 'resolucion'
         ).all()
 
-        # Construye la respuesta personalizada
+        paginator = StandardResultsSetPagination()
+        paginated_queryset = paginator.paginate_queryset(queryset, request)
+
         data = [
             {
                 'id': depto_jefe.id,
@@ -64,10 +75,10 @@ class JefeDepartamentoViewSet(viewsets.ModelViewSet):
                     },
                 },
             }
-            for depto_jefe in queryset
+            for depto_jefe in paginated_queryset
         ]
 
-        return Response(data)
+        return paginator.get_paginated_response(data)  # ✅ Respuesta paginada
 
     @action(detail=True, methods=['get'], url_path='obtener_detalle')
     def obtener_detalle(self, request, pk=None):

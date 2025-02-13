@@ -94,7 +94,8 @@ const ListaDepartamentosJefe = () => {
   const fetchData = async (url: string) => {
     try {
       const response = await axios.get(url);
-      setDeptoJefes(response.data);
+      console.log(response)
+      setDeptoJefes(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
       setTotalItems(response.data.count);

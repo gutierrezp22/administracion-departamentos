@@ -261,3 +261,12 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 SECURE_SSL_REDIRECT = False  # Asegúrate de que no redirija innecesariamente
+
+# 📌 Configuración del Correo
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.environ["EMAIL_HOST"]  # Se asume que está definida en el entorno
+EMAIL_PORT = int(os.environ["EMAIL_PORT"])  # Convertir a entero
+EMAIL_USE_TLS = os.environ["EMAIL_USE_TLS"].lower() == "true"  # Convertir a booleano
+EMAIL_HOST_USER = os.environ["EMAIL_HOST_USER"]
+EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
+DEFAULT_FROM_EMAIL = os.environ["DEFAULT_FROM_EMAIL"]
