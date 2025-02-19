@@ -7,6 +7,9 @@ from rest_framework.response import Response
 from ..models import JefeDepartamento
 from ..serializers import JefeDepartamentoCreateSerializer, JefeDepartamentoDetailSerializer
 from rest_framework.pagination import PageNumberPagination
+from django.utils.timezone import now, timedelta
+from django.db.models import Prefetch
+
 
 
 # 📌 Definir la paginación personalizada
@@ -34,6 +37,14 @@ class JefeDepartamentoViewSet(viewsets.ModelViewSet):
         if self.request and self.request.method in ['POST', 'PUT', 'PATCH']:
             return JefeDepartamentoCreateSerializer
         return JefeDepartamentoDetailSerializer
+    
+    # def get_serializer_class(self):
+    #     if self.action in ['list_detalle', 'list_proximos_vencimientos']:
+    #         return JefeDepartamentoDetailSerializer  # Usar serializador con relaciones completas
+    #     elif self.request and self.request.method in ['POST', 'PUT', 'PATCH']:
+    #         return JefeDepartamentoCreateSerializer
+    #     return JefeDepartamentoSerializer
+
 
     @action(detail=False, methods=['get'], url_path='list_detalle')
     def list_detalle(self, request):
@@ -114,3 +125,55 @@ class JefeDepartamentoViewSet(viewsets.ModelViewSet):
             },
         }
         return Response(data)
+    
+    
+    @action(detail=False, methods=['get'], url_path='list_proximos_vencimientos')
+    def list_proximos_vencimientos(self, request):
+        """🔹 Lista Jefes Departamentos cuyos cargos vencen en los próximos 30 días con datos completos."""
+        fecha_limite = now().date() + timedelta(days=30)
+
+        # 🔹 Asegurar que todas las relaciones se expandan correctamente
+        queryset = JefeDepartamento.objects.select_related(
+            'departamento', 'resolucion', 'jefe__persona'  # Importante: expandir jefe__persona
+        ).filter(
+            fecha_de_fin__lte=fecha_limite,
+            fecha_de_fin__gte=now().date()
+        )
+
+        paginator = StandardResultsSetPagination()
+        paginated_queryset = paginator.paginate_queryset(queryset, request)
+
+        data = [
+            {
+                'id': depto_jefe.id,
+                'observaciones': depto_jefe.observaciones,
+                'estado': depto_jefe.estado,
+                'fecha_de_inicio': depto_jefe.fecha_de_inicio,
+                'fecha_de_fin': depto_jefe.fecha_de_fin,
+                'departamento': {
+                    'id': depto_jefe.departamento.id,
+                    'nombre': depto_jefe.departamento.nombre,
+                } if depto_jefe.departamento else None,
+                'resolucion': {
+                    'id': depto_jefe.resolucion.id,
+                    'nresolucion': depto_jefe.resolucion.nresolucion,
+                    'nexpediente': depto_jefe.resolucion.nexpediente,
+                } if depto_jefe.resolucion else None,
+                'jefe': {
+                    'id': depto_jefe.jefe.id,
+                    'observaciones': depto_jefe.jefe.observaciones,
+                    'persona': {
+                        'id': depto_jefe.jefe.persona.id,
+                        'nombre': depto_jefe.jefe.persona.nombre,
+                        'apellido': depto_jefe.jefe.persona.apellido,
+                        'dni': depto_jefe.jefe.persona.dni,
+                        'legajo': depto_jefe.jefe.persona.legajo,
+                        'telefono': depto_jefe.jefe.persona.telefono,
+                        'email': depto_jefe.jefe.persona.email if depto_jefe.jefe.persona.email else "No disponible",
+                    } if depto_jefe.jefe and depto_jefe.jefe.persona else None,  # Asegurar que `persona` esté expandida
+                } if depto_jefe.jefe else None,
+            }
+            for depto_jefe in paginated_queryset
+        ]
+
+        return paginator.get_paginated_response(data)  # ✅ Respuesta paginada con datos completos

@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
-import { Container, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, TextField, Button, InputLabel, Select, MenuItem, FormControl, Tooltip } from '@mui/material';
+import { Container, Grid, Paper,FormControlLabel,Checkbox, Table, TableBody, TableCell, TableContainer, TableHead,
+  TableRow, Typography, TextField, Button, InputLabel, Select, MenuItem, FormControl, Tooltip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import EmailIcon from '@mui/icons-material/Email';
 import Link from 'next/link'; // Cambiado para usar Link de Next.js
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
@@ -12,6 +14,9 @@ import DashboardMenu from '../../../../dashboard';
 import dayjs from 'dayjs';
 import withAuth from "../../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../../utils/config";
+import Swal from 'sweetalert2';
+// import { FormControlLabel, Checkbox } from "@mui/material";
+
 
 
 const ListaDepartamentosJefe = () => {
@@ -86,6 +91,8 @@ const ListaDepartamentosJefe = () => {
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [mostrarVencimientos, setMostrarVencimientos] = useState(false);
+
 
   useEffect(() => {
     fetchData(currentUrl);
@@ -94,7 +101,6 @@ const ListaDepartamentosJefe = () => {
   const fetchData = async (url: string) => {
     try {
       const response = await axios.get(url);
-      console.log(response)
       setDeptoJefes(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
@@ -114,33 +120,87 @@ const ListaDepartamentosJefe = () => {
     }
   };
 
-  const filtrarJefesDepartamentos = () => {
-    let url = `${API_BASE_URL}/facet/jefe-departamento/?`;
-    const params = new URLSearchParams();
-    if (filtroNombre !== '') {
-      params.append('jefe__persona__nombre__icontains', filtroNombre);
-    }
-    if (filtroDni !== '') {
-      params.append('jefe__persona__dni__icontains', filtroDni);
-    }
-    if (filtroEstado !== '') {
-      params.append('jefe__estado', filtroEstado.toString());
-    }
-    if (filtroApellido !== '') {
-      params.append('jefe__persona__apellido__icontains', filtroApellido);
-    }
-    if (filtroLegajo !== '') {
-      params.append('jefe__persona__legajo__icontains', filtroLegajo);
-    }
-    if (filtroDepartamento !== '') {
-      params.append('departamento__nombre__icontains', filtroDepartamento);
-    }
-    if (filtroResolucion !== '') {
-      params.append('resolucion__nresolucion__icontains', filtroResolucion);
-    }
-    url += params.toString();
-    setCurrentUrl(url);
-  };
+  // ✅ Función para alternar el modo de "Próximos vencimientos"
+const toggleVencimientos = () => {
+  setMostrarVencimientos(!mostrarVencimientos);
+  const newUrl = mostrarVencimientos
+    ? `${API_BASE_URL}/facet/jefe-departamento/list_detalle/`
+    : `${API_BASE_URL}/facet/jefe-departamento/list_proximos_vencimientos/`;
+  setCurrentUrl(newUrl);
+};
+
+
+// ✅ Función para enviar notificación manualmente
+const enviarNotificacion = async (id: number, email: string) => {
+  try {
+    // ✅ Mostrar modal de carga
+    Swal.fire({
+      title: "Enviando notificación...",
+      text: "Por favor, espera mientras se envía la notificación.",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading(); // 🔄 Mostrar spinner de carga
+      }
+    });
+
+    // ✅ Enviar la notificación
+    await axios.post(`${API_BASE_URL}/facet/notificacion/crear_notificacion/`, {
+      persona_id: id,
+      mensaje: `Recordatorio: Tu cargo vence pronto. Contacta administración para renovarlo.`,
+    });
+
+    // ✅ Mostrar confirmación cuando se complete
+    Swal.fire({
+      icon: "success",
+      title: "Notificación enviada",
+      text: `Se envió un correo a ${email}`,
+    });
+
+  } catch (error) {
+    console.error("Error enviando notificación:", error);
+
+    // ❌ Mostrar error en caso de fallo
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "No se pudo enviar la notificación.",
+    });
+  }
+};
+
+
+const filtrarJefesDepartamentos = () => {
+  let baseUrl = mostrarVencimientos
+    ? `${API_BASE_URL}/facet/jefe-departamento/list_proximos_vencimientos/`
+    : `${API_BASE_URL}/facet/jefe-departamento/list_detalle/`;
+
+  const params = new URLSearchParams();
+  if (filtroNombre !== '') {
+    params.append('jefe__persona__nombre__icontains', filtroNombre);
+  }
+  if (filtroDni !== '') {
+    params.append('jefe__persona__dni__icontains', filtroDni);
+  }
+  if (filtroEstado !== '') {
+    params.append('jefe__estado', filtroEstado.toString());
+  }
+  if (filtroApellido !== '') {
+    params.append('jefe__persona__apellido__icontains', filtroApellido);
+  }
+  if (filtroLegajo !== '') {
+    params.append('jefe__persona__legajo__icontains', filtroLegajo);
+  }
+  if (filtroDepartamento !== '') {
+    params.append('departamento__nombre__icontains', filtroDepartamento);
+  }
+  if (filtroResolucion !== '') {
+    params.append('resolucion__nresolucion__icontains', filtroResolucion);
+  }
+
+  const finalUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+  setCurrentUrl(finalUrl);
+};
 
   
 const descargarExcel = async () => {
@@ -270,6 +330,14 @@ const descargarExcel = async () => {
             />
           </Grid>
           <Grid item xs={4} marginBottom={2}>
+            <FormControlLabel
+              control={
+                <Checkbox checked={mostrarVencimientos} onChange={toggleVencimientos} />
+              }
+              label="Próximos Vencimientos"
+            />
+          </Grid>
+          <Grid item xs={4} marginBottom={2}>
             <Button variant="contained" onClick={filtrarJefesDepartamentos}>
               Filtrar
             </Button>
@@ -277,65 +345,77 @@ const descargarExcel = async () => {
         </Grid>
 
         <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow className='header-row'>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Nombre</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Apellido</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Departamento</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Resolución</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Fecha de Inicio</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Fecha de Fin</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Estado</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Observaciones</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1"></Typography>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {deptoJefes.map((deptoJefe) => (
-                <TableRow key={deptoJefe.id}>
-                  <TableCell>{deptoJefe.jefe.persona.nombre}</TableCell>
-                  <TableCell>{deptoJefe.jefe.persona.apellido}</TableCell>
-                  <TableCell>{deptoJefe.departamento.nombre}</TableCell>
-                  <TableCell>{deptoJefe.resolucion.nresolucion}</TableCell>
-                  <TableCell>{formatFecha(deptoJefe.fecha_de_inicio)}</TableCell>
-                  <TableCell>{deptoJefe.fecha_de_fin ? formatFecha(deptoJefe.fecha_de_fin) : '-'}</TableCell>
-                  <TableCell>{deptoJefe.estado == 1 ? 'Activo' : 'Inactivo'}</TableCell>
-                  <TableCell style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                    <Tooltip title={deptoJefe.observaciones}>
-                      <VisibilityIcon/>
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell>
-                    <Tooltip title="Editar">
-                      <Link href={`/dashboard/departments/departamentoJefe/edit/${deptoJefe.id}`} passHref>
-                        <EditIcon />
-                      </Link>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+  <Table>
+    <TableHead>
+      <TableRow className='header-row'>
+        <TableCell className='header-cell'>
+          <Typography variant="subtitle1">Nombre</Typography>
+        </TableCell>
+        <TableCell className='header-cell'>
+          <Typography variant="subtitle1">Apellido</Typography>
+        </TableCell>
+        <TableCell className='header-cell'>
+          <Typography variant="subtitle1">Departamento</Typography>
+        </TableCell>
+        <TableCell className='header-cell'>
+          <Typography variant="subtitle1">Resolución</Typography>
+        </TableCell>
+        <TableCell className='header-cell'>
+          <Typography variant="subtitle1">Fecha de Inicio</Typography>
+        </TableCell>
+        <TableCell className='header-cell'>
+          <Typography variant="subtitle1">Fecha de Fin</Typography>
+        </TableCell>
+        <TableCell className='header-cell'>
+          <Typography variant="subtitle1">Estado</Typography>
+        </TableCell>
+        <TableCell className='header-cell'>
+          <Typography variant="subtitle1">Acciones</Typography>
+        </TableCell>
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      {deptoJefes.map((deptoJefe) => (
+        <TableRow key={deptoJefe.id}>
+          <TableCell>{deptoJefe.jefe.persona.nombre}</TableCell>
+          <TableCell>{deptoJefe.jefe.persona.apellido}</TableCell>
+          <TableCell>{deptoJefe.departamento.nombre}</TableCell>
+          <TableCell>{deptoJefe.resolucion.nresolucion}</TableCell>
+          <TableCell>{formatFecha(deptoJefe.fecha_de_inicio)}</TableCell>
+          <TableCell>{deptoJefe.fecha_de_fin ? formatFecha(deptoJefe.fecha_de_fin) : '-'}</TableCell>
+          <TableCell>{deptoJefe.estado == 1 ? 'Activo' : 'Inactivo'}</TableCell>
+          
+           {/* ✅ Acciones: Ver, Editar y Notificar */}
+          <TableCell>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              {/* Ver Observaciones */}
+              <Tooltip title="Ver Observaciones">
+                <VisibilityIcon style={{ cursor: 'pointer' }} />
+              </Tooltip>
+
+              {/* Editar */}
+              <Tooltip title="Editar">
+                <Link href={`/dashboard/departments/departamentoJefe/edit/${deptoJefe.id}`} passHref>
+                  <EditIcon style={{ cursor: 'pointer' }} />
+                </Link>
+              </Tooltip>
+
+              {/* Notificar (solo si tiene email) */}
+              {deptoJefe.jefe.persona.email && (
+                <Tooltip title="Enviar Notificación">
+                  <EmailIcon
+                    style={{ cursor: 'pointer' }} 
+                    onClick={() => enviarNotificacion(deptoJefe.jefe.persona.id, deptoJefe.jefe.persona.email)}
+                  />
+                </Tooltip>
+              )}
+            </div>
+          </TableCell>
+        </TableRow>
+      ))}
+    </TableBody>
+  </Table>
+</TableContainer>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
           <Button

@@ -6,9 +6,8 @@ from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
 
-
 from django.utils.timezone import now
-from ..models import Notificacion
+from ..models import Notificacion, Persona
 from ..serializers import NotificacionSerializer
 
 class NotificacionViewSet(viewsets.ModelViewSet):
@@ -28,20 +27,39 @@ class NotificacionViewSet(viewsets.ModelViewSet):
         notificacion.save()
         return Response({"message": "Notificación marcada como leída"}, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['post'], url_path='crear_notificacion')
     def crear_notificacion(self, request):
-        """Crear una nueva notificación manualmente."""
+        """Crear una nueva notificación manualmente y enviar un correo."""
         persona_id = request.data.get('persona_id')
         mensaje = request.data.get('mensaje')
 
         if not persona_id or not mensaje:
             return Response({"error": "Faltan datos"}, status=status.HTTP_400_BAD_REQUEST)
 
-        notificacion = Notificacion.objects.create(
-            persona_id=persona_id,
-            mensaje=mensaje
-        )
-        return Response(NotificacionSerializer(notificacion).data, status=status.HTTP_201_CREATED)
+        try:
+            persona = Persona.objects.get(id=persona_id)
+            if not persona.email:
+                return Response({"error": "La persona no tiene un correo registrado"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Crear notificación
+            notificacion = Notificacion.objects.create(
+                persona=persona,
+                mensaje=mensaje
+            )
+
+            # Enviar correo
+            send_mail(
+                subject="Notificación de Administración",
+                message=mensaje,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[persona.email],
+                fail_silently=False,
+            )
+
+            return Response(NotificacionSerializer(notificacion).data, status=status.HTTP_201_CREATED)
+
+        except Persona.DoesNotExist:
+            return Response({"error": "Persona no encontrada"}, status=status.HTTP_404_NOT_FOUND)
     
     @shared_task
     def verificar_documentaciones():
