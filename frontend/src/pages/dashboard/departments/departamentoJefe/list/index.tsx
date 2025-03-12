@@ -7,6 +7,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EmailIcon from '@mui/icons-material/Email';
+import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead'; // Ícono de email con check
 import Link from 'next/link'; // Cambiado para usar Link de Next.js
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
@@ -71,6 +72,7 @@ const ListaDepartamentosJefe = () => {
     fecha_de_fin: string | null; // Actualizado de Date a string | null
     observaciones: string;
     estado: 0 | 1;
+    notificado: boolean; // ✅ Agregado campo notificado
   }
 
   const [resoluciones, setResoluciones] = useState<Resolucion[]>([]);
@@ -133,6 +135,20 @@ const toggleVencimientos = () => {
 // ✅ Función para enviar notificación manualmente
 const enviarNotificacion = async (id: number, email: string) => {
   try {
+    // ✅ Confirmación antes de enviar la notificación
+    const confirmacion = await Swal.fire({
+      title: "¿Estás seguro?",
+      text: `Se enviará una notificación a ${email}.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, enviar",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (!confirmacion.isConfirmed) {
+      return; // ❌ Cancelar si el usuario no confirma
+    }
+
     // ✅ Mostrar modal de carga
     Swal.fire({
       title: "Enviando notificación...",
@@ -169,6 +185,27 @@ const enviarNotificacion = async (id: number, email: string) => {
   }
 };
 
+const confirmarReenvio = async (id: number, email: string) => {
+  try {
+    const confirmacion = await Swal.fire({
+      title: "¿Reenviar notificación?",
+      text: `Esta persona ya fue notificada. ¿Quieres enviarla de nuevo?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Sí, reenviar",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (!confirmacion.isConfirmed) {
+      return;
+    }
+
+    await enviarNotificacion(id, email);
+  } catch (error) {
+    console.error("Error reenviando notificación:", error);
+  }
+};
+
 
 const filtrarJefesDepartamentos = () => {
   let baseUrl = mostrarVencimientos
@@ -201,6 +238,7 @@ const filtrarJefesDepartamentos = () => {
   const finalUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
   setCurrentUrl(finalUrl);
 };
+
 
   
 const descargarExcel = async () => {
@@ -402,13 +440,20 @@ const descargarExcel = async () => {
 
               {/* Notificar (solo si tiene email) */}
               {deptoJefe.jefe.persona.email && (
-                <Tooltip title="Enviar Notificación">
-                  <EmailIcon
-                    style={{ cursor: 'pointer' }} 
-                    onClick={() => enviarNotificacion(deptoJefe.jefe.persona.id, deptoJefe.jefe.persona.email)}
-                  />
-                </Tooltip>
+            <Tooltip title={deptoJefe.notificado ? "Notificación ya enviada. ¿Enviar de nuevo?" : "Enviar Notificación"}>
+              {deptoJefe.notificado ? (
+                <MarkEmailReadIcon
+                  style={{ cursor: 'pointer', color: 'green' }} 
+                  onClick={() => confirmarReenvio(deptoJefe.jefe.persona.id, deptoJefe.jefe.persona.email)}
+                />
+              ) : (
+                <EmailIcon
+                  style={{ cursor: 'pointer' }} 
+                  onClick={() => enviarNotificacion(deptoJefe.jefe.persona.id, deptoJefe.jefe.persona.email)}
+                />
               )}
+            </Tooltip>
+          )}
             </div>
           </TableCell>
         </TableRow>

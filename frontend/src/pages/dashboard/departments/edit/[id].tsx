@@ -122,8 +122,8 @@ const EditarDepartamento = () => {
                   label="Estado"
                   onChange={(e) => setDepartamento({ ...departamento, estado: e.target.value })}
                 >
-                  <MenuItem value={1}>1</MenuItem>
-                  <MenuItem value={0}>0</MenuItem>
+                  <MenuItem value={1}>Activo</MenuItem>
+                  <MenuItem value={0}>Inactivo</MenuItem>
                 </Select>
               </FormControl>
             </Grid>

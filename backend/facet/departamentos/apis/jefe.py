@@ -6,6 +6,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import AllowAny
 from ..models import Jefe
 from ..serializers import JefeSerializer
+from rest_framework import status
+
 
 
 class JefeViewSet(viewsets.ModelViewSet):
@@ -75,3 +77,15 @@ class JefeViewSet(viewsets.ModelViewSet):
             return Response(data)
         else:
             return Response({'detail': 'Jefe no encontrado'}, status=404)
+        
+    @action(detail=False, methods=['get'], url_path='existe_jefe')
+    def existe_jefe(self, request):
+        """Verifica si una persona ya es jefe"""
+        persona_id = request.query_params.get('persona_id', None)
+
+        if not persona_id:
+            return Response({"error": "Se requiere un ID de persona"}, status=status.HTTP_400_BAD_REQUEST)
+
+        existe = Jefe.objects.filter(persona_id=persona_id).exists()
+        return Response({"existe": existe}, status=status.HTTP_200_OK)
+

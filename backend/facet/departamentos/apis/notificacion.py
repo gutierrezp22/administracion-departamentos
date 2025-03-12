@@ -5,19 +5,43 @@ from rest_framework.permissions import AllowAny
 from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
-
 from django.utils.timezone import now
-from ..models import Notificacion, Persona
+from ..models import Notificacion, Persona, JefeDepartamento
 from ..serializers import NotificacionSerializer
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
+from django_filters import rest_framework as filters
+
+
+# Configuración de paginación
+class NotificacionPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+# Definir un `FilterSet` personalizado
+class NotificacionFilter(filters.FilterSet):
+    persona_apellido = filters.CharFilter(field_name="persona__apellido", lookup_expr="icontains")
+    persona_nombre = filters.CharFilter(field_name="persona__nombre", lookup_expr="icontains")
+    fecha_creacion = filters.DateFromToRangeFilter(field_name="fecha_creacion")  # Permite rangos de fechas
+
+    class Meta:
+        model = Notificacion
+        fields = ['persona_apellido', 'persona_nombre', 'fecha_creacion']
 
 class NotificacionViewSet(viewsets.ModelViewSet):
-    queryset = Notificacion.objects.all().order_by('-fecha_creacion')
+    queryset = Notificacion.objects.select_related('persona').all().order_by('-fecha_creacion')  # Asegurar relación
     serializer_class = NotificacionSerializer
     permission_classes = [AllowAny]
+    pagination_class = NotificacionPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = NotificacionFilter  # 👈 Ahora usamos el filtro personalizado
 
-    # def get_queryset(self):
-    #     """Filtrar notificaciones por usuario."""
-    #     return Notificacion.objects.filter(persona=self.request.user.persona)
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())  
+        return super().list(request, *args, **kwargs)
+    
 
     @action(detail=True, methods=['patch'])
     def marcar_leida(self, request, pk=None):
@@ -38,6 +62,8 @@ class NotificacionViewSet(viewsets.ModelViewSet):
 
         try:
             persona = Persona.objects.get(id=persona_id)
+            jefe_departamento = JefeDepartamento.objects.get(jefe__persona__id=persona_id)
+
             if not persona.email:
                 return Response({"error": "La persona no tiene un correo registrado"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -55,6 +81,10 @@ class NotificacionViewSet(viewsets.ModelViewSet):
                 recipient_list=[persona.email],
                 fail_silently=False,
             )
+
+            # Marcar como notificado
+            jefe_departamento.notificado = True
+            jefe_departamento.save()
 
             return Response(NotificacionSerializer(notificacion).data, status=status.HTTP_201_CREATED)
 

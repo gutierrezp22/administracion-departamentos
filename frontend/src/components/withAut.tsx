@@ -6,7 +6,7 @@ const withAuth = (WrappedComponent: React.ComponentType) => {
     const router = useRouter();
 
     useEffect(() => {
-      const token = localStorage.getItem("access_token");
+      const token = sessionStorage.getItem("access_token"); // Cambiar localStorage por sessionStorage
 
       if (!token) {
         router.replace("/login"); // Redirige al login si no está autenticado

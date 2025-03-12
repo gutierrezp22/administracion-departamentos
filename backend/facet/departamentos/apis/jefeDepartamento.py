@@ -4,12 +4,12 @@ from rest_framework.permissions import AllowAny
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from ..models import JefeDepartamento
-from ..serializers import JefeDepartamentoCreateSerializer, JefeDepartamentoDetailSerializer
-from rest_framework.pagination import PageNumberPagination
 from django.utils.timezone import now, timedelta
 from django.db.models import Prefetch
+from rest_framework.pagination import PageNumberPagination
 
+from ..models import JefeDepartamento
+from ..serializers import JefeDepartamentoCreateSerializer, JefeDepartamentoDetailSerializer
 
 
 # 📌 Definir la paginación personalizada
@@ -37,18 +37,11 @@ class JefeDepartamentoViewSet(viewsets.ModelViewSet):
         if self.request and self.request.method in ['POST', 'PUT', 'PATCH']:
             return JefeDepartamentoCreateSerializer
         return JefeDepartamentoDetailSerializer
-    
-    # def get_serializer_class(self):
-    #     if self.action in ['list_detalle', 'list_proximos_vencimientos']:
-    #         return JefeDepartamentoDetailSerializer  # Usar serializador con relaciones completas
-    #     elif self.request and self.request.method in ['POST', 'PUT', 'PATCH']:
-    #         return JefeDepartamentoCreateSerializer
-    #     return JefeDepartamentoSerializer
 
 
     @action(detail=False, methods=['get'], url_path='list_detalle')
     def list_detalle(self, request):
-        """🔹 Devuelve Jefes de Departamento paginados"""
+        """🔹 Devuelve Jefes de Departamento paginados con información completa."""
         queryset = JefeDepartamento.objects.select_related(
             'jefe__persona', 'departamento', 'resolucion'
         ).all()
@@ -61,6 +54,7 @@ class JefeDepartamentoViewSet(viewsets.ModelViewSet):
                 'id': depto_jefe.id,
                 'observaciones': depto_jefe.observaciones,
                 'estado': depto_jefe.estado,
+                'notificado': depto_jefe.notificado,  # ✅ Agregado campo notificado
                 'fecha_de_inicio': depto_jefe.fecha_de_inicio,
                 'fecha_de_fin': depto_jefe.fecha_de_fin,
                 'departamento': {
@@ -91,14 +85,16 @@ class JefeDepartamentoViewSet(viewsets.ModelViewSet):
 
         return paginator.get_paginated_response(data)  # ✅ Respuesta paginada
 
+
     @action(detail=True, methods=['get'], url_path='obtener_detalle')
     def obtener_detalle(self, request, pk=None):
-        """Obtener detalle de un JefeDepartamento específico con relaciones completas."""
+        """🔹 Obtener detalle de un JefeDepartamento específico."""
         jefe_departamento = self.get_object()
         data = {
             'id': jefe_departamento.id,
             'observaciones': jefe_departamento.observaciones,
             'estado': jefe_departamento.estado,
+            'notificado': jefe_departamento.notificado,  # ✅ Agregado campo notificado
             'fecha_de_inicio': jefe_departamento.fecha_de_inicio,
             'fecha_de_fin': jefe_departamento.fecha_de_fin,
             'departamento': {
@@ -125,16 +121,15 @@ class JefeDepartamentoViewSet(viewsets.ModelViewSet):
             },
         }
         return Response(data)
-    
+
     
     @action(detail=False, methods=['get'], url_path='list_proximos_vencimientos')
     def list_proximos_vencimientos(self, request):
-        """🔹 Lista Jefes Departamentos cuyos cargos vencen en los próximos 30 días con datos completos."""
+        """🔹 Lista Jefes Departamentos cuyos cargos vencen en los próximos 30 días."""
         fecha_limite = now().date() + timedelta(days=30)
 
-        # 🔹 Asegurar que todas las relaciones se expandan correctamente
         queryset = JefeDepartamento.objects.select_related(
-            'departamento', 'resolucion', 'jefe__persona'  # Importante: expandir jefe__persona
+            'departamento', 'resolucion', 'jefe__persona'
         ).filter(
             fecha_de_fin__lte=fecha_limite,
             fecha_de_fin__gte=now().date()
@@ -148,6 +143,7 @@ class JefeDepartamentoViewSet(viewsets.ModelViewSet):
                 'id': depto_jefe.id,
                 'observaciones': depto_jefe.observaciones,
                 'estado': depto_jefe.estado,
+                'notificado': depto_jefe.notificado,  # ✅ Agregado campo notificado
                 'fecha_de_inicio': depto_jefe.fecha_de_inicio,
                 'fecha_de_fin': depto_jefe.fecha_de_fin,
                 'departamento': {
@@ -170,10 +166,19 @@ class JefeDepartamentoViewSet(viewsets.ModelViewSet):
                         'legajo': depto_jefe.jefe.persona.legajo,
                         'telefono': depto_jefe.jefe.persona.telefono,
                         'email': depto_jefe.jefe.persona.email if depto_jefe.jefe.persona.email else "No disponible",
-                    } if depto_jefe.jefe and depto_jefe.jefe.persona else None,  # Asegurar que `persona` esté expandida
+                    } if depto_jefe.jefe and depto_jefe.jefe.persona else None,
                 } if depto_jefe.jefe else None,
             }
             for depto_jefe in paginated_queryset
         ]
 
-        return paginator.get_paginated_response(data)  # ✅ Respuesta paginada con datos completos
+        return paginator.get_paginated_response(data)
+
+
+
+    # def get_serializer_class(self):
+    #     if self.action in ['list_detalle', 'list_proximos_vencimientos']:
+    #         return JefeDepartamentoDetailSerializer  # Usar serializador con relaciones completas
+    #     elif self.request and self.request.method in ['POST', 'PUT', 'PATCH']:
+    #         return JefeDepartamentoCreateSerializer
+    #     return JefeDepartamentoSerializer

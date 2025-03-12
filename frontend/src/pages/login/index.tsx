@@ -55,10 +55,11 @@ export default function LoginPage() {
         password,
       });
   
-      localStorage.setItem('access_token', response.data.access);
-      localStorage.setItem('refresh_token', response.data.refresh);
+      // Guardar tokens en sessionStorage para que se eliminen al cerrar el navegador
+      sessionStorage.setItem('access_token', response.data.access);
+      sessionStorage.setItem('refresh_token', response.data.refresh);
   
-      router.push('/dashboard'); // Redirige al Dashboard después de iniciar sesión
+      router.push('/dashboard/home'); // Redirige al Dashboard después de iniciar sesión
     } catch (error) {
       Swal.fire({
         icon: 'error',

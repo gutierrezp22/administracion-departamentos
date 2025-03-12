@@ -15,10 +15,6 @@ import {
   TableRow,
   TextField,
 } from '@mui/material';
-import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
-import DeleteIcon from '@mui/icons-material/Delete';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
 import Swal from "sweetalert2";
 import DashboardMenu from '../../../dashboard';
 import withAuth from "../../../../components/withAut"; 
@@ -26,18 +22,30 @@ import { API_BASE_URL } from "../../../../utils/config";
 
 interface Notificacion {
   id: number;
-  persona: number;
-  mensaje: string;
-  leido: boolean;
   fecha_creacion: string;
+  leido: boolean;
+  mensaje: string;
+  persona: number;
+  persona_apellido: string;
+  persona_nombre: string;
 }
+
 
 const ListaNotificaciones = () => {
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
+  const [filtroApellido, setFiltroApellido] = useState("");
+  const [filtroNombre, setFiltroNombre] = useState("");
+  const [filtroFecha, setFiltroFecha] = useState("");
   const [filtroMensaje, setFiltroMensaje] = useState('');
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
-  const [currentUrl, setCurrentUrl] = useState<string>(`${API_BASE_URL}/facet/notificacion/`);
+  // const [currentUrl, setCurrentUrl] = useState<string>(`${API_BASE_URL}/facet/notificacion/`);
+  const [currentUrl, setCurrentUrl] = useState<string>(
+    `${API_BASE_URL}/facet/notificacion/`
+  );
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   useEffect(() => {
     fetchData(currentUrl);
@@ -49,11 +57,13 @@ const ListaNotificaciones = () => {
       setNotificaciones(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
+      setTotalItems(response.data.count);
+      setCurrentPage(url.includes("page=") ? parseInt(new URL(url).searchParams.get("page") || "1") : 1);
     } catch (error) {
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Error al obtener las notificaciones.',
+        icon: "error",
+        title: "Error",
+        text: "Error al obtener las notificaciones.",
       });
     }
   };
@@ -61,43 +71,52 @@ const ListaNotificaciones = () => {
   const filtrarNotificaciones = () => {
     let url = `${API_BASE_URL}/facet/notificacion/?`;
     const params = new URLSearchParams();
-    if (filtroMensaje !== '') {
-      params.append('mensaje__icontains', filtroMensaje);
+
+    // Asegurarse de que los filtros no estén vacíos antes de agregarlos
+    if (filtroApellido.trim() !== "") {
+        params.append("persona_apellido", filtroApellido.trim());
     }
-    url += params.toString();
-    setCurrentUrl(url);
+    if (filtroNombre.trim() !== "") {
+        params.append("persona_nombre", filtroNombre.trim());
+    }
+    if (filtroFecha.trim() !== "") {
+        params.append("fecha_creacion_after", filtroFecha);
+        params.append("fecha_creacion_before", filtroFecha);
+    }
+    if (filtroMensaje.trim() !== "") {
+        params.append("mensaje__icontains", filtroMensaje.trim());
+    }
+
+    params.append("page_size", pageSize.toString());
+    params.append("page", "1"); // Siempre reiniciar en la primera página
+
+    // Verificar si hay filtros antes de cambiar la URL
+    const finalUrl = url + params.toString();
+
+    if (params.toString().length > 0) {
+        setCurrentUrl(finalUrl);
+    } else {
+        console.warn("⚠ No se aplicaron filtros, URL no se actualizará.");
+    }
+};
+
+
+
+
+  const mostrarMensaje = (mensaje: string) => {
+    Swal.fire({
+      title: "Mensaje enviado",
+      text: mensaje,
+      icon: "info",
+    });
   };
 
-  const marcarComoLeida = async (id: number) => {
-    try {
-      await axios.patch(`${API_BASE_URL}/facet/notificacion/${id}/`, { leido: true });
-      fetchData(currentUrl);
-    } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'No se pudo marcar como leída.',
-      });
-    }
-  };
-
-  const eliminarNotificacion = async (id: number) => {
-    try {
-      await axios.delete(`${API_BASE_URL}/facet/notificacion/${id}/`);
-      fetchData(currentUrl);
-    } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'No se pudo eliminar la notificación.',
-      });
-    }
-  };
+  const totalPages = Math.ceil(totalItems / pageSize);
 
   return (
     <DashboardMenu>
       <Container maxWidth="lg">
-        <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
+        <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
           <Typography variant="h4" gutterBottom>
             Notificaciones
           </Typography>
@@ -105,13 +124,31 @@ const ListaNotificaciones = () => {
           <Grid container spacing={2} marginBottom={2}>
             <Grid item xs={4}>
               <TextField
-                label="Buscar mensaje"
-                value={filtroMensaje}
-                onChange={(e) => setFiltroMensaje(e.target.value)}
+                label="Buscar por apellido"
+                value={filtroApellido}
+                onChange={(e) => setFiltroApellido(e.target.value)}
                 fullWidth
               />
             </Grid>
             <Grid item xs={4}>
+              <TextField
+                label="Buscar por nombre"
+                value={filtroNombre}
+                onChange={(e) => setFiltroNombre(e.target.value)}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <TextField
+                label="Buscar por fecha"
+                type="date"
+                value={filtroFecha}
+                onChange={(e) => setFiltroFecha(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
               <Button variant="contained" onClick={filtrarNotificaciones}>
                 Filtrar
               </Button>
@@ -121,35 +158,42 @@ const ListaNotificaciones = () => {
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
-                <TableRow className='header-row'>
-                  <TableCell className='header-cell'>
-                    <Typography variant="subtitle1">Mensaje</Typography>
+                <TableRow className="header-row">
+                  <TableCell className="header-cell">
+                    <Typography variant="subtitle1">Apellido</Typography>
                   </TableCell>
-                  <TableCell className='header-cell'>
+                  <TableCell className="header-cell">
+                    <Typography variant="subtitle1">Nombre</Typography>
+                  </TableCell>
+                  <TableCell className="header-cell">
                     <Typography variant="subtitle1">Fecha</Typography>
                   </TableCell>
-                  <TableCell className='header-cell'>
-                    <Typography variant="subtitle1">Estado</Typography>
-                  </TableCell>
-                  <TableCell className='header-cell'>
-                    <Typography variant="subtitle1">Acciones</Typography>
+                  <TableCell className="header-cell">
+                    <Typography variant="subtitle1">Mensaje</Typography>
                   </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {notificaciones.map((noti) => (
                   <TableRow key={noti.id}>
-                    <TableCell>{noti.mensaje}</TableCell>
-                    <TableCell>{new Date(noti.fecha_creacion).toLocaleDateString()}</TableCell>
-                    <TableCell>{noti.leido ? 'Leído' : 'No leído'}</TableCell>
+                    <TableCell>{noti.persona_apellido}</TableCell>
+                    <TableCell>{noti.persona_nombre}</TableCell>
                     <TableCell>
-                      {!noti.leido && (
-                        <Button onClick={() => marcarComoLeida(noti.id)} color="primary">
-                          <MarkEmailReadIcon />
-                        </Button>
-                      )}
-                      <Button onClick={() => eliminarNotificacion(noti.id)} color="secondary">
-                        <DeleteIcon />
+                    {noti.fecha_creacion
+                      ? (() => {
+                          const [day, month, year] = noti.fecha_creacion.split(" ")[0].split("/"); // Extraer partes de la fecha
+                          const fixedDate = new Date(`${year}-${month}-${day}T00:00:00`); // Crear fecha en formato correcto sin afectar la zona horaria
+                          return fixedDate.toLocaleDateString();
+                        })()
+                      : "Fecha inválida"}
+                  </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        onClick={() => mostrarMensaje(noti.mensaje)}
+                      >
+                        Ver Mensaje
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -157,6 +201,29 @@ const ListaNotificaciones = () => {
               </TableBody>
             </Table>
           </TableContainer>
+
+          {/* Controles de paginación */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "16px" }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => prevUrl && setCurrentUrl(prevUrl)}
+              disabled={!prevUrl}
+            >
+              Anterior
+            </Button>
+            <Typography variant="body1">
+              Página {currentPage} de {totalPages}
+            </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => nextUrl && setCurrentUrl(nextUrl)}
+              disabled={!nextUrl}
+            >
+              Siguiente
+            </Button>
+          </div>
         </Paper>
       </Container>
     </DashboardMenu>
