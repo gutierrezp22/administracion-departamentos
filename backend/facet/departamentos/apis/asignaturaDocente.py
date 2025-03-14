@@ -5,15 +5,14 @@ from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from ..models import AsignaturaDocente
+from datetime import datetime, timedelta
+from django.utils.timezone import now
 from ..serializers import AsignaturaDocenteSerializer, AsignaturaDocenteCreateSerializer, AsignaturaDocenteDetailSerializer
 
 class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     queryset = AsignaturaDocente.objects.all()
     serializer_class = AsignaturaDocenteSerializer
-    # filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    # filterset_fields = ['nombre']
-    # search_fields = ['nombre']
     filterset_fields = {
         'docente__persona__estado': ['exact'],
         'docente__persona__legajo': ['icontains'],
@@ -65,3 +64,42 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
         ]
 
         return Response(data)
+        
+    @action(detail=False, methods=['get'], url_path='proximos_a_vencer')
+    def proximos_a_vencer(self, request):
+        """
+        Devuelve las asignaciones docentes cuya fecha de vencimiento está próxima a ocurrir (en los próximos 30 días).
+        """
+        dias_limite = int(request.query_params.get('dias', 30))  # Permite ajustar el límite con un parámetro opcional
+        fecha_limite = now() + timedelta(days=dias_limite)
+
+        queryset = AsignaturaDocente.objects.select_related('docente__persona').filter(
+            fecha_de_vencimiento__lte=fecha_limite,
+            fecha_de_vencimiento__gte=now()
+        )
+
+        data = [
+            {
+                'id': asignatura_docente.id,
+                'condicion': asignatura_docente.condicion,
+                'cargo': asignatura_docente.cargo,
+                'dedicacion': asignatura_docente.dedicacion,
+                'fecha_de_vencimiento': asignatura_docente.fecha_de_vencimiento,
+                'docente': {
+                    'id': asignatura_docente.docente.id,
+                    'persona': {
+                        'id': asignatura_docente.docente.persona.id,
+                        'nombre': asignatura_docente.docente.persona.nombre,
+                        'apellido': asignatura_docente.docente.persona.apellido,
+                        'dni': asignatura_docente.docente.persona.dni,
+                    },
+                },
+            }
+            for asignatura_docente in queryset
+        ]
+
+        return Response(data)
+
+            # filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    # filterset_fields = ['nombre']
+    # search_fields = ['nombre']

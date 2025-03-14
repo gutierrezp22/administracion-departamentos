@@ -18,6 +18,7 @@ import {
   MenuItem,
   FormControl,
   Grid,
+FormControlLabel,Checkbox
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import * as XLSX from 'xlsx';
@@ -29,6 +30,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import Link from 'next/link';
 import withAuth from "../../../../../components/withAut"; // Importa el HOC
 import { API_BASE_URL } from "../../../../../utils/config";
+import Swal from "sweetalert2";
+
 
 
 const ListaDocenteAsignatura: React.FC = () => {
@@ -75,20 +78,28 @@ const ListaDocenteAsignatura: React.FC = () => {
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [mostrarVencimientos, setMostrarVencimientos] = useState(false);
 
 
   useEffect(() => {
     if (idAsignatura) {
-      fetchData(`${API_BASE_URL}/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`);
+      const initialUrl = `${API_BASE_URL}/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`;
+      setCurrentUrl(initialUrl);
     }
   }, [idAsignatura]);
+
+  useEffect(() => {
+    if (currentUrl) {
+      fetchData(currentUrl);
+    }
+  }, [currentUrl]);
 
 
   const fetchData = async (url: string) => {
     try {
       const response = await axios.get(url);
       const data = response.data;
-  
+      console.log(response.data)
       setAsignaturaDocentes(data.results || data); // Usa `results` para DRF paginado
       setPrevUrl(data.previous || null); // Guarda la URL anterior
       setNextUrl(data.next || null); // Guarda la URL siguiente
@@ -97,6 +108,16 @@ const ListaDocenteAsignatura: React.FC = () => {
       console.error('Error fetching data:', error);
     }
   };
+
+   // ✅ Alternar entre vista normal y próximos vencimientos
+   const toggleVencimientos = () => {
+    setMostrarVencimientos(!mostrarVencimientos);
+    const baseUrl = mostrarVencimientos
+      ? `${API_BASE_URL}/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`
+      : `${API_BASE_URL}/facet/asignatura-docente/proximos_a_vencer/?asignatura=${idAsignatura}`;
+    setCurrentUrl(baseUrl);
+  };
+
 
   useEffect(() => {
     if (idAsignatura) {
@@ -112,18 +133,63 @@ const ListaDocenteAsignatura: React.FC = () => {
   }, [currentUrl]);  
   
 
+  // ✅ Filtrar datos
   const filtrarAsignaturaDocentes = () => {
-    if (!idAsignatura) return;
+    let baseUrl = mostrarVencimientos
+      ? `${API_BASE_URL}/facet/asignatura-docente/proximos_a_vencer/?asignatura=${idAsignatura}`
+      : `${API_BASE_URL}/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`;
 
-    let url = `${API_BASE_URL}/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`;
     const params = new URLSearchParams();
-    if (filtroNombre) params.append('docente__persona__nombre__icontains', filtroNombre);
-    if (filtroCondicion) params.append('condicion', filtroCondicion);
-    if (filtroCargo) params.append('cargo', filtroCargo);
-    if (filtroDedicacion) params.append('dedicacion', filtroDedicacion);
-    url += `&${params.toString()}`;
+    if (filtroNombre) params.append("docente__persona__nombre__icontains", filtroNombre);
+    if (filtroCondicion) params.append("condicion", filtroCondicion);
+    if (filtroCargo) params.append("cargo", filtroCargo);
+    if (filtroDedicacion) params.append("dedicacion", filtroDedicacion);
 
-    fetchData(url);
+    const finalUrl = params.toString() ? `${baseUrl}&${params.toString()}` : baseUrl;
+    setCurrentUrl(finalUrl);
+  };
+
+   // ✅ Enviar notificación manualmente
+   const enviarNotificacion = async (id: number, email: string) => {
+    try {
+      const confirmacion = await Swal.fire({
+        title: "¿Estás seguro?",
+        text: `Se enviará una notificación a ${email}.`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sí, enviar",
+        cancelButtonText: "Cancelar",
+      });
+
+      if (!confirmacion.isConfirmed) return;
+
+      Swal.fire({
+        title: "Enviando notificación...",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      await axios.post(`${API_BASE_URL}/facet/notificacion/crear_notificacion/`, {
+        persona_id: id,
+        mensaje: `Recordatorio: Tu cargo vence pronto. Contacta administración para renovarlo.`,
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Notificación enviada",
+        text: `Se envió un correo a ${email}`,
+      });
+    } catch (error) {
+      console.error("Error enviando notificación:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudo enviar la notificación.",
+      });
+    }
   };
 
   const descargarExcel = async () => {
@@ -243,6 +309,14 @@ const ListaDocenteAsignatura: React.FC = () => {
                 </Select>
               </FormControl>
             </Grid>
+            <Grid item xs={4} marginBottom={2}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox checked={mostrarVencimientos} onChange={toggleVencimientos} />
+                          }
+                          label="Próximos Vencimientos"
+                        />
+                      </Grid>
             <Grid item xs={4}>
               <Button variant="contained" onClick={filtrarAsignaturaDocentes}>
                 Filtrar
