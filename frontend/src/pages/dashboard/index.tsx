@@ -6,17 +6,18 @@ import CssBaseline from '@mui/material/CssBaseline';
 import MuiDrawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
 import List from '@mui/material/List';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
 import Badge from '@mui/material/Badge';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import NotificationsIcon from '@mui/icons-material/Notifications';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { IconButton, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
 import ItemsMenu from './components/itemsMenu'; // Asegúrate de que la ruta sea correcta
 import { Container } from '@mui/material';
-import withAuth from "../../components/withAut"; 
+import { useRouter } from 'next/router';
+import { useState } from 'react';
+
 
 
 // Define las propiedades del componente
@@ -78,10 +79,29 @@ const defaultTheme = createTheme();
 
 const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
   const [open, setOpen] = React.useState(true);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const router = useRouter();
+
+  // ✅ Función para abrir el menú de usuario
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  // ✅ Función para cerrar el menú
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  // ✅ Función para cerrar sesión
+  const handleLogout = () => {
+    sessionStorage.removeItem('access_token');
+    sessionStorage.removeItem('refresh_token');
+    router.push('/login'); // Redirige a la página de login
+  };
+
   const toggleDrawer = () => {
     setOpen(!open);
   };
-
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: 'flex' }}>
@@ -100,11 +120,17 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
             <Typography component="h1" variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
               Dashboard
             </Typography>
-            {/* <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton> */}
+         {/* ✅ Botón de usuario con menú de logout */}
+         <div>
+              <IconButton color="inherit" onClick={handleMenuOpen}>
+                <AccountCircleIcon />
+              </IconButton>
+              <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+                <MenuItem onClick={handleLogout}>
+                  <LogoutIcon sx={{ mr: 1 }} /> Cerrar sesión
+                </MenuItem>
+              </Menu>
+            </div>
           </Toolbar>
         </AppBar>
         <Drawer variant="permanent" open={open}>
@@ -137,3 +163,9 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
 };
 
 export default DashboardMenu;
+
+            {/* <IconButton color="inherit">
+              <Badge badgeContent={4} color="secondary">
+                <NotificationsIcon />
+              </Badge>
+            </IconButton> */}

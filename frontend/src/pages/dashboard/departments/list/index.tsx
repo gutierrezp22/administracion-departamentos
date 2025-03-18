@@ -167,8 +167,8 @@ const ListaDepartamentos = () => {
                 label="Estado"
               >
                 <MenuItem value=""><em>Todos</em></MenuItem>
-                <MenuItem value={1}>1</MenuItem>
-                <MenuItem value={0}>0</MenuItem>
+                <MenuItem value={1}>Activo</MenuItem>
+                <MenuItem value={0}>Inactivo</MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -216,7 +216,8 @@ const ListaDepartamentos = () => {
                     <Typography variant="body1">{departamento.telefono}</Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body1">{departamento.estado}</Typography>
+                    <Typography variant="body1">  {departamento.estado == 1 ? "Activo" : "Inactivo"}
+                    </Typography>
                   </TableCell>
                   <TableCell>
                     <Typography variant="body1">{departamento.interno}</Typography>

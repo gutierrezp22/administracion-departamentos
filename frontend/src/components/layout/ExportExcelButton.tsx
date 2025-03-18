@@ -29,7 +29,7 @@ const ExportExcelButton = () => {
     };
 
     return (
-        <button className="btn botonCPA me-3" onClick={handleClickExcel}>
+        <button color="primary"style={{ marginLeft: '10px' }} onClick={handleClickExcel}>
             <FaFileDownload className="iconAntD" />
             Descargar Excel
         </button>

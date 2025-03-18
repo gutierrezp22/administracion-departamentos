@@ -48,18 +48,8 @@ class PasswordResetView(generics.CreateAPIView):
             raise ValidationError(_('No existe un usuario con ese correo electrónico.'))
         
         #Controla de donde se esta realizando la consulta
-        if request.META.get('HTTP_REFERER', '') == 'http://juegoscpa.test.cajapop.org/recuperar-clave':
-            reset = os.environ.get('RESET_TEST')
-        elif request.META.get('HTTP_REFERER', '') == 'https://agenciasdequiniela.cajapopular.gov.ar/recuperar-clave':
-            reset = os.environ.get('RESET_PROD_OUT')
-        elif request.META.get('HTTP_REFERER', '') == 'http://juegoscpa.dev.cajapop.org/recuperar-clave':
-            reset = os.environ.get('RESET_DEV')
-        elif request.META.get('HTTP_REFERER', '') == 'https://pruebajuegos.cajapopular.gov.ar/recuperar-clave':
-            reset = os.environ.get('RESET_DEV_OUT')
-        elif request.META.get('HTTP_REFERER', '') == 'http://juegoscpa.cajapop.org/recuperar-clave':
-            reset = os.environ.get('RESET_PROD')
-        else:
-            reset = os.environ.get('RESET_LOCAL')
+
+        reset = os.environ.get('RESET_LOCAL')
 
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         token = AccountActivationTokenGenerator().make_token(user)
@@ -118,29 +108,7 @@ class PasswordResetConfirmView(APIView):
                     return Response({"error": "La nueva contraseña no puede ser una de las últimas tres contraseñas."}, status=409)
         else:
             return Response({"detail": _("El enlace de restablecimiento de contraseña no es válido o ha expirado.")}, status=status.HTTP_400_BAD_REQUEST)
-        
-
-# class Validate_current_password(APIView):
-#     permission_classes = [AllowAny]
-    
-#     def post(self, request):
-#         user = authenticate(request=request, username=request.user.username, password=request.data['current_password'])
-#         if user:
-#             return Response(status=status.HTTP_200_OK)
-#         else:
-#             return Response(status=status.HTTP_400_BAD_REQUEST)
-
-# class  ChangePasswordView(APIView):
-#     def get(self, request):
-#         return Response(status=status.HTTP_204_NO_CONTENT)
-
-#     def post(self, request):
-#         serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
-#         if serializer.is_valid():
-#             serializer.update(request.user, serializer.validated_data)
-#             return Response(status=status.HTTP_200_OK)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+      
 
 class CambiarClaveView(APIView):
     permission_classes = [AllowAny]

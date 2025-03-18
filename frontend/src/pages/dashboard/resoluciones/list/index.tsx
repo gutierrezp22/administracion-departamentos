@@ -288,7 +288,7 @@ const ListaResoluciones = () => {
                         : 'No disponible'}
                     </Typography>
                   </TableCell>
-                  <TableCell><Typography variant="body1">{resolucion.estado}</Typography></TableCell>
+                  <TableCell><Typography variant="body1">{resolucion.estado == 1 ? "Activo" : "Inactivo"}</Typography></TableCell>
                   <TableCell style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                     <a href={resolucion.adjunto} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', lineHeight: '0' }}>
                       <TextSnippetIcon />

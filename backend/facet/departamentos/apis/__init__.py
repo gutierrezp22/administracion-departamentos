@@ -13,3 +13,4 @@ from .asignaturaDocente import AsignaturaDocenteViewSet
 from .carrera import CarreraViewSet
 from .directorCarrera import DirectorCarreraViewSet
 from .tipoTitulo import TipoTituloViewSet
+from .notificacion import NotificacionViewSet

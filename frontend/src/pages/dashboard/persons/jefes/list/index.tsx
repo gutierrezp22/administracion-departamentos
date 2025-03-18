@@ -268,7 +268,7 @@ const ListaJefes = () => {
                   <TableCell>{jefe.persona.dni}</TableCell>
                   <TableCell>{jefe.persona.legajo}</TableCell>
                   <TableCell>{jefe.observaciones}</TableCell>
-                  <TableCell>{jefe.estado}</TableCell>
+                  <TableCell>{jefe.estado == 1 ? "Activo" : "Inactivo"}</TableCell>
                   <TableCell>
                     <Button onClick={() => router.push(`/dashboard/persons/jefes/edit/${jefe.id}`)}>
                       <EditIcon />

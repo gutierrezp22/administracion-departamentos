@@ -8,7 +8,7 @@ import ArticleIcon from '@mui/icons-material/Article';
 import PeopleIcon from '@mui/icons-material/People';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import SchoolIcon from '@mui/icons-material/School';
-import AssignmentIcon from '@mui/icons-material/Assignment';
+import EmailIcon from '@mui/icons-material/Email';
 import ViewComfyIcon from '@mui/icons-material/ViewComfy';
 import HomeIcon from '@mui/icons-material/Home';
 import NoteAltIcon from '@mui/icons-material/NoteAlt';
@@ -66,12 +66,12 @@ const ItemsMenu = () => {
         </ListItemIcon>
         <ListItemText primary="Carreras" />
       </ListItemButton>
-      {/* <ListItemButton onClick={() => handleNavigation('/dashboard/reportes')}>
+      <ListItemButton onClick={() => handleNavigation('/dashboard/notificaciones')}>
         <ListItemIcon>
-          <BarChartIcon />
+          <EmailIcon />
         </ListItemIcon>
-        <ListItemText primary="Reportes" />
-      </ListItemButton> */}
+        <ListItemText primary="Notificaciones" />
+      </ListItemButton>
     </React.Fragment>
   );
 };

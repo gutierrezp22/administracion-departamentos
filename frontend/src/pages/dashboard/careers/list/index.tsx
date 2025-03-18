@@ -168,8 +168,8 @@ const ListaCarreras = () => {
                 label="Estado"
               >
                 <MenuItem value=""><em>Todos</em></MenuItem>
-                <MenuItem value={1}>1</MenuItem>
-                <MenuItem value={0}>0</MenuItem>
+                <MenuItem value={1}>Activo</MenuItem>
+                <MenuItem value={0}>Inactivo</MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -234,7 +234,7 @@ const ListaCarreras = () => {
                     </Button>
                   </TableCell>
                   <TableCell style={{ textAlign: 'center' }}>
-                    <Typography variant="body1">{carrera.estado}</Typography>
+                    <Typography variant="body1">{carrera.estado == 1 ? "Activo" : "Inactivo"}</Typography>
                   </TableCell>
                   <TableCell>
                     <Button onClick={() => router.push(`/dashboard/careers/edit/${carrera.id}`)}>

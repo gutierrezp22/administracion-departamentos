@@ -19,6 +19,7 @@ class JefeDepartamento(BaseModel):
     fecha_de_fin = models.DateTimeField(blank=True, null=True)
     observaciones = models.TextField()
     estado = models.CharField(max_length=1,blank=False, null=False)
+    notificado = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.jefe.persona.apellido}"

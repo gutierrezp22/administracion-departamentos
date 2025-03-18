@@ -12,7 +12,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { Theme, createTheme, ThemeProvider } from '@mui/material/styles';
-import { useRouter } from 'next/navigation'; // Usamos useRouter de Next.js
+import { useRouter } from 'next/navigation'; 
 import axios from 'axios';
 import Swal from "sweetalert2";
 import { API_BASE_URL } from "../../utils/config";
@@ -55,10 +55,11 @@ export default function LoginPage() {
         password,
       });
   
-      localStorage.setItem('access_token', response.data.access);
-      localStorage.setItem('refresh_token', response.data.refresh);
+      // Guardar tokens en sessionStorage para que se eliminen al cerrar el navegador
+      sessionStorage.setItem('access_token', response.data.access);
+      sessionStorage.setItem('refresh_token', response.data.refresh);
   
-      router.push('/dashboard'); // Redirige al Dashboard después de iniciar sesión
+      router.push('/dashboard/home'); // Redirige al Dashboard después de iniciar sesión
     } catch (error) {
       Swal.fire({
         icon: 'error',

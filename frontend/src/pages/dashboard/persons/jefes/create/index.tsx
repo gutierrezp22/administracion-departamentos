@@ -117,30 +117,45 @@ const CrearJefe = () => {
   };
 
   const crearNuevoJefeDepartamento = async () => {
+    if (!persona?.id) {
+      handleOpenModal('Error', 'No se ha seleccionado una persona.', () => {});
+      return;
+    }
+  
     const nuevoJefe = {
-      persona: persona?.id,
+      persona: persona.id,
       observaciones,
       estado,
     };
-
+  
+  
     try {
-      const existeRegistro = await axios.get(`${API_BASE_URL}/facet/jefe/${persona?.id}/`);
-      if (existeRegistro.data) {
-        handleOpenModal('Error', 'Ya existe jefe departamento', () => {});
+      // 🔹 Verificar si la persona ya es un jefe
+      const response = await axios.get(`${API_BASE_URL}/facet/jefe/existe_jefe/`, {
+        params: { persona_id: persona.id }
+      });
+  
+  
+      if (response.data.existe) {
+        handleOpenModal('Error', 'Ya existe un jefe con esta persona.', () => {});
+        return; // 🔹 Detener ejecución si la persona ya es jefe
       }
+  
+      // ✅ Si la persona NO es jefe, proceder a crearla
+      const postResponse = await API.post(`/facet/jefe/`, nuevoJefe);
+  
+      handleOpenModal('Bien', 'Se creó el jefe con éxito', handleConfirmModal);
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        try {
-          await API.post(`/facet/jefe/`, nuevoJefe);
-          handleOpenModal('Bien', 'Se creó el jefe con éxito', handleConfirmModal);
-        } catch (postError) {
-          handleOpenModal('Error', 'No se pudo realizar la acción.', () => {});
-        }
+      console.error("Error en la verificación o creación del jefe:", error);
+  
+      if (axios.isAxiosError(error) && error.response?.status === 400) {
+        handleOpenModal('Error', 'Los datos enviados no son válidos.', () => {});
       } else {
         handleOpenModal('Error', 'No se pudo realizar la acción.', () => {});
       }
     }
   };
+  
 
   return (
     <DashboardMenu>

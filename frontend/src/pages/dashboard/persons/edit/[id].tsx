@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import './styles.css';
 import axios from 'axios';
 import {
   Container,
@@ -15,36 +14,21 @@ import {
 } from '@mui/material';
 import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
-import { useRouter } from 'next/router'; 
+import { useRouter } from 'next/router';
 import DashboardMenu from '../..';
-import withAuth from "../../../../components/withAut"; 
+import withAuth from "../../../../components/withAut";
 import { API_BASE_URL } from "../../../../utils/config";
 import API from '@/api/axiosConfig';
 
-// Configuración de `EditarPersona` para usar el idPersona desde la URL
-
 const EditarPersona: React.FC = () => {
-  const router = useRouter(); // Usamos useRouter para manejar la navegación
-  const { id: idPersona } = router.query; // Captura el `id` desde la URL como idPersona
+  const router = useRouter();
+  const { id: idPersona } = router.query;
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [modalTitle, setModalTitle] = useState('');
   const [confirmarEliminacion, setConfirmarEliminacion] = useState(false);
 
-  const handleOpenModal = (title: string, message: string) => {
-    setModalTitle(title);
-    setModalMessage(message);
-    setModalVisible(true);
-  };
-
-  const handleCloseModal = () => {
-    setModalVisible(false);
-    setModalMessage('');
-    router.push('/dashboard/persons/'); // Redirige a la lista de personas
-  };
-
-  // Definición de la interfaz de Persona
   interface Persona {
     id: number;
     nombre: string;
@@ -53,10 +37,9 @@ const EditarPersona: React.FC = () => {
     dni: string;
     estado: 0 | 1;
     email: string;
-    interno: string;
+    interno: number | null; // ⚡ Interno ahora es un número entero o null
     legajo: string;
-    titulo: number | null; // Asegúrate de que no es un objeto
-
+    titulo: number | null;
   }
 
   interface Titulo {
@@ -64,19 +47,18 @@ const EditarPersona: React.FC = () => {
     nombre: string;
   }
 
-  const [persona, setPersona] = useState<Persona>();
+  const [persona, setPersona] = useState<Persona | null>(null);
   const [dni, setDni] = useState('');
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
   const [legajo, setLegajo] = useState('');
   const [telefono, setTelefono] = useState('');
   const [email, setEmail] = useState('');
-  const [interno, setInterno] = useState('');
-  const [estado, setEstado] = useState('');
+  const [interno, setInterno] = useState<number | ''>(''); // ⚡ Asegurar tipo seguro
+  const [estado, setEstado] = useState('1');
   const [titulos, setTitulos] = useState<Titulo[]>([]);
   const [tituloId, setTituloId] = useState<number | ''>('');
 
-  // Obtener títulos al cargar la página
   useEffect(() => {
     const fetchTitulos = async () => {
       try {
@@ -91,15 +73,8 @@ const EditarPersona: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (persona) {
-      setTituloId(persona.titulo as number ?? '');
-    }
-  }, [persona]);
-  
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (idPersona) {
+    if (idPersona) {
+      const fetchData = async () => {
         try {
           const response = await axios.get(`${API_BASE_URL}/facet/persona/${idPersona}/`);
           const personaData = response.data;
@@ -107,25 +82,37 @@ const EditarPersona: React.FC = () => {
         } catch (error) {
           console.error('Error fetching data:', error);
         }
-      }
-    };
+      };
 
-    fetchData();
+      fetchData();
+    }
   }, [idPersona]);
 
-  // Actualización del estado
   useEffect(() => {
     if (persona) {
-      setDni(persona.dni);
-      setNombre(persona.nombre);
-      setApellido(persona.apellido);
-      setLegajo(persona.legajo);
-      setTelefono(persona.telefono);
-      setEmail(persona.email);
-      setInterno(persona.interno);
-      setEstado(String(persona.estado));
+      setDni(persona.dni ?? '');
+      setNombre(persona.nombre ?? '');
+      setApellido(persona.apellido ?? '');
+      setLegajo(persona.legajo ?? '');
+      setTelefono(persona.telefono ?? '');
+      setEmail(persona.email ?? '');
+      setInterno(persona.interno ?? ''); // ⚡ Asegurar tipo seguro
+      setEstado(String(persona.estado ?? '1'));
+      setTituloId(persona.titulo ?? '');
     }
   }, [persona]);
+
+  const handleOpenModal = (title: string, message: string) => {
+    setModalTitle(title);
+    setModalMessage(message);
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setModalMessage('');
+    router.push('/dashboard/persons/');
+  };
 
   const edicionPersona = async () => {
     const personaEditada = {
@@ -135,7 +122,7 @@ const EditarPersona: React.FC = () => {
       dni,
       estado: Number(estado),
       email,
-      interno,
+      interno: interno !== '' ? Number(interno) : null, // ⚡ Convertir interno a número o null
       legajo,
       titulo: tituloId,
     };
@@ -164,33 +151,18 @@ const EditarPersona: React.FC = () => {
       <Container maxWidth="lg">
         <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
           <Typography variant="h4" gutterBottom>
-            Personas
+            Editar Persona
           </Typography>
 
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <TextField
-                label="DNI"
-                value={dni}
-                onChange={(e) => setDni(e.target.value)}
-                fullWidth
-              />
+              <TextField label="DNI" value={dni} onChange={(e) => setDni(e.target.value)} fullWidth />
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                label="Nombres"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                fullWidth
-              />
+              <TextField label="Nombres" value={nombre} onChange={(e) => setNombre(e.target.value)} fullWidth />
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                label="Apellido"
-                value={apellido}
-                onChange={(e) => setApellido(e.target.value)}
-                fullWidth
-              />
+              <TextField label="Apellido" value={apellido} onChange={(e) => setApellido(e.target.value)} fullWidth />
             </Grid>
             <Grid item xs={12}>
               <FormControl fullWidth>
@@ -210,68 +182,45 @@ const EditarPersona: React.FC = () => {
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                label="Teléfono"
-                value={telefono}
-                onChange={(e) => setTelefono(e.target.value)}
-                fullWidth
-              />
+              <TextField label="Teléfono" value={telefono} onChange={(e) => setTelefono(e.target.value)} fullWidth />
             </Grid>
             <Grid item xs={12}>
-              <FormControl fullWidth margin="none">
+              <FormControl fullWidth>
                 <InputLabel id="estado-label">Estado</InputLabel>
-                <Select
-                  labelId="estado-label"
-                  value={estado}
-                  onChange={(e) => setEstado(e.target.value)}
-                >
-                  <MenuItem value={1}>Activo</MenuItem>
-                  <MenuItem value={0}>Inactivo</MenuItem>
+                <Select labelId="estado-label" value={estado} onChange={(e) => setEstado(e.target.value)}>
+                  <MenuItem value="1">Activo</MenuItem>
+                  <MenuItem value="0">Inactivo</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                label="Email"
-                value={email || ''}
-                onChange={(e) => setEmail(e.target.value)}
-                fullWidth
-              />
+              <TextField label="Email" value={email} onChange={(e) => setEmail(e.target.value)} fullWidth />
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                label="Interno"
-                value={interno || ''}
-                onChange={(e) => setInterno(e.target.value)}
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Legajo"
-                value={legajo || ''}
-                onChange={(e) => setLegajo(e.target.value)}
-                fullWidth
-              />
-            </Grid>
+  <TextField
+    label="Interno"
+    type="number" // ✅ Asegurar que solo acepte números
+    value={interno}
+    onChange={(e) => setInterno(e.target.value === '' ? '' : Number(e.target.value))} // ✅ Conversión segura
+    fullWidth
+  />
+</Grid>
+
+
+            {/* ✅ Botones de acción */}
             <Grid item xs={12} marginBottom={2}>
               <Button variant="contained" onClick={edicionPersona}>
                 Editar
               </Button>
-              <Button onClick={() => setConfirmarEliminacion(true)} variant="contained" style={{ marginLeft: '8px' }} color="error">
+              <Button onClick={() => setConfirmarEliminacion(true)} variant="contained" color="error" style={{ marginLeft: '8px' }}>
                 Eliminar
               </Button>
             </Grid>
           </Grid>
+
+          {/* Modales */}
           <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} />
-          <ModalConfirmacion
-            open={confirmarEliminacion}
-            onClose={() => setConfirmarEliminacion(false)}
-            onConfirm={() => {
-              setConfirmarEliminacion(false);
-              eliminarPersona();
-            }}
-          />
+          <ModalConfirmacion open={confirmarEliminacion} onClose={() => setConfirmarEliminacion(false)} onConfirm={eliminarPersona} />
         </Paper>
       </Container>
     </DashboardMenu>

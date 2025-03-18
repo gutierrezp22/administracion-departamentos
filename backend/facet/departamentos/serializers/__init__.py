@@ -13,3 +13,4 @@ from .asignaturaDocente import AsignaturaDocenteSerializer, AsignaturaDocenteCre
 from .carrera import CarreraSerializer
 from .directorCarrera import DirectorCarreraSerializer
 from .tipoTitulo import TipoTituloSerializer
+from .notificacion import NotificacionSerializer

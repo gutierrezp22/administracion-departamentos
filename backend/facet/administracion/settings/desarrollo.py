@@ -33,8 +33,6 @@ REST_FRAMEWORK = {
     "DATE_FORMAT": "%d/%m/%Y",
 }
 CORS_ORIGIN_WHITELIST = [
-    'http://juegoscpa.dev.cajapop.org',
-    'https://pruebajuegos.cajapopular.gov.ar',
 ]
 CORS_ALLOW_METHODS = [
     "DELETE",

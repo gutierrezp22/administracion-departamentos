@@ -198,7 +198,7 @@ const ListaAreas = () => {
                       {departamentos.find(depto => depto.id === area.departamento)?.nombre || 'Departamento no encontrado'}
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body1">{area.estado}</Typography>
+                      <Typography variant="body1">{area.estado == 1 ? "Activo" : "Inactivo"}</Typography>
                     </TableCell>
                     <TableCell>
                       <Link href={`/dashboard/areas/edit/${area.id}`} passHref>

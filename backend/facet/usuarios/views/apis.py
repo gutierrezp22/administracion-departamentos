@@ -27,7 +27,6 @@ class UserViewSet(viewsets.ModelViewSet):
     def update(self,request,pk=None):
         from django.contrib.auth.hashers import make_password
         from ..models import User
-        from quiniela.models import Persona, Titular
         from roles.models import Rol
         
         try: 
@@ -42,11 +41,6 @@ class UserViewSet(viewsets.ModelViewSet):
             if(data.get('documento') is not None):
                 user.documento= data['documento']
             if(data.get('email') is not None):
-                if(Persona.objects.filter(email=user.email).exists()):
-                    persona = Persona.objects.get(email=user.email)
-                    if(Titular.objects.filter(persona=persona).exists()):
-                        persona.email = data['email']
-                        persona.save()
                 user.email= data['email']
             if(data.get('rol') is not None):
                 user.rol= Rol.objects.get(id=data['rol'])
@@ -100,41 +94,7 @@ class UserViewSet(viewsets.ModelViewSet):
         else:
             return Response({'error': "No se encuentra el Usuario que esta buscando"}, status=status.HTTP_204_NO_CONTENT)
         
-    @action(detail=False, methods=['get'], url_path=r'ListSinPag', name='ListSinPag')
-    def ListSinPag(self, request, *args, **kwargs):
-        import ast 
-        from quiniela.models.titularagencia import TitularAgencia
-        from roles.models import Rol
-        from django.db.models import F
-        from datetime import datetime
-        queryset = self.queryset.order_by(F('last_login').desc(nulls_last=True))
-        if request.query_params.get('filters'):
-            filtros = ast.literal_eval(request.query_params.get('filters'))
-            for filtro in filtros:
-                if filtro['id'] == 'email':
-                    queryset = queryset.filter(email__icontains=filtro['value'])
-                if filtro['id'] == 'apellido':
-                    queryset = queryset.filter(apellido__icontains=filtro['value'])
-                if filtro['id'] == 'nombre':
-                    queryset = queryset.filter(nombre__icontains=filtro['value'])
-                if filtro['id'] == 'legajo':
-                    queryset = queryset.filter(legajo__icontains=filtro['value'])
-                if filtro['id'] == 'documento':
-                    queryset = queryset.filter(documento__icontains=filtro['value'])
-                if filtro['id'] == 'rol_detalle':
-                    queryset = queryset.filter(rol__descripcion__icontains=filtro['value'])
-        serializer = UserSerializer(queryset, many=True)
-        rol_titular = Rol.objects.get(descripcion__icontains='TITULAR')
-        for user in serializer.data:
-            if (user['rol'] == rol_titular.id and user['documento'] is not None and TitularAgencia.objects.filter(titular__persona__documento=user['documento']).exists()):
-                if TitularAgencia.objects.filter(titular__persona__documento=user['documento'],fecha_hasta = None).exists():
-                    titularAgencia = TitularAgencia.objects.filter(titular__persona__documento=user['documento'],fecha_hasta = None).last()
-                    user['agencia'] = str(titularAgencia.agencia.numero_agencia).zfill(2) + '-' + str(titularAgencia.agencia.numero_subagencia).zfill(3)
-                elif TitularAgencia.objects.filter(titular__persona__documento=user['documento'],fecha_hasta__gte = datetime.now().date()).exists():    
-                    titularAgencia = TitularAgencia.objects.filter(titular__persona__documento=user['documento'],fecha_hasta__gte = datetime.now().date()).last()
-                    user['agencia'] = str(titularAgencia.agencia.numero_agencia).zfill(2) + '-' + str(titularAgencia.agencia.numero_subagencia).zfill(3)
-        return Response(serializer.data)
-    
+
 class GroupViewSet(viewsets.ModelViewSet):
     """
     API endpoint que permite ver o editar grupos de permisos.
