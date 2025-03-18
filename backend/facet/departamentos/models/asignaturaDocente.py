@@ -10,6 +10,8 @@ class AsignaturaDocente(BaseModel):
     fecha_de_vencimiento = models.DateTimeField(blank=True, null=True)
     observaciones = models.TextField()
     estado = models.CharField(max_length=1)
+    # ✅ Nuevo campo para saber si se envió la notificación
+    notificado = models.BooleanField(default=False)
 
 
     asignatura = models.ForeignKey(

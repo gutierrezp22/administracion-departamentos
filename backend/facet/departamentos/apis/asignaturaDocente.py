@@ -49,6 +49,7 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
                 'estado': asignatura_docente.estado,
                 'fecha_de_inicio': asignatura_docente.fecha_de_inicio,
                 'fecha_de_vencimiento': asignatura_docente.fecha_de_vencimiento,
+                'notificado': asignatura_docente.notificado,
                 'docente': {
                     'id': asignatura_docente.docente.id,
                     'persona': {
@@ -57,6 +58,7 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
                         'apellido': asignatura_docente.docente.persona.apellido,
                         'dni': asignatura_docente.docente.persona.dni,
                         'estado': asignatura_docente.docente.persona.estado,
+                        'email': asignatura_docente.docente.persona.email, 
                     },
                 },
             }
@@ -84,7 +86,9 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
                 'condicion': asignatura_docente.condicion,
                 'cargo': asignatura_docente.cargo,
                 'dedicacion': asignatura_docente.dedicacion,
+                'fecha_de_inicio': asignatura_docente.fecha_de_inicio,  # Agregar este campo
                 'fecha_de_vencimiento': asignatura_docente.fecha_de_vencimiento,
+                'notificado': asignatura_docente.notificado,
                 'docente': {
                     'id': asignatura_docente.docente.id,
                     'persona': {
@@ -99,7 +103,3 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
         ]
 
         return Response(data)
-
-            # filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    # filterset_fields = ['nombre']
-    # search_fields = ['nombre']

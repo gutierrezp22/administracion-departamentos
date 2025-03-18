@@ -163,7 +163,7 @@ const enviarNotificacion = async (id: number, email: string) => {
     // ✅ Enviar la notificación
     await axios.post(`${API_BASE_URL}/facet/notificacion/crear_notificacion/`, {
       persona_id: id,
-      mensaje: `Recordatorio: Tu cargo vence pronto. Contacta administración para renovarlo.`,
+      mensaje: `Atención: Su cargo en el departamento está próximo a vencer. Debe acercarse al área de Personal con la documentación necesaria para su renovación.`,
     });
 
     // ✅ Mostrar confirmación cuando se complete

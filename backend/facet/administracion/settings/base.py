@@ -120,7 +120,6 @@ JAZZMIN_SETTINGS = {
     "navigation_expanded": True,
     "welcome_sign": "Administrador - Departamentos FACET",
     "copyright": "FACET - UNT",
-    # "site_logo": "img/icono-caja.png",
     # "show_ui_builder": True,
 }
 

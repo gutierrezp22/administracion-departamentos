@@ -6,7 +6,7 @@ from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils.timezone import now
-from ..models import Notificacion, Persona, JefeDepartamento
+from ..models import Notificacion, Persona, JefeDepartamento, AsignaturaDocente
 from ..serializers import NotificacionSerializer
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.filters import SearchFilter
@@ -24,19 +24,19 @@ class NotificacionPagination(PageNumberPagination):
 class NotificacionFilter(filters.FilterSet):
     persona_apellido = filters.CharFilter(field_name="persona__apellido", lookup_expr="icontains")
     persona_nombre = filters.CharFilter(field_name="persona__nombre", lookup_expr="icontains")
-    fecha_creacion = filters.DateFromToRangeFilter(field_name="fecha_creacion")  # Permite rangos de fechas
+    fecha_creacion = filters.DateFromToRangeFilter(field_name="fecha_creacion")  
 
     class Meta:
         model = Notificacion
         fields = ['persona_apellido', 'persona_nombre', 'fecha_creacion']
 
 class NotificacionViewSet(viewsets.ModelViewSet):
-    queryset = Notificacion.objects.select_related('persona').all().order_by('-fecha_creacion')  # Asegurar relación
+    queryset = Notificacion.objects.select_related('persona').all().order_by('-fecha_creacion')  
     serializer_class = NotificacionSerializer
     permission_classes = [AllowAny]
     pagination_class = NotificacionPagination
     filter_backends = [DjangoFilterBackend]
-    filterset_class = NotificacionFilter  # 👈 Ahora usamos el filtro personalizado
+    filterset_class = NotificacionFilter  
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())  
@@ -91,6 +91,49 @@ class NotificacionViewSet(viewsets.ModelViewSet):
         except Persona.DoesNotExist:
             return Response({"error": "Persona no encontrada"}, status=status.HTTP_404_NOT_FOUND)
     
+    @action(detail=False, methods=['post'], url_path='crear_notificacion_asig')
+    def crear_notificacion_asignatura(self, request):
+        """Crear una notificación para un docente de asignatura y enviar un correo."""
+        persona_id = request.data.get('persona_id')
+        mensaje = request.data.get('mensaje')
+
+        if not persona_id or not mensaje:
+            return Response({"error": "Faltan datos"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            persona = Persona.objects.get(id=persona_id)
+            asignatura_docente = AsignaturaDocente.objects.get(docente__persona__id=persona_id)
+
+            if not persona.email:
+                return Response({"error": "La persona no tiene un correo registrado"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Crear notificación
+            notificacion = Notificacion.objects.create(
+                persona=persona,
+                mensaje=mensaje
+            )
+
+            # Enviar correo
+            send_mail(
+                subject="Notificación de Administración",
+                message=mensaje,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[persona.email],
+                fail_silently=False,
+            )
+
+            # ✅ Marcar como notificado en la base de datos
+            asignatura_docente.notificado = True
+            asignatura_docente.save()
+
+            return Response(NotificacionSerializer(notificacion).data, status=status.HTTP_201_CREATED)
+
+        except Persona.DoesNotExist:
+            return Response({"error": "Persona no encontrada"}, status=status.HTTP_404_NOT_FOUND)
+        except AsignaturaDocente.DoesNotExist:
+            return Response({"error": "No se encontró la asignatura del docente"}, status=status.HTTP_404_NOT_FOUND)
+
+
     @shared_task
     def verificar_documentaciones():
         """Verifica si algún jefe de departamento debe renovar su documentación en 30 días y genera notificaciones."""
