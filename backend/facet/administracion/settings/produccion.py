@@ -33,7 +33,7 @@ REST_FRAMEWORK = {
     "DATE_FORMAT": "%d/%m/%Y",
 }
 CORS_ORIGIN_WHITELIST = [
-    'https://administracionfacet.site',
+    'https://docentes.facet.unt.edu.ar/api',
 ]
 CORS_ALLOW_METHODS = [
     "DELETE",
@@ -63,7 +63,7 @@ CORS_EXPOSE_HEADERS = [
 
 CORS_ALLOW_CREDENTIALS = True
 # Seguridad (CSRF, SSL, etc.)
-CSRF_TRUSTED_ORIGINS = ['https://administracionfacet.site']
+CSRF_TRUSTED_ORIGINS = ['https://docentes.facet.unt.edu.ar/api']
 
 CSRF_COOKIE_SECURE = True  # Requiere HTTPS
 CSRF_COOKIE_HTTPONLY = False  # Permite acceso desde JS

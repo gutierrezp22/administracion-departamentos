@@ -247,16 +247,14 @@ RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY")
 CORS_ALLOWED_ORIGINS=[
     "http://localhost:3000",
     "http://18.215.115.94",
-    "http://administracionfacet.site",
-    "https://administracionfacet.site",
+    "https://docentes.facet.unt.edu.ar/api",
 
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://18.215.115.94",
-    "http://administracionfacet.site",
-    "https://administracionfacet.site",
+    "https://docentes.facet.unt.edu.ar/api",
 ]
 
 SECURE_SSL_REDIRECT = False  # Asegúrate de que no redirija innecesariamente
