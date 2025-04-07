@@ -75,7 +75,7 @@ class NotificacionViewSet(viewsets.ModelViewSet):
 
             # Enviar correo
             send_mail(
-                subject="Notificación de Administración",
+                subject="Notificación - Renovación de jefatura",
                 message=mensaje,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[persona.email],
@@ -115,7 +115,7 @@ class NotificacionViewSet(viewsets.ModelViewSet):
 
             # Enviar correo
             send_mail(
-                subject="Notificación de Administración",
+                subject="Notificación - Renovación de cargo",
                 message=mensaje,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[persona.email],
