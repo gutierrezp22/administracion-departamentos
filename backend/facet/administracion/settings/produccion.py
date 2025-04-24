@@ -4,10 +4,23 @@ from .base import *
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-django_allowed_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS")
+allowed_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS")
+ALLOWED_HOSTS = allowed_hosts.split(',') if allowed_hosts else []
+print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
 
-# Convierte la cadena en una lista separada por comas
-ALLOWED_HOSTS = ['administracionfacet.site', '18.215.115.94', 'localhost', '127.0.0.1']
+# CORS
+cors_allowed_origins = os.environ.get("CORS_ALLOWED_ORIGINS")
+CORS_ALLOWED_ORIGINS = cors_allowed_origins.split(',') if cors_allowed_origins else []
+print(f"CORS_ALLOWED_ORIGINS: {CORS_ALLOWED_ORIGINS}")
+
+cors_origin_whitelist = os.environ.get("CORS_ORIGIN_WHITELIST")
+CORS_ORIGIN_WHITELIST = cors_origin_whitelist.split(',') if cors_origin_whitelist else []
+
+CORS_ALLOW_CREDENTIALS = True
+
+csrf_trusted_origins = os.environ.get("CSRF_TRUSTED_ORIGINS")
+CSRF_TRUSTED_ORIGINS = csrf_trusted_origins.split(',') if csrf_trusted_origins else []
+print(f"CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}")
 
 MIDDLEWARE += [
     # 'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -32,9 +45,11 @@ REST_FRAMEWORK = {
     "DATETIME_FORMAT": "%d/%m/%Y %H:%M:%S",
     "DATE_FORMAT": "%d/%m/%Y",
 }
+
 CORS_ORIGIN_WHITELIST = [
     'https://docentes.facet.unt.edu.ar/api',
 ]
+
 CORS_ALLOW_METHODS = [
     "DELETE",
     "GET",
@@ -61,10 +76,14 @@ CORS_EXPOSE_HEADERS = [
     "x-csrftoken",
 ]
 
+'''
+
 CORS_ALLOW_CREDENTIALS = True
 # Seguridad (CSRF, SSL, etc.)
 CSRF_TRUSTED_ORIGINS = ['https://docentes.facet.unt.edu.ar/api']
 
-CSRF_COOKIE_SECURE = True  # Requiere HTTPS
-CSRF_COOKIE_HTTPONLY = False  # Permite acceso desde JS
-CSRF_COOKIE_SAMESITE = "None"  # Necesario si frontend y backend están en dominios distintos
+'''
+
+CSRF_COOKIE_SECURE = False  # Requiere HTTPS
+CSRF_COOKIE_HTTPONLY = False  # Permite acceso desde JS, document.cookie
+CSRF_COOKIE_SAMESITE = "Lax"  # O "None" si frontend y backend están en dominios distintos
