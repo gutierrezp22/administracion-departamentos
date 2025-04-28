@@ -1,25 +1,24 @@
 import React from 'react';
-import {Route, Routes,Navigate, useLocation,BrowserRouter  as Router} from 'react-router-dom';
+import { useRouter } from 'next/router';
 import CrearArea from './create';
 import ListaArea from './list';
-import EditarArea from './edit';
 
 const Areas = () => {
-  const h1Style = {
-    color: 'black',
+  const router = useRouter();
+  const { path } = router.query;
+
+  const renderComponent = () => {
+    if (path === 'crear') {
+      return <CrearArea />;
+    } else {
+      return <ListaArea />; // Renderiza ListaArea por defecto
+    }
   };
 
   return (
-
-      <Routes>
-    
-      <Route path="/*" element={<ListaArea/>}/>
-      <Route path="crear/*" element={<CrearArea/>}/>
-      <Route path="editar/:idArea" Component={EditarArea}/>
-
-
-      </Routes>
-      
+    <div>
+      {renderComponent()}
+    </div>
   );
 };
 

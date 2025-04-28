@@ -4,14 +4,17 @@ import axios from 'axios';
 import { Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, TextField, Button, Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
-import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { useRouter } from 'next/router';
+import DashboardMenu from '../../../../dashboard';
+import withAuth from "../../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../../utils/config";
+
+
 
 const ListaJefes = () => {
-  const h1Style = {
-    color: 'black',
-  };
+  const router = useRouter();
 
   interface Persona {
     id: number;
@@ -19,31 +22,28 @@ const ListaJefes = () => {
     apellido: string;
     telefono: string;
     dni: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
+    estado: 0 | 1;
     email: string;
     interno: string;
     legajo: string;
-    // Otros campos según sea necesario
   }
 
   interface Jefe {
     id: number;
     persona: Persona;
     observaciones: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
+    estado: 0 | 1;
   }
 
   const [jefes, setJefes] = useState<Jefe[]>([]);
-  const [personas, setPersonas] = useState<Persona[]>([]);
   const [filtroDni, setFiltroDni] = useState('');
   const [filtroNombre, setFiltroNombre] = useState('');
   const [filtroApellido, setFiltroApellido] = useState('');
   const [filtroLegajo, setFiltroLegajo] = useState('');
-  const [filtroEstado, setFiltroEstado] = useState<string | number>(''); // Añadido
-  console.log("festadoi",filtroEstado)
+  const [filtroEstado, setFiltroEstado] = useState<string | number>('');
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
-  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/jefe/');
+  const [currentUrl, setCurrentUrl] = useState<string>(`${API_BASE_URL}/facet/jefe/list_jefes_persona/`);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -56,20 +56,18 @@ const ListaJefes = () => {
     try {
       const response = await axios.get(url);
       setJefes(response.data.results);
+      // Actualiza los valores de paginación
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
-      setTotalItems(response.data.count);
+      setTotalItems(response.data.count)
       setCurrentPage(1);
-
-      const personasResponse = await axios.get('http://127.0.0.1:8000/facet/persona/');
-      setPersonas(personasResponse.data.results);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
 
   const filtrarJefes = () => {
-    let url = `http://127.0.0.1:8000/facet/jefe/?`;
+    let url = `${API_BASE_URL}/facet/jefe/list_jefes_persona/?`;
     const params = new URLSearchParams();
     if (filtroNombre !== '') {
       params.append('persona__nombre__icontains', filtroNombre);
@@ -90,38 +88,89 @@ const ListaJefes = () => {
     setCurrentUrl(url);
   };
 
-  const exportToExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(jefes.map(jefe => ({
-      Nombre: jefe.persona.nombre,
-      Apellido: jefe.persona.apellido,
-      DNI: jefe.persona.dni,
-      Legajo: jefe.persona.legajo,
-      Observaciones: jefe.observaciones,
-      Estado: jefe.estado === 1 ? 'Activo' : 'Inactivo',
-    })));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Jefes');
-    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    saveAs(new Blob([wbout], { type: 'application/octet-stream' }), 'jefes.xlsx');
+  const exportToExcel = async () => {
+    try {
+      let allJefes: Jefe[] = [];
+      let url = `${API_BASE_URL}/facet/jefe/?`;
+      const params = new URLSearchParams();
+  
+      if (filtroNombre !== '') {
+        params.append('persona__nombre__icontains', filtroNombre);
+      }
+      if (filtroDni !== '') {
+        params.append('persona__dni__icontains', filtroDni);
+      }
+      if (filtroEstado !== '') {
+        params.append('estado', filtroEstado.toString());
+      }
+      if (filtroApellido !== '') {
+        params.append('persona__apellido__icontains', filtroApellido);
+      }
+      if (filtroLegajo !== '') {
+        params.append('persona__legajo__icontains', filtroLegajo);
+      }
+      url += params.toString();
+  
+      while (url) {
+        const response = await axios.get(url);
+        const { results, next } = response.data;
+  
+        // Obtener los detalles completos de cada persona
+        const detailedJefes = await Promise.all(
+          results.map(async (jefe: any) => {
+            // Solicitar los detalles de la persona si `persona` es solo un ID
+            if (typeof jefe.persona === 'number') {
+              const personaResponse = await axios.get(`${API_BASE_URL}/facet/persona/${jefe.persona}/`);
+              jefe.persona = personaResponse.data; // Asignar detalles completos a `jefe.persona`
+            }
+            return jefe;
+          })
+        );
+  
+        allJefes = [...allJefes, ...detailedJefes];
+        url = next;
+      }
+  
+      // Crear el archivo Excel con los datos obtenidos
+      const ws = XLSX.utils.json_to_sheet(
+        allJefes.map((jefe) => ({
+          Nombre: jefe.persona.nombre,
+          Apellido: jefe.persona.apellido,
+          DNI: jefe.persona.dni,
+          Legajo: jefe.persona.legajo,
+          Observaciones: jefe.observaciones,
+          Estado: jefe.estado === 1 ? 'Activo' : 'Inactivo',
+        }))
+      );
+  
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Jefes');
+      const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const excelBlob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(excelBlob, 'jefes.xlsx');
+    } catch (error) {
+      console.error('Error al exportar a Excel:', error);
+    }
   };
+  
+
 
   const totalPages = Math.ceil(totalItems / pageSize);
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <div>
-        <Link to="/dashboard/personas/jefes/crear">
-          <Button variant="contained" endIcon={<AddIcon />}>
-            Agregar Jefe
-          </Button>
-        </Link>
+        <Button variant="contained" endIcon={<AddIcon />} onClick={() => router.push('/dashboard/persons/jefes/create')}>
+          Agregar Jefe
+        </Button>
         <Button
           variant="contained"
-          color="secondary"
+          color="primary"
           onClick={exportToExcel}
           style={{ marginLeft: '16px' }}
         >
-          Exportar a Excel
+          Descargar Excel
         </Button>
       </div>
 
@@ -219,11 +268,11 @@ const ListaJefes = () => {
                   <TableCell>{jefe.persona.dni}</TableCell>
                   <TableCell>{jefe.persona.legajo}</TableCell>
                   <TableCell>{jefe.observaciones}</TableCell>
-                  <TableCell>{jefe.estado}</TableCell>
+                  <TableCell>{jefe.estado == 1 ? "Activo" : "Inactivo"}</TableCell>
                   <TableCell>
-                    <Link to={`/dashboard/personas/jefes/editar/${jefe.id}`}>
+                    <Button onClick={() => router.push(`/dashboard/persons/jefes/edit/${jefe.id}`)}>
                       <EditIcon />
-                    </Link>
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -260,7 +309,8 @@ const ListaJefes = () => {
         </div>
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 
-export default ListaJefes;
+export default withAuth(ListaJefes);

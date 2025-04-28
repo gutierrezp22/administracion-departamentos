@@ -7,10 +7,10 @@ DEBUG = True
 django_allowed_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS")
 
 # Convierte la cadena en una lista separada por comas
-ALLOWED_HOSTS = django_allowed_hosts.split(",")
+ALLOWED_HOSTS = ['administracionfacet.site', '18.215.115.94', 'localhost', '127.0.0.1']
 
 MIDDLEWARE += [
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # 'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 REST_FRAMEWORK = {
@@ -33,7 +33,7 @@ REST_FRAMEWORK = {
     "DATE_FORMAT": "%d/%m/%Y",
 }
 CORS_ORIGIN_WHITELIST = [
-    'https://administracionfacet.site',
+    'https://docentes.facet.unt.edu.ar/api',
 ]
 CORS_ALLOW_METHODS = [
     "DELETE",
@@ -63,4 +63,8 @@ CORS_EXPOSE_HEADERS = [
 
 CORS_ALLOW_CREDENTIALS = True
 # Seguridad (CSRF, SSL, etc.)
-CSRF_TRUSTED_ORIGINS = ['https://administracionfacet.site']
+CSRF_TRUSTED_ORIGINS = ['https://docentes.facet.unt.edu.ar/api']
+
+CSRF_COOKIE_SECURE = True  # Requiere HTTPS
+CSRF_COOKIE_HTTPONLY = False  # Permite acceso desde JS
+CSRF_COOKIE_SAMESITE = "None"  # Necesario si frontend y backend están en dominios distintos

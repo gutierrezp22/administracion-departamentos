@@ -1,26 +1,20 @@
 import React from 'react';
-import {Route, Routes,Navigate, useLocation,BrowserRouter  as Router} from 'react-router-dom';
-import ListaDocentes from './list';
+import { useRouter } from 'next/router';
 import CrearDocente from './create';
-import EditarDocente from './edit';
+import ListaDocentes from './list';
 
 const Docentes = () => {
-  const h1Style = {
-    color: 'black',
+  const router = useRouter();
+
+  const renderContent = () => {
+    if (router.pathname.endsWith('/crear')) {
+      return <CrearDocente />;
+    } else {
+      return <ListaDocentes />;
+    }
   };
 
-  return (
-
-      <Routes>
-    
-      <Route path="/*" element={<ListaDocentes/>}/>
-      <Route path="crear/*" element={<CrearDocente/>}/>
-      <Route path="editar/:idPersona" Component={EditarDocente}/>
-
-
-      </Routes>
-      
-  );
+  return <>{renderContent()}</>;
 };
 
 export default Docentes;

@@ -1,27 +1,28 @@
 import React from 'react';
-import {Route, Routes,Navigate, useLocation,BrowserRouter  as Router} from 'react-router-dom';
+import { useRouter } from 'next/router';
 import CrearDepartamento from './create';
 import ListaDepartamentos from './list';
-import EditarDepartamento from './edit';
 import DepartamentosJefe from './departamentoJefe';
 
 const Departamentos = () => {
-  const h1Style = {
-    color: 'black',
+  const router = useRouter();
+  const { path } = router.query;
+
+  const renderComponent = () => {
+    switch (path) {
+      case 'crear':
+        return <CrearDepartamento />;
+      case 'jefes':
+        return <DepartamentosJefe />;
+      default:
+        return <ListaDepartamentos />;
+    }
   };
 
   return (
-
-      <Routes>
-    
-      <Route path="/*" element={<ListaDepartamentos/>}/>
-      <Route path="crear/*" element={<CrearDepartamento/>}/>
-      <Route path="editar/:idDepartamento" Component={EditarDepartamento}/>
-      <Route path="jefes/*" element={<DepartamentosJefe/>}/>
-
-
-      </Routes>
-      
+    <div>
+      {renderComponent()}
+    </div>
   );
 };
 

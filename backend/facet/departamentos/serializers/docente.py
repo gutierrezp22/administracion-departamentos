@@ -1,32 +1,41 @@
 from rest_framework import serializers
-from ..models import Docente,Persona
-from .persona import PersonaSerializer 
+from ..models import Docente, Persona
 
 class DocenteSerializer(serializers.ModelSerializer):
-    persona = PersonaSerializer()  # Para incluir todos los detalles de Persona en la salida
+    # Agregamos el ID de persona para escritura y un campo adicional para mostrar los datos completos
+    persona = serializers.PrimaryKeyRelatedField(queryset=Persona.objects.all())
+    persona_detalle = serializers.SerializerMethodField()
 
     class Meta:
         model = Docente
-        fields = '__all__'
+        fields = '__all__'  # Incluye todos los campos, incluyendo persona y persona_detalle
 
-    def create(self, validated_data):
-            persona_data = validated_data.pop('persona')
-            # Si `Persona` ya existe, se obtiene, si no, se crea una nueva
-            persona, created = Persona.objects.get_or_create(**persona_data)
-            docente = Docente.objects.create(persona=persona, **validated_data)
-            return docente
-    
+    def get_persona_detalle(self, obj):
+        """Obtiene los detalles completos de la persona relacionada"""
+        if obj.persona:
+            return {
+                "id": obj.persona.id,
+                "nombre": obj.persona.nombre,
+                "apellido": obj.persona.apellido,
+                "dni": obj.persona.dni,
+                "telefono": obj.persona.telefono,
+                "legajo": obj.persona.legajo,
+                "email": obj.persona.email,
+            }
+        return None
+
     def update(self, instance, validated_data):
-        persona_data = validated_data.pop('persona', None)
-        if persona_data:
-            # Actualizar la instancia de Persona
-            persona, created = Persona.objects.update_or_create(
-                id=instance.persona.id, defaults=persona_data
-            )
-            instance.persona = persona
-        
-        # Actualizar el resto de los campos de Docente
+        # Extrae el ID de persona de validated_data si existe
+        persona_id = validated_data.pop('persona', None)
+
+        # Si se proporciona un nuevo ID de persona, actualízalo
+        if persona_id and instance.persona_id != persona_id.id:  # Asegúrate de que persona_id sea solo el ID
+            instance.persona_id = persona_id  # Solo asigna el ID
+
+        # Actualizar otros campos de Docente
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+        
         instance.save()
         return instance
+

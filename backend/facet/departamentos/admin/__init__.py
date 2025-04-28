@@ -12,4 +12,6 @@ from .asignaturaCarrera import AsignaturaCarreraAdmin
 from .asignaturaDocente import AsignaturaDocenteAdmin
 from .carrera import CarreraAdmin
 from .directorCarrera import DirectorCarreraAdmin
+from .tipoTitulo import TipoTituloAdmin
+from .notificacion import NotificacionAdmin
 

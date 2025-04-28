@@ -5,9 +5,12 @@ import { Container, Table, TableBody, TableCell, TableContainer, TableHead, Tabl
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import NoteAltIcon from '@mui/icons-material/NoteAlt';
-import { Link } from 'react-router-dom';
+import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import DashboardMenu from '../../../dashboard';
+import withAuth from "../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../utils/config";
 
 type TipoCarrera = 'Pregrado' | 'Grado' | 'Posgrado';
 
@@ -21,6 +24,7 @@ interface Carrera {
 }
 
 const ListaCarreras = () => {
+  const router = useRouter(); // Usamos useRouter de Next.js
   const [carreras, setCarreras] = useState<Carrera[]>([]);
   const [filtroNombre, setFiltroNombre] = useState('');
   const [filtroTipo, setFiltroTipo] = useState('');
@@ -28,7 +32,7 @@ const ListaCarreras = () => {
   const [filtroPlanEstudio, setFiltroPlanEstudio] = useState('');
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
-  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/carrera/');
+  const [currentUrl, setCurrentUrl] = useState<string>(`${API_BASE_URL}/facet/carrera/`);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -51,7 +55,7 @@ const ListaCarreras = () => {
   };
 
   const filtrarCarreras = () => {
-    let url = `http://127.0.0.1:8000/facet/carrera/?`;
+    let url = `${API_BASE_URL}/facet/carrera/?`;
     const params = new URLSearchParams();
     if (filtroNombre !== '') {
       params.append('nombre__icontains', filtroNombre);
@@ -75,7 +79,7 @@ const ListaCarreras = () => {
     try {
       let allCarreras: Carrera[] = [];
 
-      let url = `http://127.0.0.1:8000/facet/carrera/?`;
+      let url = `${API_BASE_URL}/facet/carrera/?`;
       const params = new URLSearchParams();
       if (filtroNombre !== '') {
         params.append('nombre__icontains', filtroNombre);
@@ -111,13 +115,16 @@ const ListaCarreras = () => {
   };
 
   return (
+    <DashboardMenu>
     <Container maxWidth="md">
       <div>
-        <Link to="/dashboard/carreras/crear">
-          <Button variant="contained" endIcon={<AddIcon />}>
-            Agregar Carrera
-          </Button>
-        </Link>
+        <Button
+          variant="contained"
+          endIcon={<AddIcon />}
+          onClick={() => router.push('/dashboard/careers/create')} // Navegación a la página de creación
+        >
+          Agregar Carrera
+        </Button>
         <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
           Descargar Excel
         </Button>
@@ -161,8 +168,8 @@ const ListaCarreras = () => {
                 label="Estado"
               >
                 <MenuItem value=""><em>Todos</em></MenuItem>
-                <MenuItem value={1}>1</MenuItem>
-                <MenuItem value={0}>0</MenuItem>
+                <MenuItem value={1}>Activo</MenuItem>
+                <MenuItem value={0}>Inactivo</MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -222,17 +229,17 @@ const ListaCarreras = () => {
                     <Typography variant="body1">{carrera.sitio}</Typography>
                   </TableCell>
                   <TableCell style={{ textAlign: 'center' }}>
-                    <Link to={`/dashboard/carreras/asignaturas/${carrera.id}`}>
+                    <Button onClick={() => router.push(`/dashboard/careers/asignaturaCarrera/${carrera.id}`)}>
                       <NoteAltIcon />
-                    </Link>
+                    </Button>
                   </TableCell>
                   <TableCell style={{ textAlign: 'center' }}>
-                    <Typography variant="body1">{carrera.estado}</Typography>
+                    <Typography variant="body1">{carrera.estado == 1 ? "Activo" : "Inactivo"}</Typography>
                   </TableCell>
                   <TableCell>
-                    <Link to={`/dashboard/carreras/editar/${carrera.id}`}>
+                    <Button onClick={() => router.push(`/dashboard/careers/edit/${carrera.id}`)}>
                       <EditIcon />
-                    </Link>
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -269,7 +276,8 @@ const ListaCarreras = () => {
         </div>
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 
-export default ListaCarreras;
+export default withAuth(ListaCarreras);

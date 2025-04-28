@@ -1,26 +1,21 @@
 import React from 'react';
-import {Route, Routes,Navigate, useLocation,BrowserRouter  as Router} from 'react-router-dom';
+import { useRouter } from 'next/router'; 
 import ListaDepartamentosJefe from './list';
 import CrearDepartamentoJefe from './create';
-import EditarDepartamentoJefe from './edit';
 
 const DepartamentosJefe = () => {
-  const h1Style = {
-    color: 'black',
+  const router = useRouter();
+  const { path } = router.query;
+
+  const renderContent = () => {
+    if (path === 'crear') {
+      return <CrearDepartamentoJefe />;
+    } else {
+      return <ListaDepartamentosJefe />;
+    }
   };
 
-  return (
-
-      <Routes>
-    
-      <Route path="/*" element={<ListaDepartamentosJefe/>}/>
-      <Route path="crear/*" element={<CrearDepartamentoJefe/>}/>
-      <Route path="editar/:idDepartamentoJefe" Component={EditarDepartamentoJefe}/>
-
-
-      </Routes>
-      
-  );
+  return <>{renderContent()}</>;
 };
 
 export default DepartamentosJefe;

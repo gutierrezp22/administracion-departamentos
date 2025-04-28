@@ -1,26 +1,20 @@
 import React from 'react';
-import {Route, Routes,Navigate, useLocation,BrowserRouter  as Router} from 'react-router-dom';
-import ListaJefe from './list';
+import { useRouter } from 'next/router';
 import CrearJefe from './create';
-import EditarJefe from './edit';
+import ListaJefe from './list';
 
 const Jefes = () => {
-  const h1Style = {
-    color: 'black',
+  const router = useRouter();
+
+  const renderContent = () => {
+    if (router.pathname.endsWith('/crear')) {
+      return <CrearJefe />;
+    } else {
+      return <ListaJefe />;
+    }
   };
 
-  return (
-
-      <Routes>
-    
-      <Route path="/*" element={<ListaJefe/>}/>
-      <Route path="crear/*" element={<CrearJefe/>}/>
-      <Route path="editar/:idPersona" Component={EditarJefe}/>
-
-
-      </Routes>
-      
-  );
+  return <>{renderContent()}</>;
 };
 
 export default Jefes;

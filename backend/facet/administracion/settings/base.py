@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "corsheaders",
     'django_filters',
     "coreapi",
+    "multiselectfield",
 ]
 
 MIDDLEWARE = [
@@ -63,11 +64,12 @@ TEMPLATES = [
 
 STATIC_URL = "static/"
 
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
 # STATICFILES_DIRS = [
 #     # Tell Django where to look for React's static files (css, js)
 #     os.path.join(BASE_DIR, "build/static"),
 # ]
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 WSGI_APPLICATION = "administracion.wsgi.application"
 
@@ -118,7 +120,6 @@ JAZZMIN_SETTINGS = {
     "navigation_expanded": True,
     "welcome_sign": "Administrador - Departamentos FACET",
     "copyright": "FACET - UNT",
-    # "site_logo": "img/icono-caja.png",
     # "show_ui_builder": True,
 }
 
@@ -245,8 +246,24 @@ RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY")
 
 CORS_ALLOWED_ORIGINS=[
     "http://localhost:3000",
+    "http://18.215.115.94",
+    "https://docentes.facet.unt.edu.ar/api",
+
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
+    "http://18.215.115.94",
+    "https://docentes.facet.unt.edu.ar/api",
 ]
+
+SECURE_SSL_REDIRECT = False  # Asegúrate de que no redirija innecesariamente
+
+# 📌 Configuración del Correo
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.environ["EMAIL_HOST"]  # Se asume que está definida en el entorno
+EMAIL_PORT = int(os.environ["EMAIL_PORT"])  # Convertir a entero
+EMAIL_USE_TLS = os.environ["EMAIL_USE_TLS"].lower() == "true"  # Convertir a booleano
+EMAIL_HOST_USER = os.environ["EMAIL_HOST_USER"]
+EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
+DEFAULT_FROM_EMAIL = os.environ["DEFAULT_FROM_EMAIL"]

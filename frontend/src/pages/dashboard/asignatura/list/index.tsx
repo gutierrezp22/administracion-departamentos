@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
-import { Container, List, ListItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, TextField, Button, InputLabel, Select, MenuItem, FormControl, Grid } from '@mui/material';
+import { Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, TextField, Button, InputLabel, Select, MenuItem, FormControl, Grid } from '@mui/material';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import GroupIcon from '@mui/icons-material/Group';
-import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import Link from 'next/link';
+import DashboardMenu from '../../../dashboard';
+import withAuth from "../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../utils/config";
 
 const ListaAsignaturas = () => {
   const h1Style = {
@@ -54,7 +57,7 @@ const ListaAsignaturas = () => {
   const [filtroEstado, setFiltroEstado] = useState<string | number>('');
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
-  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/asignatura/');
+  const [currentUrl, setCurrentUrl] = useState<string>(`${API_BASE_URL}/facet/asignatura/`);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -67,8 +70,8 @@ const ListaAsignaturas = () => {
     try {
       const [asignaturasRes, departamentosRes, areasRes] = await Promise.all([
         axios.get(url),
-        axios.get('http://127.0.0.1:8000/facet/departamento/'), // URL para obtener departamentos
-        axios.get('http://127.0.0.1:8000/facet/area/') // URL para obtener áreas
+        axios.get(`${API_BASE_URL}/facet/departamento/`),
+        axios.get(`${API_BASE_URL}/facet/area/`)
       ]);
 
       setAsignaturas(asignaturasRes.data.results);
@@ -84,7 +87,7 @@ const ListaAsignaturas = () => {
   };
 
   const filtrarAsignaturas = () => {
-    let url = `http://127.0.0.1:8000/facet/asignatura/?`;
+    let url = `${API_BASE_URL}/facet/asignatura/?`;
     const params = new URLSearchParams();
     if (filtroNombre !== '') {
       params.append('nombre__icontains', filtroNombre);
@@ -111,7 +114,8 @@ const ListaAsignaturas = () => {
     try {
       let allAsignaturas: Asignatura[] = [];
 
-      let url = `http://127.0.0.1:8000/facet/asignatura/?`;
+      // Construir URL con filtros
+      let url = `${API_BASE_URL}/facet/asignatura/?`;
       const params = new URLSearchParams();
       if (filtroNombre !== '') {
         params.append('nombre__icontains', filtroNombre);
@@ -123,20 +127,32 @@ const ListaAsignaturas = () => {
         params.append('tipo', filtroTipo);
       }
       if (filtroModulo !== '') {
-        params.append('planestudio__icontains', filtroModulo);
+        params.append('modulo__icontains', filtroModulo);
       }
       url += params.toString();
 
+      // Iterar sobre las páginas de resultados
       while (url) {
         const response = await axios.get(url);
         const { results, next } = response.data;
-
         allAsignaturas = [...allAsignaturas, ...results];
         url = next;
       }
 
+      // Preparar los datos en el formato requerido para el Excel
+      const dataForExcel = allAsignaturas.map((asignatura) => ({
+        'Codigo': asignatura.codigo,
+        'Nombre': asignatura.nombre,
+        'Modulo': asignatura.modulo,
+        'Tipo': asignatura.tipo,
+        'Estado': asignatura.estado == 1 ? 'Activo' : 'Inactivo',
+        'Area': areas.find(area => area.id === asignatura.area)?.nombre || 'Área no encontrada',
+        'Departamento': departamentos.find(depto => depto.id === asignatura.departamento)?.nombre || 'Departamento no encontrado',
+      }));
+
+      // Generar y descargar el archivo Excel
       const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(allAsignaturas);
+      const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Asignaturas');
       const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
       const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -146,10 +162,12 @@ const ListaAsignaturas = () => {
     }
   };
 
+
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <div>
-        <Link to="/dashboard/asignaturas/crear">
+        <Link href="/dashboard/asignatura/create">
           <Button variant="contained" endIcon={<AddIcon />}>
             Agregar Asignatura
           </Button>
@@ -260,7 +278,7 @@ const ListaAsignaturas = () => {
                     <Typography variant="body1">{asignatura.modulo}</Typography>
                   </TableCell>
                   <TableCell style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                    <Link to={asignatura.programa} target="_blank" style={{ display: 'inline-block', lineHeight: '0' }}>
+                    <Link href={asignatura.programa} target="_blank" style={{ display: 'inline-block', lineHeight: '0' }}>
                       <TextSnippetIcon />
                     </Link>
                   </TableCell>
@@ -268,7 +286,7 @@ const ListaAsignaturas = () => {
                     <Typography variant="body1">{asignatura.tipo}</Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body1">{asignatura.estado === 1 ? "Activo" : "Inactivo"}</Typography>
+                    <Typography variant="body1">{asignatura.estado == 1 ? "Activo" : "Inactivo"}</Typography>
                   </TableCell>
                   <TableCell>
                     {areas.find(area => area.id === asignatura.area)?.nombre || 'Área no encontrada'}
@@ -277,12 +295,12 @@ const ListaAsignaturas = () => {
                     {departamentos.find(depto => depto.id === asignatura.departamento)?.nombre || 'Departamento no encontrado'}
                   </TableCell>
                   <TableCell style={{ textAlign: 'center' }}>
-                    <Link to={`/dashboard/asignaturas/docentes/${asignatura.id}`}>
+                    <Link href={`/dashboard/asignatura/docenteAsignatura/${asignatura.id}`}>
                       <GroupIcon />
                     </Link>
                   </TableCell>
                   <TableCell style={{ textAlign: 'center' }}>
-                    <Link to={`/dashboard/asignaturas/editar/${asignatura.id}/${asignatura.id}`}>
+                    <Link href={`/dashboard/asignatura/edit/${asignatura.id}`}>
                       <EditIcon />
                     </Link>
                   </TableCell>
@@ -320,7 +338,8 @@ const ListaAsignaturas = () => {
         </div>
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 
-export default ListaAsignaturas;
+export default withAuth(ListaAsignaturas);

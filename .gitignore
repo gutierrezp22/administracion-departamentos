@@ -8,3 +8,5 @@ __pycache__/
 
 #frontend
 frontend/node_modules
+backend/facet/administracion/.env
+backend/facet/administracion/.env
