@@ -6,8 +6,6 @@ backend/facet/adminitracion/.env
 __pycache__/
 # Migraciones
 backend/facet/administracion/migrations/*
-backend/facet/roles/migrations/*
-backend/facet/usuarios/migrations/*
 backend/facet/departamentos/migrations/*
 
 #frontend

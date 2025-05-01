@@ -10,7 +10,6 @@ https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
 import os
 from django.core.wsgi import get_wsgi_application
 
-# Asegúrate de que este apunte al archivo de configuración correcto
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'administracion.settings.produccion')  # Ajusta esto según tu estructura
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'administracion.settings.produccion')  # O cambiar por local si estás en desarrollo
 
 application = get_wsgi_application()
