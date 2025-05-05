@@ -259,6 +259,8 @@ CSRF_TRUSTED_ORIGINS = [
 
 SECURE_SSL_REDIRECT = False  # Asegúrate de que no redirija innecesariamente
 
+FORCE_SCRIPT_NAME = os.getenv('DJANGO_FORCE_SCRIPT_NAME', '/api')
+
 # 📌 Configuración del Correo
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.environ["EMAIL_HOST"]  # Se asume que está definida en el entorno
