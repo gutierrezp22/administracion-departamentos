@@ -5,8 +5,6 @@ backend/facet/adminitracion/.env
 # Byte-compiled / optimized
 __pycache__/
 # Migraciones
-backend/facet/administracion/migrations/*
-backend/facet/departamentos/migrations/*
 
 #frontend
 frontend/node_modules
