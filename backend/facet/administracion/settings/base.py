@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "knox",
     "simple_history",
     "corsheaders",
+    "django_extensions",
     'django_filters',
     "coreapi",
     "multiselectfield",
@@ -62,7 +63,7 @@ TEMPLATES = [
 ]
 
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
