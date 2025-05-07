@@ -47,7 +47,6 @@ urlpatterns = [
     path('api/facet/', include('departamentos.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-urlpatterns.append(re_path(r'^.*', TemplateView.as_view(template_name='index.html')))
 
 def custom_404_view(request, exception):
     return JsonResponse({"error": "Not found"}, status=404)
