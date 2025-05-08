@@ -44,7 +44,7 @@ urlpatterns = [
     re_path(r'^api/redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
     # Incluir las URLs de departamentos bajo 'api'
-    path('api/facet/', include('departamentos.urls')),
+    path('facet/', include('departamentos.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
