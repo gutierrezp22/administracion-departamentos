@@ -63,8 +63,12 @@ TEMPLATES = [
     },
 ]
 
+FORCE_SCRIPT_NAME = os.getenv('DJANGO_URL_PREFIX', None)
 
 STATIC_URL = "/static/"
+
+if FORCE_SCRIPT_NAME:
+    STATIC_URL = f"{FORCE_SCRIPT_NAME}{STATIC_URL}"
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
@@ -262,8 +266,6 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 SECURE_SSL_REDIRECT = False  # Asegúrate de que no redirija innecesariamente
-
-FORCE_SCRIPT_NAME = os.getenv('DJANGO_FORCE_SCRIPT_NAME', '/api')
 
 # 📌 Configuración del Correo
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
