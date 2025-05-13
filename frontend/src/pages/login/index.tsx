@@ -50,7 +50,7 @@ export default function LoginPage() {
     const password = data.get('password');
   
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/login/token/`, {
+      const response = await axios.post(`${API_BASE_URL}/login/token/`, {
         email,
         password,
       });
