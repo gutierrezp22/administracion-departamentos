@@ -35,8 +35,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # Usuarios
-    path('api/auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('api/login/', include('usuarios.urls')),  # Mover todo a 'api/'
+    path('auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('login/', include('usuarios.urls')),  # Mover todo a 'api/'
 
     # Swagger
     re_path(r'^api/swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
@@ -44,10 +44,9 @@ urlpatterns = [
     re_path(r'^api/redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
     # Incluir las URLs de departamentos bajo 'api'
-    path('api/facet/', include('departamentos.urls')),
+    path('facet/', include('departamentos.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-urlpatterns.append(re_path(r'^.*', TemplateView.as_view(template_name='index.html')))
 
 def custom_404_view(request, exception):
     return JsonResponse({"error": "Not found"}, status=404)

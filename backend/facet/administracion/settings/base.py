@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "knox",
     "simple_history",
     "corsheaders",
+    "django_extensions",
     'django_filters',
     "coreapi",
     "multiselectfield",
@@ -32,15 +33,16 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "administracion.urls"
@@ -61,10 +63,16 @@ TEMPLATES = [
     },
 ]
 
+FORCE_SCRIPT_NAME = os.getenv('DJANGO_URL_PREFIX', None)
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+
+if FORCE_SCRIPT_NAME:
+    STATIC_URL = f"{FORCE_SCRIPT_NAME}{STATIC_URL}"
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # STATICFILES_DIRS = [
 #     # Tell Django where to look for React's static files (css, js)
