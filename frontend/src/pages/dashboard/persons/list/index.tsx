@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
-import './styles.css';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+import "./styles.css";
+import axios from "axios";
 import {
-  Container,
   Grid,
   Paper,
   Table,
@@ -13,22 +12,25 @@ import {
   TableRow,
   Typography,
   TextField,
-  Button,
   InputLabel,
   Select,
   MenuItem,
   FormControl,
   Tooltip,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
-import Link from 'next/link';
-import DashboardMenu from '../../../dashboard';
-import withAuth from "../../../../components/withAut"; 
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import PeopleIcon from "@mui/icons-material/People";
+import SchoolIcon from "@mui/icons-material/School";
+import WorkIcon from "@mui/icons-material/Work";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import DashboardMenu from "../../../dashboard";
+import withAuth from "../../../../components/withAut";
 import { API_BASE_URL } from "../../../../utils/config";
-
 
 interface Persona {
   id: number;
@@ -40,7 +42,7 @@ interface Persona {
   email: string;
   interno: string;
   legajo: string;
-  titulo: Titulo | null; // Añadir el campo título
+  titulo: Titulo | null;
 }
 
 interface Titulo {
@@ -50,17 +52,20 @@ interface Titulo {
 
 const ListaPersonas = () => {
   const [personas, setPersonas] = useState<Persona[]>([]);
-  const [filtroDni, setFiltroDni] = useState('');
-  const [filtroNombre, setFiltroNombre] = useState('');
-  const [filtroApellido, setFiltroApellido] = useState('');
-  const [filtroLegajo, setFiltroLegajo] = useState('');
-  const [filtroEstado, setFiltroEstado] = useState<string | number>('');
+  const [filtroDni, setFiltroDni] = useState("");
+  const [filtroNombre, setFiltroNombre] = useState("");
+  const [filtroApellido, setFiltroApellido] = useState("");
+  const [filtroLegajo, setFiltroLegajo] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState<string | number>("");
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
-  const [currentUrl, setCurrentUrl] = useState<string>(`${API_BASE_URL}/facet/persona/`);
+  const [currentUrl, setCurrentUrl] = useState<string>(
+    `${API_BASE_URL}/facet/persona/`
+  );
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const router = useRouter();
 
   useEffect(() => {
     fetchData(currentUrl);
@@ -75,27 +80,27 @@ const ListaPersonas = () => {
       setTotalItems(response.data.count);
       setCurrentPage(1);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error fetching data:", error);
     }
   };
 
   const filtrarPersonas = () => {
     let url = `${API_BASE_URL}/facet/persona/?`;
     const params = new URLSearchParams();
-    if (filtroNombre !== '') {
-      params.append('nombre__icontains', filtroNombre);
+    if (filtroNombre !== "") {
+      params.append("nombre__icontains", filtroNombre);
     }
-    if (filtroDni !== '') {
-      params.append('dni__icontains', filtroDni);
+    if (filtroDni !== "") {
+      params.append("dni__icontains", filtroDni);
     }
-    if (filtroEstado !== '') {
-      params.append('estado', filtroEstado.toString());
+    if (filtroEstado !== "") {
+      params.append("estado", filtroEstado.toString());
     }
-    if (filtroApellido !== '') {
-      params.append('apellido__icontains', filtroApellido);
+    if (filtroApellido !== "") {
+      params.append("apellido__icontains", filtroApellido);
     }
-    if (filtroLegajo !== '') {
-      params.append('legajo__icontains', filtroLegajo);
+    if (filtroLegajo !== "") {
+      params.append("legajo__icontains", filtroLegajo);
     }
     url += params.toString();
     setCurrentUrl(url);
@@ -106,17 +111,17 @@ const ListaPersonas = () => {
       let allPersona: Persona[] = [];
       let url = `${API_BASE_URL}/facet/persona/?`;
       const params = new URLSearchParams();
-      if (filtroNombre !== '') {
-        params.append('nombre__icontains', filtroNombre);
+      if (filtroNombre !== "") {
+        params.append("nombre__icontains", filtroNombre);
       }
-      if (filtroEstado !== '') {
-        params.append('estado', filtroEstado.toString());
+      if (filtroEstado !== "") {
+        params.append("estado", filtroEstado.toString());
       }
-      if (filtroApellido !== '') {
-        params.append('apellido__icontains', filtroApellido);
+      if (filtroApellido !== "") {
+        params.append("apellido__icontains", filtroApellido);
       }
-      if (filtroLegajo !== '') {
-        params.append('legajo__icontains', filtroLegajo);
+      if (filtroLegajo !== "") {
+        params.append("legajo__icontains", filtroLegajo);
       }
       url += params.toString();
 
@@ -135,73 +140,105 @@ const ListaPersonas = () => {
           Apellido: persona.apellido,
           Telefono: persona.telefono,
           DNI: persona.dni,
-          Estado: persona.estado == 1 ? 'Activo' : 'Inactivo',
+          Estado: persona.estado == 1 ? "Activo" : "Inactivo",
           Email: persona.email,
           Interno: persona.interno,
           Legajo: persona.legajo,
-          Titulo: persona.titulo, // Agrega el campo Titulo al Excel
+          Titulo: persona.titulo ? String(persona.titulo) : "",
         }))
       );
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Personas');
-      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-      const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      saveAs(excelBlob, 'personas.xlsx');
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Personas");
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+      const excelBlob = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      saveAs(excelBlob, "personas.xlsx");
     } catch (error) {
-      console.error('Error downloading Excel:', error);
+      console.error("Error downloading Excel:", error);
     }
   };
 
+  const totalPages = Math.ceil(totalItems / pageSize);
+
   return (
     <DashboardMenu>
-      <Container maxWidth="lg">
-      <div>
-          <Link href="/dashboard/persons/create" passHref>
-            <Button variant="contained" endIcon={<AddIcon />} style={{ marginRight: '10px' }}>
-              Agregar Persona
-            </Button>
-          </Link>
-          <Link href="/dashboard/persons/jefes" passHref>
-            <Button variant="contained" color="secondary" style={{ marginRight: '10px' }}>
-              Jefes
-            </Button>
-          </Link>
-          <Link href="/dashboard/persons/docentes" passHref>
-            <Button variant="contained" color="secondary" style={{ marginRight: '10px' }}>
-              Docentes
-            </Button>
-          </Link>
-          <Link href="/dashboard/persons/noDocentes" passHref>
-            <Button variant="contained" color="secondary" style={{ marginRight: '10px' }}>
-              No Docentes
-            </Button>
-          </Link>
-          <Button variant="contained" color="primary" onClick={descargarExcel}>
-            Descargar Excel
-          </Button>
+      <div className="p-6">
+        <div className="flex flex-wrap gap-4 mb-6">
+          <button
+            onClick={() => router.push("/dashboard/persons/create")}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
+            <AddIcon /> Agregar Persona
+          </button>
+          <button
+            onClick={() => router.push("/dashboard/persons/jefes")}
+            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
+            <PeopleIcon /> Jefes
+          </button>
+          <button
+            onClick={() => router.push("/dashboard/persons/docentes")}
+            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
+            <SchoolIcon /> Docentes
+          </button>
+          <button
+            onClick={() => router.push("/dashboard/persons/noDocentes")}
+            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
+            <WorkIcon /> No Docentes
+          </button>
+          <button
+            onClick={descargarExcel}
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
+            <FileDownloadIcon /> Descargar Excel
+          </button>
         </div>
 
-        <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-          <Typography variant="h4" gutterBottom>
+        <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
+          <Typography variant="h4" gutterBottom className="text-gray-800">
             Personas
           </Typography>
 
           <Grid container spacing={2}>
             <Grid item xs={4}>
-              <TextField label="DNI" value={filtroDni} onChange={(e) => setFiltroDni(e.target.value)} fullWidth />
+              <TextField
+                label="DNI"
+                value={filtroDni}
+                onChange={(e) => setFiltroDni(e.target.value)}
+                fullWidth
+              />
             </Grid>
             <Grid item xs={4}>
-              <TextField label="Nombre" value={filtroNombre} onChange={(e) => setFiltroNombre(e.target.value)} fullWidth />
+              <TextField
+                label="Nombre"
+                value={filtroNombre}
+                onChange={(e) => setFiltroNombre(e.target.value)}
+                fullWidth
+              />
             </Grid>
             <Grid item xs={4}>
-              <TextField label="Apellido" value={filtroApellido} onChange={(e) => setFiltroApellido(e.target.value)} fullWidth />
+              <TextField
+                label="Apellido"
+                value={filtroApellido}
+                onChange={(e) => setFiltroApellido(e.target.value)}
+                fullWidth
+              />
             </Grid>
             <Grid item xs={4} marginBottom={2}>
-              <TextField label="Legajo" value={filtroLegajo} onChange={(e) => setFiltroLegajo(e.target.value)} fullWidth />
+              <TextField
+                label="Legajo"
+                value={filtroLegajo}
+                onChange={(e) => setFiltroLegajo(e.target.value)}
+                fullWidth
+              />
             </Grid>
             <Grid item xs={4} marginBottom={2}>
               <FormControl fullWidth>
                 <InputLabel>Estado</InputLabel>
-                <Select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} label="Estado">
+                <Select
+                  value={filtroEstado}
+                  onChange={(e) => setFiltroEstado(e.target.value)}
+                  label="Estado">
                   <MenuItem value="">Todos</MenuItem>
                   <MenuItem value="0">Inactivo</MenuItem>
                   <MenuItem value="1">Activo</MenuItem>
@@ -209,84 +246,70 @@ const ListaPersonas = () => {
               </FormControl>
             </Grid>
             <Grid item xs={4} marginBottom={2}>
-              <Button variant="contained" onClick={filtrarPersonas}>
+              <button
+                onClick={filtrarPersonas}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors duration-200">
                 Filtrar
-              </Button>
+              </button>
             </Grid>
           </Grid>
 
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} className="mt-4">
             <Table>
               <TableHead>
-                <TableRow className="header-row">
-                  <TableCell className="header-cell">
-                    <Typography variant="subtitle1">Nombre</Typography>
+                <TableRow className="bg-blue-600 text-white">
+                  <TableCell className="text-white font-medium">
+                    Nombre
                   </TableCell>
-                  <TableCell className="header-cell">
-                    <Typography variant="subtitle1">Apellido</Typography>
+                  <TableCell className="text-white font-medium">
+                    Apellido
                   </TableCell>
-                  <TableCell className="header-cell">
-                    <Typography variant="subtitle1">Teléfono</Typography>
+                  <TableCell className="text-white font-medium">
+                    Teléfono
                   </TableCell>
-                  <TableCell className="header-cell">
-                    <Typography variant="subtitle1">DNI</Typography>
+                  <TableCell className="text-white font-medium">DNI</TableCell>
+                  <TableCell className="text-white font-medium">
+                    Estado
                   </TableCell>
-                  <TableCell className="header-cell">
-                    <Typography variant="subtitle1">Estado</Typography>
+                  <TableCell className="text-white font-medium">
+                    Email
                   </TableCell>
-                  <TableCell className="header-cell">
-                    <Typography variant="subtitle1">Email</Typography>
+                  <TableCell className="text-white font-medium">
+                    Interno
                   </TableCell>
-                  <TableCell className="header-cell">
-                    <Typography variant="subtitle1">Interno</Typography>
+                  <TableCell className="text-white font-medium">
+                    Legajo
                   </TableCell>
-                  <TableCell className="header-cell">
-                    <Typography variant="subtitle1">Legajo</Typography>
+                  <TableCell className="text-white font-medium">
+                    Título
                   </TableCell>
-                  <TableCell className="header-cell">
-                    <Typography variant="subtitle1">Título</Typography>
-                  </TableCell>
-                  <TableCell className="header-cell"></TableCell>
+                  <TableCell className="text-white font-medium"></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {personas.map((persona) => (
-                  <TableRow key={persona.id}>
+                  <TableRow key={persona.id} className="hover:bg-gray-50">
+                    <TableCell>{persona.nombre}</TableCell>
+                    <TableCell>{persona.apellido}</TableCell>
+                    <TableCell>{persona.telefono}</TableCell>
+                    <TableCell>{persona.dni}</TableCell>
                     <TableCell>
-                      <Typography variant="body1">{persona.nombre}</Typography>
+                      {persona.estado == 1 ? "Activo" : "Inactivo"}
+                    </TableCell>
+                    <TableCell>{persona.email}</TableCell>
+                    <TableCell>{persona.interno}</TableCell>
+                    <TableCell>{persona.legajo}</TableCell>
+                    <TableCell>
+                      {persona.titulo ? String(persona.titulo) : ""}
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body1">{persona.apellido}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body1">{persona.telefono}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body1">{persona.dni}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body1">{persona.estado == 1 ? 'Activo' : 'Inactivo'}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body1">{persona.email}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body1">{persona.interno}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body1">{persona.legajo}</Typography>
-                    </TableCell>
-                    <TableCell>
-                    <Typography variant="body1">
-                  {persona.titulo ? String(persona.titulo) : ''}
-                </Typography>
-
-
-                  </TableCell>
-                    <TableCell>
-                      <Link href={`/dashboard/persons/edit/${persona.id}`} passHref>
+                      <button
+                        onClick={() =>
+                          router.push(`/dashboard/persons/edit/${persona.id}`)
+                        }
+                        className="p-2 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-100 transition-colors duration-200">
                         <EditIcon />
-                      </Link>
+                      </button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -294,35 +317,39 @@ const ListaPersonas = () => {
             </Table>
           </TableContainer>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
-            <Button
-              variant="contained"
-              color="primary"
+          <div className="flex justify-between items-center mt-4">
+            <button
               onClick={() => {
                 prevUrl && setCurrentUrl(prevUrl);
                 setCurrentPage(currentPage - 1);
               }}
               disabled={!prevUrl}
-            >
+              className={`px-4 py-2 rounded-md ${
+                prevUrl
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              } transition-colors duration-200`}>
               Anterior
-            </Button>
+            </button>
             <Typography variant="body1">
-              Página {currentPage} de {Math.ceil(totalItems / pageSize)}
+              Página {currentPage} de {totalPages}
             </Typography>
-            <Button
-              variant="contained"
-              color="primary"
+            <button
               onClick={() => {
                 nextUrl && setCurrentUrl(nextUrl);
                 setCurrentPage(currentPage + 1);
               }}
               disabled={!nextUrl}
-            >
+              className={`px-4 py-2 rounded-md ${
+                nextUrl
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              } transition-colors duration-200`}>
               Siguiente
-            </Button>
+            </button>
           </div>
         </Paper>
-      </Container>
+      </div>
     </DashboardMenu>
   );
 };

@@ -2,11 +2,9 @@ import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
 import {
-  Container,
   Typography,
   Paper,
   TextField,
-  Button,
   Grid,
   Table,
   TableBody,
@@ -17,13 +15,13 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
-import { useRouter } from 'next/router'; // Importamos useRouter de Next.js
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import { useRouter } from 'next/router';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import Swal from "sweetalert2";
 import DashboardMenu from '../../../dashboard';
-import Link from 'next/link'; // Asegúrate de importar Link de Next.js
-import withAuth from "../../../../components/withAut"; // Importa el HOC
+import withAuth from "../../../../components/withAut";
 import { API_BASE_URL } from "../../../../utils/config";
 
 
@@ -31,19 +29,19 @@ interface Area {
   id: number;
   departamento: number;
   nombre: string;
-  estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
+  estado: 0 | 1;
 }
 
 interface Departamento {
   id: number;
   nombre: string;
   telefono: string;
-  estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
+  estado: 0 | 1;
   interno: string;
 }
 
 const ListaAreas = () => {
-  const router = useRouter(); // Usamos useRouter de Next.js
+  const router = useRouter();
 
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
@@ -135,25 +133,27 @@ const ListaAreas = () => {
     }
   };
   
-  
-
   return (
     <DashboardMenu>
-      <Container maxWidth="lg">
-        <div>
-          <Link href="/dashboard/areas/create" passHref>
-            <Button variant="contained" endIcon={<AddIcon />}>
-              Agregar Area
-            </Button>
-          </Link>
-          <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
-            Descargar Excel
-          </Button>
+      <div className="p-6">
+        <div className="flex flex-wrap gap-4 mb-6">
+          <button
+            onClick={() => router.push('/dashboard/areas/create')}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200"
+          >
+            <AddIcon /> Agregar Area
+          </button>
+          <button
+            onClick={descargarExcel}
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200"
+          >
+            <FileDownloadIcon /> Descargar Excel
+          </button>
         </div>
 
         <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-          <Typography variant="h4" gutterBottom>
-            Area
+          <Typography variant="h4" gutterBottom className="text-gray-800">
+            Areas
           </Typography>
 
           <Grid container spacing={2} marginBottom={2}>
@@ -166,81 +166,81 @@ const ListaAreas = () => {
               />
             </Grid>
             <Grid item xs={4} marginBottom={2}>
-              <Button variant="contained" onClick={filtrarAreas}>
+              <button
+                onClick={filtrarAreas}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors duration-200"
+              >
                 Filtrar
-              </Button>
+              </button>
             </Grid>
           </Grid>
 
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} className="mt-4">
             <Table>
               <TableHead>
-                <TableRow className='header-row'>
-                  <TableCell className='header-cell'>
-                    <Typography variant="subtitle1">Nombre</Typography>
-                  </TableCell>
-                  <TableCell className='header-cell'>
-                    <Typography variant="subtitle1">Departamento</Typography>
-                  </TableCell>
-                  <TableCell className='header-cell'>
-                    <Typography variant="subtitle1">Estado</Typography>
-                  </TableCell>
-                  <TableCell className='header-cell'></TableCell>
+                <TableRow className="bg-blue-600 text-white">
+                  <TableCell className="text-white font-medium">Nombre</TableCell>
+                  <TableCell className="text-white font-medium">Departamento</TableCell>
+                  <TableCell className="text-white font-medium">Estado</TableCell>
+                  <TableCell className="text-white font-medium"></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {areas.map((area) => (
-                  <TableRow key={area.id}>
-                    <TableCell>
-                      <Typography variant="body1">{area.nombre}</Typography>
-                    </TableCell>
+                  <TableRow key={area.id} className="hover:bg-gray-50">
+                    <TableCell>{area.nombre}</TableCell>
                     <TableCell>
                       {departamentos.find(depto => depto.id === area.departamento)?.nombre || 'Departamento no encontrado'}
                     </TableCell>
+                    <TableCell>{area.estado == 1 ? "Activo" : "Inactivo"}</TableCell>
                     <TableCell>
-                      <Typography variant="body1">{area.estado == 1 ? "Activo" : "Inactivo"}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Link href={`/dashboard/areas/edit/${area.id}`} passHref>
-                        <Button>
-                          <EditIcon />
-                        </Button>
-                      </Link>
+                      <button
+                        onClick={() => router.push(`/dashboard/areas/edit/${area.id}`)}
+                        className="p-2 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-100 transition-colors duration-200"
+                      >
+                        <EditIcon />
+                      </button>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
-            <Button
-              variant="contained"
-              color="primary"
+          <div className="flex justify-between items-center mt-4">
+            <button
               onClick={() => {
                 prevUrl && setCurrentUrl(prevUrl);
                 setCurrentPage(currentPage - 1);
               }}
               disabled={!prevUrl}
+              className={`px-4 py-2 rounded-md ${
+                prevUrl
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              } transition-colors duration-200`}
             >
               Anterior
-            </Button>
+            </button>
             <Typography variant="body1">
               Página {currentPage} de {totalPages}
             </Typography>
-            <Button
-              variant="contained"
-              color="primary"
+            <button
               onClick={() => {
                 nextUrl && setCurrentUrl(nextUrl);
                 setCurrentPage(currentPage + 1);
               }}
               disabled={!nextUrl}
+              className={`px-4 py-2 rounded-md ${
+                nextUrl
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              } transition-colors duration-200`}
             >
               Siguiente
-            </Button>
+            </button>
           </div>
         </Paper>
-      </Container>
+      </div>
     </DashboardMenu>
   );
 };

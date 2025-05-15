@@ -2,7 +2,7 @@
 
 /* Define un estilo para las celdas de encabezado */
 .header-row {
-    background-color: #1976d2 !important; /* Fondo celeste */
+    background-color: #2563eb !important; /* Azul que coincide con bg-blue-600 de Tailwind */
   }
 
   .header-cell {

@@ -1,169 +1,166 @@
-import * as React from 'react';
-import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import MuiDrawer from '@mui/material/Drawer';
-import Box from '@mui/material/Box';
-import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
-import List from '@mui/material/List';
-import Badge from '@mui/material/Badge';
-import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import LogoutIcon from '@mui/icons-material/Logout';
-import { IconButton, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
-import ItemsMenu from './components/itemsMenu'; // Asegúrate de que la ruta sea correcta
-import { Container } from '@mui/material';
-import { useRouter } from 'next/router';
-import { useState } from 'react';
-
-
+import * as React from "react";
+import { useState } from "react";
+import { useRouter } from "next/router";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import MenuIcon from "@mui/icons-material/Menu";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import LogoutIcon from "@mui/icons-material/Logout";
+import HomeIcon from "@mui/icons-material/Home";
+import ArticleIcon from "@mui/icons-material/Article";
+import PeopleIcon from "@mui/icons-material/People";
+import ViewComfyIcon from "@mui/icons-material/ViewComfy";
+import AutoAwesomeMotionIcon from "@mui/icons-material/AutoAwesomeMotion";
+import NoteAltIcon from "@mui/icons-material/NoteAlt";
+import SchoolIcon from "@mui/icons-material/School";
+import EmailIcon from "@mui/icons-material/Email";
+import ItemsMenu from "./components/itemsMenu";
 
 // Define las propiedades del componente
 interface DashboardMenuProps {
-  children: React.ReactNode; // Asegúrate de incluir children aquí
+  children: React.ReactNode;
 }
 
-const drawerWidth: number = 240;
-
-interface AppBarProps extends MuiAppBarProps {
-  open?: boolean;
+interface CustomMenuItemProps {
+  icon: React.ReactNode;
+  text?: string;
+  onClick: () => void;
 }
 
-const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== 'open',
-})<AppBarProps>(({ theme, open }) => ({
-  zIndex: theme.zIndex.drawer + 1,
-  transition: theme.transitions.create(['width', 'margin'], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  ...(open && {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  }),
-}));
-
-const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
-  ({ theme, open }) => ({
-    '& .MuiDrawer-paper': {
-      position: 'relative',
-      whiteSpace: 'nowrap',
-      width: drawerWidth,
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-      boxSizing: 'border-box',
-      ...(!open && {
-        overflowX: 'hidden',
-        transition: theme.transitions.create('width', {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.leavingScreen,
-        }),
-        width: theme.spacing(7),
-        [theme.breakpoints.up('sm')]: {
-          width: theme.spacing(9),
-        },
-      }),
-    },
-  }),
-);
-
-const defaultTheme = createTheme();
+const CustomMenuItem: React.FC<CustomMenuItemProps> = ({
+  icon,
+  text,
+  onClick,
+}) => {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full flex items-center p-3 hover:bg-blue-500 rounded-md transition-colors duration-200">
+      <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center">
+        {icon}
+      </div>
+      {text && <span className="ml-4 text-white">{text}</span>}
+    </button>
+  );
+};
 
 const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
-  const [open, setOpen] = React.useState(true);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [open, setOpen] = useState(true);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const router = useRouter();
 
-  // ✅ Función para abrir el menú de usuario
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+  const handleMenuOpen = () => {
+    setUserMenuOpen(!userMenuOpen);
   };
 
-  // ✅ Función para cerrar el menú
   const handleMenuClose = () => {
-    setAnchorEl(null);
+    setUserMenuOpen(false);
   };
 
-  // ✅ Función para cerrar sesión
   const handleLogout = () => {
-    sessionStorage.removeItem('access_token');
-    sessionStorage.removeItem('refresh_token');
-    router.push('/login'); // Redirige a la página de login
+    sessionStorage.removeItem("access_token");
+    sessionStorage.removeItem("refresh_token");
+    router.push("/login");
   };
 
   const toggleDrawer = () => {
     setOpen(!open);
   };
+
+  const navigateTo = (path: string) => {
+    router.push(path);
+  };
+
+  const menuItems = [
+    { icon: <HomeIcon />, text: "Inicio", path: "/dashboard/home" },
+    {
+      icon: <ArticleIcon />,
+      text: "Resoluciones",
+      path: "/dashboard/resoluciones",
+    },
+    { icon: <PeopleIcon />, text: "Personas", path: "/dashboard/persons" },
+    {
+      icon: <ViewComfyIcon />,
+      text: "Departamentos",
+      path: "/dashboard/departments",
+    },
+    { icon: <AutoAwesomeMotionIcon />, text: "Area", path: "/dashboard/areas" },
+    {
+      icon: <NoteAltIcon />,
+      text: "Asignaturas",
+      path: "/dashboard/asignatura",
+    },
+    { icon: <SchoolIcon />, text: "Carreras", path: "/dashboard/careers" },
+    {
+      icon: <EmailIcon />,
+      text: "Notificaciones",
+      path: "/dashboard/notificaciones",
+    },
+  ];
+
   return (
-    <ThemeProvider theme={defaultTheme}>
-      <Box sx={{ display: 'flex' }}>
-        <CssBaseline />
-        <AppBar position="absolute" open={open}>
-          <Toolbar sx={{ pr: '24px' }}>
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              onClick={toggleDrawer}
-              sx={{ marginRight: '36px', ...(open && { display: 'none' }) }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography component="h1" variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
-              Dashboard
-            </Typography>
-         {/* ✅ Botón de usuario con menú de logout */}
-         <div>
-              <IconButton color="inherit" onClick={handleMenuOpen}>
+    <div className="flex h-screen bg-gray-100">
+      {/* Sidebar */}
+      <div
+        className={`${
+          open ? "w-64" : "w-16"
+        } bg-blue-600 text-white shadow-lg transition-all duration-300 ease-in-out z-20`}>
+        <div className="flex justify-between items-center p-4">
+          {open && <span className="font-bold text-xl">Menu</span>}
+          <button
+            onClick={toggleDrawer}
+            className="p-2 rounded-full hover:bg-blue-500 transition-colors duration-200 text-white">
+            {open ? <ChevronLeftIcon /> : <MenuIcon />}
+          </button>
+        </div>
+        <div className="px-2 py-2">
+          <div className="space-y-1">
+            {menuItems.map((item, index) => (
+              <CustomMenuItem
+                key={index}
+                icon={item.icon}
+                text={open ? item.text : undefined}
+                onClick={() => navigateTo(item.path)}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Navbar */}
+        <header className="bg-white shadow-md z-10">
+          <div className="flex items-center justify-between px-6 py-4">
+            <h1 className="text-xl font-semibold text-gray-800">
+              FACET
+            </h1>
+
+            <div className="relative">
+              <button
+                onClick={handleMenuOpen}
+                className="p-2 text-blue-600 rounded-full hover:bg-gray-100 transition-colors duration-200">
                 <AccountCircleIcon />
-              </IconButton>
-              <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-                <MenuItem onClick={handleLogout}>
-                  <LogoutIcon sx={{ mr: 1 }} /> Cerrar sesión
-                </MenuItem>
-              </Menu>
+              </button>
+
+              {userMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    <LogoutIcon className="mr-2 text-gray-500" />
+                    Cerrar sesión
+                  </button>
+                </div>
+              )}
             </div>
-          </Toolbar>
-        </AppBar>
-        <Drawer variant="permanent" open={open}>
-          <Toolbar sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', px: [1] }}>
-            <IconButton onClick={toggleDrawer}>
-              <ChevronLeftIcon />
-            </IconButton>
-          </Toolbar>
-          <List component="nav">
-            <ItemsMenu /> {/* Aquí se renderiza el menú lateral */}
-          </List>
-        </Drawer>
-        <Box
-          component="main"
-          sx={{
-            backgroundColor: (theme) => theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
-            flexGrow: 1,
-            height: '100vh',
-            overflow: 'auto',
-          }}
-        >
-          <Toolbar />
-          <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            {children} {/* Aquí se renderiza el contenido basado en la ruta actual */}
-          </Container>
-        </Box>
-      </Box>
-    </ThemeProvider>
+          </div>
+        </header>
+
+        {/* Content */}
+        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+      </div>
+    </div>
   );
 };
 
 export default DashboardMenu;
-
-            {/* <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton> */}

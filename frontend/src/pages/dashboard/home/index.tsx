@@ -1,26 +1,29 @@
-import React from 'react';
-import { Container, Typography, Paper, Box } from '@mui/material';
-import DashboardMenu from '../../dashboard';
+import React from "react";
+import DashboardMenu from "../../dashboard";
 
 const Home = () => {
   return (
     <DashboardMenu>
-      <Container maxWidth="md">
-        <Paper elevation={3} style={{ padding: '40px', marginTop: '30px', textAlign: 'center' }}>
-          <Typography variant="h3" component="h1" gutterBottom style={{ color: '#3f51b5' }}>
-            Bienvenido a la Gestión de Departamentos
-          </Typography>
-          <Typography variant="h5" component="p" gutterBottom style={{ color: '#757575' }}>
-            La plataforma para gestionar asignaturas, docentes, resoluciones y personas de manera eficiente y organizada.
-          </Typography>
-          <Box mt={3}>
-            <Typography variant="body1" component="p">
-              Utilice el menú de navegación para acceder a las secciones de administración. Estamos aquí para ayudarle a optimizar su flujo de trabajo y
-              gestionar la información académica con facilidad.
-            </Typography>
-          </Box>
-        </Paper>
-      </Container>
+      <div className="flex justify-center py-8 px-4">
+        <div className="w-full max-w-4xl">
+          <div className="bg-white p-10 rounded-xl shadow-lg text-center">
+            <h1 className="text-3xl font-extrabold text-indigo-600 mb-4">
+              Bienvenido a la Gestión de Departamentos
+            </h1>
+            <h2 className="text-xl text-gray-600 mb-6">
+              La plataforma para gestionar asignaturas, docentes, resoluciones y
+              personas de manera eficiente y organizada.
+            </h2>
+            <div className="mt-6">
+              <p className="text-gray-700">
+                Utilice el menú de navegación para acceder a las secciones de
+                administración. Estamos aquí para ayudarle a optimizar su flujo
+                de trabajo y gestionar la información académica con facilidad.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </DashboardMenu>
   );
 };
