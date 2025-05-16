@@ -166,7 +166,7 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
               <button
                 onClick={handleMenuOpen}
                 className="p-2 text-blue-500 rounded-full hover:bg-gray-100 transition-colors duration-200">
-                <AccountCircleIcon />
+                <AccountCircleIcon className="w-8 h-8" />
               </button>
 
               {userMenuOpen && (
