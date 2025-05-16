@@ -14,6 +14,7 @@ import AutoAwesomeMotionIcon from "@mui/icons-material/AutoAwesomeMotion";
 import NoteAltIcon from "@mui/icons-material/NoteAlt";
 import SchoolIcon from "@mui/icons-material/School";
 import EmailIcon from "@mui/icons-material/Email";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ItemsMenu from "./components/itemsMenu";
 
 // Define las propiedades del componente
@@ -184,7 +185,21 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-6">
+          {children}
+
+          {/* Botón Volver Atrás */}
+          {router.pathname !== "/dashboard/home" && (
+            <div className="mt-8 flex justify-center">
+              <button
+                onClick={() => router.back()}
+                className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2.5 rounded-md shadow-md transition-colors duration-200 font-medium">
+                <ArrowBackIcon />
+                Volver Atrás
+              </button>
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );
