@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import Image from "next/image";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -51,9 +52,9 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
   // Initialize sidebar state from localStorage when component mounts
   useEffect(() => {
     // Try to get saved state from localStorage
-    const savedState = localStorage.getItem('sidebarOpen');
+    const savedState = localStorage.getItem("sidebarOpen");
     // Set the initial state based on saved value (or false if no saved value)
-    setOpen(savedState === 'true');
+    setOpen(savedState === "true");
   }, []);
 
   const handleMenuOpen = () => {
@@ -74,7 +75,7 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
     const newState = !open;
     setOpen(newState);
     // Save state to localStorage
-    localStorage.setItem('sidebarOpen', newState.toString());
+    localStorage.setItem("sidebarOpen", newState.toString());
   };
 
   const navigateTo = (path: string) => {
@@ -120,7 +121,11 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
           open ? "w-64" : "w-16"
         } bg-blue-500 text-white shadow-lg transition-all duration-300 ease-in-out z-20`}>
         <div className="flex justify-between items-center p-4">
-          {open && <span className="font-bold text-xl">Menu</span>}
+          {open ? (
+            <span className="font-bold text-xl">Menu</span>
+          ) : (
+            <span></span>
+          )}
           <button
             onClick={toggleDrawer}
             className="p-2 rounded-full hover:bg-blue-400 transition-colors duration-200 text-white">
@@ -146,7 +151,16 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
         {/* Navbar */}
         <header className="bg-white shadow-md z-10">
           <div className="flex items-center justify-between px-6 py-4">
-            <h1 className="text-xl font-semibold text-gray-800">FACET</h1>
+            <div className="flex items-center">
+              <Image
+                src="/logoFACET.png"
+                alt="Logo FACET"
+                width={160}
+                height={50}
+                className="h-12 w-auto"
+                unoptimized={true}
+              />
+            </div>
 
             <div className="relative">
               <button
