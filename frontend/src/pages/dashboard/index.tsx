@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -34,7 +34,7 @@ const CustomMenuItem: React.FC<CustomMenuItemProps> = ({
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center p-3 hover:bg-blue-500 rounded-md transition-colors duration-200">
+      className="w-full flex items-center p-3 hover:bg-blue-400 rounded-md transition-colors duration-200">
       <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center">
         {icon}
       </div>
@@ -44,9 +44,17 @@ const CustomMenuItem: React.FC<CustomMenuItemProps> = ({
 };
 
 const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const router = useRouter();
+
+  // Initialize sidebar state from localStorage when component mounts
+  useEffect(() => {
+    // Try to get saved state from localStorage
+    const savedState = localStorage.getItem('sidebarOpen');
+    // Set the initial state based on saved value (or false if no saved value)
+    setOpen(savedState === 'true');
+  }, []);
 
   const handleMenuOpen = () => {
     setUserMenuOpen(!userMenuOpen);
@@ -63,10 +71,17 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
   };
 
   const toggleDrawer = () => {
-    setOpen(!open);
+    const newState = !open;
+    setOpen(newState);
+    // Save state to localStorage
+    localStorage.setItem('sidebarOpen', newState.toString());
   };
 
   const navigateTo = (path: string) => {
+    // Close the user menu if it's open when navigating
+    if (userMenuOpen) {
+      setUserMenuOpen(false);
+    }
     router.push(path);
   };
 
@@ -103,12 +118,12 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
       <div
         className={`${
           open ? "w-64" : "w-16"
-        } bg-blue-600 text-white shadow-lg transition-all duration-300 ease-in-out z-20`}>
+        } bg-blue-500 text-white shadow-lg transition-all duration-300 ease-in-out z-20`}>
         <div className="flex justify-between items-center p-4">
           {open && <span className="font-bold text-xl">Menu</span>}
           <button
             onClick={toggleDrawer}
-            className="p-2 rounded-full hover:bg-blue-500 transition-colors duration-200 text-white">
+            className="p-2 rounded-full hover:bg-blue-400 transition-colors duration-200 text-white">
             {open ? <ChevronLeftIcon /> : <MenuIcon />}
           </button>
         </div>
@@ -131,14 +146,12 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
         {/* Navbar */}
         <header className="bg-white shadow-md z-10">
           <div className="flex items-center justify-between px-6 py-4">
-            <h1 className="text-xl font-semibold text-gray-800">
-              FACET
-            </h1>
+            <h1 className="text-xl font-semibold text-gray-800">FACET</h1>
 
             <div className="relative">
               <button
                 onClick={handleMenuOpen}
-                className="p-2 text-blue-600 rounded-full hover:bg-gray-100 transition-colors duration-200">
+                className="p-2 text-blue-500 rounded-full hover:bg-gray-100 transition-colors duration-200">
                 <AccountCircleIcon />
               </button>
 

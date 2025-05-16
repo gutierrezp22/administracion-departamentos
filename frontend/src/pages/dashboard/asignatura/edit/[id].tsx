@@ -6,12 +6,8 @@ import {
   Typography,
   Paper,
   TextField,
-  Button,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormControl,
-  Grid
+  Grid,
+  MenuItem
 } from '@mui/material';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -126,7 +122,7 @@ const EditarAsignatura: React.FC = () => {
     <DashboardMenu>
       <Container maxWidth="lg">
         <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-          <Typography variant="h4" gutterBottom>
+          <Typography variant="h4" gutterBottom className="text-gray-800">
             Editar Asignatura
           </Typography>
 
@@ -137,6 +133,7 @@ const EditarAsignatura: React.FC = () => {
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value.toUpperCase())}
                 fullWidth
+                variant="outlined"
               />
             </Grid>
             <Grid item xs={12}>
@@ -145,6 +142,7 @@ const EditarAsignatura: React.FC = () => {
                 value={codigo}
                 onChange={(e) => setCodigo(e.target.value.toUpperCase())}
                 fullWidth
+                variant="outlined"
               />
             </Grid>
             <Grid item xs={12}>
@@ -153,6 +151,7 @@ const EditarAsignatura: React.FC = () => {
                 value={modulo}
                 onChange={(e) => setModulo(e.target.value.toUpperCase())}
                 fullWidth
+                variant="outlined"
               />
             </Grid>
             <Grid item xs={12}>
@@ -161,44 +160,44 @@ const EditarAsignatura: React.FC = () => {
                 value={programa}
                 onChange={(e) => setPrograma(e.target.value)}
                 fullWidth
+                variant="outlined"
               />
             </Grid>  
             <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel id="tipo-label">Tipo</InputLabel>
-                <Select
-                  labelId="tipo-label"
-                  id="tipo-select"
-                  value={tipo}
-                  onChange={(e) => setTipo(e.target.value as TipoAsignatura)}
-                >
-                  <MenuItem value="Electiva">Electiva</MenuItem>
-                  <MenuItem value="Obligatoria">Obligatoria</MenuItem>
-                </Select>
-              </FormControl>
+              <TextField
+                select
+                label="Tipo"
+                value={tipo}
+                onChange={(e) => setTipo(e.target.value as TipoAsignatura)}
+                fullWidth
+                variant="outlined">
+                <MenuItem value="Electiva">Electiva</MenuItem>
+                <MenuItem value="Obligatoria">Obligatoria</MenuItem>
+              </TextField>
             </Grid>  
             <Grid item xs={12}>
-              <FormControl fullWidth margin="none">
-                <InputLabel id="estado-label">Estado</InputLabel>
-                <Select
-                  labelId="estado-label"
-                  id="estado-select"
-                  value={estado}
-                  label="Estado"
-                  onChange={(e) => setEstado(e.target.value)}
-                >
-                  <MenuItem value={1}>Activo</MenuItem>
-                  <MenuItem value={0}>Inactivo</MenuItem>
-                </Select>
-              </FormControl>
+              <TextField
+                select
+                label="Estado"
+                value={estado}
+                onChange={(e) => setEstado(e.target.value)}
+                fullWidth
+                variant="outlined">
+                <MenuItem value={1}>Activo</MenuItem>
+                <MenuItem value={0}>Inactivo</MenuItem>
+              </TextField>
             </Grid>
             <Grid item xs={12} marginBottom={2}>
-              <Button variant="contained" onClick={edicionAsignatura}>
+              <button
+                onClick={edicionAsignatura}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
                 Editar
-              </Button>
-              <Button onClick={() => setConfirmarEliminacion(true)} variant="contained" style={{ marginLeft: '8px' }} color="error">
+              </button>
+              <button 
+                onClick={() => setConfirmarEliminacion(true)} 
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200 ml-2">
                 Eliminar
-              </Button>
+              </button>
             </Grid>
           </Grid>
           <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} />

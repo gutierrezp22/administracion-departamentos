@@ -1,11 +1,9 @@
-import { useEffect, useState } from 'react';
-import './styles.css';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+import "./styles.css";
+import axios from "axios";
 import {
-  Container,
   Typography,
   Paper,
-  Button,
   Grid,
   Table,
   TableBody,
@@ -14,10 +12,11 @@ import {
   TableHead,
   TableRow,
   TextField,
-} from '@mui/material';
+} from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import Swal from "sweetalert2";
-import DashboardMenu from '../../../dashboard';
-import withAuth from "../../../../components/withAut"; 
+import DashboardMenu from "../../../dashboard";
+import withAuth from "../../../../components/withAut";
 import { API_BASE_URL } from "../../../../utils/config";
 
 interface Notificacion {
@@ -30,16 +29,14 @@ interface Notificacion {
   persona_nombre: string;
 }
 
-
 const ListaNotificaciones = () => {
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
   const [filtroApellido, setFiltroApellido] = useState("");
   const [filtroNombre, setFiltroNombre] = useState("");
   const [filtroFecha, setFiltroFecha] = useState("");
-  const [filtroMensaje, setFiltroMensaje] = useState('');
+  const [filtroMensaje, setFiltroMensaje] = useState("");
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
-  // const [currentUrl, setCurrentUrl] = useState<string>(`${API_BASE_URL}/facet/notificacion/`);
   const [currentUrl, setCurrentUrl] = useState<string>(
     `${API_BASE_URL}/facet/notificacion/`
   );
@@ -58,7 +55,11 @@ const ListaNotificaciones = () => {
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
       setTotalItems(response.data.count);
-      setCurrentPage(url.includes("page=") ? parseInt(new URL(url).searchParams.get("page") || "1") : 1);
+      setCurrentPage(
+        url.includes("page=")
+          ? parseInt(new URL(url).searchParams.get("page") || "1")
+          : 1
+      );
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -74,17 +75,17 @@ const ListaNotificaciones = () => {
 
     // Asegurarse de que los filtros no estén vacíos antes de agregarlos
     if (filtroApellido.trim() !== "") {
-        params.append("persona_apellido", filtroApellido.trim());
+      params.append("persona_apellido", filtroApellido.trim());
     }
     if (filtroNombre.trim() !== "") {
-        params.append("persona_nombre", filtroNombre.trim());
+      params.append("persona_nombre", filtroNombre.trim());
     }
     if (filtroFecha.trim() !== "") {
-        params.append("fecha_creacion_after", filtroFecha);
-        params.append("fecha_creacion_before", filtroFecha);
+      params.append("fecha_creacion_after", filtroFecha);
+      params.append("fecha_creacion_before", filtroFecha);
     }
     if (filtroMensaje.trim() !== "") {
-        params.append("mensaje__icontains", filtroMensaje.trim());
+      params.append("mensaje__icontains", filtroMensaje.trim());
     }
 
     params.append("page_size", pageSize.toString());
@@ -94,14 +95,11 @@ const ListaNotificaciones = () => {
     const finalUrl = url + params.toString();
 
     if (params.toString().length > 0) {
-        setCurrentUrl(finalUrl);
+      setCurrentUrl(finalUrl);
     } else {
-        console.warn("⚠ No se aplicaron filtros, URL no se actualizará.");
+      console.warn("⚠ No se aplicaron filtros, URL no se actualizará.");
     }
-};
-
-
-
+  };
 
   const mostrarMensaje = (mensaje: string) => {
     Swal.fire({
@@ -115,9 +113,9 @@ const ListaNotificaciones = () => {
 
   return (
     <DashboardMenu>
-      <Container maxWidth="lg">
+      <div className="p-6">
         <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
-          <Typography variant="h4" gutterBottom>
+          <Typography variant="h4" gutterBottom className="text-gray-800">
             Notificaciones
           </Typography>
 
@@ -149,52 +147,56 @@ const ListaNotificaciones = () => {
               />
             </Grid>
             <Grid item xs={12}>
-              <Button variant="contained" onClick={filtrarNotificaciones}>
+              <button
+                onClick={filtrarNotificaciones}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
                 Filtrar
-              </Button>
+              </button>
             </Grid>
           </Grid>
 
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} className="mt-4">
             <Table>
               <TableHead>
-                <TableRow className="header-row">
-                  <TableCell className="header-cell">
-                    <Typography variant="subtitle1">Apellido</Typography>
+                <TableRow style={{ backgroundColor: "#3b82f6" }}>
+                  <TableCell style={{ color: "white", fontWeight: 500 }}>
+                    Apellido
                   </TableCell>
-                  <TableCell className="header-cell">
-                    <Typography variant="subtitle1">Nombre</Typography>
+                  <TableCell style={{ color: "white", fontWeight: 500 }}>
+                    Nombre
                   </TableCell>
-                  <TableCell className="header-cell">
-                    <Typography variant="subtitle1">Fecha</Typography>
+                  <TableCell style={{ color: "white", fontWeight: 500 }}>
+                    Fecha
                   </TableCell>
-                  <TableCell className="header-cell">
-                    <Typography variant="subtitle1">Mensaje</Typography>
+                  <TableCell style={{ color: "white", fontWeight: 500 }}>
+                    Mensaje
                   </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {notificaciones.map((noti) => (
-                  <TableRow key={noti.id}>
+                  <TableRow key={noti.id} className="hover:bg-gray-50">
                     <TableCell>{noti.persona_apellido}</TableCell>
                     <TableCell>{noti.persona_nombre}</TableCell>
                     <TableCell>
-                    {noti.fecha_creacion
-                      ? (() => {
-                          const [day, month, year] = noti.fecha_creacion.split(" ")[0].split("/"); // Extraer partes de la fecha
-                          const fixedDate = new Date(`${year}-${month}-${day}T00:00:00`); // Crear fecha en formato correcto sin afectar la zona horaria
-                          return fixedDate.toLocaleDateString();
-                        })()
-                      : "Fecha inválida"}
-                  </TableCell>
+                      {noti.fecha_creacion
+                        ? (() => {
+                            const [day, month, year] = noti.fecha_creacion
+                              .split(" ")[0]
+                              .split("/");
+                            const fixedDate = new Date(
+                              `${year}-${month}-${day}T00:00:00`
+                            );
+                            return fixedDate.toLocaleDateString();
+                          })()
+                        : "Fecha inválida"}
+                    </TableCell>
                     <TableCell>
-                      <Button
-                        variant="outlined"
-                        color="primary"
+                      <button
                         onClick={() => mostrarMensaje(noti.mensaje)}
-                      >
-                        Ver Mensaje
-                      </Button>
+                        className="p-2 text-blue-500 hover:text-blue-700 rounded-full hover:bg-blue-50 transition-colors duration-200">
+                        <VisibilityIcon />
+                      </button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -202,30 +204,33 @@ const ListaNotificaciones = () => {
             </Table>
           </TableContainer>
 
-          {/* Controles de paginación */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "16px" }}>
-            <Button
-              variant="contained"
-              color="primary"
+          <div className="flex justify-between items-center mt-4">
+            <button
               onClick={() => prevUrl && setCurrentUrl(prevUrl)}
               disabled={!prevUrl}
-            >
+              className={`px-4 py-2 rounded-md ${
+                prevUrl
+                  ? "bg-blue-500 text-white hover:bg-blue-600"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              } transition-colors duration-200`}>
               Anterior
-            </Button>
+            </button>
             <Typography variant="body1">
               Página {currentPage} de {totalPages}
             </Typography>
-            <Button
-              variant="contained"
-              color="primary"
+            <button
               onClick={() => nextUrl && setCurrentUrl(nextUrl)}
               disabled={!nextUrl}
-            >
+              className={`px-4 py-2 rounded-md ${
+                nextUrl
+                  ? "bg-blue-500 text-white hover:bg-blue-600"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              } transition-colors duration-200`}>
               Siguiente
-            </Button>
+            </button>
           </div>
         </Paper>
-      </Container>
+      </div>
     </DashboardMenu>
   );
 };

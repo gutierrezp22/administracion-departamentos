@@ -1,16 +1,11 @@
-import { useEffect, useState } from 'react';
-import './styles.css';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+import "./styles.css";
+import axios from "axios";
 import {
   Container,
   Paper,
   Typography,
   TextField,
-  Button,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormControl,
   Grid,
   Dialog,
   DialogTitle,
@@ -22,13 +17,14 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-} from '@mui/material';
-import BasicModal from '@/utils/modal';
-import { useRouter } from 'next/router'; // Importa useRouter de Next.js
-import DashboardMenu from '../../../../dashboard';
-import withAuth from "../../../../../components/withAut"; 
+  MenuItem,
+} from "@mui/material";
+import BasicModal from "@/utils/modal";
+import { useRouter } from "next/router"; // Importa useRouter de Next.js
+import DashboardMenu from "../../../../dashboard";
+import withAuth from "../../../../../components/withAut";
 import { API_BASE_URL } from "../../../../../utils/config";
-import API from '@/api/axiosConfig';
+import API from "@/api/axiosConfig";
 
 const CrearJefe = () => {
   const router = useRouter();
@@ -48,26 +44,30 @@ const CrearJefe = () => {
 
   const [persona, setPersona] = useState<Persona | null>(null);
   const [personas, setPersonas] = useState<Persona[]>([]);
-  const [apellido, setApellido] = useState('');
-  const [dni, setDni] = useState('');
-  const [filtroNombre, setFiltroNombre] = useState('');
-  const [filtroApellido, setFiltroApellido] = useState('');
-  const [filtroDni, setFiltroDni] = useState('');
-  const [filtroLegajo, setFiltroLegajo] = useState('');
+  const [apellido, setApellido] = useState("");
+  const [dni, setDni] = useState("");
+  const [filtroNombre, setFiltroNombre] = useState("");
+  const [filtroApellido, setFiltroApellido] = useState("");
+  const [filtroDni, setFiltroDni] = useState("");
+  const [filtroLegajo, setFiltroLegajo] = useState("");
   const [openPersona, setOpenPersona] = useState(false);
-  const [nombre, setNombre] = useState('');
-  const [observaciones, setObservaciones] = useState('');
+  const [nombre, setNombre] = useState("");
+  const [observaciones, setObservaciones] = useState("");
   const [estado, setEstado] = useState<number>(1);
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
-  const [modalTitle, setModalTitle] = useState('');
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalTitle, setModalTitle] = useState("");
   const [fn, setFn] = useState(() => () => {});
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalItems, setTotalItems] = useState<number>(0);
 
-  const handleOpenModal = (title: string, message: string, onConfirm: () => void) => {
+  const handleOpenModal = (
+    title: string,
+    message: string,
+    onConfirm: () => void
+  ) => {
     setModalTitle(title);
     setModalMessage(message);
     setModalVisible(true);
@@ -76,11 +76,11 @@ const CrearJefe = () => {
 
   const handleCloseModal = () => {
     setModalVisible(false);
-    setModalMessage('');
+    setModalMessage("");
   };
 
   const handleConfirmModal = () => {
-    router.push('/dashboard/persons/jefes/');
+    router.push("/dashboard/persons/jefes/");
   };
 
   const handleOpenPersona = () => {
@@ -100,7 +100,7 @@ const CrearJefe = () => {
       setPrevUrl(response.data.previous);
       setTotalItems(response.data.count);
     } catch (error) {
-      console.error('Error fetching paginated data:', error);
+      console.error("Error fetching paginated data:", error);
     }
   };
 
@@ -108,116 +108,145 @@ const CrearJefe = () => {
     let url = `${API_BASE_URL}/facet/persona/?`;
     const params = new URLSearchParams();
 
-    if (filtroNombre) params.append('nombre__icontains', filtroNombre);
-    if (filtroApellido) params.append('apellido__icontains', filtroApellido);
-    if (filtroDni) params.append('dni__icontains', filtroDni);
-    if (filtroLegajo) params.append('legajo__icontains', filtroLegajo);
+    if (filtroNombre) params.append("nombre__icontains", filtroNombre);
+    if (filtroApellido) params.append("apellido__icontains", filtroApellido);
+    if (filtroDni) params.append("dni__icontains", filtroDni);
+    if (filtroLegajo) params.append("legajo__icontains", filtroLegajo);
 
     fetchPersonas(url + params.toString());
   };
 
   const crearNuevoJefeDepartamento = async () => {
     if (!persona?.id) {
-      handleOpenModal('Error', 'No se ha seleccionado una persona.', () => {});
+      handleOpenModal("Error", "No se ha seleccionado una persona.", () => {});
       return;
     }
-  
+
     const nuevoJefe = {
       persona: persona.id,
       observaciones,
       estado,
     };
-  
-  
+
     try {
       // 🔹 Verificar si la persona ya es un jefe
-      const response = await axios.get(`${API_BASE_URL}/facet/jefe/existe_jefe/`, {
-        params: { persona_id: persona.id }
-      });
-  
-  
+      const response = await axios.get(
+        `${API_BASE_URL}/facet/jefe/existe_jefe/`,
+        {
+          params: { persona_id: persona.id },
+        }
+      );
+
       if (response.data.existe) {
-        handleOpenModal('Error', 'Ya existe un jefe con esta persona.', () => {});
+        handleOpenModal(
+          "Error",
+          "Ya existe un jefe con esta persona.",
+          () => {}
+        );
         return; // 🔹 Detener ejecución si la persona ya es jefe
       }
-  
+
       // ✅ Si la persona NO es jefe, proceder a crearla
       const postResponse = await API.post(`/facet/jefe/`, nuevoJefe);
-  
-      handleOpenModal('Bien', 'Se creó el jefe con éxito', handleConfirmModal);
+
+      handleOpenModal("Bien", "Se creó el jefe con éxito", handleConfirmModal);
     } catch (error) {
       console.error("Error en la verificación o creación del jefe:", error);
-  
+
       if (axios.isAxiosError(error) && error.response?.status === 400) {
-        handleOpenModal('Error', 'Los datos enviados no son válidos.', () => {});
+        handleOpenModal(
+          "Error",
+          "Los datos enviados no son válidos.",
+          () => {}
+        );
       } else {
-        handleOpenModal('Error', 'No se pudo realizar la acción.', () => {});
+        handleOpenModal("Error", "No se pudo realizar la acción.", () => {});
       }
     }
   };
-  
 
   return (
     <DashboardMenu>
       <Container maxWidth="lg">
-        <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-          <Typography variant="h4" gutterBottom>
+        <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
+          <Typography variant="h4" gutterBottom className="text-gray-800">
             Agregar Jefe
           </Typography>
 
           <Grid container spacing={2}>
             <Grid item xs={4}>
-              <Button variant="contained" onClick={handleOpenPersona}>
+              <button
+                onClick={handleOpenPersona}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
                 Seleccionar Persona
-              </Button>
+              </button>
 
-              <Dialog open={openPersona} onClose={handleClose} maxWidth="md" fullWidth>
+              <Dialog
+                open={openPersona}
+                onClose={handleClose}
+                maxWidth="md"
+                fullWidth>
                 <DialogTitle>Seleccionar Persona</DialogTitle>
                 <DialogContent>
-                <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={6}>
-                    <TextField
-                      label="Nombre"
-                      value={filtroNombre}
-                      onChange={(e) => setFiltroNombre(e.target.value)}
-                      fullWidth
-                      margin="normal"
-                    />
+                  <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={6}>
+                      <TextField
+                        label="Nombre"
+                        value={filtroNombre}
+                        onChange={(e) => setFiltroNombre(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                        variant="outlined"
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        label="Apellido"
+                        value={filtroApellido}
+                        onChange={(e) => setFiltroApellido(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                        variant="outlined"
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        label="DNI"
+                        value={filtroDni}
+                        onChange={(e) => setFiltroDni(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                        variant="outlined"
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        label="Legajo"
+                        value={filtroLegajo}
+                        onChange={(e) => setFiltroLegajo(e.target.value)}
+                        fullWidth
+                        margin="normal"
+                        variant="outlined"
+                      />
+                    </Grid>
+                    <Grid
+                      item
+                      xs={4}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        height: "100%",
+                      }}>
+                      <button
+                        onClick={filtrarPersonas}
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
+                        Filtrar
+                      </button>
+                    </Grid>
                   </Grid>
-                  <Grid item xs={6}>
-                    <TextField
-                      label="Apellido"
-                      value={filtroApellido}
-                      onChange={(e) => setFiltroApellido(e.target.value)}
-                      fullWidth
-                      margin="normal"
-                    />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <TextField
-                      label="DNI"
-                      value={filtroDni}
-                      onChange={(e) => setFiltroDni(e.target.value)}
-                      fullWidth
-                      margin="normal"
-                    />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <TextField
-                      label="Legajo"
-                      value={filtroLegajo}
-                      onChange={(e) => setFiltroLegajo(e.target.value)}
-                      fullWidth
-                      margin="normal"
-                    />
-                  </Grid>
-                  <Grid item xs={4} style={{ display: "flex", alignItems: "center", height: "100%" }}>
-                    <Button variant="contained" onClick={filtrarPersonas}>
-                      Filtrar
-                    </Button>
-                  </Grid>
-                </Grid>
-                  <TableContainer component={Paper} style={{ marginTop: '20px' }}>
+                  <TableContainer
+                    component={Paper}
+                    style={{ marginTop: "20px" }}>
                     <Table>
                       <TableHead>
                         <TableRow>
@@ -236,21 +265,20 @@ const CrearJefe = () => {
                             <TableCell>{p.nombre}</TableCell>
                             <TableCell>{p.legajo}</TableCell>
                             <TableCell>
-                              <Button
-                                variant="outlined"
+                              <button
                                 onClick={() => {
                                   setPersona(p);
                                   setApellido(p.apellido);
                                   setDni(p.dni);
                                   setNombre(p.nombre);
                                 }}
-                                style={{
-                                  backgroundColor: persona?.id === p.id ? '#4caf50' : 'inherit',
-                                  color: persona?.id === p.id ? 'white' : 'inherit',
-                                }}
-                              >
+                                className={`px-3 py-1 rounded-md transition-colors duration-200 border ${
+                                  persona?.id === p.id
+                                    ? "bg-green-500 text-white border-green-500 hover:bg-green-600"
+                                    : "border-gray-300 hover:bg-gray-100"
+                                }`}>
                                 Seleccionar
-                              </Button>
+                              </button>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -259,40 +287,64 @@ const CrearJefe = () => {
                   </TableContainer>
                 </DialogContent>
                 <DialogActions>
-                  <Button
-                    variant="contained"
+                  <button
                     disabled={!prevUrl}
                     onClick={() => prevUrl && fetchPersonas(prevUrl)}
-                  >
+                    className={`mr-2 px-3 py-1 rounded-md ${
+                      !prevUrl
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-blue-500 hover:bg-blue-600 text-white"
+                    }`}>
                     Anterior
-                  </Button>
+                  </button>
                   <Typography>
                     Página {currentPage} de {Math.ceil(totalItems / 10)}
                   </Typography>
-                  <Button
-                    variant="contained"
+                  <button
                     disabled={!nextUrl}
                     onClick={() => nextUrl && fetchPersonas(nextUrl)}
-                  >
+                    className={`mr-2 px-3 py-1 rounded-md ${
+                      !nextUrl
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-blue-500 hover:bg-blue-600 text-white"
+                    }`}>
                     Siguiente
-                  </Button>
-                  <Button onClick={handleClose}>Cerrar</Button>
-                  <Button
-                    variant="contained"
+                  </button>
+                  <button
+                    onClick={handleClose}
+                    className="px-3 py-1 rounded-md border border-gray-300 hover:bg-gray-100">
+                    Cerrar
+                  </button>
+                  <button
                     onClick={handleClose}
                     disabled={!persona}
-                  >
+                    className={`ml-2 px-3 py-1 rounded-md ${
+                      !persona
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-blue-500 hover:bg-blue-600 text-white"
+                    }`}>
                     Confirmar Selección
-                  </Button>
+                  </button>
                 </DialogActions>
               </Dialog>
             </Grid>
 
             <Grid item xs={12}>
-              <TextField disabled label="DNI" value={dni} fullWidth />
+              <TextField
+                disabled
+                label="DNI"
+                value={dni}
+                fullWidth
+                variant="outlined"
+              />
             </Grid>
             <Grid item xs={12}>
-              <TextField disabled value={`${apellido} ${nombre}`} fullWidth />
+              <TextField
+                disabled
+                value={`${apellido} ${nombre}`}
+                fullWidth
+                variant="outlined"
+              />
             </Grid>
             <Grid item xs={12}>
               <TextField
@@ -300,26 +352,27 @@ const CrearJefe = () => {
                 value={observaciones}
                 onChange={(e) => setObservaciones(e.target.value)}
                 fullWidth
+                variant="outlined"
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel id="estado-label">Estado</InputLabel>
-                <Select
-                  labelId="estado-label"
-                  id="estado-select"
-                  value={estado}
-                  onChange={(e) => setEstado(Number(e.target.value))}
-                >
-                  <MenuItem value={1}>Activo</MenuItem>
-                  <MenuItem value={0}>Inactivo</MenuItem>
-                </Select>
-              </FormControl>
+              <TextField
+                select
+                label="Estado"
+                value={estado}
+                onChange={(e) => setEstado(Number(e.target.value))}
+                fullWidth
+                variant="outlined">
+                <MenuItem value={1}>Activo</MenuItem>
+                <MenuItem value={0}>Inactivo</MenuItem>
+              </TextField>
             </Grid>
             <Grid item xs={12}>
-              <Button variant="contained" onClick={crearNuevoJefeDepartamento}>
+              <button
+                onClick={crearNuevoJefeDepartamento}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
                 Crear
-              </Button>
+              </button>
             </Grid>
           </Grid>
           <BasicModal

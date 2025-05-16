@@ -1,57 +1,55 @@
-import React from 'react';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import Modal from '@mui/material/Modal';
+import React, { useEffect } from "react";
 
 interface BasicModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm?: () => void; // Hacer que la función sea opcional
+  onConfirm?: () => void;
   title: string;
   content: string;
 }
 
-const style = {
-  position: 'absolute' as 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-  textAlign: 'center' as 'center', // Alinear el contenido al centro
-};
+const BasicModal: React.FC<BasicModalProps> = ({
+  open,
+  onClose,
+  title,
+  content,
+  onConfirm = () => {},
+}) => {
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [open]);
 
-const buttonStyle = {
-  marginTop: '20px', // Espacio superior para separar el botón del contenido
-};
+  if (!open) return null;
 
-
-const BasicModal: React.FC<BasicModalProps> = ({ open, onClose, title, content, onConfirm = () => {}  }) => (
-  <Modal
-    open={open}
-    onClose={onClose}
-    aria-labelledby="modal-modal-title"
-    aria-describedby="modal-modal-description"
-  >
-    <Box sx={style}>
-      <Typography id="modal-modal-title" variant="h6" component="h2">
-        {title}
-      </Typography>
-      <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-        {content}
-      </Typography>
-      <Button style={buttonStyle} variant="contained" color="primary" onClick={() => {
-        onClose(); // Cierra el modal de éxito
-        onConfirm(); // Ejecuta la función de confirmación (puede ser la función de navegación)
-      }}>
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-[10000]">
+      <div className="fixed inset-0 bg-black opacity-50" onClick={onClose}></div>
+      <div className="bg-white rounded-lg shadow-xl p-6 w-96 z-[10001] relative">
+        <h3 className="text-xl font-bold text-center mb-2">{title}</h3>
+        <hr className="my-3 border-gray-200" />
+        <p className="text-gray-600 text-lg text-center mb-6">{content}</p>
+        <div className="flex justify-center">
+          <button
+            onClick={() => {
+              onClose();
+              onConfirm();
+            }}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md font-medium"
+          >
         OK
-      </Button>
-    </Box>
-  </Modal>
+          </button>
+        </div>
+      </div>
+    </div>
 );
+};
 
 export default BasicModal;

@@ -143,7 +143,7 @@ const ListaDepartamentos = () => {
         <div className="flex flex-wrap gap-4 mb-6">
           <button
             onClick={() => router.push("/dashboard/departments/create")}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
+            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
             <AddIcon /> Agregar Departamento
           </button>
           <button
@@ -200,7 +200,7 @@ const ListaDepartamentos = () => {
             <Grid item xs={4} marginBottom={2}>
               <button
                 onClick={filtrarDepartamentos}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors duration-200">
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
                 Filtrar
               </button>
             </Grid>
@@ -209,7 +209,7 @@ const ListaDepartamentos = () => {
           <TableContainer component={Paper} className="mt-4">
             <Table>
               <TableHead>
-                <TableRow className="bg-blue-600 text-white">
+                <TableRow className="bg-blue-500 text-white">
                   <TableCell className="text-white font-medium">
                     Nombre
                   </TableCell>
@@ -260,7 +260,7 @@ const ListaDepartamentos = () => {
               disabled={!prevUrl}
               className={`px-4 py-2 rounded-md ${
                 prevUrl
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  ? "bg-blue-500 text-white hover:bg-blue-600"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               } transition-colors duration-200`}>
               Anterior
@@ -276,7 +276,7 @@ const ListaDepartamentos = () => {
               disabled={!nextUrl}
               className={`px-4 py-2 rounded-md ${
                 nextUrl
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  ? "bg-blue-500 text-white hover:bg-blue-600"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               } transition-colors duration-200`}>
               Siguiente

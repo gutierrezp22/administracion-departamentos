@@ -1,11 +1,27 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
-import { Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, TextField, Button, InputLabel, Select, MenuItem, FormControl, Grid } from '@mui/material';
+import { 
+  Typography, 
+  Paper, 
+  TextField, 
+  FormControl, 
+  InputLabel, 
+  Select, 
+  MenuItem,
+  Grid, 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableContainer, 
+  TableHead, 
+  TableRow 
+} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import NoteAltIcon from '@mui/icons-material/NoteAlt';
-import { useRouter } from 'next/router'; // Importa useRouter de Next.js
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import { useRouter } from 'next/router';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import DashboardMenu from '../../../dashboard';
@@ -24,7 +40,7 @@ interface Carrera {
 }
 
 const ListaCarreras = () => {
-  const router = useRouter(); // Usamos useRouter de Next.js
+  const router = useRouter();
   const [carreras, setCarreras] = useState<Carrera[]>([]);
   const [filtroNombre, setFiltroNombre] = useState('');
   const [filtroTipo, setFiltroTipo] = useState('');
@@ -116,166 +132,161 @@ const ListaCarreras = () => {
 
   return (
     <DashboardMenu>
-    <Container maxWidth="md">
-      <div>
-        <Button
-          variant="contained"
-          endIcon={<AddIcon />}
-          onClick={() => router.push('/dashboard/careers/create')} // Navegación a la página de creación
-        >
-          Agregar Carrera
-        </Button>
-        <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
-          Descargar Excel
-        </Button>
-      </div>
-
-      <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-        <Typography variant="h4" gutterBottom>
-          Carreras
-        </Typography>
-
-        <Grid container spacing={2} marginBottom={2}>
-          <Grid item xs={4}>
-            <TextField
-              label="Nombre"
-              value={filtroNombre}
-              onChange={(e) => setFiltroNombre(e.target.value)}
-              fullWidth
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <FormControl fullWidth>
-              <InputLabel>Tipo</InputLabel>
-              <Select
-                value={filtroTipo}
-                onChange={(e) => setFiltroTipo(e.target.value)}
-                label="Tipo"
-              >
-                <MenuItem value=""><em>Todos</em></MenuItem>
-                <MenuItem value="Pregrado">Pregrado</MenuItem>
-                <MenuItem value="Grado">Grado</MenuItem>
-                <MenuItem value="Posgrado">Posgrado</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={4}>
-            <FormControl fullWidth>
-              <InputLabel>Estado</InputLabel>
-              <Select
-                value={filtroEstado}
-                onChange={(e) => setFiltroEstado(e.target.value)}
-                label="Estado"
-              >
-                <MenuItem value=""><em>Todos</em></MenuItem>
-                <MenuItem value={1}>Activo</MenuItem>
-                <MenuItem value={0}>Inactivo</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={4}>
-            <TextField
-              label="Plan de Estudio"
-              value={filtroPlanEstudio}
-              onChange={(e) => setFiltroPlanEstudio(e.target.value)}
-              fullWidth
-            />
-          </Grid>
-          <Grid item xs={4} marginBottom={2}>
-            <Button variant="contained" onClick={filtrarCarreras}>
-              Filtrar
-            </Button>
-          </Grid>
-        </Grid>
-
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow className='header-row'>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Nombre</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Tipo</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Plan de Estudio</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Sitio</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Asignaturas</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Estado</Typography>
-                </TableCell>
-                <TableCell className='header-cell'></TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {carreras.map(carrera => (
-                <TableRow key={carrera.id}>
-                  <TableCell>
-                    <Typography variant="body1">{carrera.nombre}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body1">{carrera.tipo}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body1">{carrera.planestudio}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body1">{carrera.sitio}</Typography>
-                  </TableCell>
-                  <TableCell style={{ textAlign: 'center' }}>
-                    <Button onClick={() => router.push(`/dashboard/careers/asignaturaCarrera/${carrera.id}`)}>
-                      <NoteAltIcon />
-                    </Button>
-                  </TableCell>
-                  <TableCell style={{ textAlign: 'center' }}>
-                    <Typography variant="body1">{carrera.estado == 1 ? "Activo" : "Inactivo"}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Button onClick={() => router.push(`/dashboard/careers/edit/${carrera.id}`)}>
-                      <EditIcon />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              prevUrl && setCurrentUrl(prevUrl);
-              setCurrentPage(currentPage - 1);
-            }}
-            disabled={!prevUrl}
+      <div className="p-6">
+        <div className="flex flex-wrap gap-4 mb-6">
+          <button
+            onClick={() => router.push('/dashboard/careers/create')}
+            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200"
           >
-            Anterior
-          </Button>
-          <Typography variant="body1">
-            Página {currentPage} de {totalPages}
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              nextUrl && setCurrentUrl(nextUrl);
-              setCurrentPage(currentPage + 1);
-            }}
-            disabled={!nextUrl}
+            <AddIcon /> Agregar Carrera
+          </button>
+          <button
+            onClick={descargarExcel}
+            className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200"
           >
-            Siguiente
-          </Button>
+            <FileDownloadIcon /> Descargar Excel
+          </button>
         </div>
-      </Paper>
-    </Container>
+
+        <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
+          <Typography variant="h4" gutterBottom className="text-gray-800">
+            Carreras
+          </Typography>
+
+          <Grid container spacing={2} marginBottom={2}>
+            <Grid item xs={4}>
+              <TextField
+                label="Nombre"
+                value={filtroNombre}
+                onChange={(e) => setFiltroNombre(e.target.value)}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <FormControl fullWidth>
+                <InputLabel>Tipo</InputLabel>
+                <Select
+                  value={filtroTipo}
+                  onChange={(e) => setFiltroTipo(e.target.value)}
+                  label="Tipo"
+                >
+                  <MenuItem value=""><em>Todos</em></MenuItem>
+                  <MenuItem value="Pregrado">Pregrado</MenuItem>
+                  <MenuItem value="Grado">Grado</MenuItem>
+                  <MenuItem value="Posgrado">Posgrado</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={4}>
+              <FormControl fullWidth>
+                <InputLabel>Estado</InputLabel>
+                <Select
+                  value={filtroEstado}
+                  onChange={(e) => setFiltroEstado(e.target.value)}
+                  label="Estado"
+                >
+                  <MenuItem value=""><em>Todos</em></MenuItem>
+                  <MenuItem value={1}>Activo</MenuItem>
+                  <MenuItem value={0}>Inactivo</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={4}>
+              <TextField
+                label="Plan de Estudio"
+                value={filtroPlanEstudio}
+                onChange={(e) => setFiltroPlanEstudio(e.target.value)}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={4} marginBottom={2}>
+              <button
+                onClick={filtrarCarreras}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200"
+              >
+                Filtrar
+              </button>
+            </Grid>
+          </Grid>
+
+          <TableContainer component={Paper} className="mt-4">
+            <Table>
+              <TableHead>
+                <TableRow style={{ backgroundColor: '#3b82f6' }}>
+                  <TableCell style={{ color: 'white', fontWeight: 500 }}>Nombre</TableCell>
+                  <TableCell style={{ color: 'white', fontWeight: 500 }}>Tipo</TableCell>
+                  <TableCell style={{ color: 'white', fontWeight: 500 }}>Plan de Estudio</TableCell>
+                  <TableCell style={{ color: 'white', fontWeight: 500 }}>Sitio</TableCell>
+                  <TableCell style={{ color: 'white', fontWeight: 500 }}>Asignaturas</TableCell>
+                  <TableCell style={{ color: 'white', fontWeight: 500 }}>Estado</TableCell>
+                  <TableCell style={{ color: 'white', fontWeight: 500 }}></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {carreras.map(carrera => (
+                  <TableRow key={carrera.id} className="hover:bg-gray-50">
+                    <TableCell>{carrera.nombre}</TableCell>
+                    <TableCell>{carrera.tipo}</TableCell>
+                    <TableCell>{carrera.planestudio}</TableCell>
+                    <TableCell>{carrera.sitio}</TableCell>
+                    <TableCell className="text-center">
+                      <button
+                        onClick={() => router.push(`/dashboard/careers/asignaturaCarrera/${carrera.id}`)}
+                        className="p-2 text-purple-500 hover:text-purple-700 rounded-full hover:bg-purple-50 transition-colors duration-200"
+                      >
+                        <NoteAltIcon />
+                      </button>
+                    </TableCell>
+                    <TableCell>{carrera.estado == 1 ? "Activo" : "Inactivo"}</TableCell>
+                    <TableCell>
+                      <button
+                        onClick={() => router.push(`/dashboard/careers/edit/${carrera.id}`)}
+                        className="p-2 text-blue-500 hover:text-blue-700 rounded-full hover:bg-blue-50 transition-colors duration-200"
+                      >
+                        <EditIcon />
+                      </button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          <div className="flex justify-between items-center mt-4">
+            <button
+              onClick={() => {
+                prevUrl && setCurrentUrl(prevUrl);
+                setCurrentPage(currentPage - 1);
+              }}
+              disabled={!prevUrl}
+              className={`px-4 py-2 rounded-md ${
+                prevUrl
+                  ? 'bg-blue-500 text-white hover:bg-blue-600'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              } transition-colors duration-200`}
+            >
+              Anterior
+            </button>
+            <Typography variant="body1">
+              Página {currentPage} de {totalPages}
+            </Typography>
+            <button
+              onClick={() => {
+                nextUrl && setCurrentUrl(nextUrl);
+                setCurrentPage(currentPage + 1);
+              }}
+              disabled={!nextUrl}
+              className={`px-4 py-2 rounded-md ${
+                nextUrl
+                  ? 'bg-blue-500 text-white hover:bg-blue-600'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              } transition-colors duration-200`}
+            >
+              Siguiente
+            </button>
+          </div>
+        </Paper>
+      </div>
     </DashboardMenu>
   );
 };

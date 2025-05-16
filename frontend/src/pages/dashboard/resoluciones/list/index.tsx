@@ -36,7 +36,7 @@ import { saveAs } from "file-saver";
 import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 import DashboardMenu from "../..";
-import withAuth from "../../../../components/withAut";
+import withAuth from "../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../utils/config";
 
 dayjs.extend(utc);
@@ -125,7 +125,7 @@ const ListaResoluciones = () => {
       let allResoluciones: Resolucion[] = [];
       let url = `${API_BASE_URL}/facet/resolucion/?`;
       const params = new URLSearchParams();
-
+  
       // Agrega los filtros actuales al URL de exportación
       if (filtroNroExpediente !== "")
         params.append("nexpediente__icontains", filtroNroExpediente);
@@ -136,7 +136,7 @@ const ListaResoluciones = () => {
       if (filtroFecha)
         params.append("fecha__date", filtroFecha.format("YYYY-MM-DD"));
       url += params.toString();
-
+  
       // Obtiene todos los datos para el Excel
       while (url) {
         const response = await axios.get(url);
@@ -144,7 +144,7 @@ const ListaResoluciones = () => {
         allResoluciones = [...allResoluciones, ...results];
         url = next;
       }
-
+  
       // Crea el archivo Excel con las columnas de la grilla!
       const workbook = XLSX.utils.book_new();
       const worksheet = XLSX.utils.json_to_sheet(
@@ -175,7 +175,7 @@ const ListaResoluciones = () => {
           Observaciones: resolucion.observaciones,
         }))
       );
-
+  
       XLSX.utils.book_append_sheet(workbook, worksheet, "Resoluciones");
       const excelBuffer = XLSX.write(workbook, {
         bookType: "xlsx",
@@ -202,7 +202,7 @@ const ListaResoluciones = () => {
         <div className="flex gap-4 mb-6">
           <button
             onClick={() => router.push("/dashboard/resoluciones/create")}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
+            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
             <AddIcon /> Agregar Resolución
           </button>
           <button
@@ -210,78 +210,78 @@ const ListaResoluciones = () => {
             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
             <FileDownloadIcon /> Descargar Excel
           </button>
-        </div>
+      </div>
 
         <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
           <Typography variant="h4" gutterBottom className="text-gray-800">
-            Resoluciones
-          </Typography>
+          Resoluciones
+        </Typography>
 
-          <Grid container spacing={2}>
-            <Grid item xs={4}>
-              <TextField
-                label="Nro Expediente"
-                value={filtroNroExpediente}
-                onChange={(e) => setFiltroNroExpediente(e.target.value)}
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                label="Nro Resolución"
-                value={filtroNroResolucion}
-                onChange={(e) => setFiltroNroResolucion(e.target.value)}
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <FormControl fullWidth margin="none">
-                <InputLabel id="demo-simple-select-label">Tipo</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={filtroTipo}
-                  label="Tipo"
+        <Grid container spacing={2}>
+          <Grid item xs={4}>
+            <TextField
+              label="Nro Expediente"
+              value={filtroNroExpediente}
+              onChange={(e) => setFiltroNroExpediente(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <TextField
+              label="Nro Resolución"
+              value={filtroNroResolucion}
+              onChange={(e) => setFiltroNroResolucion(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <FormControl fullWidth margin="none">
+              <InputLabel id="demo-simple-select-label">Tipo</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={filtroTipo}
+                label="Tipo"
                   onChange={(e) => setFiltroTipo(e.target.value)}>
-                  <MenuItem value={""}>Todos</MenuItem>
-                  <MenuItem value={"Rector"}>Rector</MenuItem>
-                  <MenuItem value={"Decano"}>Decano</MenuItem>
+                <MenuItem value={""}>Todos</MenuItem>
+                <MenuItem value={"Rector"}>Rector</MenuItem>
+                <MenuItem value={"Decano"}>Decano</MenuItem>
                   <MenuItem value={"Consejo_Superior"}>
                     Consejo Superior
                   </MenuItem>
                   <MenuItem value={"Consejo_Directivo"}>
                     Consejo Directivo
                   </MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={4} marginBottom={2}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label="Fecha"
-                  value={filtroFecha}
-                  onChange={(date) => {
-                    if (date) {
-                      const fechaSeleccionada = dayjs(date).utc();
-                      setFiltroFecha(fechaSeleccionada);
-                    }
-                  }}
-                />
-              </LocalizationProvider>
-            </Grid>
-            <Grid item xs={4} marginBottom={2}>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={4} marginBottom={2}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label="Fecha"
+                value={filtroFecha}
+                onChange={(date) => {
+                  if (date) {
+                    const fechaSeleccionada = dayjs(date).utc();
+                    setFiltroFecha(fechaSeleccionada);
+                  }
+                }}
+              />
+            </LocalizationProvider>
+          </Grid>
+          <Grid item xs={4} marginBottom={2}>
               <button
                 onClick={filtrarResoluciones}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                Filtrar
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
+              Filtrar
               </button>
-            </Grid>
           </Grid>
+        </Grid>
 
           <TableContainer component={Paper} className="mt-4">
-            <Table>
-              <TableHead>
-                <TableRow className="bg-blue-600 text-white">
+          <Table>
+            <TableHead>
+                <TableRow className="bg-blue-500 text-white">
                   <TableCell className="text-white font-medium">
                     Nro Expediente
                   </TableCell>
@@ -305,21 +305,21 @@ const ListaResoluciones = () => {
                     Observaciones
                   </TableCell>
                   <TableCell className="text-white font-medium"></TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {resoluciones.map((resolucion) => (
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {resoluciones.map((resolucion) => (
                   <TableRow key={resolucion.id} className="hover:bg-gray-50">
                     <TableCell>{resolucion.nexpediente}</TableCell>
                     <TableCell>{resolucion.nresolucion}</TableCell>
-                    <TableCell>
+                  <TableCell>
                       {resolucion.tipo === "Consejo_Superior"
                         ? "Consejo Superior"
                         : resolucion.tipo === "Consejo_Directivo"
                         ? "Consejo Directivo"
                         : resolucion.tipo}
-                    </TableCell>
-                    <TableCell>
+                  </TableCell>
+                  <TableCell>
                       {dayjs(resolucion.fecha, "DD/MM/YYYY HH:mm:ss").isValid()
                         ? dayjs(resolucion.fecha, "DD/MM/YYYY HH:mm:ss").format(
                             "DD/MM/YYYY"
@@ -335,25 +335,25 @@ const ListaResoluciones = () => {
                             "DD/MM/YYYY"
                           )
                         : "No disponible"}
-                    </TableCell>
-                    <TableCell>
+                  </TableCell>
+                  <TableCell>
                       {resolucion.estado == 1 ? "Activo" : "Inactivo"}
-                    </TableCell>
+                  </TableCell>
                     <TableCell className="text-center">
                       <a
                         href={resolucion.adjunto}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:text-blue-800">
-                        <TextSnippetIcon />
-                      </a>
-                    </TableCell>
+                      <TextSnippetIcon />
+                    </a>
+                  </TableCell>
                     <TableCell className="text-center">
-                      <Tooltip title={resolucion.observaciones}>
+                    <Tooltip title={resolucion.observaciones}>
                         <VisibilityIcon className="text-gray-600 hover:text-gray-800" />
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell>
                       <button
                         onClick={() =>
                           router.push(
@@ -361,47 +361,47 @@ const ListaResoluciones = () => {
                           )
                         }
                         className="p-2 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-100 transition-colors duration-200">
-                        <EditIcon />
+                      <EditIcon />
                       </button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
           <div className="flex justify-between items-center mt-4">
             <button
-              onClick={() => {
-                prevUrl && setCurrentUrl(prevUrl);
-                setCurrentPage(currentPage - 1);
-              }}
-              disabled={!prevUrl}
+            onClick={() => {
+              prevUrl && setCurrentUrl(prevUrl);
+              setCurrentPage(currentPage - 1);
+            }}
+            disabled={!prevUrl}
               className={`px-4 py-2 rounded-md ${
                 prevUrl
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  ? "bg-blue-500 text-white hover:bg-blue-600"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               } transition-colors duration-200`}>
-              Anterior
+            Anterior
             </button>
-            <Typography variant="body1">
-              Página {currentPage} de {totalPages}
-            </Typography>
+          <Typography variant="body1">
+            Página {currentPage} de {totalPages}
+          </Typography>
             <button
-              onClick={() => {
-                nextUrl && setCurrentUrl(nextUrl);
-                setCurrentPage(currentPage + 1);
-              }}
-              disabled={!nextUrl}
+            onClick={() => {
+              nextUrl && setCurrentUrl(nextUrl);
+              setCurrentPage(currentPage + 1);
+            }}
+            disabled={!nextUrl}
               className={`px-4 py-2 rounded-md ${
                 nextUrl
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  ? "bg-blue-500 text-white hover:bg-blue-600"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               } transition-colors duration-200`}>
-              Siguiente
+            Siguiente
             </button>
-          </div>
-        </Paper>
+        </div>
+      </Paper>
       </div>
     </DashboardMenu>
   );
