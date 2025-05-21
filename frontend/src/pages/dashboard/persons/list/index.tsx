@@ -78,7 +78,6 @@ const ListaPersonas = () => {
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
       setTotalItems(response.data.count);
-      setCurrentPage(1);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -257,33 +256,33 @@ const ListaPersonas = () => {
           <TableContainer component={Paper} className="mt-4">
             <Table>
               <TableHead>
-                <TableRow className="bg-blue-500 text-white">
-                  <TableCell className="text-white font-medium">
+                <TableRow className="bg-blue-500">
+                  <TableCell className="header-cell font-medium">
                     Nombre
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell className="header-cell font-medium">
                     Apellido
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell className="header-cell font-medium">
                     Teléfono
                   </TableCell>
-                  <TableCell className="text-white font-medium">DNI</TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell className="header-cell font-medium">DNI</TableCell>
+                  <TableCell className="header-cell font-medium">
                     Estado
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell className="header-cell font-medium">
                     Email
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell className="header-cell font-medium">
                     Interno
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell className="header-cell font-medium">
                     Legajo
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell className="header-cell font-medium">
                     Título
                   </TableCell>
-                  <TableCell className="text-white font-medium"></TableCell>
+                  <TableCell className="header-cell font-medium"></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

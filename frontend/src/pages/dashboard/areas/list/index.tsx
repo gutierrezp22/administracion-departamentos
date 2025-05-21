@@ -101,17 +101,17 @@ const ListaAreas = () => {
         params.append("nombre__icontains", filtroNombre);
       }
       url += params.toString();
-  
+
       // Obtener todos los departamentos para enlazar con las áreas
       const departamentosResponse = await axios.get(
         `${API_BASE_URL}/facet/departamento/`
       );
       const departamentos: Departamento[] = departamentosResponse.data.results;
-  
+
       while (url) {
         const response = await axios.get(url);
         const { results, next } = response.data;
-  
+
         // Mapea los datos para incluir solo las columnas requeridas
         allAreas = [
           ...allAreas,
@@ -128,7 +128,7 @@ const ListaAreas = () => {
         ];
         url = next;
       }
-  
+
       const workbook = XLSX.utils.book_new();
       const worksheet = XLSX.utils.json_to_sheet(allAreas);
       XLSX.utils.book_append_sheet(workbook, worksheet, "Areas");
@@ -156,7 +156,7 @@ const ListaAreas = () => {
           </button>
           <button
             onClick={descargarExcel}
-            className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
             <FileDownloadIcon /> Descargar Excel
           </button>
         </div>
@@ -219,7 +219,7 @@ const ListaAreas = () => {
                           router.push(`/dashboard/areas/edit/${area.id}`)
                         }
                         className="p-2 text-blue-500 hover:text-blue-700 rounded-full hover:bg-blue-50 transition-colors duration-200">
-                          <EditIcon />
+                        <EditIcon />
                       </button>
                     </TableCell>
                   </TableRow>

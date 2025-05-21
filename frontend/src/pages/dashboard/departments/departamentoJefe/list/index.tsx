@@ -36,6 +36,7 @@ import withAuth from "../../../../../components/withAut";
 import { API_BASE_URL } from "../../../../../utils/config";
 import Swal from "sweetalert2";
 import { useRouter } from "next/router";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
 
 const ListaDepartamentosJefe = () => {
   const router = useRouter();
@@ -348,7 +349,7 @@ const ListaDepartamentosJefe = () => {
           <button
             onClick={descargarExcel}
             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-            Descargar Excel
+            <FileDownloadIcon /> Descargar Excel
           </button>
         </div>
 
