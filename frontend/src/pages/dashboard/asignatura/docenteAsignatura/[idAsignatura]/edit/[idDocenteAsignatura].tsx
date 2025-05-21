@@ -12,16 +12,12 @@ import {
   Typography,
   Paper,
   TextField,
-  Button,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Grid,
-  InputLabel,
-  Select,
   MenuItem,
-  FormControl,
 } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -198,7 +194,7 @@ const EditarDocenteAsignatura: React.FC = () => {
     <DashboardMenu>
       <Container maxWidth="lg">
         <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-          <Typography variant="h4" gutterBottom>
+          <Typography variant="h4" gutterBottom className="text-gray-800">
             Editar Asignación de Docente en Asignatura
           </Typography>
 
@@ -206,34 +202,79 @@ const EditarDocenteAsignatura: React.FC = () => {
 
             {/* Otros campos de entrada y selección de datos */}
             <Grid item xs={12}>
-              <TextField label="Nombre y Apellido del Docente" value={persona?.persona_detalle ? `${persona.persona_detalle.nombre} ${persona.persona_detalle.apellido}` : ''} fullWidth disabled />
+              <TextField 
+                label="Nombre y Apellido del Docente" 
+                value={persona?.persona_detalle ? `${persona.persona_detalle.nombre} ${persona.persona_detalle.apellido}` : ''} 
+                fullWidth 
+                disabled 
+                variant="outlined"
+              />
             </Grid>
             <Grid item xs={12}>
-              <TextField label="Asignatura" value={asignatura} fullWidth disabled />
+              <TextField 
+                label="Asignatura" 
+                value={asignatura} 
+                fullWidth 
+                disabled 
+                variant="outlined"
+              />
             </Grid>
             <Grid item xs={12}>
-              <TextField label="Nro Resolución Seleccionada" value={resolucion ? resolucion.nresolucion : ''} fullWidth disabled />
+              <TextField 
+                label="Nro Resolución Seleccionada" 
+                value={resolucion ? resolucion.nresolucion : ''} 
+                fullWidth 
+                disabled 
+                variant="outlined"
+              />
             </Grid>
             <Grid item xs={12}>
-              <TextField label="Observaciones" value={observaciones} onChange={(e) => setObservaciones(e.target.value)} fullWidth />
+              <TextField 
+                label="Observaciones" 
+                value={observaciones} 
+                onChange={(e) => setObservaciones(e.target.value)} 
+                fullWidth 
+                variant="outlined"
+              />
             </Grid>
             <Grid item xs={12}>
-              <TextField label="Dedicación" value={dedicacion} onChange={(e) => setDedicacion(e.target.value)} fullWidth />
+              <TextField 
+                label="Dedicación" 
+                value={dedicacion} 
+                onChange={(e) => setDedicacion(e.target.value)} 
+                fullWidth 
+                variant="outlined"
+              />
             </Grid>
             <Grid item xs={12}>
-              <TextField label="Condición" value={condicion} onChange={(e) => setCondicion(e.target.value)} fullWidth />
+              <TextField 
+                label="Condición" 
+                value={condicion} 
+                onChange={(e) => setCondicion(e.target.value)} 
+                fullWidth 
+                variant="outlined"
+              />
             </Grid>
             <Grid item xs={12}>
-              <TextField label="Cargo" value={cargo} onChange={(e) => setCargo(e.target.value)} fullWidth />
+              <TextField 
+                label="Cargo" 
+                value={cargo} 
+                onChange={(e) => setCargo(e.target.value)} 
+                fullWidth 
+                variant="outlined"
+              />
             </Grid>
             <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel id="estado-label">Estado</InputLabel>
-                <Select labelId="estado-label" value={estado} onChange={(e) => setEstado(e.target.value)}>
-                  <MenuItem value="1">Activo</MenuItem>
-                  <MenuItem value="0">Inactivo</MenuItem>
-                </Select>
-              </FormControl>
+              <TextField
+                select
+                label="Estado"
+                value={estado}
+                onChange={(e) => setEstado(e.target.value)}
+                fullWidth
+                variant="outlined">
+                <MenuItem value="1">Activo</MenuItem>
+                <MenuItem value="0">Inactivo</MenuItem>
+              </TextField>
             </Grid>
             <Grid container item xs={12} spacing={2} marginBottom={2}>
             <Grid item xs={6}>
@@ -246,12 +287,16 @@ const EditarDocenteAsignatura: React.FC = () => {
               </Grid>
             </Grid>
             <Grid item xs={12} marginBottom={2}>
-              <Button variant="contained" onClick={updateDocenteAsignatura}>
+              <button
+                onClick={updateDocenteAsignatura}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
                 Editar
-              </Button>
-              <Button onClick={() => setConfirmarEliminacion(true)} variant="contained" style={{ marginLeft: '8px' }} color="error">
+              </button>
+              <button 
+                onClick={() => setConfirmarEliminacion(true)} 
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200 ml-2">
                 Eliminar
-              </Button>
+              </button>
             </Grid>
           </Grid>
           <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} />

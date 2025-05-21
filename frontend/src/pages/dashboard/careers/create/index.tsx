@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react';
-import './styles.css';
-import axios from 'axios';
-import { Container, Typography, TextField, Button, InputLabel, Select, MenuItem, FormControl, Grid, Paper } from '@mui/material';
-import dayjs from 'dayjs'; // Asegúrate de tener instalada esta dependencia
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-import BasicModal from '@/utils/modal';
-import { useRouter } from 'next/router'; // Importa useRouter de Next.js
-import DashboardMenu from '../../../dashboard';
-import withAuth from "../../../../components/withAut"; 
+import { useEffect, useState } from "react";
+import "./styles.css";
+import axios from "axios";
+import { Typography, TextField, Grid, Paper, MenuItem } from "@mui/material";
+import dayjs from "dayjs"; // Asegúrate de tener instalada esta dependencia
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import BasicModal from "@/utils/modal";
+import { useRouter } from "next/router"; // Importa useRouter de Next.js
+import DashboardMenu from "../../../dashboard";
+import withAuth from "../../../../components/withAut";
 import { API_BASE_URL } from "../../../../utils/config";
 import API from "../../../../api/axiosConfig";
 
@@ -17,29 +17,29 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const CrearCarrera = () => {
-  const h1Style = {
-    color: 'black',
-  };
-
   const router = useRouter(); // Usamos useRouter de Next.js
 
-  type TipoCarrera = 'Pregrado' | 'Grado' | 'Posgrado';
+  type TipoCarrera = "Pregrado" | "Grado" | "Posgrado";
 
-  const [nombre, setNombre] = useState('');
-  const [tipo, setTipo] = useState('');
-  const [planEstudio, setPlanEstudio] = useState('');
-  const [sitio, setsitio] = useState('');
-  const [estado, setEstado] = useState('');
+  const [nombre, setNombre] = useState("");
+  const [tipo, setTipo] = useState("");
+  const [planEstudio, setPlanEstudio] = useState("");
+  const [sitio, setsitio] = useState("");
+  const [estado, setEstado] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
-  const [modalTitle, setModalTitle] = useState('');
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalTitle, setModalTitle] = useState("");
   const [fn, setFn] = useState(() => () => {});
 
   function capitalizeFirstLetter(string: string) {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   }
 
-  const handleOpenModal = (title: string, message: string, onConfirm: () => void) => {
+  const handleOpenModal = (
+    title: string,
+    message: string,
+    onConfirm: () => void
+  ) => {
     setModalTitle(title); // Establecer el título del modal
     setModalMessage(message);
     setModalVisible(true);
@@ -48,11 +48,11 @@ const CrearCarrera = () => {
 
   const handleCloseModal = () => {
     setModalVisible(false);
-    setModalMessage('');
+    setModalMessage("");
   };
 
   const handleConfirmModal = () => {
-    router.push('/dashboard/careers/'); // Cambia a router.push para el enrutamiento en Next.js
+    router.push("/dashboard/careers/"); // Cambia a router.push para el enrutamiento en Next.js
   };
 
   const crearNuevaCarrera = async () => {
@@ -61,89 +61,99 @@ const CrearCarrera = () => {
       tipo: tipo,
       planestudio: planEstudio,
       sitio: sitio,
-      estado: 0 | 1,
+      estado: estado,
     };
 
     try {
       const response = await API.post(`/facet/carrera/`, nuevaCarrera);
-      handleOpenModal('Éxito', 'Se creó la carrera con éxito.', handleConfirmModal);
+      handleOpenModal(
+        "Éxito",
+        "Se creó la carrera con éxito.",
+        handleConfirmModal
+      );
     } catch (error) {
-      handleOpenModal('Error', 'NO se pudo realizar la acción.', () => {});
+      handleOpenModal("Error", "NO se pudo realizar la acción.", () => {});
     }
   };
 
   return (
     <DashboardMenu>
-    <Container maxWidth="lg">
-      <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-        <Typography variant="h4" gutterBottom>
-          Carrera
-        </Typography>
+      <div className="p-6">
+        <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
+          <Typography variant="h4" gutterBottom className="text-gray-800">
+            Carrera
+          </Typography>
 
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <TextField
-              label="Nombre"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              fullWidth
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <FormControl fullWidth>
-              <InputLabel id="tipo-label">Tipo</InputLabel>
-              <Select
-                labelId="tipo-label"
-                id="tipo-select"
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                label="Nombre"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                fullWidth
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                select
+                label="Tipo"
                 value={tipo}
                 onChange={(e) => setTipo(e.target.value as TipoCarrera)}
-              >
+                fullWidth
+                variant="outlined">
                 <MenuItem value="Pregrado">Pregrado</MenuItem>
                 <MenuItem value="Grado">Grado</MenuItem>
                 <MenuItem value="Posgrado">Posgrado</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Plan de Estudio"
-              value={planEstudio}
-              onChange={(e) => setPlanEstudio(e.target.value)}
-              fullWidth
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Sitio"
-              value={sitio}
-              onChange={(e) => setsitio(e.target.value)}
-              fullWidth
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <FormControl fullWidth margin="none">
-              <InputLabel id="demo-simple-select-label">Estado</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
+              </TextField>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Plan de Estudio"
+                value={planEstudio}
+                onChange={(e) => setPlanEstudio(e.target.value)}
+                fullWidth
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Sitio"
+                value={sitio}
+                onChange={(e) => setsitio(e.target.value)}
+                fullWidth
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                select
+                label="Estado"
                 value={estado}
-                label="Tipo"
                 onChange={(e) => setEstado(e.target.value)}
-              >
+                fullWidth
+                variant="outlined">
                 <MenuItem value={1}>Activo</MenuItem>
                 <MenuItem value={0}>Inactivo</MenuItem>
-              </Select>
-            </FormControl>
+              </TextField>
+            </Grid>
+            <Grid item xs={12} marginBottom={2}>
+              <button
+                onClick={crearNuevaCarrera}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
+                Crear
+              </button>
+            </Grid>
           </Grid>
-          <Grid item xs={12} marginBottom={2}>
-            <Button variant="contained" onClick={crearNuevaCarrera}>
-              Crear
-            </Button>
-          </Grid>
-        </Grid>
-        <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} onConfirm={fn} />
-      </Paper>
-    </Container>
+          <BasicModal
+            open={modalVisible}
+            onClose={handleCloseModal}
+            title={modalTitle}
+            content={modalMessage}
+            onConfirm={fn}
+          />
+        </Paper>
+      </div>
     </DashboardMenu>
   );
 };

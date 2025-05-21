@@ -2,9 +2,10 @@
 
 /* Define un estilo para las celdas de encabezado */
 .header-row {
-    background-color: #1976d2; /* Fondo celeste */
+    background-color: #2563eb; /* Color azul consistente con el resto de la aplicación */
   }
 
   .header-cell {
-    color: #ffff !important; /* Texto blanco */
+    color: #ffffff !important; /* Texto blanco */
+    font-weight: 500 !important;
   }

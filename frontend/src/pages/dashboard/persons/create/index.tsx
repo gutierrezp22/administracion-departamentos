@@ -105,10 +105,7 @@ const CrearPersona = () => {
   return (
     <DashboardMenu>
       <Container maxWidth="lg">
-        <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-          <Typography variant="h4" gutterBottom>
-            Personas
-          </Typography>
+                <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>          <Typography variant="h4" gutterBottom className="text-gray-800">            Personas          </Typography>
 
           <Grid container spacing={2}>
             <Grid item xs={12}>
@@ -168,11 +165,7 @@ const CrearPersona = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} marginBottom={2}>
-              <Button variant="contained" onClick={crearNuevaPersona}>
-                Crear
-              </Button>
-            </Grid>
+                        <Grid item xs={12} marginBottom={2}>              <button                onClick={crearNuevaPersona}                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">                Crear              </button>            </Grid>
           </Grid>
           <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} onConfirm={fn} />
         </Paper>

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import './styles.css';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+import "./styles.css";
+import axios from "axios";
 import {
   Container,
   Paper,
@@ -12,21 +12,20 @@ import {
   MenuItem,
   FormControl,
   Grid,
-} from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import dayjs from 'dayjs'; // Asegúrate de tener instalada esta dependencia
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-import BasicModal from '@/utils/modal';
-import Swal from 'sweetalert2';
-import { useRouter } from 'next/router'; // Importa useRouter de Next.js
-import DashboardMenu from '../..';
+} from "@mui/material";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from "dayjs"; // Asegúrate de tener instalada esta dependencia
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import BasicModal from "@/utils/modal";
+import Swal from "sweetalert2";
+import { useRouter } from "next/router"; // Importa useRouter de Next.js
+import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../utils/config";
-import API from '@/api/axiosConfig';
-
+import API from "@/api/axiosConfig";
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -47,19 +46,23 @@ const CrearResolucion = () => {
     // Otros campos según sea necesario
   }
 
-  const [nroExpediente, setNroExpediente] = useState('');
-  const [nroResolucion, setNroResolucion] = useState('');
-  const [tipo, setTipo] = useState('');
-  const [adjunto, setAdjunto] = useState('');
-  const [fechaCarga, setFechaCarga] = useState('');
+  const [nroExpediente, setNroExpediente] = useState("");
+  const [nroResolucion, setNroResolucion] = useState("");
+  const [tipo, setTipo] = useState("");
+  const [adjunto, setAdjunto] = useState("");
+  const [fechaCarga, setFechaCarga] = useState("");
   const [fecha, setFecha] = useState<dayjs.Dayjs | null>(null);
-  const [estado, setEstado] = useState('');
+  const [estado, setEstado] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
-  const [modalTitle, setModalTitle] = useState('');
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalTitle, setModalTitle] = useState("");
   const [fn, setFn] = useState(() => () => {});
 
-  const handleOpenModal = (title: string, message: string, onConfirm: () => void) => {
+  const handleOpenModal = (
+    title: string,
+    message: string,
+    onConfirm: () => void
+  ) => {
     setModalTitle(title); // Establecer el título del modal
     setModalMessage(message);
     setModalVisible(true);
@@ -68,20 +71,20 @@ const CrearResolucion = () => {
 
   const handleCloseModal = () => {
     setModalVisible(false);
-    setModalMessage('');
+    setModalMessage("");
   };
 
   const handleConfirmModal = () => {
-    router.push('/dashboard/resoluciones/'); // Navegar a la lista de resoluciones
+    router.push("/dashboard/resoluciones/"); // Navegar a la lista de resoluciones
   };
 
   const crearNuevaResolucion = async () => {
     const nuevaResolucion = {
       nexpediente: nroExpediente,
       nresolucion: nroResolucion,
-      tipo: tipo || '',
+      tipo: tipo || "",
       adjunto: adjunto,
-      observaciones: '', // Puedes asignar el valor que corresponda
+      observaciones: "", // Puedes asignar el valor que corresponda
       fechadecarga: new Date(), // Usamos la fecha actual
       fecha: fecha ? fecha.toISOString() : null, // Convierte la fecha a formato ISO si existe
       estado: estado,
@@ -89,20 +92,23 @@ const CrearResolucion = () => {
 
     try {
       const response = await API.post(`/facet/resolucion/`, nuevaResolucion);
-      handleOpenModal('Éxito', 'Se creó la resolución con éxito.', handleConfirmModal);
+      handleOpenModal(
+        "Éxito",
+        "Se creó la resolución con éxito.",
+        handleConfirmModal
+      );
     } catch (error) {
-      handleOpenModal('Error', 'NO se pudo realizar la acción.', () => {});
+      handleOpenModal("Error", "NO se pudo realizar la acción.", () => {});
     }
   };
 
   return (
     <DashboardMenu>
     <Container maxWidth="lg">
-      <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-        <Typography variant="h4" gutterBottom>
+        <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
+          <Typography variant="h4" gutterBottom className="text-gray-800">
           Crear Resolución
         </Typography>
-
         {/* Agrega controles de entrada y botones para los filtros */}
         <Grid container spacing={2}>
           <Grid item xs={12}>
@@ -111,6 +117,7 @@ const CrearResolucion = () => {
               value={nroExpediente}
               onChange={(e) => setNroExpediente(e.target.value)}
               fullWidth
+                variant="outlined"
             />
           </Grid>
           <Grid item xs={12}>
@@ -119,24 +126,22 @@ const CrearResolucion = () => {
               value={nroResolucion}
               onChange={(e) => setNroResolucion(e.target.value)}
               fullWidth
+                variant="outlined"
             />
           </Grid>
           <Grid item xs={12}>
-            <FormControl fullWidth margin="none">
-              <InputLabel id="demo-simple-select-label">Tipo</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={tipo}
+              <TextField
+                select
+                fullWidth
                 label="Tipo"
+                value={tipo}
                 onChange={(e) => setTipo(e.target.value)}
-              >
-                <MenuItem value={"Rector"}>Rector</MenuItem>
-                <MenuItem value={"Decano"}>Decano</MenuItem>
-                <MenuItem value={"Consejo_Superior"}>Consejo Superior</MenuItem>
-                <MenuItem value={"Consejo_Directivo"}>Consejo Directivo</MenuItem>
-              </Select>
-            </FormControl>
+                variant="outlined">
+                <MenuItem value="Rector">Rector</MenuItem>
+                <MenuItem value="Decano">Decano</MenuItem>
+                <MenuItem value="Consejo_Superior">Consejo Superior</MenuItem>
+                <MenuItem value="Consejo_Directivo">Consejo Directivo</MenuItem>
+              </TextField>
           </Grid>
           <Grid item xs={12}>
             <TextField
@@ -144,22 +149,20 @@ const CrearResolucion = () => {
               value={adjunto}
               onChange={(e) => setAdjunto(e.target.value)}
               fullWidth
+                variant="outlined"
             />
           </Grid>
           <Grid item xs={12}>
-            <FormControl fullWidth margin="none">
-              <InputLabel id="demo-simple-select-label">Estado</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={estado}
+              <TextField
+                select
+                fullWidth
                 label="Estado"
+                value={estado}
                 onChange={(e) => setEstado(e.target.value)}
-              >
-                <MenuItem value={1}>Activo</MenuItem>
-                <MenuItem value={0}>Inactivo</MenuItem>
-              </Select>
-            </FormControl>
+                variant="outlined">
+                <MenuItem value="1">Activo</MenuItem>
+                <MenuItem value="0">Inactivo</MenuItem>
+              </TextField>
           </Grid>
           <Grid item xs={12} marginBottom={2}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -172,16 +175,52 @@ const CrearResolucion = () => {
                     setFecha(fechaSeleccionada);
                   }
                 }}
+                  slotProps={{
+                    textField: { fullWidth: true, variant: "outlined" },
+                  }}
               />
             </LocalizationProvider>
           </Grid>
           <Grid item xs={12} marginBottom={2}>
-            <Button variant="contained" onClick={crearNuevaResolucion}>
+              <button
+                onClick={crearNuevaResolucion}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
               Crear
-            </Button>
+              </button>
+            </Grid>
           </Grid>
-        </Grid>
-        <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} onConfirm={fn} />
+          {modalVisible && (
+            <div
+              className="fixed inset-0 flex items-center justify-center z-[10000]"
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+              }}>
+              <div className="fixed inset-0 bg-black opacity-50"></div>
+              <div className="bg-white rounded-lg shadow-xl p-6 w-96 z-[10001] relative">
+                <h3 className="text-xl font-bold text-center mb-2 text-gray-900">
+                  {modalTitle}
+                </h3>
+                <hr className="my-3 border-gray-200" />
+                <p className="text-gray-800 text-lg text-center mb-6 font-medium">
+                  {modalMessage}
+                </p>
+                <div className="flex justify-center">
+                  <button
+                    onClick={() => {
+                      handleCloseModal();
+                      fn();
+                    }}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md font-medium">
+                    OK
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
       </Paper>
     </Container>
     </DashboardMenu>

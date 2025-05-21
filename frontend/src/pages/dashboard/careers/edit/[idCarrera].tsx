@@ -1,17 +1,17 @@
-import { useEffect, useState } from 'react';
-import './styles.css';
-import axios from 'axios';
-import { Container, Typography, TextField, Button, InputLabel, Select, MenuItem, FormControl, Grid, Paper } from '@mui/material';
-import dayjs from 'dayjs'; // Asegúrate de tener instalada esta dependencia
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-import BasicModal from '@/utils/modal';
-import ModalConfirmacion from '@/utils/modalConfirmacion';
-import { useRouter } from 'next/router'; // Importa useRouter de Next.js
-import DashboardMenu from '../..';
-import withAuth from "../../../../components/withAut"; 
+import { useEffect, useState } from "react";
+import "./styles.css";
+import axios from "axios";
+import { Typography, TextField, Grid, Paper, MenuItem } from "@mui/material";
+import dayjs from "dayjs"; // Asegúrate de tener instalada esta dependencia
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import BasicModal from "@/utils/modal";
+import ModalConfirmacion from "@/utils/modalConfirmacion";
+import { useRouter } from "next/router"; // Importa useRouter de Next.js
+import DashboardMenu from "../..";
+import withAuth from "../../../../components/withAut";
 import { API_BASE_URL } from "../../../../utils/config";
-import API from '@/api/axiosConfig';
+import API from "@/api/axiosConfig";
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -22,8 +22,8 @@ const EditarCarrera: React.FC = () => {
   const { idCarrera } = router.query; // Obtenemos el idCarrera desde la ruta7
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
-  const [modalTitle, setModalTitle] = useState('');
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalTitle, setModalTitle] = useState("");
   const [confirmarEliminacion, setConfirmarEliminacion] = useState(false);
 
   const handleOpenModal = (title: string, message: string) => {
@@ -34,14 +34,14 @@ const EditarCarrera: React.FC = () => {
 
   const handleCloseModal = () => {
     setModalVisible(false);
-    setModalMessage('');
-    router.push('/dashboard/careers/'); // Usamos router.push para la navegación
+    setModalMessage("");
+    router.push("/dashboard/careers/"); // Usamos router.push para la navegación
   };
 
   const [modalOpen, setModalOpen] = useState(false);
   const closeModal = () => setModalOpen(false);
 
-  type TipoCarrera = 'Pregrado' | 'Grado' | 'Posgrado';
+  type TipoCarrera = "Pregrado" | "Grado" | "Posgrado";
 
   interface Carrera {
     idCarrera: number;
@@ -53,21 +53,24 @@ const EditarCarrera: React.FC = () => {
   }
 
   const [carrera, setCarrera] = useState<Carrera>();
-  const [nombre, setNombre] = useState('');
-  const [tipo, setTipo] = useState('');
-  const [planEstudio, setPlanEstudio] = useState('');
-  const [sitio, setsitio] = useState('');
-  const [estado, setEstado] = useState('');
+  const [nombre, setNombre] = useState("");
+  const [tipo, setTipo] = useState("");
+  const [planEstudio, setPlanEstudio] = useState("");
+  const [sitio, setsitio] = useState("");
+  const [estado, setEstado] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
-      if (idCarrera) { // Verificamos que idCarrera esté definido
+      if (idCarrera) {
+        // Verificamos que idCarrera esté definido
         try {
-          const response = await axios.get(`${API_BASE_URL}/facet/carrera/${idCarrera}/`);
+          const response = await axios.get(
+            `${API_BASE_URL}/facet/carrera/${idCarrera}/`
+          );
           const data = response.data;
           setCarrera(data);
         } catch (error) {
-          console.error('Error fetching data:', error);
+          console.error("Error fetching data:", error);
         }
       }
     };
@@ -95,30 +98,30 @@ const EditarCarrera: React.FC = () => {
     };
 
     try {
-      await API.put(`/facet/carrera/${idCarrera}/`);
-      handleOpenModal('Éxito', 'La acción se realizó con éxito.');
+      await API.put(`/facet/carrera/${idCarrera}/`, carreraEditada);
+      handleOpenModal("Éxito", "La acción se realizó con éxito.");
     } catch (error) {
-      console.error('Error al hacer la solicitud PUT:', error);
-      handleOpenModal('Error', 'NO se pudo realizar la acción.');
+      console.error("Error al hacer la solicitud PUT:", error);
+      handleOpenModal("Error", "NO se pudo realizar la acción.");
     }
   };
 
   const eliminarCarrera = async () => {
     try {
       await API.delete(`/facet/carrera/${idCarrera}/`);
-      handleOpenModal('Asignatura Eliminada', 'La acción se realizó con éxito.');
+      handleOpenModal("Carrera Eliminada", "La acción se realizó con éxito.");
     } catch (error) {
-      console.error('Error al hacer la solicitud DELETE:', error);
-      handleOpenModal('Error', 'NO se pudo realizar la acción.');
+      console.error("Error al hacer la solicitud DELETE:", error);
+      handleOpenModal("Error", "NO se pudo realizar la acción.");
     }
   };
 
   return (
     <DashboardMenu>
-      <Container maxWidth="lg">
-        <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-          <Typography variant="h4" gutterBottom>
-            Carreras
+      <div className="p-6">
+        <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
+          <Typography variant="h4" gutterBottom className="text-gray-800">
+            Editar Carrera
           </Typography>
 
           <Grid container spacing={2}>
@@ -128,22 +131,21 @@ const EditarCarrera: React.FC = () => {
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
                 fullWidth
+                variant="outlined"
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel id="tipo-label">Tipo</InputLabel>
-                <Select
-                  labelId="tipo-label"
-                  id="tipo-select"
-                  value={tipo}
-                  onChange={(e) => setTipo(e.target.value as TipoCarrera)}
-                >
-                  <MenuItem value="Pregrado">Pregrado</MenuItem>
-                  <MenuItem value="Grado">Grado</MenuItem>
-                  <MenuItem value="Posgrado">Posgrado</MenuItem>
-                </Select>
-              </FormControl>
+              <TextField
+                select
+                label="Tipo"
+                value={tipo}
+                onChange={(e) => setTipo(e.target.value as TipoCarrera)}
+                fullWidth
+                variant="outlined">
+                <MenuItem value="Pregrado">Pregrado</MenuItem>
+                <MenuItem value="Grado">Grado</MenuItem>
+                <MenuItem value="Posgrado">Posgrado</MenuItem>
+              </TextField>
             </Grid>
             <Grid item xs={12}>
               <TextField
@@ -151,6 +153,7 @@ const EditarCarrera: React.FC = () => {
                 value={planEstudio}
                 onChange={(e) => setPlanEstudio(e.target.value)}
                 fullWidth
+                variant="outlined"
               />
             </Grid>
             <Grid item xs={12}>
@@ -159,33 +162,41 @@ const EditarCarrera: React.FC = () => {
                 value={sitio}
                 onChange={(e) => setsitio(e.target.value)}
                 fullWidth
+                variant="outlined"
               />
             </Grid>
 
             <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel id="estado-label">Estado</InputLabel>
-                <Select
-                  labelId="estado-label"
-                  id="estado-select"
-                  value={estado}
-                  onChange={(e) => setEstado(e.target.value)}
-                >
-                  <MenuItem value="1">Activo</MenuItem>
-                  <MenuItem value="0">Inactivo</MenuItem>
-                </Select>
-              </FormControl>
+              <TextField
+                select
+                label="Estado"
+                value={estado}
+                onChange={(e) => setEstado(e.target.value)}
+                fullWidth
+                variant="outlined">
+                <MenuItem value="1">Activo</MenuItem>
+                <MenuItem value="0">Inactivo</MenuItem>
+              </TextField>
             </Grid>
-            <Grid item xs={12} marginBottom={2}>
-              <Button variant="contained" onClick={edicionCarrera}>
+            <Grid item xs={12} marginBottom={2} className="flex gap-4">
+              <button
+                onClick={edicionCarrera}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
                 Editar
-              </Button>
-              <Button onClick={() => setConfirmarEliminacion(true)} variant="contained" style={{ marginLeft: '8px' }} color='error'>
+              </button>
+              <button
+                onClick={() => setConfirmarEliminacion(true)}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
                 Eliminar
-              </Button>
+              </button>
             </Grid>
           </Grid>
-          <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} />
+          <BasicModal
+            open={modalVisible}
+            onClose={handleCloseModal}
+            title={modalTitle}
+            content={modalMessage}
+          />
           <ModalConfirmacion
             open={confirmarEliminacion}
             onClose={() => setConfirmarEliminacion(false)}
@@ -195,7 +206,7 @@ const EditarCarrera: React.FC = () => {
             }}
           />
         </Paper>
-      </Container>
+      </div>
     </DashboardMenu>
   );
 };
