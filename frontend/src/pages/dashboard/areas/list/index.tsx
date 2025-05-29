@@ -187,18 +187,17 @@ const ListaAreas = () => {
           <TableContainer component={Paper} className="mt-4">
             <Table>
               <TableHead>
-                <TableRow style={{ backgroundColor: "#3b82f6" }}>
-                  <TableCell style={{ color: "white", fontWeight: 500 }}>
+                <TableRow className="bg-blue-500">
+                  <TableCell className="header-cell font-medium">
                     Nombre
                   </TableCell>
-                  <TableCell style={{ color: "white", fontWeight: 500 }}>
+                  <TableCell className="header-cell font-medium">
                     Departamento
                   </TableCell>
-                  <TableCell style={{ color: "white", fontWeight: 500 }}>
+                  <TableCell className="header-cell font-medium">
                     Estado
                   </TableCell>
-                  <TableCell
-                    style={{ color: "white", fontWeight: 500 }}></TableCell>
+                  <TableCell className="header-cell font-medium"></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

@@ -261,36 +261,17 @@ const ListaAsignaturas = () => {
           <TableContainer component={Paper} className="mt-4">
             <Table>
               <TableHead>
-                <TableRow style={{ backgroundColor: "#3b82f6" }}>
-                  <TableCell style={{ color: "white", fontWeight: 500 }}>
-                    Codigo
-                  </TableCell>
-                  <TableCell style={{ color: "white", fontWeight: 500 }}>
-                    Nombre
-                  </TableCell>
-                  <TableCell style={{ color: "white", fontWeight: 500 }}>
-                    Modulo
-                  </TableCell>
-                  <TableCell style={{ color: "white", fontWeight: 500 }}>
-                    Programa
-                  </TableCell>
-                  <TableCell style={{ color: "white", fontWeight: 500 }}>
-                    Tipo
-                  </TableCell>
-                  <TableCell style={{ color: "white", fontWeight: 500 }}>
-                    Estado
-                  </TableCell>
-                  <TableCell style={{ color: "white", fontWeight: 500 }}>
-                    Area
-                  </TableCell>
-                  <TableCell style={{ color: "white", fontWeight: 500 }}>
-                    Departamento
-                  </TableCell>
-                  <TableCell style={{ color: "white", fontWeight: 500 }}>
-                    Docentes
-                  </TableCell>
-                  <TableCell
-                    style={{ color: "white", fontWeight: 500 }}></TableCell>
+                <TableRow className="bg-blue-500">
+                  <TableCell className="header-cell font-medium">Codigo</TableCell>
+                  <TableCell className="header-cell font-medium">Nombre</TableCell>
+                  <TableCell className="header-cell font-medium">Modulo</TableCell>
+                  <TableCell className="header-cell font-medium">Programa</TableCell>
+                  <TableCell className="header-cell font-medium">Tipo</TableCell>
+                  <TableCell className="header-cell font-medium">Estado</TableCell>
+                  <TableCell className="header-cell font-medium">Area</TableCell>
+                  <TableCell className="header-cell font-medium">Departamento</TableCell>
+                  <TableCell className="header-cell font-medium">Docentes</TableCell>
+                  <TableCell className="header-cell font-medium"></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
