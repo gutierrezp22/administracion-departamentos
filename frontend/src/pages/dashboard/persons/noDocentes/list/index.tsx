@@ -192,7 +192,7 @@ const ListaNoDocentes = () => {
           <TableContainer component={Paper} className="mt-4">
             <Table>
               <TableHead>
-                <TableRow className="bg-blue-500 text-white">
+                <TableRow className="bg-blue-500">
                   <TableCell className="text-white font-medium">
                     Nombre
                   </TableCell>

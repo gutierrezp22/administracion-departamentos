@@ -1,4 +1,5 @@
-from rest_framework import viewsets, filters
+from rest_framework import viewsets, filters, status
+from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import AllowAny
 from rest_framework.filters import SearchFilter
@@ -7,7 +8,7 @@ from ..serializers import DepartamentoSerializer
 
 class DepartamentoViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
-    queryset = Departamento.objects.all()
+    queryset = Departamento.objects.filter(estado='1')  # Solo objetos activos por defecto
     serializer_class = DepartamentoSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = {
@@ -15,10 +16,29 @@ class DepartamentoViewSet(viewsets.ModelViewSet):
         'telefono': ['icontains'], # Filtrar por teléfono que contiene el valor especificado
         'nombre': ['icontains'],   # Filtrar por nombre que contiene el valor especificado
     }
-    # filterset_fields = ['estado', 'telefono']  # Asegúrate de incluir 'telefono' aquí si no lo has hecho
-    # search_fields = ['nombre']  # Incluye 'telefono' como campo de búsqueda adicional
+    search_fields = ['nombre', 'telefono']
 
-    # filterset_fields = ['estado']  # Asegúrate de que el campo 'estado' sea incluido aquí
-    # filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    # filterset_fields = ['nombre']
-    # search_fields = ['nombre']
+    def destroy(self, request, *args, **kwargs):
+        """Soft delete: cambia el estado a '0' en lugar de eliminar físicamente"""
+        instance = self.get_object()
+        instance.estado = '0'  # Marcar como inactivo
+        instance.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get_queryset(self):
+        """
+        Permite obtener todos los objetos (incluyendo inactivos) si se especifica el parámetro 'show_all'
+        o si se filtra explícitamente por estado
+        """
+        queryset = Departamento.objects.all()
+        
+        # Si se especifica show_all, mostrar todos
+        if self.request.query_params.get('show_all', False):
+            return queryset
+            
+        # Si se filtra explícitamente por estado, no aplicar filtro automático
+        if 'estado' in self.request.query_params:
+            return queryset
+            
+        # Por defecto, mostrar solo activos
+        return queryset.filter(estado='1')

@@ -1,18 +1,17 @@
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import AllowAny
 from ..models import Jefe
 from ..serializers import JefeSerializer
-from rest_framework import status
 
 
 
 class JefeViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
-    queryset = Jefe.objects.all()
+    queryset = Jefe.objects.filter(estado='1')  # Solo objetos activos por defecto
     serializer_class = JefeSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = {
@@ -22,6 +21,31 @@ class JefeViewSet(viewsets.ModelViewSet):
         'persona__nombre': ['icontains'],
         'persona__dni': ['icontains'],
     }
+
+    def destroy(self, request, *args, **kwargs):
+        """Soft delete: cambia el estado a '0' en lugar de eliminar físicamente"""
+        instance = self.get_object()
+        instance.estado = '0'  # Marcar como inactivo
+        instance.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get_queryset(self):
+        """
+        Permite obtener todos los objetos (incluyendo inactivos) si se especifica el parámetro 'show_all'
+        o si se filtra explícitamente por estado
+        """
+        queryset = Jefe.objects.select_related('persona').all()
+        
+        # Si se especifica show_all, mostrar todos
+        if self.request.query_params.get('show_all', False):
+            return queryset
+            
+        # Si se filtra explícitamente por estado, no aplicar filtro automático
+        if 'estado' in self.request.query_params:
+            return queryset
+            
+        # Por defecto, mostrar solo activos
+        return queryset.filter(estado='1')
 
     @action(detail=False, methods=['get'], url_path='list_jefes_persona')
     def list_jefes_persona(self, request):
