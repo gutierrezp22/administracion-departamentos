@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, filters, status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import AllowAny
 from rest_framework.filters import SearchFilter
@@ -21,23 +21,47 @@ class StandardResultsSetPagination(PageNumberPagination):
 
 class JefeDepartamentoViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
-    queryset = JefeDepartamento.objects.all()
+    queryset = JefeDepartamento.objects.filter(estado='1')  # Solo objetos activos por defecto
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = {
-        'jefe__persona__estado': ['exact'],
-        'jefe__persona__legajo': ['icontains'],
+        'estado': ['exact'],
+        'departamento__nombre': ['icontains'],
         'jefe__persona__apellido': ['icontains'],
         'jefe__persona__nombre': ['icontains'],
-        'jefe__persona__dni': ['icontains'],
-        'departamento__nombre': ['icontains'],
         'resolucion__nresolucion': ['icontains'],
     }
+    search_fields = ['departamento__nombre', 'jefe__persona__apellido', 'jefe__persona__nombre']
 
     def get_serializer_class(self):
-        if self.request and self.request.method in ['POST', 'PUT', 'PATCH']:
-            return JefeDepartamentoCreateSerializer
+        if self.request and self.request.method:
+            if self.request.method in ['POST', 'PUT', 'PATCH']:
+                return JefeDepartamentoCreateSerializer
         return JefeDepartamentoDetailSerializer
 
+    def destroy(self, request, *args, **kwargs):
+        """Soft delete: cambia el estado a '0' en lugar de eliminar físicamente"""
+        instance = self.get_object()
+        instance.estado = '0'  # Marcar como inactivo
+        instance.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get_queryset(self):
+        """
+        Permite obtener todos los objetos (incluyendo inactivos) si se especifica el parámetro 'show_all'
+        o si se filtra explícitamente por estado
+        """
+        queryset = JefeDepartamento.objects.select_related('departamento', 'jefe__persona', 'resolucion').all()
+        
+        # Si se especifica show_all, mostrar todos
+        if self.request.query_params.get('show_all', False):
+            return queryset
+            
+        # Si se filtra explícitamente por estado, no aplicar filtro automático
+        if 'estado' in self.request.query_params:
+            return queryset
+            
+        # Por defecto, mostrar solo activos
+        return queryset.filter(estado='1')
 
     @action(detail=False, methods=['get'], url_path='list_detalle')
     def list_detalle(self, request):

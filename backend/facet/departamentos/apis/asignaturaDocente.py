@@ -1,9 +1,9 @@
-from rest_framework import viewsets, filters
+from rest_framework import viewsets, filters, status
+from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import AllowAny
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
-from rest_framework.response import Response
 from ..models import AsignaturaDocente
 from datetime import datetime, timedelta
 from django.utils.timezone import now
@@ -11,10 +11,11 @@ from ..serializers import AsignaturaDocenteSerializer, AsignaturaDocenteCreateSe
 
 class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
-    queryset = AsignaturaDocente.objects.all()
+    queryset = AsignaturaDocente.objects.filter(estado='1')  # Solo objetos activos por defecto
     serializer_class = AsignaturaDocenteSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = {
-        'docente__persona__estado': ['exact'],
+        'estado': ['exact'],
         'docente__persona__legajo': ['icontains'],
         'docente__persona__apellido': ['icontains'],
         'docente__persona__nombre': ['icontains'],
@@ -22,6 +23,7 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
         'asignatura__nombre': ['icontains'],
         'resolucion__nresolucion': ['icontains'],
     }
+    search_fields = ['docente__persona__nombre', 'docente__persona__apellido', 'asignatura__nombre']
 
     def get_serializer_class(self):
         # Verificar si la solicitud está disponible
@@ -29,6 +31,31 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
             if self.request.method in ['POST', 'PUT', 'PATCH']:
                 return AsignaturaDocenteCreateSerializer
         return AsignaturaDocenteDetailSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        """Soft delete: cambia el estado a '0' en lugar de eliminar físicamente"""
+        instance = self.get_object()
+        instance.estado = '0'  # Marcar como inactivo
+        instance.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get_queryset(self):
+        """
+        Permite obtener todos los objetos (incluyendo inactivos) si se especifica el parámetro 'show_all'
+        o si se filtra explícitamente por estado
+        """
+        queryset = AsignaturaDocente.objects.select_related('docente__persona', 'asignatura', 'resolucion').all()
+        
+        # Si se especifica show_all, mostrar todos
+        if self.request.query_params.get('show_all', False):
+            return queryset
+            
+        # Si se filtra explícitamente por estado, no aplicar filtro automático
+        if 'estado' in self.request.query_params:
+            return queryset
+            
+        # Por defecto, mostrar solo activos
+        return queryset.filter(estado='1')
     
     @action(detail=False, methods=['get'], url_path='list_detalle')
     def list_detalle(self, request):
@@ -39,6 +66,10 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
         queryset = AsignaturaDocente.objects.select_related(
             'docente__persona', 'asignatura', 'resolucion'
         ).filter(asignatura__id=request.query_params.get('asignatura'))
+
+        # Aplicar filtro de estado si no se especifica show_all
+        if not request.query_params.get('show_all', False):
+            queryset = queryset.filter(estado='1')
 
         data = [
             {
@@ -79,6 +110,10 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
             fecha_de_vencimiento__lte=fecha_limite,
             fecha_de_vencimiento__gte=now()
         )
+
+        # Aplicar filtro de estado si no se especifica show_all
+        if not request.query_params.get('show_all', False):
+            queryset = queryset.filter(estado='1')
 
         data = [
             {
