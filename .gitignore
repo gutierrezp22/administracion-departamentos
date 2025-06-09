@@ -1,12 +1,70 @@
-# Entorno virtual python
-backend/facet/venv/*
-backend/facet/adminitracion/.env
+# 🔐 Archivos de configuración sensibles
+*.env
+.env
+.env.*
+!.env.example
+!.env.template
 
-# Byte-compiled / optimized
+# 🐍 Entorno virtual Python
+backend/facet/venv/
+venv/
+env/
+ENV/
+
+# 📦 Dependencias Node.js
+frontend/node_modules/
+node_modules/
+
+# 🗃️ Archivos compilados Python
 __pycache__/
-# Migraciones
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-#frontend
-frontend/node_modules
-backend/facet/administracion/.env
-backend/facet/administracion/.env
+# 🗄️ Base de datos
+*.db
+*.sqlite3
+db.sqlite3
+
+# 📝 Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 🔧 IDEs y editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 📱 Sistema operativo
+.DS_Store
+Thumbs.db
+
+# 🔄 Migraciones (opcional - descomentar si no quieres versionar migraciones)
+# */migrations/*.py
+# !*/migrations/__init__.py
+
+# 🚀 Build del frontend
+frontend/.next/
+frontend/out/
+frontend/dist/

@@ -29,6 +29,9 @@ INSTALLED_APPS = [
     'django_filters',
     "coreapi",
     "multiselectfield",
+    # Celery apps
+    "django_celery_beat",
+    "django_celery_results",
 ]
 
 MIDDLEWARE = [
@@ -269,9 +272,66 @@ SECURE_SSL_REDIRECT = False  # Asegúrate de que no redirija innecesariamente
 
 # 📌 Configuración del Correo
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.environ["EMAIL_HOST"]  # Se asume que está definida en el entorno
-EMAIL_PORT = int(os.environ["EMAIL_PORT"])  # Convertir a entero
-EMAIL_USE_TLS = os.environ["EMAIL_USE_TLS"].lower() == "true"  # Convertir a booleano
-EMAIL_HOST_USER = os.environ["EMAIL_HOST_USER"]
-EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
-DEFAULT_FROM_EMAIL = os.environ["DEFAULT_FROM_EMAIL"]
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "true").lower() == "true"
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@facet.unt.edu.ar")
+
+# Configuración adicional para evitar SPAM
+EMAIL_USE_SSL = False  # Usar TLS en lugar de SSL
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+ADMINS = [('Admin', DEFAULT_FROM_EMAIL)]
+
+# 🚀 Configuración de Celery
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_ENABLE_UTC = True
+
+# Configuración de serialización
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_RESULT_SERIALIZER = 'json'
+
+# Configuración de resultados
+CELERY_RESULT_EXPIRES = 3600  # 1 hora
+CELERY_TASK_RESULT_EXPIRES = 3600
+
+# Configuración de reintentos
+CELERY_TASK_ACKS_LATE = True
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+
+# Configuración de Beat (tareas programadas)
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+# Configuración de logging para Celery
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'celery': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'departamentos.tasks': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
