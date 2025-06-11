@@ -160,7 +160,7 @@ const ListaDepartamentosJefe = () => {
     setCurrentUrl(newUrl);
   };
 
-  // ✅ Función para enviar notificación manualmente
+  // ✅ Función para enviar notificación manualmente con Celery
   const enviarNotificacion = async (id: number, email: string) => {
     try {
       // ✅ Confirmación antes de enviar la notificación
@@ -171,6 +171,14 @@ const ListaDepartamentosJefe = () => {
         showCancelButton: true,
         confirmButtonText: "Sí, enviar",
         cancelButtonText: "Cancelar",
+        confirmButtonColor: "#3b82f6",
+        cancelButtonColor: "#6b7280",
+        background: "#ffffff",
+        color: "#1f2937",
+        customClass: {
+          confirmButton: "swal-confirm-btn",
+          cancelButton: "swal-cancel-btn",
+        },
       });
 
       if (!confirmacion.isConfirmed) {
@@ -179,8 +187,8 @@ const ListaDepartamentosJefe = () => {
 
       // ✅ Mostrar modal de carga
       Swal.fire({
-        title: "Enviando notificación...",
-        text: "Por favor, espera mientras se envía la notificación.",
+        title: "Programando notificación...",
+        text: "La notificación se está programando para envío.",
         allowOutsideClick: false,
         allowEscapeKey: false,
         didOpen: () => {
@@ -188,29 +196,58 @@ const ListaDepartamentosJefe = () => {
         },
       });
 
-      // ✅ Enviar la notificación
-      await axios.post(
+      // ✅ Enviar la notificación usando Celery
+      const response = await axios.post(
         `${API_BASE_URL}/facet/notificacion/crear_notificacion/`,
         {
           persona_id: id,
-          mensaje: `Atención: Su cargo en el departamento está próximo a vencer. Debe acercarse al área de Personal con la documentación necesaria para su renovación.`,
+          mensaje: `Estimado/a usuario/a,
+
+Atención: Su cargo en el departamento está próximo a vencer. 
+
+Para renovar su cargo, debe acercarse al área de Personal con la documentación necesaria.
+
+Gracias por su atención.
+
+Área de Personal`,
         }
       );
 
-      // ✅ Mostrar confirmación cuando se complete
+      // ✅ Mostrar confirmación de que la tarea fue programada
       Swal.fire({
         icon: "success",
-        title: "Notificación enviada",
-        text: `Se envió un correo a ${email}`,
+        title: "Notificación programada",
+        text: `La notificación a ${email} está siendo procesada en segundo plano.`,
+        showConfirmButton: true,
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#22c55e",
+        background: "#ffffff",
+        color: "#1f2937",
+        customClass: {
+          confirmButton: "swal-success-btn",
+        },
       });
-    } catch (error) {
+
+      // 🔄 Recargar la página para mostrar el estado actualizado
+      setTimeout(() => {
+        fetchData(currentUrl);
+      }, 1000);
+    } catch (error: any) {
       console.error("Error enviando notificación:", error);
 
       // ❌ Mostrar error en caso de fallo
+      const errorMessage =
+        error.response?.data?.error || "No se pudo programar la notificación.";
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "No se pudo enviar la notificación.",
+        text: errorMessage,
+        confirmButtonColor: "#ef4444",
+        background: "#ffffff",
+        color: "#1f2937",
+        customClass: {
+          confirmButton: "swal-error-btn",
+        },
       });
     }
   };
@@ -219,11 +256,19 @@ const ListaDepartamentosJefe = () => {
     try {
       const confirmacion = await Swal.fire({
         title: "¿Reenviar notificación?",
-        text: `Esta persona ya fue notificada. ¿Quieres enviarla de nuevo?`,
+        text: `Esta persona ya fue notificada. ¿Quieres programar el envío de nuevo?`,
         icon: "question",
         showCancelButton: true,
         confirmButtonText: "Sí, reenviar",
         cancelButtonText: "Cancelar",
+        confirmButtonColor: "#3b82f6",
+        cancelButtonColor: "#6b7280",
+        background: "#ffffff",
+        color: "#1f2937",
+        customClass: {
+          confirmButton: "swal-confirm-btn",
+          cancelButton: "swal-cancel-btn",
+        },
       });
 
       if (!confirmacion.isConfirmed) {
@@ -430,29 +475,29 @@ const ListaDepartamentosJefe = () => {
           <TableContainer component={Paper} className="mt-4">
             <Table>
               <TableHead>
-                <TableRow className="bg-blue-500 text-white">
-                  <TableCell className="text-white font-medium">
+                <TableRow style={{ backgroundColor: "#3b82f6" }}>
+                  <TableCell style={{ color: "white", fontWeight: "500" }}>
                     Nombre
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell style={{ color: "white", fontWeight: "500" }}>
                     Apellido
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell style={{ color: "white", fontWeight: "500" }}>
                     Departamento
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell style={{ color: "white", fontWeight: "500" }}>
                     Resolución
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell style={{ color: "white", fontWeight: "500" }}>
                     Fecha de Inicio
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell style={{ color: "white", fontWeight: "500" }}>
                     Fecha de Fin
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell style={{ color: "white", fontWeight: "500" }}>
                     Estado
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell style={{ color: "white", fontWeight: "500" }}>
                     Acciones
                   </TableCell>
                 </TableRow>

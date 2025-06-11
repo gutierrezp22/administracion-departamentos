@@ -1,0 +1,38 @@
+# Configuración de Base de Datos
+DB_NAME=your_database_name
+DB_USER=your_database_user
+DB_PASSWORD=your_database_password
+DB_HOST=localhost
+DB_PORT=5432
+
+# Clave secreta de Django
+SECRET_KEY=your-super-secret-key-here
+
+# Entorno de ejecución
+ENVIRONMENT=development
+
+# 📧 Configuración de Email para evitar SPAM
+# Para Gmail - Configuración recomendada
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=true
+EMAIL_HOST_USER=your-email@gmail.com
+EMAIL_HOST_PASSWORD=your-app-password  # Usar contraseña de aplicación, NO la contraseña normal
+DEFAULT_FROM_EMAIL=Sistema FACET <your-email@gmail.com>
+
+# Para otros proveedores:
+# Outlook/Hotmail
+# EMAIL_HOST=smtp-mail.outlook.com
+# EMAIL_PORT=587
+
+# Yahoo
+# EMAIL_HOST=smtp.mail.yahoo.com
+# EMAIL_PORT=587
+
+# 🚀 Configuración de Celery
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/0
+
+# 🔐 Configuración de reCAPTCHA (opcional)
+RECAPTCHA_PUBLIC_KEY=your-recaptcha-public-key
+RECAPTCHA_PRIVATE_KEY=your-recaptcha-private-key 

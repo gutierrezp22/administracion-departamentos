@@ -5,7 +5,6 @@ export default function Document() {
     <Html>
       <Head>
         <link rel="icon" href="/logoFACET.png" />
-        <title>FACET - Administración de Departamentos</title>
       </Head>
       <body>
         <Main />
