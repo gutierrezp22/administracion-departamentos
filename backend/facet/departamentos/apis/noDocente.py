@@ -14,6 +14,7 @@ class NoDocenteViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = {
         'estado': ['exact'],       # Filtrar por estado exacto (0 o 1)
+        'persona': ['exact'],      # Filtrar por ID de persona exacto
         'persona__legajo': ['icontains'],
         'persona__apellido': ['icontains'],
         'persona__nombre': ['icontains'],

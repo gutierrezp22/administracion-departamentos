@@ -125,18 +125,22 @@ const CrearNoDocente = () => {
     };
 
     try {
-      const response = await axios.get(`${API_BASE_URL}/facet/nodocente/`);
-      const existe = response.data.results.some(
-        (nodocente: any) => nodocente.persona === persona?.id
-      );
+      // Busca si ya existe un no docente asociado a esta persona (incluye activos e inactivos)
+      const response = await axios.get(`${API_BASE_URL}/facet/nodocente/`, {
+        params: {
+          persona: persona?.id, // Filtrar por ID de la persona
+          show_all: true, // Incluir todos los estados para validación completa
+        },
+      });
 
-      if (existe) {
+      // Si hay resultados, significa que ya existe un no docente
+      if (response.data.results.length > 0) {
         handleOpenModal(
           "Error",
-          "Ya existe no docente para esta persona",
+          "Ya existe un no docente para esta persona",
           () => {}
         );
-        return;
+        return; // Detenemos la ejecución
       }
 
       await API.post(`/facet/nodocente/`, nuevoNoDocente);

@@ -13,42 +13,30 @@ import {
   Paper,
   TextField,
   Button,
-  FormControl,
   InputLabel,
   Select,
   MenuItem,
+  FormControl,
   Grid,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import Link from "next/link";
-import DashboardMenu from "../../../../dashboard";
+import Swal from "sweetalert2";
+import { useRouter } from "next/router";
+import DashboardMenu from "../../..";
 import withAuth from "../../../../../components/withAut";
 import { API_BASE_URL } from "../../../../../utils/config";
-import { useRouter } from "next/router";
+import {
+  FilterContainer,
+  FilterInput,
+  EstadoFilter,
+} from "../../../../../components/Filters";
 
 const ListaDocentes = () => {
-  const router = useRouter();
-
-  const h1Style = {
-    color: "black",
-  };
-
-  interface Persona {
-    id: number;
-    nombre: string;
-    apellido: string;
-    telefono: string;
-    dni: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    email: string;
-    interno: string;
-    legajo: string;
-  }
-
   interface Docente {
     id: number;
     persona: number;
@@ -57,29 +45,29 @@ const ListaDocentes = () => {
       nombre: string;
       apellido: string;
       dni: string;
-      email: string;
-      telefono: string;
       legajo: string;
+      telefono: string;
+      email: string;
     };
-    observaciones: string;
-    estado: 0 | 1 | "0" | "1"; // Puede ser cadena o número según lo que devuelva el backend.
+    estado: string;
   }
 
   const [docentes, setDocentes] = useState<Docente[]>([]);
-  const [personas, setPersonas] = useState<Persona[]>([]);
-  const [filtroDni, setFiltroDni] = useState("");
   const [filtroNombre, setFiltroNombre] = useState("");
   const [filtroApellido, setFiltroApellido] = useState("");
+  const [filtroDni, setFiltroDni] = useState("");
   const [filtroLegajo, setFiltroLegajo] = useState("");
-  const [filtroEstado, setFiltroEstado] = useState<string | number>("");
+  const [filtroEstado, setFiltroEstado] = useState<string>("1");
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>(
-    `${API_BASE_URL}/facet/docente/`
+    `${API_BASE_URL}/facet/docente/?estado=1`
   );
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
+
+  const router = useRouter();
 
   useEffect(() => {
     fetchData(currentUrl);
@@ -92,14 +80,12 @@ const ListaDocentes = () => {
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
       setTotalItems(response.data.count);
-      setCurrentPage(1);
-
-      const personasResponse = await axios.get(
-        `${API_BASE_URL}/facet/persona/`
-      );
-      setPersonas(personasResponse.data.results);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Error al obtener los datos.",
+      });
     }
   };
 
@@ -112,7 +98,9 @@ const ListaDocentes = () => {
     if (filtroDni !== "") {
       params.append("persona__dni__icontains", filtroDni);
     }
-    if (filtroEstado !== "") {
+    if (filtroEstado === "todos") {
+      params.append("show_all", "true");
+    } else if (filtroEstado !== "" && filtroEstado !== "todos") {
       params.append("estado", filtroEstado.toString());
     }
     if (filtroApellido !== "") {
@@ -125,42 +113,93 @@ const ListaDocentes = () => {
     setCurrentUrl(url);
   };
 
-  const exportToExcel = async () => {
+  const limpiarFiltros = () => {
+    setFiltroNombre("");
+    setFiltroApellido("");
+    setFiltroDni("");
+    setFiltroLegajo("");
+    setFiltroEstado("1");
+    setCurrentUrl(`${API_BASE_URL}/facet/docente/?estado=1`);
+  };
+
+  const descargarExcel = async () => {
     try {
       let allDocentes: Docente[] = [];
-      let url = `${API_BASE_URL}/facet/docente/`; // Asegúrate de que la URL sea correcta
+      let url = `${API_BASE_URL}/facet/docente/?`;
+      const params = new URLSearchParams();
 
-      // Fetch all pages of docentes
+      if (filtroNombre !== "")
+        params.append("persona__nombre__icontains", filtroNombre);
+      if (filtroApellido !== "")
+        params.append("persona__apellido__icontains", filtroApellido);
+      if (filtroDni !== "") params.append("persona__dni__icontains", filtroDni);
+      if (filtroLegajo !== "")
+        params.append("persona__legajo__icontains", filtroLegajo);
+      if (filtroEstado === "todos") {
+        params.append("show_all", "true");
+      } else if (filtroEstado !== "" && filtroEstado !== "todos") {
+        params.append("estado", filtroEstado.toString());
+      }
+      url += params.toString();
+
       while (url) {
         const response = await axios.get(url);
         const { results, next } = response.data;
         allDocentes = [...allDocentes, ...results];
-        url = next; // Update URL for the next page
+        url = next;
       }
 
-      const ws = XLSX.utils.json_to_sheet(
-        allDocentes.map((docente) => {
-          const persona = personas.find((p) => p.id === docente.persona);
-          return {
-            Nombre: persona?.nombre || "",
-            Apellido: persona?.apellido || "",
-            DNI: persona?.dni || "",
-            Legajo: persona?.legajo || "",
-            Observaciones: docente.observaciones,
-            Estado: docente.estado === 1 ? "Activo" : "Inactivo",
-          };
-        })
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(
+        allDocentes.map((docente) => ({
+          Nombre: docente.persona_detalle?.nombre || "N/A",
+          Apellido: docente.persona_detalle?.apellido || "N/A",
+          DNI: docente.persona_detalle?.dni || "N/A",
+          Legajo: docente.persona_detalle?.legajo || "N/A",
+          Teléfono: docente.persona_detalle?.telefono || "N/A",
+          Email: docente.persona_detalle?.email || "N/A",
+          Estado: docente.estado === "1" ? "Activo" : "Inactivo",
+        }))
       );
 
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Docentes");
-      const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-      saveAs(
-        new Blob([wbout], { type: "application/octet-stream" }),
-        "docentes.xlsx"
-      );
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Docentes");
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+      const excelBlob = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      saveAs(excelBlob, "docentes.xlsx");
     } catch (error) {
-      console.error("Error al exportar a Excel:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error al descargar",
+        text: "Se produjo un error al exportar los datos.",
+      });
+    }
+  };
+
+  const eliminarDocente = async (id: number) => {
+    try {
+      const result = await Swal.fire({
+        title: "¿Estás seguro?",
+        text: "Esta acción no se puede deshacer",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar",
+      });
+
+      if (result.isConfirmed) {
+        await axios.delete(`${API_BASE_URL}/facet/docente/${id}/`);
+        Swal.fire("Eliminado!", "El docente ha sido eliminado.", "success");
+        fetchData(currentUrl);
+      }
+    } catch (error) {
+      Swal.fire("Error!", "No se pudo eliminar el docente.", "error");
     }
   };
 
@@ -168,162 +207,177 @@ const ListaDocentes = () => {
 
   return (
     <DashboardMenu>
-      <div className="p-6">
-        <div className="flex flex-wrap gap-4 mb-6">
-          <button
-            onClick={() => router.push("/dashboard/persons/docentes/create")}
-            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-            <AddIcon /> Agregar Docente
-          </button>
-          <button
-            onClick={exportToExcel}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-            <FileDownloadIcon /> Descargar Excel
-          </button>
+      <div className="bg-white rounded-lg shadow-lg">
+        <div className="p-6 border-b border-gray-200">
+          <h1 className="text-2xl font-bold text-gray-800">Docentes</h1>
         </div>
 
-        <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
-          <Typography variant="h4" gutterBottom className="text-gray-800">
-            Docentes
-          </Typography>
+        <div className="p-6">
+          <div className="flex gap-4 mb-6">
+            <button
+              onClick={() => router.push("/dashboard/persons/docentes/create")}
+              className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+              <AddIcon /> Agregar Docente
+            </button>
+            <button
+              onClick={descargarExcel}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+              <FileDownloadIcon /> Descargar Excel
+            </button>
+          </div>
 
-          <Grid container spacing={2}>
-            <Grid item xs={4}>
-              <TextField
-                label="DNI"
-                value={filtroDni}
-                onChange={(e) => setFiltroDni(e.target.value)}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                label="Nombre"
-                value={filtroNombre}
-                onChange={(e) => setFiltroNombre(e.target.value)}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                label="Apellido"
-                value={filtroApellido}
-                onChange={(e) => setFiltroApellido(e.target.value)}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={4} marginBottom={2}>
-              <TextField
-                label="Legajo"
-                value={filtroLegajo}
-                onChange={(e) => setFiltroLegajo(e.target.value)}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={4} marginBottom={2}>
-              <TextField
-                select
-                fullWidth
-                label="Estado"
-                value={filtroEstado}
-                onChange={(e) => setFiltroEstado(e.target.value)}
-                variant="outlined"
-              >
-                <MenuItem value="">Todos</MenuItem>
-                <MenuItem value="0">Inactivo</MenuItem>
-                <MenuItem value="1">Activo</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={4} marginBottom={2}>
-              <button
-                onClick={filtrarDocentes}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                Filtrar
-              </button>
-            </Grid>
-          </Grid>
+          <FilterContainer onApply={filtrarDocentes} onClear={limpiarFiltros}>
+            <FilterInput
+              label="Nombre"
+              value={filtroNombre}
+              onChange={setFiltroNombre}
+              placeholder="Buscar por nombre"
+            />
+            <FilterInput
+              label="Apellido"
+              value={filtroApellido}
+              onChange={setFiltroApellido}
+              placeholder="Buscar por apellido"
+            />
+            <FilterInput
+              label="DNI"
+              value={filtroDni}
+              onChange={setFiltroDni}
+              placeholder="Buscar por DNI"
+            />
+            <FilterInput
+              label="Legajo"
+              value={filtroLegajo}
+              onChange={setFiltroLegajo}
+              placeholder="Buscar por legajo"
+            />
+            <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
+          </FilterContainer>
 
-          <TableContainer component={Paper} className="mt-4">
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <Table>
               <TableHead>
                 <TableRow className="bg-blue-500">
-                  <TableCell className="text-white font-medium">
+                  <TableCell className="text-white font-semibold">
                     Nombre
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell className="text-white font-semibold">
                     Apellido
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell className="text-white font-semibold">
                     DNI
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell className="text-white font-semibold">
                     Legajo
                   </TableCell>
-                  <TableCell className="text-white font-medium">
-                    Observaciones
+                  <TableCell className="text-white font-semibold">
+                    Teléfono
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell className="text-white font-semibold">
+                    Email
+                  </TableCell>
+                  <TableCell className="text-white font-semibold">
+                    Interno
+                  </TableCell>
+                  <TableCell className="text-white font-semibold">
                     Estado
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell className="text-white font-semibold">
                     Acciones
                   </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {docentes.map((docente) => {
-                  const { persona_detalle: persona } = docente;
-
-                  return (
-                    <TableRow key={docente.id} className="hover:bg-gray-50">
-                      <TableCell>{persona.nombre}</TableCell>
-                      <TableCell>{persona.apellido}</TableCell>
-                      <TableCell>{persona.dni}</TableCell>
-                      <TableCell>{persona.legajo}</TableCell>
-                      <TableCell>{docente.observaciones}</TableCell>
-                      <TableCell>{docente.estado == 1 ? 'Activo' : 'Inactivo'}</TableCell>
-                      <TableCell>
+                {docentes.map((docente) => (
+                  <TableRow key={docente.id} className="hover:bg-gray-50">
+                    <TableCell
+                      className="text-gray-800"
+                      style={{ color: "#1f2937" }}>
+                      {docente.persona_detalle?.nombre || "N/A"}
+                    </TableCell>
+                    <TableCell
+                      className="text-gray-800"
+                      style={{ color: "#1f2937" }}>
+                      {docente.persona_detalle?.apellido || "N/A"}
+                    </TableCell>
+                    <TableCell
+                      className="text-gray-800"
+                      style={{ color: "#1f2937" }}>
+                      {docente.persona_detalle?.dni || "N/A"}
+                    </TableCell>
+                    <TableCell
+                      className="text-gray-800"
+                      style={{ color: "#1f2937" }}>
+                      {docente.persona_detalle?.legajo || "N/A"}
+                    </TableCell>
+                    <TableCell
+                      className="text-gray-800"
+                      style={{ color: "#1f2937" }}>
+                      {docente.persona_detalle?.telefono || "N/A"}
+                    </TableCell>
+                    <TableCell
+                      className="text-gray-800"
+                      style={{ color: "#1f2937" }}>
+                      {docente.persona_detalle?.email || "N/A"}
+                    </TableCell>
+                    <TableCell
+                      className="text-gray-800"
+                      style={{ color: "#1f2937" }}>
+                      N/A
+                    </TableCell>
+                    <TableCell
+                      className="text-gray-800"
+                      style={{ color: "#1f2937" }}>
+                      {docente.estado === "1" ? "Activo" : "Inactivo"}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
                         <button
-                          onClick={() => router.push(`/dashboard/persons/docentes/edit/${docente.id}`)}
-                          className="p-2 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-100 transition-colors duration-200">
+                          onClick={() =>
+                            router.push(
+                              `/dashboard/persons/docentes/edit/${docente.id}`
+                            )
+                          }
+                          className="p-2 text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-100 transition-colors duration-200">
                           <EditIcon />
                         </button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                        <button
+                          onClick={() => eliminarDocente(docente.id)}
+                          className="p-2 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-100 transition-colors duration-200">
+                          <DeleteIcon />
+                        </button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
-          </TableContainer>
+          </div>
 
-          <div className="flex justify-between items-center mt-4">
+          <div className="flex justify-between items-center mt-6">
             <button
               onClick={() => {
                 prevUrl && setCurrentUrl(prevUrl);
                 setCurrentPage(currentPage - 1);
               }}
               disabled={!prevUrl}
-              className={`px-4 py-2 rounded-md ${
+              className={`px-4 py-2 rounded-lg font-medium ${
                 prevUrl
                   ? "bg-blue-500 text-white hover:bg-blue-600"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               } transition-colors duration-200`}>
               Anterior
             </button>
-            <Typography variant="body1">
+            <span className="text-gray-600">
               Página {currentPage} de {totalPages}
-            </Typography>
+            </span>
             <button
               onClick={() => {
                 nextUrl && setCurrentUrl(nextUrl);
                 setCurrentPage(currentPage + 1);
               }}
               disabled={!nextUrl}
-              className={`px-4 py-2 rounded-md ${
+              className={`px-4 py-2 rounded-lg font-medium ${
                 nextUrl
                   ? "bg-blue-500 text-white hover:bg-blue-600"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -331,7 +385,7 @@ const ListaDocentes = () => {
               Siguiente
             </button>
           </div>
-        </Paper>
+        </div>
       </div>
     </DashboardMenu>
   );

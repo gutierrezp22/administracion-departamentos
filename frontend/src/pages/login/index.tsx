@@ -21,15 +21,12 @@ export default function LoginPage() {
 
   // Comprobar si hay información guardada para "recordar" al usuario
   useEffect(() => {
-    console.log("Verificando localStorage...");
     const savedEmail = localStorage.getItem("rememberedEmail");
-    console.log("Email guardado:", savedEmail);
 
     if (savedEmail) {
       // Establecer el estado de email directamente
       setEmail(savedEmail);
       setRememberMe(true);
-      console.log("Email cargado:", savedEmail);
     }
   }, []);
 
@@ -38,8 +35,6 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      console.log("Iniciando sesión con:", { email, password });
-      console.log("¿Recordar?", rememberMe);
 
       const response = await axios.post(`${API_BASE_URL}/login/token/`, {
         email,
@@ -52,11 +47,9 @@ export default function LoginPage() {
 
       // Si el usuario marcó "Recuérdame", guardar el email en localStorage
       if (rememberMe) {
-        console.log("Guardando email en localStorage:", email);
         localStorage.setItem("rememberedEmail", email);
       } else {
         // Si no está marcado, eliminar cualquier email guardado previamente
-        console.log("Eliminando email del localStorage");
         localStorage.removeItem("rememberedEmail");
       }
 

@@ -3,13 +3,20 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import AllowAny
 from rest_framework.filters import SearchFilter
+from rest_framework.pagination import PageNumberPagination
 from ..models import Area
 from ..serializers import AreaSerializer
 
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
 class AreaViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
-    queryset = Area.objects.filter(estado='1')  # Solo objetos activos por defecto
+    queryset = Area.objects.select_related('departamento').filter(estado='1')  # Solo objetos activos por defecto
     serializer_class = AreaSerializer
+    pagination_class = StandardResultsSetPagination
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = {
         'estado': ['exact'],       # Filtrar por estado exacto (0 o 1)
@@ -29,7 +36,7 @@ class AreaViewSet(viewsets.ModelViewSet):
         Permite obtener todos los objetos (incluyendo inactivos) si se especifica el parámetro 'show_all'
         o si se filtra explícitamente por estado
         """
-        queryset = Area.objects.all()
+        queryset = Area.objects.select_related('departamento').all()
         
         # Si se especifica show_all, mostrar todos
         if self.request.query_params.get('show_all', False):

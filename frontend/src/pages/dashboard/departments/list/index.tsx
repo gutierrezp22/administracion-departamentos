@@ -29,12 +29,19 @@ import { useRouter } from "next/router"; // Importa useRouter de Next.js
 import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut"; // Importa el HOC
 import { API_BASE_URL } from "../../../../utils/config";
+import {
+  FilterContainer,
+  FilterInput,
+  EstadoFilter,
+} from "../../../../components/Filters";
+import Swal from "sweetalert2";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 interface Departamento {
   id: number;
   nombre: string;
   telefono: string;
-  estado: 0 | 1;
+  estado: string;
   interno: string;
 }
 
@@ -42,16 +49,16 @@ const ListaDepartamentos = () => {
   const router = useRouter(); // Usamos useRouter para manejar la navegación
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [filtroNombre, setFiltroNombre] = useState("");
-  const [filtroEstado, setFiltroEstado] = useState<string | number>("");
   const [filtroTelefono, setFiltroTelefono] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState<string>("1");
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>(
     `${API_BASE_URL}/facet/departamento/`
   );
   const [totalItems, setTotalItems] = useState<number>(0);
-  const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize] = useState<number>(10);
 
   useEffect(() => {
     fetchData(currentUrl);
@@ -65,7 +72,11 @@ const ListaDepartamentos = () => {
       setPrevUrl(response.data.previous);
       setTotalItems(response.data.count);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Error al obtener los datos.",
+      });
     }
   };
 
@@ -75,13 +86,46 @@ const ListaDepartamentos = () => {
     if (filtroNombre !== "") {
       params.append("nombre__icontains", filtroNombre);
     }
-    if (filtroEstado !== "") {
+    if (filtroEstado === "todos") {
+      params.append("show_all", "true");
+    } else if (filtroEstado !== "" && filtroEstado !== "todos") {
       params.append("estado", filtroEstado.toString());
     }
     if (filtroTelefono !== "") {
       params.append("telefono__icontains", filtroTelefono);
     }
+    params.append("page", "1");
     url += params.toString();
+    setCurrentPage(1);
+    setCurrentUrl(url);
+  };
+
+  const limpiarFiltros = () => {
+    setFiltroNombre("");
+    setFiltroTelefono("");
+    setFiltroEstado("1");
+  };
+
+  const handlePageChange = (newPage: number) => {
+    let url = `${API_BASE_URL}/facet/departamento/?`;
+    const params = new URLSearchParams();
+
+    if (filtroNombre !== "") {
+      params.append("nombre__icontains", filtroNombre);
+    }
+    if (filtroEstado === "todos") {
+      params.append("show_all", "true");
+    } else if (filtroEstado !== "" && filtroEstado !== "todos") {
+      params.append("estado", filtroEstado.toString());
+    }
+    if (filtroTelefono !== "") {
+      params.append("telefono__icontains", filtroTelefono);
+    }
+
+    params.append("page", newPage.toString());
+    url += params.toString();
+
+    setCurrentPage(newPage);
     setCurrentUrl(url);
   };
 
@@ -136,152 +180,165 @@ const ListaDepartamentos = () => {
     }
   };
 
+  const eliminarDepartamento = async (id: number) => {
+    try {
+      const result = await Swal.fire({
+        title: "¿Estás seguro?",
+        text: "Esta acción no se puede deshacer",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar",
+      });
+
+      if (result.isConfirmed) {
+        await axios.delete(`${API_BASE_URL}/facet/departamento/${id}/`);
+        Swal.fire(
+          "Eliminado!",
+          "El departamento ha sido eliminado.",
+          "success"
+        );
+        fetchData(currentUrl);
+      }
+    } catch (error) {
+      Swal.fire("Error!", "No se pudo eliminar el departamento.", "error");
+    }
+  };
+
   return (
     <DashboardMenu>
-      <div className="p-6">
-        <div className="flex flex-wrap gap-4 mb-6">
-          <button
-            onClick={() => router.push("/dashboard/departments/create")}
-            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-            <AddIcon /> Agregar Departamento
-          </button>
-          <button
-            onClick={() =>
-              router.push("/dashboard/departments/departamentoJefe")
-            }
-            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-            <PeopleIcon /> Jefes
-          </button>
-          <button
-            onClick={descargarExcel}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-            <FileDownloadIcon /> Descargar Excel
-          </button>
+      <div className="bg-white rounded-lg shadow-lg">
+        <div className="p-6 border-b border-gray-200">
+          <h1 className="text-2xl font-bold text-gray-800">Departamentos</h1>
         </div>
 
-        <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
-          <Typography variant="h4" gutterBottom className="text-gray-800">
-            Departamentos
-          </Typography>
+        <div className="p-6">
+          <div className="flex flex-wrap gap-4 mb-6">
+            <button
+              onClick={() => router.push("/dashboard/departments/create")}
+              className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+              <AddIcon /> Agregar Departamento
+            </button>
+            <button
+              onClick={() =>
+                router.push("/dashboard/departments/departamentoJefe")
+              }
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+              <PeopleIcon /> Jefes
+            </button>
+            <button
+              onClick={descargarExcel}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+              <FileDownloadIcon /> Descargar Excel
+            </button>
+          </div>
 
-          <Grid container spacing={2} marginBottom={2}>
-            <Grid item xs={4}>
-              <TextField
-                label="Nombre"
-                value={filtroNombre}
-                onChange={(e) => setFiltroNombre(e.target.value)}
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <FormControl fullWidth>
-                <InputLabel>Estado</InputLabel>
-                <Select
-                  value={filtroEstado}
-                  onChange={(e) => setFiltroEstado(e.target.value)}
-                  label="Estado">
-                  <MenuItem value="">
-                    <em>Todos</em>
-                  </MenuItem>
-                  <MenuItem value={1}>Activo</MenuItem>
-                  <MenuItem value={0}>Inactivo</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                label="Teléfono"
-                value={filtroTelefono}
-                onChange={(e) => setFiltroTelefono(e.target.value)}
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={4} marginBottom={2}>
-              <button
-                onClick={filtrarDepartamentos}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                Filtrar
-              </button>
-            </Grid>
-          </Grid>
+          <FilterContainer
+            onApply={filtrarDepartamentos}
+            onClear={limpiarFiltros}>
+            <FilterInput
+              label="Nombre"
+              value={filtroNombre}
+              onChange={setFiltroNombre}
+              placeholder="Buscar por nombre"
+            />
+            <FilterInput
+              label="Teléfono"
+              value={filtroTelefono}
+              onChange={setFiltroTelefono}
+              placeholder="Buscar por teléfono"
+            />
+            <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
+          </FilterContainer>
 
-          <TableContainer component={Paper} className="mt-4">
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <Table>
               <TableHead>
                 <TableRow className="bg-blue-500">
-                  <TableCell className="header-cell font-medium">
+                  <TableCell className="text-white font-semibold">
                     Nombre
                   </TableCell>
-                  <TableCell className="header-cell font-medium">
+                  <TableCell className="text-white font-semibold">
                     Teléfono
                   </TableCell>
-                  <TableCell className="header-cell font-medium">
-                    Estado
-                  </TableCell>
-                  <TableCell className="header-cell font-medium">
+                  <TableCell className="text-white font-semibold">
                     Interno
                   </TableCell>
-                  <TableCell className="header-cell font-medium"></TableCell>
+                  <TableCell className="text-white font-semibold">
+                    Estado
+                  </TableCell>
+                  <TableCell className="text-white font-semibold">
+                    Acciones
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {departamentos.map((departamento) => (
                   <TableRow key={departamento.id} className="hover:bg-gray-50">
-                    <TableCell>{departamento.nombre}</TableCell>
-                    <TableCell>{departamento.telefono}</TableCell>
-                    <TableCell>
-                      {departamento.estado == 1 ? "Activo" : "Inactivo"}
+                    <TableCell className="text-gray-800">
+                      {departamento.nombre}
                     </TableCell>
-                    <TableCell>{departamento.interno}</TableCell>
+                    <TableCell className="text-gray-800">
+                      {departamento.telefono}
+                    </TableCell>
+                    <TableCell className="text-gray-800">
+                      {departamento.interno}
+                    </TableCell>
+                    <TableCell className="text-gray-800">
+                      {departamento.estado === "1" ? "Activo" : "Inactivo"}
+                    </TableCell>
                     <TableCell>
-                      <button
-                        onClick={() =>
-                          router.push(
-                            `/dashboard/departments/edit/${departamento.id}`
-                          )
-                        }
-                        className="p-2 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-100 transition-colors duration-200">
-                        <EditIcon />
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() =>
+                            router.push(
+                              `/dashboard/departments/edit/${departamento.id}`
+                            )
+                          }
+                          className="p-2 text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-100 transition-colors duration-200">
+                          <EditIcon />
+                        </button>
+                        <button
+                          onClick={() => eliminarDepartamento(departamento.id)}
+                          className="p-2 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-100 transition-colors duration-200">
+                          <DeleteIcon />
+                        </button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          </TableContainer>
+          </div>
 
-          <div className="flex justify-between items-center mt-4">
+          <div className="flex justify-between items-center mt-6">
             <button
-              onClick={() => {
-                prevUrl && setCurrentUrl(prevUrl);
-                setCurrentPage(currentPage - 1);
-              }}
-              disabled={!prevUrl}
-              className={`px-4 py-2 rounded-md ${
-                prevUrl
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`px-4 py-2 rounded-lg font-medium ${
+                currentPage > 1
                   ? "bg-blue-500 text-white hover:bg-blue-600"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               } transition-colors duration-200`}>
               Anterior
             </button>
-            <Typography variant="body1">
+            <span className="text-gray-600">
               Página {currentPage} de {totalPages}
-            </Typography>
+            </span>
             <button
-              onClick={() => {
-                nextUrl && setCurrentUrl(nextUrl);
-                setCurrentPage(currentPage + 1);
-              }}
-              disabled={!nextUrl}
-              className={`px-4 py-2 rounded-md ${
-                nextUrl
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage >= totalPages}
+              className={`px-4 py-2 rounded-lg font-medium ${
+                currentPage < totalPages
                   ? "bg-blue-500 text-white hover:bg-blue-600"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               } transition-colors duration-200`}>
               Siguiente
             </button>
           </div>
-        </Paper>
+        </div>
       </div>
     </DashboardMenu>
   );
