@@ -50,7 +50,7 @@ const CrearDepartamento = () => {
   const [fn, setFn] = useState(() => () => {});
 
   const capitalizeFirstLetter = (string: string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+    return string.charAt(0).toUpperCase() + string.slice(1);
   };
 
   const handleOpenModal = (

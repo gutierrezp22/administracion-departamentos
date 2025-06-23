@@ -5,20 +5,22 @@ from rest_framework.permissions import AllowAny
 from rest_framework.filters import SearchFilter
 from ..models import Resolucion
 from ..serializers import ResolucionSerializer
+from .pagination import StandardResultsSetPagination
 
 class ResolucionViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     queryset = Resolucion.objects.filter(estado='1')  # Solo objetos activos por defecto
     serializer_class = ResolucionSerializer
+    pagination_class = StandardResultsSetPagination
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = {
-        'estado': ['exact'],
-        'nexpediente': ['icontains'], 
-        'nresolucion': ['icontains'],
-        'tipo': ['exact'], 
-        'fecha': ['date'], 
+        'estado': ['exact'],           # Filtrar por estado exacto (0 o 1)
+        'nexpediente': ['icontains'],  # Filtrar por número de expediente que contiene el valor especificado
+        'nresolucion': ['icontains'],  # Filtrar por número de resolución que contiene el valor especificado
+        'tipo': ['exact'],             # Filtrar por tipo exacto
+        'fecha': ['exact', 'gte', 'lte'], # Filtrar por fecha exacta, mayor o igual, menor o igual
     }
-    search_fields = ['nexpediente', 'nresolucion', 'tipo']
+    search_fields = ['nexpediente', 'nresolucion', 'tipo', 'fecha']
 
     def destroy(self, request, *args, **kwargs):
         """Soft delete: cambia el estado a '0' en lugar de eliminar físicamente"""

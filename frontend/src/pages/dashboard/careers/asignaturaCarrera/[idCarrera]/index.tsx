@@ -13,6 +13,8 @@ import {
   TableCell,
   Grid,
   MenuItem,
+  FormControl,
+  Select,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
@@ -75,6 +77,7 @@ const ListaAsignaturaCarrera = () => {
   const [filtroNombre, setFiltroNombre] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("");
   const [filtroModulo, setFiltroModulo] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState<string | number>("1");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const totalPages = Math.ceil(totalItems / pageSize);
@@ -209,7 +212,12 @@ const ListaAsignaturaCarrera = () => {
             .toLowerCase()
             .includes(filtroNombre.toLowerCase()) &&
           (filtroTipo === "" || asignatura.tipo === filtroTipo) &&
-          asignatura.modulo.toLowerCase().includes(filtroModulo.toLowerCase())
+          asignatura.modulo
+            .toLowerCase()
+            .includes(filtroModulo.toLowerCase()) &&
+          (filtroEstado === "todos" ||
+            filtroEstado === "" ||
+            asignatura.estado.toString() === filtroEstado.toString())
         );
       })
     );
@@ -269,57 +277,82 @@ const ListaAsignaturaCarrera = () => {
             Asignaturas de Carrera
           </Typography>
 
-          <Grid container spacing={2} marginBottom={2}>
-            <Grid item xs={4}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <Typography variant="subtitle1" className="mb-2">
+                Código
+              </Typography>
               <TextField
-                label="Código"
+                fullWidth
                 value={filtroCodigo}
                 onChange={(e) => setFiltroCodigo(e.target.value)}
-                fullWidth
-                variant="outlined"
+                placeholder="Buscar por código"
+                size="small"
               />
-            </Grid>
-            <Grid item xs={4}>
+            </div>
+            <div>
+              <Typography variant="subtitle1" className="mb-2">
+                Nombre
+              </Typography>
               <TextField
-                label="Nombre"
+                fullWidth
                 value={filtroNombre}
                 onChange={(e) => setFiltroNombre(e.target.value)}
-                fullWidth
-                variant="outlined"
+                placeholder="Buscar por nombre"
+                size="small"
               />
-            </Grid>
-            <Grid item xs={4}>
+            </div>
+            <div>
+              <Typography variant="subtitle1" className="mb-2">
+                Tipo
+              </Typography>
+              <FormControl fullWidth size="small">
+                <Select
+                  value={filtroTipo}
+                  onChange={(e) => setFiltroTipo(e.target.value)}
+                  displayEmpty>
+                  <MenuItem value="">Todos</MenuItem>
+                  <MenuItem value="Electiva">Electiva</MenuItem>
+                  <MenuItem value="Obligatoria">Obligatoria</MenuItem>
+                </Select>
+              </FormControl>
+            </div>
+            <div>
+              <Typography variant="subtitle1" className="mb-2">
+                Módulo
+              </Typography>
               <TextField
-                select
-                label="Tipo"
-                value={filtroTipo}
-                onChange={(e) => setFiltroTipo(e.target.value)}
                 fullWidth
-                variant="outlined">
-                <MenuItem value="">
-                  <em>Todos</em>
-                </MenuItem>
-                <MenuItem value="Electiva">Electiva</MenuItem>
-                <MenuItem value="Obligatoria">Obligatoria</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                label="Módulo"
                 value={filtroModulo}
                 onChange={(e) => setFiltroModulo(e.target.value)}
-                fullWidth
-                variant="outlined"
+                placeholder="Buscar por módulo"
+                size="small"
               />
-            </Grid>
-            <Grid item xs={4}>
-              <button
-                onClick={filtrarAsignaturas}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                Filtrar
-              </button>
-            </Grid>
-          </Grid>
+            </div>
+            <div>
+              <Typography variant="subtitle1" className="mb-2">
+                Estado
+              </Typography>
+              <FormControl fullWidth size="small">
+                <Select
+                  value={filtroEstado}
+                  onChange={(e) => setFiltroEstado(e.target.value)}
+                  displayEmpty>
+                  <MenuItem value="todos">Todos</MenuItem>
+                  <MenuItem value="1">Activo</MenuItem>
+                  <MenuItem value="0">Inactivo</MenuItem>
+                </Select>
+              </FormControl>
+            </div>
+          </div>
+
+          <div className="flex justify-end mt-4">
+            <button
+              onClick={filtrarAsignaturas}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md shadow-md transition-colors duration-200">
+              Buscar
+            </button>
+          </div>
 
           <TableContainer component={Paper} className="mb-4">
             <Table>

@@ -2,75 +2,77 @@ import { useEffect, useState } from "react";
 import "./styles.css";
 import axios from "axios";
 import {
-  Typography,
-  Paper,
-  TextField,
-  Grid,
+  Container,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
+  Paper,
+  TextField,
+  Button,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormControl,
+  Grid,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { useRouter } from "next/router";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import Swal from "sweetalert2";
-import DashboardMenu from "../../../dashboard";
+import { useRouter } from "next/router";
+import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut";
 import { API_BASE_URL } from "../../../../utils/config";
-
-interface Area {
-  id: number;
-  departamento: number;
-  nombre: string;
-  estado: 0 | 1;
-}
-
-interface Departamento {
-  id: number;
-  nombre: string;
-  telefono: string;
-  estado: 0 | 1;
-  interno: string;
-}
+import {
+  FilterContainer,
+  FilterInput,
+  EstadoFilter,
+} from "../../../../components/Filters";
 
 const ListaAreas = () => {
-  const router = useRouter();
+  interface Area {
+    id: number;
+    nombre: string;
+    estado: string;
+    departamento: number;
+    departamento_detalle: {
+      id: number;
+      nombre: string;
+    };
+  }
 
-  const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
   const [filtroNombre, setFiltroNombre] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState<string>("1");
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>(
-    `${API_BASE_URL}/facet/area/`
-  );
-  const [currentUrlDepto, setCurrentUrlDepto] = useState<string>(
-    `${API_BASE_URL}/facet/departamento/`
+    `${API_BASE_URL}/facet/area/?estado=1`
   );
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  useEffect(() => {
-    fetchData(currentUrl, currentUrlDepto);
-  }, [currentUrl, currentUrlDepto]);
+  const router = useRouter();
 
-  const fetchData = async (url: string, url2: string) => {
+  useEffect(() => {
+    fetchData(currentUrl);
+  }, [currentUrl]);
+
+  const fetchData = async (url: string) => {
     try {
       const response = await axios.get(url);
-      const deptos = await axios.get(url2);
       setAreas(response.data.results);
-      setDepartamentos(deptos.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
       setTotalItems(response.data.count);
-      setCurrentPage(1);
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -86,51 +88,75 @@ const ListaAreas = () => {
     if (filtroNombre !== "") {
       params.append("nombre__icontains", filtroNombre);
     }
+    if (filtroEstado === "todos") {
+      params.append("show_all", "true");
+    } else if (filtroEstado !== "" && filtroEstado !== "todos") {
+      params.append("estado", filtroEstado);
+    }
+    params.append("page", "1");
     url += params.toString();
+    setCurrentPage(1);
     setCurrentUrl(url);
   };
 
-  const totalPages = Math.ceil(totalItems / pageSize);
+  const limpiarFiltros = () => {
+    setFiltroNombre("");
+    setFiltroEstado("1");
+    setCurrentUrl(`${API_BASE_URL}/facet/area/?estado=1`);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    let url = `${API_BASE_URL}/facet/area/?`;
+    const params = new URLSearchParams();
+
+    if (filtroNombre !== "") {
+      params.append("nombre__icontains", filtroNombre);
+    }
+    if (filtroEstado === "todos") {
+      params.append("show_all", "true");
+    } else if (filtroEstado !== "" && filtroEstado !== "todos") {
+      params.append("estado", filtroEstado);
+    }
+
+    params.append("page", newPage.toString());
+    url += params.toString();
+
+    setCurrentPage(newPage);
+    setCurrentUrl(url);
+  };
 
   const descargarExcel = async () => {
     try {
       let allAreas: Area[] = [];
       let url = `${API_BASE_URL}/facet/area/?`;
       const params = new URLSearchParams();
+
       if (filtroNombre !== "") {
         params.append("nombre__icontains", filtroNombre);
       }
+      if (filtroEstado === "todos") {
+        params.append("show_all", "true");
+      } else if (filtroEstado !== "" && filtroEstado !== "todos") {
+        params.append("estado", filtroEstado);
+      }
       url += params.toString();
-
-      // Obtener todos los departamentos para enlazar con las áreas
-      const departamentosResponse = await axios.get(
-        `${API_BASE_URL}/facet/departamento/`
-      );
-      const departamentos: Departamento[] = departamentosResponse.data.results;
 
       while (url) {
         const response = await axios.get(url);
         const { results, next } = response.data;
-
-        // Mapea los datos para incluir solo las columnas requeridas
-        allAreas = [
-          ...allAreas,
-          ...results.map((area: any) => {
-            const departamentoNombre =
-              departamentos.find((depto) => depto.id === area.departamento)
-                ?.nombre || "Departamento no encontrado";
-            return {
-              nombre: area.nombre, // Nombre original del área
-              "nombre Departamento": departamentoNombre, // Nombre del departamento relacionado
-              estado: area.estado,
-            };
-          }),
-        ];
+        allAreas = [...allAreas, ...results];
         url = next;
       }
 
       const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(allAreas);
+      const worksheet = XLSX.utils.json_to_sheet(
+        allAreas.map((area) => ({
+          Nombre: area.nombre,
+          Departamento: area.departamento_detalle?.nombre || "N/A",
+          Estado: area.estado === "1" ? "Activo" : "Inactivo",
+        }))
+      );
+
       XLSX.utils.book_append_sheet(workbook, worksheet, "Areas");
       const excelBuffer = XLSX.write(workbook, {
         bookType: "xlsx",
@@ -141,123 +167,152 @@ const ListaAreas = () => {
       });
       saveAs(excelBlob, "areas.xlsx");
     } catch (error) {
-      console.error("Error downloading Excel:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error al descargar",
+        text: "Se produjo un error al exportar los datos.",
+      });
     }
   };
+
+  const eliminarArea = async (id: number) => {
+    try {
+      const result = await Swal.fire({
+        title: "¿Estás seguro?",
+        text: "Esta acción no se puede deshacer",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar",
+      });
+
+      if (result.isConfirmed) {
+        await axios.delete(`${API_BASE_URL}/facet/area/${id}/`);
+        Swal.fire("Eliminado!", "El área ha sido eliminada.", "success");
+        fetchData(currentUrl);
+      }
+    } catch (error) {
+      Swal.fire("Error!", "No se pudo eliminar el área.", "error");
+    }
+  };
+
+  const totalPages = Math.ceil(totalItems / pageSize);
 
   return (
     <DashboardMenu>
       <div className="p-6">
-        <div className="flex flex-wrap gap-4 mb-6">
-          <button
-            onClick={() => router.push("/dashboard/areas/create")}
-            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-            <AddIcon /> Agregar Area
-          </button>
-          <button
-            onClick={descargarExcel}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-            <FileDownloadIcon /> Descargar Excel
-          </button>
-        </div>
+        <div className="bg-white rounded-lg shadow-lg">
+          <div className="p-6 border-b border-gray-200">
+            <h1 className="text-2xl font-bold text-gray-800">Áreas</h1>
+          </div>
 
-        <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
-          <Typography variant="h4" gutterBottom className="text-gray-800">
-            Areas
-          </Typography>
+          <div className="p-6">
+            <div className="flex gap-4 mb-6">
+              <button
+                onClick={() => router.push("/dashboard/areas/create")}
+                className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
+                <AddIcon /> Agregar Área
+              </button>
+              <button
+                onClick={descargarExcel}
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
+                <FileDownloadIcon /> Descargar Excel
+              </button>
+            </div>
 
-          <Grid container spacing={2} marginBottom={2}>
-            <Grid item xs={4}>
-              <TextField
+            <FilterContainer onApply={filtrarAreas} onClear={limpiarFiltros}>
+              <FilterInput
                 label="Nombre"
                 value={filtroNombre}
-                onChange={(e) => setFiltroNombre(e.target.value)}
-                fullWidth
+                onChange={setFiltroNombre}
+                placeholder="Buscar por nombre"
               />
-            </Grid>
-            <Grid item xs={4} marginBottom={2}>
-              <button
-                onClick={filtrarAreas}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                Filtrar
-              </button>
-            </Grid>
-          </Grid>
+              <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
+            </FilterContainer>
 
-          <TableContainer component={Paper} className="mt-4">
-            <Table>
-              <TableHead>
-                <TableRow className="bg-blue-500">
-                  <TableCell className="header-cell font-medium">
-                    Nombre
-                  </TableCell>
-                  <TableCell className="header-cell font-medium">
-                    Departamento
-                  </TableCell>
-                  <TableCell className="header-cell font-medium">
-                    Estado
-                  </TableCell>
-                  <TableCell className="header-cell font-medium"></TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {areas.map((area) => (
-                  <TableRow key={area.id} className="hover:bg-gray-50">
-                    <TableCell>{area.nombre}</TableCell>
-                    <TableCell>
-                      {departamentos.find(
-                        (depto) => depto.id === area.departamento
-                      )?.nombre || "Departamento no encontrado"}
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <Table>
+                <TableHead>
+                  <TableRow className="bg-blue-500">
+                    <TableCell className="text-white font-semibold">
+                      Nombre
                     </TableCell>
-                    <TableCell>
-                      {area.estado == 1 ? "Activo" : "Inactivo"}
+                    <TableCell className="text-white font-semibold">
+                      Departamento
                     </TableCell>
-                    <TableCell>
-                      <button
-                        onClick={() =>
-                          router.push(`/dashboard/areas/edit/${area.id}`)
-                        }
-                        className="p-2 text-blue-500 hover:text-blue-700 rounded-full hover:bg-blue-50 transition-colors duration-200">
-                        <EditIcon />
-                      </button>
+                    <TableCell className="text-white font-semibold">
+                      Estado
+                    </TableCell>
+                    <TableCell className="text-white font-semibold">
+                      Acciones
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <div className="flex justify-between items-center mt-4">
-            <button
-              onClick={() => {
-                prevUrl && setCurrentUrl(prevUrl);
-                setCurrentPage(currentPage - 1);
-              }}
-              disabled={!prevUrl}
-              className={`px-4 py-2 rounded-md ${
-                prevUrl
-                  ? "bg-blue-500 text-white hover:bg-blue-600"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              } transition-colors duration-200`}>
-              Anterior
-            </button>
-            <Typography variant="body1">
-              Página {currentPage} de {totalPages}
-            </Typography>
-            <button
-              onClick={() => {
-                nextUrl && setCurrentUrl(nextUrl);
-                setCurrentPage(currentPage + 1);
-              }}
-              disabled={!nextUrl}
-              className={`px-4 py-2 rounded-md ${
-                nextUrl
-                  ? "bg-blue-500 text-white hover:bg-blue-600"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              } transition-colors duration-200`}>
-              Siguiente
-            </button>
+                </TableHead>
+                <TableBody>
+                  {areas.map((area) => (
+                    <TableRow
+                      key={area.id}
+                      className="hover:bg-gray-50 transition-colors duration-150">
+                      <TableCell className="text-gray-800">
+                        {area.nombre}
+                      </TableCell>
+                      <TableCell className="text-gray-800">
+                        {area.departamento_detalle?.nombre || "N/A"}
+                      </TableCell>
+                      <TableCell className="text-gray-800">
+                        {area.estado === "1" ? "Activo" : "Inactivo"}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() =>
+                              router.push(`/dashboard/areas/edit/${area.id}`)
+                            }
+                            className="p-2 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-100 transition-colors duration-200">
+                            <EditIcon />
+                          </button>
+                          <button
+                            onClick={() => eliminarArea(area.id)}
+                            className="p-2 text-red-600 hover:text-red-800 rounded-full hover:bg-red-100 transition-colors duration-200">
+                            <DeleteIcon />
+                          </button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            <div className="flex justify-between items-center mt-6">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                  currentPage > 1
+                    ? "bg-blue-500 text-white hover:bg-blue-600"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}>
+                Anterior
+              </button>
+              <span className="text-gray-600 font-medium">
+                Página {currentPage} de {totalPages}
+              </span>
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage >= totalPages}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                  currentPage < totalPages
+                    ? "bg-blue-500 text-white hover:bg-blue-600"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}>
+                Siguiente
+              </button>
+            </div>
           </div>
-        </Paper>
+        </div>
       </div>
     </DashboardMenu>
   );

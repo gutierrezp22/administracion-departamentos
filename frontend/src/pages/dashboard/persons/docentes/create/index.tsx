@@ -122,10 +122,11 @@ const CrearDocente = () => {
     };
 
     try {
-      // Busca si ya existe un docente asociado a esta persona
+      // Busca si ya existe un docente asociado a esta persona (incluye activos e inactivos)
       const response = await axios.get(`${API_BASE_URL}/facet/docente/`, {
         params: {
           persona: persona?.id, // Filtrar por ID de la persona
+          show_all: true, // Incluir todos los estados para validación completa
         },
       });
 

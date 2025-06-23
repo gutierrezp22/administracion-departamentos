@@ -4,20 +4,19 @@ import axios from "axios";
 import {
   Typography,
   Paper,
-  Grid,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import Swal from "sweetalert2";
-import DashboardMenu from "../../../dashboard";
+import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut";
 import { API_BASE_URL } from "../../../../utils/config";
+import { FilterContainer, FilterInput } from "../../../../components/Filters";
 
 interface Notificacion {
   id: number;
@@ -31,10 +30,12 @@ interface Notificacion {
 
 const ListaNotificaciones = () => {
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
-  const [filtroApellido, setFiltroApellido] = useState("");
-  const [filtroNombre, setFiltroNombre] = useState("");
-  const [filtroFecha, setFiltroFecha] = useState("");
-  const [filtroMensaje, setFiltroMensaje] = useState("");
+  const [filters, setFilters] = useState({
+    persona_apellido: "",
+    persona_nombre: "",
+    fecha_creacion: "",
+    mensaje: "",
+  });
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>(
@@ -69,36 +70,44 @@ const ListaNotificaciones = () => {
     }
   };
 
-  const filtrarNotificaciones = () => {
-    let url = `${API_BASE_URL}/facet/notificacion/?`;
+  const handleFilterChange = (field: string, value: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const applyFilters = () => {
     const params = new URLSearchParams();
 
-    // Asegurarse de que los filtros no estén vacíos antes de agregarlos
-    if (filtroApellido.trim() !== "") {
-      params.append("persona_apellido", filtroApellido.trim());
+    if (filters.persona_apellido.trim()) {
+      params.append("persona_apellido", filters.persona_apellido.trim());
     }
-    if (filtroNombre.trim() !== "") {
-      params.append("persona_nombre", filtroNombre.trim());
+    if (filters.persona_nombre.trim()) {
+      params.append("persona_nombre", filters.persona_nombre.trim());
     }
-    if (filtroFecha.trim() !== "") {
-      params.append("fecha_creacion_after", filtroFecha);
-      params.append("fecha_creacion_before", filtroFecha);
+    if (filters.fecha_creacion.trim()) {
+      params.append("fecha_creacion_after", filters.fecha_creacion);
+      params.append("fecha_creacion_before", filters.fecha_creacion);
     }
-    if (filtroMensaje.trim() !== "") {
-      params.append("mensaje__icontains", filtroMensaje.trim());
+    if (filters.mensaje.trim()) {
+      params.append("mensaje__icontains", filters.mensaje.trim());
     }
 
     params.append("page_size", pageSize.toString());
-    params.append("page", "1"); // Siempre reiniciar en la primera página
 
-    // Verificar si hay filtros antes de cambiar la URL
-    const finalUrl = url + params.toString();
+    const newUrl = `${API_BASE_URL}/facet/notificacion/?${params.toString()}`;
+    setCurrentUrl(newUrl);
+  };
 
-    if (params.toString().length > 0) {
-      setCurrentUrl(finalUrl);
-    } else {
-      console.warn("⚠ No se aplicaron filtros, URL no se actualizará.");
-    }
+  const clearFilters = () => {
+    setFilters({
+      persona_apellido: "",
+      persona_nombre: "",
+      fecha_creacion: "",
+      mensaje: "",
+    });
+    setCurrentUrl(`${API_BASE_URL}/facet/notificacion/`);
   };
 
   const mostrarMensaje = (mensaje: string) => {
@@ -114,122 +123,127 @@ const ListaNotificaciones = () => {
   return (
     <DashboardMenu>
       <div className="p-6">
-        <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
-          <Typography variant="h4" gutterBottom className="text-gray-800">
-            Notificaciones
-          </Typography>
+        <div className="bg-white rounded-lg shadow-lg">
+          <div className="p-6 border-b border-gray-200">
+            <h1 className="text-2xl font-bold text-gray-800">Notificaciones</h1>
+          </div>
 
-          <Grid container spacing={2} marginBottom={2}>
-            <Grid item xs={4}>
-              <TextField
-                label="Buscar por apellido"
-                value={filtroApellido}
-                onChange={(e) => setFiltroApellido(e.target.value)}
-                fullWidth
+          <div className="p-6">
+            <FilterContainer onApply={applyFilters} onClear={clearFilters}>
+              <FilterInput
+                label="Apellido"
+                value={filters.persona_apellido}
+                onChange={(value) =>
+                  handleFilterChange("persona_apellido", value)
+                }
+                placeholder="Buscar por apellido..."
               />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                label="Buscar por nombre"
-                value={filtroNombre}
-                onChange={(e) => setFiltroNombre(e.target.value)}
-                fullWidth
+              <FilterInput
+                label="Nombre"
+                value={filters.persona_nombre}
+                onChange={(value) =>
+                  handleFilterChange("persona_nombre", value)
+                }
+                placeholder="Buscar por nombre..."
               />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                label="Buscar por fecha"
+              <FilterInput
+                label="Fecha"
                 type="date"
-                value={filtroFecha}
-                onChange={(e) => setFiltroFecha(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                fullWidth
+                value={filters.fecha_creacion}
+                onChange={(value) =>
+                  handleFilterChange("fecha_creacion", value)
+                }
               />
-            </Grid>
-            <Grid item xs={12}>
-              <button
-                onClick={filtrarNotificaciones}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                Filtrar
-              </button>
-            </Grid>
-          </Grid>
+              <FilterInput
+                label="Mensaje"
+                value={filters.mensaje}
+                onChange={(value) => handleFilterChange("mensaje", value)}
+                placeholder="Buscar en mensaje..."
+              />
+            </FilterContainer>
 
-          <TableContainer component={Paper} className="mt-4">
-            <Table>
-              <TableHead>
-                <TableRow style={{ backgroundColor: "#3b82f6" }}>
-                  <TableCell style={{ color: "white", fontWeight: 500 }}>
-                    Apellido
-                  </TableCell>
-                  <TableCell style={{ color: "white", fontWeight: 500 }}>
-                    Nombre
-                  </TableCell>
-                  <TableCell style={{ color: "white", fontWeight: 500 }}>
-                    Fecha
-                  </TableCell>
-                  <TableCell style={{ color: "white", fontWeight: 500 }}>
-                    Mensaje
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {notificaciones.map((noti) => (
-                  <TableRow key={noti.id} className="hover:bg-gray-50">
-                    <TableCell>{noti.persona_apellido}</TableCell>
-                    <TableCell>{noti.persona_nombre}</TableCell>
-                    <TableCell>
-                      {noti.fecha_creacion
-                        ? (() => {
-                            const [day, month, year] = noti.fecha_creacion
-                              .split(" ")[0]
-                              .split("/");
-                            const fixedDate = new Date(
-                              `${year}-${month}-${day}T00:00:00`
-                            );
-                            return fixedDate.toLocaleDateString();
-                          })()
-                        : "Fecha inválida"}
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <Table>
+                <TableHead>
+                  <TableRow className="bg-blue-500">
+                    <TableCell className="text-white font-semibold">
+                      Apellido
                     </TableCell>
-                    <TableCell>
-                      <button
-                        onClick={() => mostrarMensaje(noti.mensaje)}
-                        className="p-2 text-blue-500 hover:text-blue-700 rounded-full hover:bg-blue-50 transition-colors duration-200">
-                        <VisibilityIcon />
-                      </button>
+                    <TableCell className="text-white font-semibold">
+                      Nombre
+                    </TableCell>
+                    <TableCell className="text-white font-semibold">
+                      Fecha
+                    </TableCell>
+                    <TableCell className="text-white font-semibold">
+                      Mensaje
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {notificaciones.map((noti) => (
+                    <TableRow
+                      key={noti.id}
+                      className="hover:bg-gray-50 transition-colors duration-150">
+                      <TableCell className="text-gray-800">
+                        {noti.persona_apellido}
+                      </TableCell>
+                      <TableCell className="text-gray-800">
+                        {noti.persona_nombre}
+                      </TableCell>
+                      <TableCell className="text-gray-800">
+                        {noti.fecha_creacion
+                          ? (() => {
+                              const [day, month, year] = noti.fecha_creacion
+                                .split(" ")[0]
+                                .split("/");
+                              const fixedDate = new Date(
+                                `${year}-${month}-${day}T00:00:00`
+                              );
+                              return fixedDate.toLocaleDateString();
+                            })()
+                          : "Fecha inválida"}
+                      </TableCell>
+                      <TableCell>
+                        <button
+                          onClick={() => mostrarMensaje(noti.mensaje)}
+                          className="p-2 text-blue-500 hover:text-blue-700 rounded-full hover:bg-blue-50 transition-colors duration-200">
+                          <VisibilityIcon />
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
 
-          <div className="flex justify-between items-center mt-4">
-            <button
-              onClick={() => prevUrl && setCurrentUrl(prevUrl)}
-              disabled={!prevUrl}
-              className={`px-4 py-2 rounded-md ${
-                prevUrl
-                  ? "bg-blue-500 text-white hover:bg-blue-600"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              } transition-colors duration-200`}>
-              Anterior
-            </button>
-            <Typography variant="body1">
-              Página {currentPage} de {totalPages}
-            </Typography>
-            <button
-              onClick={() => nextUrl && setCurrentUrl(nextUrl)}
-              disabled={!nextUrl}
-              className={`px-4 py-2 rounded-md ${
-                nextUrl
-                  ? "bg-blue-500 text-white hover:bg-blue-600"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              } transition-colors duration-200`}>
-              Siguiente
-            </button>
+            <div className="flex justify-between items-center mt-6">
+              <button
+                onClick={() => prevUrl && setCurrentUrl(prevUrl)}
+                disabled={!prevUrl}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                  prevUrl
+                    ? "bg-blue-500 text-white hover:bg-blue-600"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}>
+                Anterior
+              </button>
+              <span className="text-gray-600 font-medium">
+                Página {currentPage} de {totalPages}
+              </span>
+              <button
+                onClick={() => nextUrl && setCurrentUrl(nextUrl)}
+                disabled={!nextUrl}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                  nextUrl
+                    ? "bg-blue-500 text-white hover:bg-blue-600"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}>
+                Siguiente
+              </button>
+            </div>
           </div>
-        </Paper>
+        </div>
       </div>
     </DashboardMenu>
   );

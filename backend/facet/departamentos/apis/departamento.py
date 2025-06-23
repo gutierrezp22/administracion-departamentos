@@ -3,13 +3,20 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import AllowAny
 from rest_framework.filters import SearchFilter
+from rest_framework.pagination import PageNumberPagination
 from ..models import Departamento
 from ..serializers import DepartamentoSerializer
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 class DepartamentoViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     queryset = Departamento.objects.filter(estado='1')  # Solo objetos activos por defecto
     serializer_class = DepartamentoSerializer
+    pagination_class = StandardResultsSetPagination
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = {
         'estado': ['exact'],       # Filtrar por estado exacto (0 o 1)

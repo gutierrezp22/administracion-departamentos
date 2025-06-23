@@ -5,17 +5,19 @@ from rest_framework.permissions import AllowAny
 from rest_framework.filters import SearchFilter
 from ..models import Carrera
 from ..serializers import CarreraSerializer
+from .pagination import StandardResultsSetPagination
 
 class CarreraViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     queryset = Carrera.objects.filter(estado='1')  # Solo objetos activos por defecto
     serializer_class = CarreraSerializer
+    pagination_class = StandardResultsSetPagination
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = {
         'estado': ['exact'],       # Filtrar por estado exacto (0 o 1)
+        'nombre': ['icontains'],   # Filtrar por nombre que contiene el valor especificado
         'tipo': ['exact'],         # Filtrar por tipo exacto
         'planestudio': ['icontains'], # Filtrar por plan de estudio que contiene el valor especificado
-        'nombre': ['icontains'],   # Filtrar por nombre que contiene el valor especificado
     }
     search_fields = ['nombre', 'planestudio']
 

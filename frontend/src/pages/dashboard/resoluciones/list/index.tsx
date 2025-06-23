@@ -38,6 +38,12 @@ import { useRouter } from "next/router";
 import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut";
 import { API_BASE_URL } from "../../../../utils/config";
+import {
+  FilterContainer,
+  FilterInput,
+  FilterSelect,
+  EstadoFilter,
+} from "../../../../components/Filters";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -56,11 +62,11 @@ const ListaResoluciones = () => {
   }
 
   const [resoluciones, setResoluciones] = useState<Resolucion[]>([]);
-  const [filtroNroExpediente, setFiltroNroExpediente] = useState("");
-  const [filtroNroResolucion, setFiltroNroResolucion] = useState("");
+  const [filtroNExpediente, setFiltroNExpediente] = useState("");
+  const [filtroNResolucion, setFiltroNResolucion] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("");
-  const [filtroFecha, setFiltroFecha] = useState<dayjs.Dayjs | null>(null);
-  const [filtroEstado, setFiltroEstado] = useState<string | number>("");
+  const [filtroFecha, setFiltroFecha] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState<string>("1");
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>(
@@ -69,6 +75,7 @@ const ListaResoluciones = () => {
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const router = useRouter();
 
@@ -78,13 +85,16 @@ const ListaResoluciones = () => {
 
   const fetchData = async (url: string) => {
     try {
+      setIsLoading(true);
       const response = await axios.get(url);
       setResoluciones(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
       setTotalItems(response.data.count);
-      setCurrentPage(1);
+      // Pequeño delay para asegurar que los estilos se cargan
+      setTimeout(() => setIsLoading(false), 500);
     } catch (error) {
+      setIsLoading(false);
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -97,26 +107,64 @@ const ListaResoluciones = () => {
     let url = `${API_BASE_URL}/facet/resolucion/?`;
     const params = new URLSearchParams();
 
-    if (filtroNroExpediente !== "") {
-      params.append("nexpediente__icontains", filtroNroExpediente);
+    if (filtroNExpediente !== "") {
+      params.append("nexpediente__icontains", filtroNExpediente);
     }
-    if (filtroEstado !== "") {
-      params.append("estado", filtroEstado.toString());
+    if (filtroNResolucion !== "") {
+      params.append("nresolucion__icontains", filtroNResolucion);
     }
     if (filtroTipo !== "") {
       params.append("tipo", filtroTipo);
     }
-    if (filtroNroResolucion !== "") {
-      params.append("nresolucion__icontains", filtroNroResolucion);
+    if (filtroFecha !== "") {
+      params.append("fecha__date", filtroFecha);
     }
-    if (filtroFecha) {
-      const fechaStr = filtroFecha.format("YYYY-MM-DD");
-      if (fechaStr !== "Invalid Date") {
-        params.append("fecha__date", fechaStr);
-      }
+    if (filtroEstado === "todos") {
+      params.append("show_all", "true");
+    } else if (filtroEstado !== "" && filtroEstado !== "todos") {
+      params.append("estado", filtroEstado.toString());
     }
 
+    params.append("page", "1");
     url += params.toString();
+    setCurrentPage(1);
+    setCurrentUrl(url);
+  };
+
+  const limpiarFiltros = () => {
+    setFiltroNExpediente("");
+    setFiltroNResolucion("");
+    setFiltroTipo("");
+    setFiltroFecha("");
+    setFiltroEstado("1");
+  };
+
+  const handlePageChange = (newPage: number) => {
+    let url = `${API_BASE_URL}/facet/resolucion/?`;
+    const params = new URLSearchParams();
+
+    if (filtroNExpediente !== "") {
+      params.append("nexpediente__icontains", filtroNExpediente);
+    }
+    if (filtroNResolucion !== "") {
+      params.append("nresolucion__icontains", filtroNResolucion);
+    }
+    if (filtroTipo !== "") {
+      params.append("tipo", filtroTipo);
+    }
+    if (filtroFecha !== "") {
+      params.append("fecha__date", filtroFecha);
+    }
+    if (filtroEstado === "todos") {
+      params.append("show_all", "true");
+    } else if (filtroEstado !== "" && filtroEstado !== "todos") {
+      params.append("estado", filtroEstado.toString());
+    }
+
+    params.append("page", newPage.toString());
+    url += params.toString();
+
+    setCurrentPage(newPage);
     setCurrentUrl(url);
   };
 
@@ -127,14 +175,17 @@ const ListaResoluciones = () => {
       const params = new URLSearchParams();
 
       // Agrega los filtros actuales al URL de exportación
-      if (filtroNroExpediente !== "")
-        params.append("nexpediente__icontains", filtroNroExpediente);
-      if (filtroEstado !== "") params.append("estado", filtroEstado.toString());
+      if (filtroNExpediente !== "")
+        params.append("nexpediente__icontains", filtroNExpediente);
+      if (filtroEstado === "todos") {
+        params.append("show_all", "true");
+      } else if (filtroEstado !== "" && filtroEstado !== "todos") {
+        params.append("estado", filtroEstado.toString());
+      }
       if (filtroTipo !== "") params.append("tipo", filtroTipo);
-      if (filtroNroResolucion !== "")
-        params.append("nresolucion__icontains", filtroNroResolucion);
-      if (filtroFecha)
-        params.append("fecha__date", filtroFecha.format("YYYY-MM-DD"));
+      if (filtroNResolucion !== "")
+        params.append("nresolucion__icontains", filtroNResolucion);
+      if (filtroFecha !== "") params.append("fecha__date", filtroFecha);
       url += params.toString();
 
       // Obtiene todos los datos para el Excel
@@ -196,139 +247,135 @@ const ListaResoluciones = () => {
 
   const totalPages = Math.ceil(totalItems / pageSize);
 
+  // Modal de loading
+  if (isLoading) {
+    return (
+      <DashboardMenu>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+            <p className="text-gray-700 text-lg font-medium">
+              Cargando resoluciones...
+            </p>
+          </div>
+        </div>
+      </DashboardMenu>
+    );
+  }
+
   return (
     <DashboardMenu>
-      <div className="p-6">
-        <div className="flex gap-4 mb-6">
-          <button
-            onClick={() => router.push("/dashboard/resoluciones/create")}
-            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-            <AddIcon /> Agregar Resolución
-          </button>
-          <button
-            onClick={descargarExcel}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-            <FileDownloadIcon /> Descargar Excel
-          </button>
+      <div className="bg-white rounded-lg shadow-lg">
+        <div className="p-6 border-b border-gray-200">
+          <h1 className="text-2xl font-bold text-gray-800">Resoluciones</h1>
         </div>
 
-        <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
-          <Typography variant="h4" gutterBottom className="text-gray-800">
-            Resoluciones
-          </Typography>
+        <div className="p-6">
+          <div className="flex gap-4 mb-6">
+            <button
+              onClick={() => router.push("/dashboard/resoluciones/create")}
+              className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+              <AddIcon /> Agregar Resolución
+            </button>
+            <button
+              onClick={descargarExcel}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+              <FileDownloadIcon /> Descargar Excel
+            </button>
+          </div>
 
-          <Grid container spacing={2}>
-            <Grid item xs={4}>
-              <TextField
-                label="Nro Expediente"
-                value={filtroNroExpediente}
-                onChange={(e) => setFiltroNroExpediente(e.target.value)}
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                label="Nro Resolución"
-                value={filtroNroResolucion}
-                onChange={(e) => setFiltroNroResolucion(e.target.value)}
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <FormControl fullWidth margin="none">
-                <InputLabel id="demo-simple-select-label">Tipo</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={filtroTipo}
-                  label="Tipo"
-                  onChange={(e) => setFiltroTipo(e.target.value)}>
-                  <MenuItem value={""}>Todos</MenuItem>
-                  <MenuItem value={"Rector"}>Rector</MenuItem>
-                  <MenuItem value={"Decano"}>Decano</MenuItem>
-                  <MenuItem value={"Consejo_Superior"}>
-                    Consejo Superior
-                  </MenuItem>
-                  <MenuItem value={"Consejo_Directivo"}>
-                    Consejo Directivo
-                  </MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={4} marginBottom={2}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label="Fecha"
-                  value={filtroFecha}
-                  onChange={(date) => {
-                    if (date) {
-                      const fechaSeleccionada = dayjs(date).utc();
-                      setFiltroFecha(fechaSeleccionada);
-                    }
-                  }}
-                />
-              </LocalizationProvider>
-            </Grid>
-            <Grid item xs={4} marginBottom={2}>
-              <button
-                onClick={filtrarResoluciones}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                Filtrar
-              </button>
-            </Grid>
-          </Grid>
+          <FilterContainer
+            onApply={filtrarResoluciones}
+            onClear={limpiarFiltros}>
+            <FilterInput
+              label="N° Expediente"
+              value={filtroNExpediente}
+              onChange={setFiltroNExpediente}
+              placeholder="Buscar por N° expediente"
+            />
+            <FilterInput
+              label="N° Resolución"
+              value={filtroNResolucion}
+              onChange={setFiltroNResolucion}
+              placeholder="Buscar por N° resolución"
+            />
+            <FilterSelect
+              label="Tipo"
+              value={filtroTipo}
+              onChange={setFiltroTipo}
+              options={[
+                { value: "Rectoral", label: "Rectoral" },
+                { value: "Consejo Superior", label: "Consejo Superior" },
+                { value: "Consejo Directivo", label: "Consejo Directivo" },
+              ]}
+              placeholder="Seleccionar tipo"
+            />
+            <FilterInput
+              label="Fecha"
+              value={filtroFecha}
+              onChange={setFiltroFecha}
+              type="date"
+            />
+            <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
+          </FilterContainer>
 
-          <TableContainer component={Paper} className="mt-4">
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
             <Table>
               <TableHead>
                 <TableRow className="bg-blue-500">
-                  <TableCell className="header-cell font-medium">
+                  <TableCell className="text-white font-semibold">
                     Nro Expediente
                   </TableCell>
-                  <TableCell className="header-cell font-medium">
+                  <TableCell className="text-white font-semibold">
                     Nro Resolución
                   </TableCell>
-                  <TableCell className="header-cell font-medium">
+                  <TableCell className="text-white font-semibold">
                     Tipo
                   </TableCell>
-                  <TableCell className="header-cell font-medium">
+                  <TableCell className="text-white font-semibold">
                     Fecha
                   </TableCell>
-                  <TableCell className="header-cell font-medium">
+                  <TableCell className="text-white font-semibold">
                     Carga
                   </TableCell>
-                  <TableCell className="header-cell font-medium">
+                  <TableCell className="text-white font-semibold">
                     Estado
                   </TableCell>
-                  <TableCell className="header-cell font-medium">
+                  <TableCell className="text-white font-semibold">
                     Adjunto
                   </TableCell>
-                  <TableCell className="header-cell font-medium">
+                  <TableCell className="text-white font-semibold">
                     Observaciones
                   </TableCell>
-                  <TableCell className="header-cell font-medium"></TableCell>
+                  <TableCell className="text-white font-semibold">
+                    Acciones
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {resoluciones.map((resolucion) => (
                   <TableRow key={resolucion.id} className="hover:bg-gray-50">
-                    <TableCell>{resolucion.nexpediente}</TableCell>
-                    <TableCell>{resolucion.nresolucion}</TableCell>
-                    <TableCell>
+                    <TableCell className="text-gray-800">
+                      {resolucion.nexpediente}
+                    </TableCell>
+                    <TableCell className="text-gray-800">
+                      {resolucion.nresolucion}
+                    </TableCell>
+                    <TableCell className="text-gray-800">
                       {resolucion.tipo === "Consejo_Superior"
                         ? "Consejo Superior"
                         : resolucion.tipo === "Consejo_Directivo"
                         ? "Consejo Directivo"
                         : resolucion.tipo}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-gray-800">
                       {dayjs(resolucion.fecha, "DD/MM/YYYY HH:mm:ss").isValid()
                         ? dayjs(resolucion.fecha, "DD/MM/YYYY HH:mm:ss").format(
                             "DD/MM/YYYY"
                           )
                         : "No disponible"}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-gray-800">
                       {dayjs(
                         resolucion.fecha_creacion,
                         "DD/MM/YYYY HH:mm:ss"
@@ -338,7 +385,7 @@ const ListaResoluciones = () => {
                           )
                         : "No disponible"}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-gray-800">
                       {resolucion.estado == 1 ? "Activo" : "Inactivo"}
                     </TableCell>
                     <TableCell className="text-center">
@@ -362,7 +409,7 @@ const ListaResoluciones = () => {
                             `/dashboard/resoluciones/edit/${resolucion.id}`
                           )
                         }
-                        className="p-2 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-100 transition-colors duration-200">
+                        className="p-2 text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-100 transition-colors duration-200">
                         <EditIcon />
                       </button>
                     </TableCell>
@@ -370,40 +417,34 @@ const ListaResoluciones = () => {
                 ))}
               </TableBody>
             </Table>
-          </TableContainer>
+          </div>
 
-          <div className="flex justify-between items-center mt-4">
+          <div className="flex justify-between items-center mt-6">
             <button
-              onClick={() => {
-                prevUrl && setCurrentUrl(prevUrl);
-                setCurrentPage(currentPage - 1);
-              }}
-              disabled={!prevUrl}
-              className={`px-4 py-2 rounded-md ${
-                prevUrl
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`px-4 py-2 rounded-lg font-medium ${
+                currentPage > 1
                   ? "bg-blue-500 text-white hover:bg-blue-600"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               } transition-colors duration-200`}>
               Anterior
             </button>
-            <Typography variant="body1">
+            <span className="text-gray-600">
               Página {currentPage} de {totalPages}
-            </Typography>
+            </span>
             <button
-              onClick={() => {
-                nextUrl && setCurrentUrl(nextUrl);
-                setCurrentPage(currentPage + 1);
-              }}
-              disabled={!nextUrl}
-              className={`px-4 py-2 rounded-md ${
-                nextUrl
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage >= totalPages}
+              className={`px-4 py-2 rounded-lg font-medium ${
+                currentPage < totalPages
                   ? "bg-blue-500 text-white hover:bg-blue-600"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               } transition-colors duration-200`}>
               Siguiente
             </button>
           </div>
-        </Paper>
+        </div>
       </div>
     </DashboardMenu>
   );
