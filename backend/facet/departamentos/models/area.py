@@ -16,7 +16,3 @@ class Area(BaseModel):
         ordering = ['nombre']
         verbose_name = 'Area'
         verbose_name_plural = 'Areas'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['nombre'], name='ux_nombre_area'),
-        ]
