@@ -84,6 +84,7 @@ CSRF_TRUSTED_ORIGINS = ['https://docentes.facet.unt.edu.ar/api']
 
 '''
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_COOKIE_SECURE = False  # Requiere HTTPS
 CSRF_COOKIE_HTTPONLY = False  # Permite acceso desde JS, document.cookie
 CSRF_COOKIE_SAMESITE = "Lax"  # O "None" si frontend y backend están en dominios distintos
