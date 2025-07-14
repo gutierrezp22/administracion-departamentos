@@ -12,7 +12,6 @@ import {
 import { useRouter } from "next/router";
 import DashboardMenu from "../../..";
 import withAuth from "../../../../../components/withAut";
-import { API_BASE_URL } from "../../../../../utils/config";
 import API from "@/api/axiosConfig";
 
 const EditarDocente: React.FC = () => {
@@ -53,12 +52,12 @@ const EditarDocente: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `${API_BASE_URL}/facet/docente/${id}/`
+        const response = await API.get(
+          `/facet/docente/${id}/`
         );
         setPersona(response.data.persona);
-        const responsePers = await axios.get(
-          `${API_BASE_URL}/facet/persona/${response.data.persona}/`
+        const responsePers = await API.get(
+          `/facet/persona/${response.data.persona}/`
         );
         setNombre(responsePers.data.nombre);
         setApellido(responsePers.data.apellido);
@@ -89,7 +88,7 @@ const EditarDocente: React.FC = () => {
     };
 
     try {
-      await API.put(`facet/docente/${id}/`, docenteEditado);
+      await API.put(`/facet/docente/${id}/`, docenteEditado);
       handleOpenModal("Éxito", "La acción se realizó con éxito.");
     } catch (error) {
       handleOpenModal("Error", "NO se pudo realizar la acción.");

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
-import axios from "axios";
 import {
   Typography,
   Paper,
@@ -27,7 +26,6 @@ import { useRouter } from "next/router";
 import BasicModal from "@/utils/modal";
 import ModalConfirmacion from "@/utils/modalConfirmacion";
 import withAuth from "../../../../../components/withAut";
-import { API_BASE_URL } from "../../../../../utils/config";
 import API from "@/api/axiosConfig";
 
 const ListaAsignaturaCarrera = () => {
@@ -111,10 +109,10 @@ const ListaAsignaturaCarrera = () => {
     try {
       const [areasRes, asignaturasRes, deptosRes, asignaturasCarreraRes] =
         await Promise.all([
-          axios.get(`${API_BASE_URL}/facet/area/`),
-          axios.get(`${API_BASE_URL}/facet/asignatura/`),
-          axios.get(`${API_BASE_URL}/facet/departamento/`),
-          axios.get(`${API_BASE_URL}/facet/asignatura-carrera/`, {
+          API.get(`/facet/area/`),
+          API.get(`/facet/asignatura/`),
+          API.get(`/facet/departamento/`),
+          API.get(`/facet/asignatura-carrera/`, {
             params: { idcarrera: idCarrera },
           }),
         ]);

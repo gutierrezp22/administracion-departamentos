@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+
 import {
   Container,
   Grid,
@@ -15,7 +15,6 @@ import {
 import { useRouter } from "next/router";
 import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut";
-import { API_BASE_URL } from "../../../../utils/config";
 import API from "@/api/axiosConfig";
 
 const EditarPersona: React.FC = () => {
@@ -60,7 +59,7 @@ const EditarPersona: React.FC = () => {
   useEffect(() => {
     const fetchTitulos = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/facet/tipo-titulo/`);
+        const response = await API.get(`/facet/tipo-titulo/`);
         setTitulos(response.data.results);
       } catch (error) {
         console.error("Error al obtener títulos:", error);
@@ -74,8 +73,8 @@ const EditarPersona: React.FC = () => {
     if (idPersona) {
       const fetchData = async () => {
         try {
-          const response = await axios.get(
-            `${API_BASE_URL}/facet/persona/${idPersona}/`
+          const response = await API.get(
+            `/facet/persona/${idPersona}/`
           );
           const personaData = response.data;
           setPersona(personaData);
@@ -116,15 +115,15 @@ const EditarPersona: React.FC = () => {
 
   const edicionPersona = async () => {
     const personaEditada = {
-      nombre,
-      apellido,
-      telefono,
-      dni,
-      estado: Number(estado),
-      email,
-      interno: interno !== "" ? Number(interno) : null, // ⚡ Convertir interno a número o null
-      legajo,
-      titulo: tituloId,
+      nombre: nombre.trim(),
+      apellido: apellido.trim(),
+      telefono: telefono.trim() || null,
+      dni: dni.trim(),
+      estado: estado, // CharField, no Number
+      email: email.trim() || null,
+      interno: interno !== "" ? Number(interno) : null,
+      legajo: legajo.trim() || null,
+      titulo: tituloId || null,
     };
 
     try {
@@ -185,16 +184,16 @@ const EditarPersona: React.FC = () => {
               <TextField
                 select
                 label="Título"
-                  value={tituloId}
-                  onChange={(e) => setTituloId(Number(e.target.value))}
+                value={tituloId}
+                onChange={(e) => setTituloId(Number(e.target.value))}
                 fullWidth
                 variant="outlined">
-                  <MenuItem value="">Sin título</MenuItem>
-                  {titulos.map((titulo) => (
-                    <MenuItem key={titulo.id} value={titulo.id}>
-                      {titulo.nombre}
-                    </MenuItem>
-                  ))}
+                <MenuItem value="">Sin título</MenuItem>
+                {titulos.map((titulo) => (
+                  <MenuItem key={titulo.id} value={titulo.id}>
+                    {titulo.nombre}
+                  </MenuItem>
+                ))}
               </TextField>
             </Grid>
             <Grid item xs={12}>
@@ -214,8 +213,8 @@ const EditarPersona: React.FC = () => {
                 onChange={(e) => setEstado(e.target.value)}
                 fullWidth
                 variant="outlined">
-                  <MenuItem value="1">Activo</MenuItem>
-                  <MenuItem value="0">Inactivo</MenuItem>
+                <MenuItem value="1">Activo</MenuItem>
+                <MenuItem value="0">Inactivo</MenuItem>
               </TextField>
             </Grid>
             <Grid item xs={12}>
@@ -228,19 +227,19 @@ const EditarPersona: React.FC = () => {
               />
             </Grid>
             <Grid item xs={12}>
-  <TextField
-    label="Interno"
-    type="number" // ✅ Asegurar que solo acepte números
-    value={interno}
+              <TextField
+                label="Interno"
+                type="number" // ✅ Asegurar que solo acepte números
+                value={interno}
                 onChange={(e) =>
                   setInterno(
                     e.target.value === "" ? "" : Number(e.target.value)
                   )
                 } // ✅ Conversión segura
-    fullWidth
+                fullWidth
                 variant="outlined"
-  />
-</Grid>
+              />
+            </Grid>
 
             {/* ✅ Botones de acción */}
             <Grid item xs={12} marginBottom={2}>

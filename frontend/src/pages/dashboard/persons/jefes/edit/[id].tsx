@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
-import axios from 'axios';
 import { 
   Container, 
   Grid, 
@@ -12,7 +11,6 @@ import {
 import { useRouter } from 'next/router'; 
 import DashboardMenu from '../../..';
 import withAuth from "../../../../../components/withAut"; 
-import { API_BASE_URL } from "../../../../../utils/config";
 import API from '@/api/axiosConfig';
 
 const EditarJefe: React.FC = () => {
@@ -46,7 +44,7 @@ const EditarJefe: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/facet/jefe/${id}/obtener_jefe/`);
+        const response = await API.get(`/facet/jefe/${id}/obtener_jefe/`);
 
         // Extrae y configura los datos del jefe y la persona asociada
         setPersona(response.data.persona.id);

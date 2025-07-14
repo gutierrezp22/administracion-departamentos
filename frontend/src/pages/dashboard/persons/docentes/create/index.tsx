@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
-import axios from "axios";
 import {
   Container,
   Paper,
@@ -24,7 +23,6 @@ import BasicModal from "@/utils/modal";
 import { useRouter } from "next/router";
 import DashboardMenu from "../../../../dashboard";
 import withAuth from "../../../../../components/withAut";
-import { API_BASE_URL } from "../../../../../utils/config";
 import API from "@/api/axiosConfig";
 
 const CrearDocente = () => {
@@ -81,7 +79,7 @@ const CrearDocente = () => {
 
   const handleOpenPersona = () => {
     setOpenPersona(true);
-    fetchPersonas(`${API_BASE_URL}/facet/persona/`);
+    fetchPersonas(`/facet/persona/`);
   };
 
   const handleClose = () => {
@@ -90,7 +88,7 @@ const CrearDocente = () => {
 
   const fetchPersonas = async (url: string) => {
     try {
-      const response = await axios.get(url);
+      const response = await API.get(url);
       setPersonas(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
@@ -101,7 +99,7 @@ const CrearDocente = () => {
   };
 
   const filtrarPersonas = () => {
-    let url = `${API_BASE_URL}/facet/persona/?`;
+    let url = `/facet/persona/?`;
     const params = new URLSearchParams();
 
     if (filtroNombre.trim()) params.append("nombre__icontains", filtroNombre);
@@ -123,7 +121,7 @@ const CrearDocente = () => {
 
     try {
       // Busca si ya existe un docente asociado a esta persona (incluye activos e inactivos)
-      const response = await axios.get(`${API_BASE_URL}/facet/docente/`, {
+      const response = await API.get(`/facet/docente/`, {
         params: {
           persona: persona?.id, // Filtrar por ID de la persona
           show_all: true, // Incluir todos los estados para validación completa

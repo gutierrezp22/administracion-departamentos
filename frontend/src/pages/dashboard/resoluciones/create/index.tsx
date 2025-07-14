@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
-import axios from "axios";
 import {
   Container,
   Paper,
@@ -23,8 +22,7 @@ import BasicModal from "@/utils/modal";
 import Swal from "sweetalert2";
 import { useRouter } from "next/router"; // Importa useRouter de Next.js
 import DashboardMenu from "../..";
-import withAuth from "../../../../components/withAut"; 
-import { API_BASE_URL } from "../../../../utils/config";
+import withAuth from "../../../../components/withAut";
 import API from "@/api/axiosConfig";
 
 // Habilita los plugins
@@ -104,32 +102,32 @@ const CrearResolucion = () => {
 
   return (
     <DashboardMenu>
-    <Container maxWidth="lg">
+      <Container maxWidth="lg">
         <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
           <Typography variant="h4" gutterBottom className="text-gray-800">
-          Crear Resolución
-        </Typography>
-        {/* Agrega controles de entrada y botones para los filtros */}
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <TextField
-              label="Nro Expediente"
-              value={nroExpediente}
-              onChange={(e) => setNroExpediente(e.target.value)}
-              fullWidth
+            Crear Resolución
+          </Typography>
+          {/* Agrega controles de entrada y botones para los filtros */}
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                label="Nro Expediente"
+                value={nroExpediente}
+                onChange={(e) => setNroExpediente(e.target.value)}
+                fullWidth
                 variant="outlined"
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Nro Resolución"
-              value={nroResolucion}
-              onChange={(e) => setNroResolucion(e.target.value)}
-              fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Nro Resolución"
+                value={nroResolucion}
+                onChange={(e) => setNroResolucion(e.target.value)}
+                fullWidth
                 variant="outlined"
-            />
-          </Grid>
-          <Grid item xs={12}>
+              />
+            </Grid>
+            <Grid item xs={12}>
               <TextField
                 select
                 fullWidth
@@ -142,17 +140,17 @@ const CrearResolucion = () => {
                 <MenuItem value="Consejo_Superior">Consejo Superior</MenuItem>
                 <MenuItem value="Consejo_Directivo">Consejo Directivo</MenuItem>
               </TextField>
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Link Documento Adjunto"
-              value={adjunto}
-              onChange={(e) => setAdjunto(e.target.value)}
-              fullWidth
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Link Documento Adjunto"
+                value={adjunto}
+                onChange={(e) => setAdjunto(e.target.value)}
+                fullWidth
                 variant="outlined"
-            />
-          </Grid>
-          <Grid item xs={12}>
+              />
+            </Grid>
+            <Grid item xs={12}>
               <TextField
                 select
                 fullWidth
@@ -163,29 +161,29 @@ const CrearResolucion = () => {
                 <MenuItem value="1">Activo</MenuItem>
                 <MenuItem value="0">Inactivo</MenuItem>
               </TextField>
-          </Grid>
-          <Grid item xs={12} marginBottom={2}>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label="Fecha"
-                value={fecha}
-                onChange={(date) => {
-                  if (date) {
-                    const fechaSeleccionada = dayjs(date).utc(); // Usa .utc() para evitar problemas de zona horaria
-                    setFecha(fechaSeleccionada);
-                  }
-                }}
+            </Grid>
+            <Grid item xs={12} marginBottom={2}>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  label="Fecha"
+                  value={fecha}
+                  onChange={(date) => {
+                    if (date) {
+                      const fechaSeleccionada = dayjs(date).utc(); // Usa .utc() para evitar problemas de zona horaria
+                      setFecha(fechaSeleccionada);
+                    }
+                  }}
                   slotProps={{
                     textField: { fullWidth: true, variant: "outlined" },
                   }}
-              />
-            </LocalizationProvider>
-          </Grid>
-          <Grid item xs={12} marginBottom={2}>
+                />
+              </LocalizationProvider>
+            </Grid>
+            <Grid item xs={12} marginBottom={2}>
               <button
                 onClick={crearNuevaResolucion}
                 className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-              Crear
+                Crear
               </button>
             </Grid>
           </Grid>
@@ -221,8 +219,8 @@ const CrearResolucion = () => {
               </div>
             </div>
           )}
-      </Paper>
-    </Container>
+        </Paper>
+      </Container>
     </DashboardMenu>
   );
 };

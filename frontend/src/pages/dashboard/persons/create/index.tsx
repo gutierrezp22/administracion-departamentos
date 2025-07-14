@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
-import axios from 'axios';
 import {
   Container,
   Paper,
@@ -17,7 +16,6 @@ import BasicModal from '@/utils/modal';
 import { useRouter } from 'next/router';
 import DashboardMenu from '../../../dashboard';
 import withAuth from "../../../../components/withAut"; 
-import { API_BASE_URL } from "../../../../utils/config";
 import API from '@/api/axiosConfig';
 
 interface Titulo {
@@ -36,7 +34,7 @@ const CrearPersona = () => {
   const [telefono, setTelefono] = useState('');
   const [email, setEmail] = useState('');
   const [interno, setInterno] = useState('');
-  const [estado, setEstado] = useState('');
+  const [estado, setEstado] = useState('1'); // Valor por defecto: Activo
   const [titulos, setTitulos] = useState<Titulo[]>([]);
   const [tituloId, setTituloId] = useState<number | ''>('');
   const [modalVisible, setModalVisible] = useState(false);
@@ -66,7 +64,7 @@ const CrearPersona = () => {
   useEffect(() => {
     const fetchTitulos = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/facet/tipo-titulo/`);
+        const response = await API.get(`/facet/tipo-titulo/`);
         setTitulos(response.data.results);
       } catch (error) {
         console.error('Error al obtener títulos:', error);
@@ -82,22 +80,29 @@ const CrearPersona = () => {
 
   // Función para crear una nueva persona
   const crearNuevaPersona = async () => {
+    // Validar campos requeridos
+    if (!nombre.trim() || !apellido.trim() || !dni.trim()) {
+      handleOpenModal('Error', 'Los campos Nombre, Apellido y DNI son obligatorios.', () => {});
+      return;
+    }
+
     const nuevaPersona = {
-      nombre: nombre,
-      apellido: apellido,
-      telefono: telefono,
-      dni: dni,
+      nombre: nombre.trim(),
+      apellido: apellido.trim(),
+      telefono: telefono.trim() || null,
+      dni: dni.trim(),
       estado: estado,
-      email: email,
-      interno: interno,
-      legajo: legajo,
-      titulo: tituloId, // Añadido el campo título en la solicitud
+      email: email.trim() || null,
+      interno: interno.trim() ? parseInt(interno.trim()) : null,
+      legajo: legajo.trim() || null,
+      titulo: tituloId || null,
     };
 
     try {
       const response = await API.post(`/facet/persona/`, nuevaPersona);
       handleOpenModal('Éxito', 'Se creó la persona con éxito.', handleConfirmModal);
     } catch (error) {
+      console.error('Error al crear persona:', error);
       handleOpenModal('Error', 'No se pudo realizar la acción.', () => {});
     }
   };

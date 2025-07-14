@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
-import axios from "axios";
 import API from "@/api/axiosConfig";
 import {
   Container,
@@ -25,7 +24,7 @@ import { useRouter } from "next/router";
 import DashboardMenu from "../../../dashboard";
 import Swal from "sweetalert2";
 import withAuth from "../../../../components/withAut"; // Importa el HOC
-import { API_BASE_URL } from "../../../../utils/config";
+
 
 const CrearArea = () => {
   const router = useRouter();
@@ -42,7 +41,7 @@ const CrearArea = () => {
     useState<Departamento | null>(null);
   const [openDepartamentoModal, setOpenDepartamentoModal] = useState(false);
   const [nombre, setNombre] = useState("");
-  const [estado, setEstado] = useState("");
+  const [estado, setEstado] = useState("1"); // Valor por defecto: Activo
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
@@ -54,7 +53,7 @@ const CrearArea = () => {
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>(
-    `${API_BASE_URL}/facet/departamento/`
+    `/facet/departamento/`
   );
   const [totalItems, setTotalItems] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -63,6 +62,11 @@ const CrearArea = () => {
   function capitalizeFirstLetter(string: string) {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   }
+
+  // Función helper para normalizar URLs
+  const normalizeUrl = (url: string) => {
+    return url.replace(window.location.origin, '').replace(/^\/+/, '/');
+  };
 
   const handleOpenModal = (
     title: string,
@@ -100,6 +104,7 @@ const CrearArea = () => {
 
   const fetchDepartamentos = async (url: string) => {
     try {
+      console.log("Fetching departamentos from URL:", url);
       const response = await API.get(url);
 
       setDepartamentos(response.data.results); // Lista de departamentos paginados
@@ -108,26 +113,29 @@ const CrearArea = () => {
       setTotalItems(response.data.count); // Total de elementos en la base de datos
 
       // Calcular la página actual usando offset
-      const offset = new URL(url).searchParams.get("offset") || "0";
+      // Construir URL completa solo si es necesario
+      const fullUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
+      const offset = new URL(fullUrl).searchParams.get("offset") || "0";
       setCurrentPage(Math.floor(Number(offset) / pageSize) + 1);
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Error al obtener los departamentos.",
-      });
+      console.error("Error al obtener departamentos:", error);
+      setDepartamentos([]);
+      setNextUrl(null);
+      setPrevUrl(null);
+      setTotalItems(0);
+      // No mostrar modal de error aquí, solo loguear
     }
   };
 
   const filtrarDepartamentos = () => {
-    let url = `${API_BASE_URL}/facet/departamento/?`;
+    let url = `/facet/departamento/?`;
     const params = new URLSearchParams();
 
     if (filtroDepartamentos)
       params.append("nombre__icontains", filtroDepartamentos);
 
     url += params.toString();
-    setCurrentUrl(url); // Actualiza la URL, lo que dispara el useEffect
+    setCurrentUrl(normalizeUrl(url)); // Actualiza la URL, lo que dispara el useEffect
   };
 
   const handleFilterDepartamentos = (filtro: string) => {
@@ -137,38 +145,34 @@ const CrearArea = () => {
   };
 
   const crearNuevaArea = async () => {
+    // Validar campos requeridos
     if (!departamentoSeleccionado) {
-      Swal.fire({
-        icon: "warning",
-        title: "Advertencia",
-        text: "Debe seleccionar un departamento.",
-      });
+      handleOpenModal("Error", "Debe seleccionar un departamento.", () => {});
+      return;
+    }
+
+    if (!nombre.trim()) {
+      handleOpenModal("Error", "El nombre del área es obligatorio.", () => {});
       return;
     }
 
     const nuevaArea = {
       departamento: departamentoSeleccionado.id,
-      nombre: nombre,
+      nombre: nombre.trim(),
       estado: estado,
     };
 
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/facet/area/`,
-        nuevaArea,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await API.post(`/facet/area/`, nuevaArea);
       handleOpenModal(
         "Éxito",
         "Se creó el área con éxito.",
         handleConfirmModal
       );
-    } catch (error) {
-      handleOpenModal("Error", "NO se pudo realizar la acción.", () => {});
+    } catch (error: any) {
+      console.error("Error al crear área:", error);
+      const errorMessage = error.response?.data?.message || "NO se pudo realizar la acción.";
+      handleOpenModal("Error", errorMessage, () => {});
     }
   };
 
@@ -256,7 +260,7 @@ const CrearArea = () => {
                   {/* Paginación */}
                   <div className="flex justify-between items-center mt-4">
                     <button
-                      onClick={() => prevUrl && setCurrentUrl(prevUrl)}
+                      onClick={() => prevUrl && setCurrentUrl(normalizeUrl(prevUrl))}
                       disabled={!prevUrl}
                       className={`mr-2 px-3 py-1 rounded-md ${
                         !prevUrl
@@ -269,7 +273,7 @@ const CrearArea = () => {
                       Página {currentPage} de {Math.ceil(totalItems / pageSize)}
                     </Typography>
                     <button
-                      onClick={() => nextUrl && setCurrentUrl(nextUrl)}
+                      onClick={() => nextUrl && setCurrentUrl(normalizeUrl(nextUrl))}
                       disabled={!nextUrl}
                       className={`ml-2 px-3 py-1 rounded-md ${
                         !nextUrl

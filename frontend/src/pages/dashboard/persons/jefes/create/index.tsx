@@ -23,7 +23,6 @@ import BasicModal from "@/utils/modal";
 import { useRouter } from "next/router"; // Importa useRouter de Next.js
 import DashboardMenu from "../../../../dashboard";
 import withAuth from "../../../../../components/withAut";
-import { API_BASE_URL } from "../../../../../utils/config";
 import API from "@/api/axiosConfig";
 
 const CrearJefe = () => {
@@ -85,7 +84,7 @@ const CrearJefe = () => {
 
   const handleOpenPersona = () => {
     setOpenPersona(true);
-    fetchPersonas(`${API_BASE_URL}/facet/persona/`);
+    fetchPersonas(`/facet/persona/`);
   };
 
   const handleClose = () => {
@@ -94,7 +93,7 @@ const CrearJefe = () => {
 
   const fetchPersonas = async (url: string) => {
     try {
-      const response = await axios.get(url);
+      const response = await API.get(url);
       setPersonas(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
@@ -105,7 +104,7 @@ const CrearJefe = () => {
   };
 
   const filtrarPersonas = () => {
-    let url = `${API_BASE_URL}/facet/persona/?`;
+    let url = `/facet/persona/?`;
     const params = new URLSearchParams();
 
     if (filtroNombre) params.append("nombre__icontains", filtroNombre);
@@ -130,8 +129,8 @@ const CrearJefe = () => {
 
     try {
       // 🔹 Verificar si la persona ya es un jefe
-      const response = await axios.get(
-        `${API_BASE_URL}/facet/jefe/existe_jefe/`,
+      const response = await API.get(
+        `/facet/jefe/existe_jefe/`,
         {
           params: { persona_id: persona.id },
         }

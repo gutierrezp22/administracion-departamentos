@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
-import axios from "axios";
 import {
   Container,
   Paper,
@@ -31,7 +30,6 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import DashboardMenu from "../../../..";
 import withAuth from "../../../../../../components/withAut";
-import { API_BASE_URL } from "../../../../../../utils/config";
 import API from "@/api/axiosConfig";
 
 // Habilita los plugins
@@ -130,7 +128,7 @@ const CrearAsignaturaCarrera = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/facet/asignatura/`);
+        const response = await API.get(`/facet/asignatura/`);
         setAsignaturas(response.data.results);
       } catch (error) {
         console.error("Error fetching data:", error);

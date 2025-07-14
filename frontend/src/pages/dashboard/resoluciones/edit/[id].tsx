@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
-import axios from "axios";
 import {
   Container,
   Grid,
@@ -19,8 +18,7 @@ import BasicModal from "@/utils/modal";
 import ModalConfirmacion from "@/utils/modalConfirmacion";
 import { useRouter } from "next/router";
 import DashboardMenu from "../..";
-import withAuth from "../../../../components/withAut"; 
-import { API_BASE_URL } from "../../../../utils/config";
+import withAuth from "../../../../components/withAut";
 import API from "@/api/axiosConfig";
 
 dayjs.extend(utc);
@@ -48,9 +46,7 @@ const EditarResolucion = () => {
     const fetchData = async () => {
       if (idResolucion) {
         try {
-          const response = await axios.get(
-            `${API_BASE_URL}/facet/resolucion/${idResolucion}/`
-          );
+          const response = await API.get(`/facet/resolucion/${idResolucion}/`);
 
           setNroExpediente(response.data.nexpediente);
           setNroResolucion(response.data.nresolucion);
@@ -189,93 +185,93 @@ const EditarResolucion = () => {
 
   return (
     <>
-    <DashboardMenu>
-    <Container maxWidth="lg">
+      <DashboardMenu>
+        <Container maxWidth="lg">
           <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
             <Typography variant="h4" gutterBottom className="text-gray-800">
-          Editar Resolución
-        </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <TextField
-              label="Nro Expediente"
-              value={nroExpediente}
-              onChange={(e) => setNroExpediente(e.target.value)}
-              fullWidth
+              Editar Resolución
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  label="Nro Expediente"
+                  value={nroExpediente}
+                  onChange={(e) => setNroExpediente(e.target.value)}
+                  fullWidth
                   variant="outlined"
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Nro Resolución"
-              value={nroResolucion}
-              onChange={(e) => setNroResolucion(e.target.value)}
-              fullWidth
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Nro Resolución"
+                  value={nroResolucion}
+                  onChange={(e) => setNroResolucion(e.target.value)}
+                  fullWidth
                   variant="outlined"
-            />
-          </Grid>
-          <Grid item xs={12}>
+                />
+              </Grid>
+              <Grid item xs={12}>
                 <TextField
                   select
                   fullWidth
                   label="Tipo"
-              value={tipo}
-              onChange={(e) => setTipo(e.target.value)}
+                  value={tipo}
+                  onChange={(e) => setTipo(e.target.value)}
                   variant="outlined">
-              <MenuItem value="Rector">Rector</MenuItem>
-              <MenuItem value="Decano">Decano</MenuItem>
-              <MenuItem value="Consejo_Superior">Consejo Superior</MenuItem>
+                  <MenuItem value="Rector">Rector</MenuItem>
+                  <MenuItem value="Decano">Decano</MenuItem>
+                  <MenuItem value="Consejo_Superior">Consejo Superior</MenuItem>
                   <MenuItem value="Consejo_Directivo">
                     Consejo Directivo
                   </MenuItem>
                 </TextField>
-        </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Link Documento Adjunto"
-              value={adjunto}
-              onChange={(e) => setAdjunto(e.target.value)}
-              fullWidth
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Link Documento Adjunto"
+                  value={adjunto}
+                  onChange={(e) => setAdjunto(e.target.value)}
+                  fullWidth
                   variant="outlined"
-            />
-          </Grid>
-          <Grid item xs={12}>
+                />
+              </Grid>
+              <Grid item xs={12}>
                 <TextField
                   select
                   fullWidth
                   label="Estado"
-                value={estado}
-                onChange={(e) => setEstado(e.target.value)}
+                  value={estado}
+                  onChange={(e) => setEstado(e.target.value)}
                   variant="outlined">
                   <MenuItem value="1">Activo</MenuItem>
                   <MenuItem value="0">Inactivo</MenuItem>
                 </TextField>
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Observaciones"
-              value={observaciones}
-              onChange={(e) => setObservaciones(e.target.value)}
-              fullWidth
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Observaciones"
+                  value={observaciones}
+                  onChange={(e) => setObservaciones(e.target.value)}
+                  fullWidth
                   variant="outlined"
-            />
-          </Grid>
-          <Grid item xs={12} marginBottom={2}>
+                />
+              </Grid>
+              <Grid item xs={12} marginBottom={2}>
                 <button
                   onClick={edicionResolucion}
                   className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-              Editar
+                  Editar
                 </button>
                 <button
                   onClick={() => setConfirmarEliminacion(true)}
                   className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200 ml-2">
-              Eliminar
+                  Eliminar
                 </button>
-          </Grid>
-        </Grid>
-      </Paper>
-    </Container>
-    </DashboardMenu>
+              </Grid>
+            </Grid>
+          </Paper>
+        </Container>
+      </DashboardMenu>
 
       {renderModalConfirmacion()}
       {renderBasicModal()}
