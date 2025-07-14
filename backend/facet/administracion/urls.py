@@ -45,6 +45,8 @@ urlpatterns = [
 
     # Incluir las URLs de departamentos bajo 'api'
     path('facet/', include('departamentos.urls')),
+    path('facet/', include('usuarios.urls')),  # <--- Esto expone /facet/users/
+    path('facet/', include('roles.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

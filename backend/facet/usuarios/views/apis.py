@@ -24,7 +24,7 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated] # Se pueden ver solo si el usuario esta autenticado
     pagination_class = LimitOffsetPagination
     
-    def update(self,request,pk=None):
+    def update(self,request,pk=None,partial=False):
         from django.contrib.auth.hashers import make_password
         from ..models import User
         from roles.models import Rol

@@ -9,6 +9,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import HomeIcon from "@mui/icons-material/Home";
 import ArticleIcon from "@mui/icons-material/Article";
 import PeopleIcon from "@mui/icons-material/People";
+import PersonIcon from "@mui/icons-material/Person";
 import ViewComfyIcon from "@mui/icons-material/ViewComfy";
 import AutoAwesomeMotionIcon from "@mui/icons-material/AutoAwesomeMotion";
 import NoteAltIcon from "@mui/icons-material/NoteAlt";
@@ -111,6 +112,11 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
       icon: <EmailIcon />,
       text: "Notificaciones",
       path: "/dashboard/notificaciones",
+    },
+    {
+      icon: <PersonIcon />,
+      text: "Usuarios",
+      path: "/dashboard/usuarios",
     },
   ];
 

@@ -1,0 +1,81 @@
+/* Estilos para la lista de usuarios */
+.table-container {
+  overflow-x: auto;
+}
+
+.table-header {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.table-row:hover {
+  background-color: #f5f5f5;
+}
+
+.action-button {
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.action-button:hover {
+  transform: scale(1.1);
+}
+
+.filter-section {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding: 8px 0;
+}
+
+.status-chip {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.export-button {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.export-button:hover {
+  background-color: #059669;
+}
+
+.add-button {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.add-button:hover {
+  background-color: #2563eb;
+}

@@ -11,6 +11,7 @@ from django.utils import timezone
 User = get_user_model()
 
 from django.contrib.auth.tokens import default_token_generator
+from roles.models import Rol
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -20,19 +21,23 @@ class UserSerializer(serializers.ModelSerializer):
         super(UserSerializer, self).__init__(*args, **kwargs)
         if 'request' in self.context and self.context['request'].method == "PUT":
             self.fields.pop('password')
-            
+    
     password = serializers.CharField(
         write_only=True,
         required=True,
         help_text='Dejar vacío si no hacen falta cambios',
         style={'input_type': 'password', 'placeholder': 'Password'}
     )
+    rol = serializers.PrimaryKeyRelatedField(queryset=Rol.objects.all(), required=False, allow_null=True)
     rol_detalle = serializers.CharField(source='rol.descripcion', read_only=True)
 
     class Meta:
         model = User
         fields = ['id','email','password','nombre','apellido','legajo','documento','rol','rol_detalle','is_active','groups','date_joined','last_login']
         
+    def get_rol(self, obj):
+        return obj.rol.id if obj.rol else None
+
     def create(self, validated_data):
         validated_data['password'] = make_password(validated_data.get('password'))
         return super(UserSerializer, self).create(validated_data)

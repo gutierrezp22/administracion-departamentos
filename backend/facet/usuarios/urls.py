@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from .views.apis import UserViewSet, GroupViewSet, MyTokenObtainPairView
 from rest_framework import routers
 from rest_framework_simplejwt.views import (
@@ -14,6 +14,7 @@ router.register(r'groups', GroupViewSet)
 #router = routers.DefaultRouter(trailing_slash=False)
 
 urlpatterns = [
+    path('', include(router.urls)),  # <-- Esto expone /facet/users/ y /facet/groups/
     path('token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     # Manejar el restablecimiento de contraseña
