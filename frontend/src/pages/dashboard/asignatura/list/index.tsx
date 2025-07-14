@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
 import axios from "axios";
+import API from "@/api/axiosConfig";
 import {
   Container,
   Table,
@@ -83,7 +84,7 @@ const ListaAsignaturas = () => {
 
   const fetchData = async (url: string) => {
     try {
-      const response = await axios.get(url);
+      const response = await API.get(url);
       setAsignaturas(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
@@ -181,7 +182,7 @@ const ListaAsignaturas = () => {
       });
 
       if (result.isConfirmed) {
-        await axios.delete(`${API_BASE_URL}/facet/asignatura/${id}/`);
+        await API.delete(`${API_BASE_URL}/facet/asignatura/${id}/`);
         Swal.fire("Eliminado!", "La asignatura ha sido eliminada.", "success");
         fetchData(currentUrl);
       }
@@ -212,7 +213,7 @@ const ListaAsignaturas = () => {
       url += params.toString();
 
       while (url) {
-        const response = await axios.get(url);
+        const response = await API.get(url);
         const { results, next } = response.data;
         allAsignaturas = [...allAsignaturas, ...results];
         url = next;
@@ -310,16 +311,56 @@ const ListaAsignaturas = () => {
             <Table>
               <TableHead>
                 <TableRow className="bg-blue-500">
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Código</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Nombre</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Módulo</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Programa</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Tipo</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Área</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Departamento</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Estado</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Docentes</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Acciones</TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Código
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Nombre
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Módulo
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Programa
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Tipo
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Área
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Departamento
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Estado
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Docentes
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Acciones
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

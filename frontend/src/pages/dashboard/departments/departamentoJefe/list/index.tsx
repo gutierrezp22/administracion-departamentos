@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
 import axios from "axios";
+import API from "@/api/axiosConfig";
 import {
   Container,
   Table,
@@ -97,7 +98,7 @@ const ListaJefesDepartamentos = () => {
 
   const fetchData = async (url: string) => {
     try {
-      const response = await axios.get(url);
+      const response = await API.get(url);
       setJefesDepartamentos(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
@@ -183,7 +184,7 @@ const ListaJefesDepartamentos = () => {
       url += params.toString();
 
       while (url) {
-        const response = await axios.get(url);
+        const response = await API.get(url);
         const { results, next } = response.data;
         allJefesDepartamentos = [...allJefesDepartamentos, ...results];
         url = next;
@@ -240,7 +241,7 @@ const ListaJefesDepartamentos = () => {
       });
 
       if (result.isConfirmed) {
-        await axios.delete(`${API_BASE_URL}/facet/jefe-departamento/${id}/`);
+        await API.delete(`${API_BASE_URL}/facet/jefe-departamento/${id}/`);
         Swal.fire(
           "Eliminado!",
           "El jefe de departamento ha sido eliminado.",

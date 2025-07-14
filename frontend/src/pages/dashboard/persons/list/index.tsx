@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
 import axios from "axios";
+import API from "@/api/axiosConfig";
 import {
   Container,
   Table,
@@ -74,7 +75,7 @@ const ListaPersonas = () => {
 
   const fetchData = async (url: string) => {
     try {
-      const response = await axios.get(url);
+      const response = await API.get(url);
       setPersonas(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
@@ -140,7 +141,7 @@ const ListaPersonas = () => {
       url += params.toString();
 
       while (url) {
-        const response = await axios.get(url);
+        const response = await API.get(url);
         const { results, next } = response.data;
         allPersonas = [...allPersonas, ...results];
         url = next;
@@ -193,7 +194,7 @@ const ListaPersonas = () => {
       });
 
       if (result.isConfirmed) {
-        await axios.delete(`${API_BASE_URL}/facet/persona/${id}/`);
+        await API.delete(`${API_BASE_URL}/facet/persona/${id}/`);
         Swal.fire("Eliminado!", "La persona ha sido eliminada.", "success");
         fetchData(currentUrl);
       }

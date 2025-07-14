@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
 import axios from "axios";
+import API from "@/api/axiosConfig";
 import {
   Container,
   Table,
@@ -77,7 +78,7 @@ const ListaJefes = () => {
 
   const fetchData = async (url: string) => {
     try {
-      const response = await axios.get(url);
+      const response = await API.get(url);
       setJefes(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
@@ -145,7 +146,7 @@ const ListaJefes = () => {
       url += params.toString();
 
       while (url) {
-        const response = await axios.get(url);
+        const response = await API.get(url);
         const { results, next } = response.data;
         allJefes = [...allJefes, ...results];
         url = next;
@@ -198,7 +199,7 @@ const ListaJefes = () => {
       });
 
       if (result.isConfirmed) {
-        await axios.delete(`${API_BASE_URL}/facet/jefe/${id}/`);
+        await API.delete(`${API_BASE_URL}/facet/jefe/${id}/`);
         Swal.fire("Eliminado!", "El jefe ha sido eliminado.", "success");
         fetchData(currentUrl);
       }

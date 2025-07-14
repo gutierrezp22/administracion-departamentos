@@ -36,6 +36,7 @@ import {
 } from "../../../../components/Filters";
 import Swal from "sweetalert2";
 import DeleteIcon from "@mui/icons-material/Delete";
+import API from "@/api/axiosConfig";
 
 interface Departamento {
   id: number;
@@ -66,7 +67,7 @@ const ListaDepartamentos = () => {
 
   const fetchData = async (url: string) => {
     try {
-      const response = await axios.get(url);
+      const response = await API.get(url);
       setDepartamentos(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
@@ -149,7 +150,7 @@ const ListaDepartamentos = () => {
       url += params.toString();
 
       while (url) {
-        const response = await axios.get(url);
+        const response = await API.get(url);
         const { results, next } = response.data;
 
         allDepartamentos = [
@@ -194,7 +195,7 @@ const ListaDepartamentos = () => {
       });
 
       if (result.isConfirmed) {
-        await axios.delete(`${API_BASE_URL}/facet/departamento/${id}/`);
+        await API.delete(`${API_BASE_URL}/facet/departamento/${id}/`);
         Swal.fire(
           "Eliminado!",
           "El departamento ha sido eliminado.",
@@ -257,11 +258,31 @@ const ListaDepartamentos = () => {
             <Table>
               <TableHead>
                 <TableRow className="bg-blue-500">
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Nombre</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Teléfono</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Interno</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Estado</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Acciones</TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Nombre
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Teléfono
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Interno
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Estado
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Acciones
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
 import axios from "axios";
+import API from "@/api/axiosConfig";
 import {
   Container,
   Table,
@@ -68,7 +69,7 @@ const ListaAreas = () => {
 
   const fetchData = async (url: string) => {
     try {
-      const response = await axios.get(url);
+      const response = await API.get(url);
       setAreas(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
@@ -142,7 +143,7 @@ const ListaAreas = () => {
       url += params.toString();
 
       while (url) {
-        const response = await axios.get(url);
+        const response = await API.get(url);
         const { results, next } = response.data;
         allAreas = [...allAreas, ...results];
         url = next;
@@ -189,7 +190,7 @@ const ListaAreas = () => {
       });
 
       if (result.isConfirmed) {
-        await axios.delete(`${API_BASE_URL}/facet/area/${id}/`);
+        await API.delete(`${API_BASE_URL}/facet/area/${id}/`);
         Swal.fire("Eliminado!", "El área ha sido eliminada.", "success");
         fetchData(currentUrl);
       }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
 import axios from "axios";
+import API from "@/api/axiosConfig";
 import {
   Container,
   Grid,
@@ -99,7 +100,7 @@ const CrearArea = () => {
 
   const fetchDepartamentos = async (url: string) => {
     try {
-      const response = await axios.get(url);
+      const response = await API.get(url);
 
       setDepartamentos(response.data.results); // Lista de departamentos paginados
       setNextUrl(response.data.next); // URL para la página siguiente

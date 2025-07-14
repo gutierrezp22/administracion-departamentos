@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
 import axios from "axios";
+import API from "@/api/axiosConfig";
 import {
   Typography,
   Paper,
@@ -51,7 +52,7 @@ const ListaNotificaciones = () => {
 
   const fetchData = async (url: string) => {
     try {
-      const response = await axios.get(url);
+      const response = await API.get(url);
       setNotificaciones(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
