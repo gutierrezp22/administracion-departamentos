@@ -323,33 +323,15 @@ const ListaResoluciones = () => {
             <Table>
               <TableHead>
                 <TableRow className="bg-blue-500">
-                  <TableCell className="text-white font-semibold">
-                    Nro Expediente
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Nro Resolución
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Tipo
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Fecha
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Carga
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Estado
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Adjunto
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Observaciones
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Acciones
-                  </TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Nro Expediente</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Nro Resolución</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Tipo</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Fecha</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Carga</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Estado</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Adjunto</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Observaciones</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Acciones</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

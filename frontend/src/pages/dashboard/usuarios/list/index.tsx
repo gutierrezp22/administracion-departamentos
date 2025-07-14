@@ -367,28 +367,44 @@ const ListaUsuarios = () => {
               <Table>
                 <TableHead>
                   <TableRow className="bg-blue-500">
-                    <TableCell className="text-white font-semibold">
+                    <TableCell
+                      className="text-white font-semibold"
+                      style={{ color: "#fff" }}>
                       Email
                     </TableCell>
-                    <TableCell className="text-white font-semibold">
+                    <TableCell
+                      className="text-white font-semibold"
+                      style={{ color: "#fff" }}>
                       Nombre
                     </TableCell>
-                    <TableCell className="text-white font-semibold">
+                    <TableCell
+                      className="text-white font-semibold"
+                      style={{ color: "#fff" }}>
                       Apellido
                     </TableCell>
-                    <TableCell className="text-white font-semibold">
+                    <TableCell
+                      className="text-white font-semibold"
+                      style={{ color: "#fff" }}>
                       Legajo
                     </TableCell>
-                    <TableCell className="text-white font-semibold">
+                    <TableCell
+                      className="text-white font-semibold"
+                      style={{ color: "#fff" }}>
                       Documento
                     </TableCell>
-                    <TableCell className="text-white font-semibold">
+                    <TableCell
+                      className="text-white font-semibold"
+                      style={{ color: "#fff" }}>
                       Rol
                     </TableCell>
-                    <TableCell className="text-white font-semibold">
+                    <TableCell
+                      className="text-white font-semibold"
+                      style={{ color: "#fff" }}>
                       Estado
                     </TableCell>
-                    <TableCell className="text-white font-semibold">
+                    <TableCell
+                      className="text-white font-semibold"
+                      style={{ color: "#fff" }}>
                       Acciones
                     </TableCell>
                   </TableRow>

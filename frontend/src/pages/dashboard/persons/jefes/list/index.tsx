@@ -262,36 +262,16 @@ const ListaJefes = () => {
             <Table>
               <TableHead>
                 <TableRow className="bg-blue-500">
-                  <TableCell className="text-white font-semibold">
-                    Nombre
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Apellido
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    DNI
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Legajo
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Teléfono
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Email
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Interno
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Observaciones
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Estado
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Acciones
-                  </TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Nombre</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Apellido</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>DNI</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Legajo</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Teléfono</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Email</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Interno</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Observaciones</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Estado</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Acciones</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

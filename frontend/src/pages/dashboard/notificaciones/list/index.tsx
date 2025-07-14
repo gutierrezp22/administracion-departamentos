@@ -166,18 +166,10 @@ const ListaNotificaciones = () => {
               <Table>
                 <TableHead>
                   <TableRow className="bg-blue-500">
-                    <TableCell className="text-white font-semibold">
-                      Apellido
-                    </TableCell>
-                    <TableCell className="text-white font-semibold">
-                      Nombre
-                    </TableCell>
-                    <TableCell className="text-white font-semibold">
-                      Fecha
-                    </TableCell>
-                    <TableCell className="text-white font-semibold">
-                      Mensaje
-                    </TableCell>
+                    <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Apellido</TableCell>
+                    <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Nombre</TableCell>
+                    <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Fecha</TableCell>
+                    <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Mensaje</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>

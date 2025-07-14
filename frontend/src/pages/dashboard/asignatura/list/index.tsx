@@ -310,36 +310,16 @@ const ListaAsignaturas = () => {
             <Table>
               <TableHead>
                 <TableRow className="bg-blue-500">
-                  <TableCell className="text-white font-semibold">
-                    Código
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Nombre
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Módulo
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Programa
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Tipo
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Área
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Departamento
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Estado
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Docentes
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Acciones
-                  </TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Código</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Nombre</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Módulo</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Programa</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Tipo</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Área</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Departamento</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Estado</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Docentes</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Acciones</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

@@ -236,16 +236,19 @@ const ListaAreas = () => {
               <Table>
                 <TableHead>
                   <TableRow className="bg-blue-500">
-                    <TableCell className="text-white font-semibold">
+                    <TableCell
+                      className="text-white font-semibold"
+                      style={{ color: "#fff" }}>
                       Nombre
                     </TableCell>
-                    <TableCell className="text-white font-semibold">
-                      Departamento
-                    </TableCell>
-                    <TableCell className="text-white font-semibold">
+                    <TableCell
+                      className="text-white font-semibold"
+                      style={{ color: "#fff" }}>
                       Estado
                     </TableCell>
-                    <TableCell className="text-white font-semibold">
+                    <TableCell
+                      className="text-white font-semibold"
+                      style={{ color: "#fff" }}>
                       Acciones
                     </TableCell>
                   </TableRow>
@@ -257,9 +260,6 @@ const ListaAreas = () => {
                       className="hover:bg-gray-50 transition-colors duration-150">
                       <TableCell className="text-gray-800">
                         {area.nombre}
-                      </TableCell>
-                      <TableCell className="text-gray-800">
-                        {area.departamento_detalle?.nombre || "N/A"}
                       </TableCell>
                       <TableCell className="text-gray-800">
                         {area.estado === "1" ? "Activo" : "Inactivo"}

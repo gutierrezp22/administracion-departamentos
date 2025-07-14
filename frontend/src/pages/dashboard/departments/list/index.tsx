@@ -257,21 +257,11 @@ const ListaDepartamentos = () => {
             <Table>
               <TableHead>
                 <TableRow className="bg-blue-500">
-                  <TableCell className="text-white font-semibold">
-                    Nombre
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Teléfono
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Interno
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Estado
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Acciones
-                  </TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Nombre</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Teléfono</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Interno</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Estado</TableCell>
+                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Acciones</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
