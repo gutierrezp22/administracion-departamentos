@@ -22,7 +22,6 @@ import {
 import BasicModal from "@/utils/modal";
 import { useRouter } from "next/router";
 import DashboardMenu from "../../../dashboard";
-import Swal from "sweetalert2";
 import withAuth from "../../../../components/withAut"; // Importa el HOC
 
 
@@ -138,11 +137,7 @@ const CrearArea = () => {
     setCurrentUrl(normalizeUrl(url)); // Actualiza la URL, lo que dispara el useEffect
   };
 
-  const handleFilterDepartamentos = (filtro: string) => {
-    return departamentos.filter((departamento) =>
-      departamento.nombre.toLowerCase().includes(filtro.toLowerCase())
-    );
-  };
+
 
   const crearNuevaArea = async () => {
     // Validar campos requeridos
@@ -212,11 +207,21 @@ const CrearArea = () => {
                     margin="normal"
                     variant="outlined"
                   />
-                  <button
-                    onClick={filtrarDepartamentos}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200 mb-4">
-                    Filtrar
-                  </button>
+                  <div className="flex gap-2 mb-4">
+                    <button
+                      onClick={filtrarDepartamentos}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
+                      Filtrar
+                    </button>
+                    <button
+                      onClick={() => {
+                        setFiltroDepartamentos("");
+                        setCurrentUrl("/facet/departamento/");
+                      }}
+                      className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
+                      Limpiar
+                    </button>
+                  </div>
 
                   {/* Tabla de Departamentos */}
                   <TableContainer component={Paper}>

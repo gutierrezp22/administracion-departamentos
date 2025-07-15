@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
-import axios from "axios";
 import {
   Container,
   Grid,
@@ -28,10 +27,8 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import BasicModal from "@/utils/modal";
 import { useRouter } from "next/router";
-import Swal from "sweetalert2";
 import DashboardMenu from "../../../dashboard";
 import withAuth from "../../../../components/withAut"; // Importa el HOC
-import { API_BASE_URL } from "../../../../utils/config";
 import API from "@/api/axiosConfig";
 
 dayjs.extend(utc);
@@ -47,21 +44,14 @@ const CrearAsignatura = () => {
     estado: 0 | 1;
   }
 
-  interface Departamento {
-    id: number;
-    nombre: string;
-    estado: 0 | 1;
-  }
-
   type TipoAsignatura = "Electiva" | "Obligatoria";
 
   const [areaSeleccionada, setAreaSeleccionada] = useState<Area | null>(null);
-  const [departamentos, setDepartamentos] = useState<Departamento[]>([]); // Definimos departamentos correctamente
   const [openAreaModal, setOpenAreaModal] = useState(false);
   const [nombre, setNombre] = useState("");
   const [codigo, setCodigo] = useState("");
-  const [estado, setEstado] = useState("");
-  const [tipo, setTipo] = useState("");
+  const [estado, setEstado] = useState("1"); // Valor por defecto: Activo
+  const [tipo, setTipo] = useState("Obligatoria"); // Valor por defecto
   const [modulo, setModulo] = useState("");
   const [programa, setPrograma] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
@@ -73,9 +63,8 @@ const CrearAsignatura = () => {
   const [filtroAreas, setFiltroAreas] = useState("");
   const [nextUrlAreas, setNextUrlAreas] = useState<string | null>(null);
   const [prevUrlAreas, setPrevUrlAreas] = useState<string | null>(null);
-  const [currentUrlAreas, setCurrentUrlAreas] = useState<string>(
-    `${API_BASE_URL}/facet/area/`
-  );
+  const [currentUrlAreas, setCurrentUrlAreas] =
+    useState<string>(`/facet/area/`);
   const [totalItemsAreas, setTotalItemsAreas] = useState<number>(0);
   const [currentPageAreas, setCurrentPageAreas] = useState<number>(1);
   const pageSizeAreas = 10; // Tamaño de página
@@ -114,7 +103,7 @@ const CrearAsignatura = () => {
 
   const fetchAreas = async (url: string) => {
     try {
-      const response = await axios.get(url);
+      const response = await API.get(url);
 
       setAreas(response.data.results); // Datos de la página actual
       setNextUrlAreas(response.data.next); // URL de la página siguiente
@@ -122,19 +111,22 @@ const CrearAsignatura = () => {
       setTotalItemsAreas(response.data.count); // Total de elementos
 
       // Calcula la página actual usando offset
-      const offset = new URL(url).searchParams.get("offset") || "0";
+      const fullUrl = url.startsWith("http")
+        ? url
+        : `${window.location.origin}${url}`;
+      const offset = new URL(fullUrl).searchParams.get("offset") || "0";
       setCurrentPageAreas(Math.floor(Number(offset) / pageSizeAreas) + 1);
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Error al obtener las áreas.",
-      });
+      console.error("Error al obtener áreas:", error);
+      setAreas([]);
+      setNextUrlAreas(null);
+      setPrevUrlAreas(null);
+      setTotalItemsAreas(0);
     }
   };
 
   const filtrarAreas = () => {
-    let url = `${API_BASE_URL}/facet/area/?`;
+    let url = `/facet/area/?`;
     const params = new URLSearchParams();
 
     if (filtroAreas) params.append("nombre__icontains", filtroAreas);
@@ -143,29 +135,47 @@ const CrearAsignatura = () => {
     setCurrentUrlAreas(url); // Actualiza la URL, lo que dispara el useEffect
   };
 
-  const handleFilterAreas = (filtro: string) => {
-    return areas.filter((area) =>
-      area.nombre.toLowerCase().includes(filtro.toLowerCase())
-    );
-  };
-
   const crearNuevaAsignatura = async () => {
+    // Validar campos requeridos
     if (!areaSeleccionada) {
-      Swal.fire({
-        icon: "warning",
-        title: "Advertencia",
-        text: "Debe seleccionar un área.",
-      });
+      handleOpenModal("Error", "Debe seleccionar un área.", () => {});
+      return;
+    }
+
+    if (!nombre.trim()) {
+      handleOpenModal(
+        "Error",
+        "El nombre de la asignatura es obligatorio.",
+        () => {}
+      );
+      return;
+    }
+
+    if (!codigo.trim()) {
+      handleOpenModal(
+        "Error",
+        "El código de la asignatura es obligatorio.",
+        () => {}
+      );
+      return;
+    }
+
+    if (!tipo) {
+      handleOpenModal(
+        "Error",
+        "Debe seleccionar un tipo de asignatura.",
+        () => {}
+      );
       return;
     }
 
     const nuevaAsignatura = {
       area: areaSeleccionada.id,
       departamento: areaSeleccionada.departamento,
-      codigo: codigo,
-      nombre: nombre,
-      modulo: modulo,
-      programa: programa,
+      codigo: codigo.trim(),
+      nombre: nombre.trim(),
+      modulo: modulo.trim() || null,
+      programa: programa.trim() || null,
       tipo: tipo,
       estado: estado,
     };
@@ -177,8 +187,11 @@ const CrearAsignatura = () => {
         "Se creó la asignatura con éxito.",
         handleConfirmModal
       );
-    } catch (error) {
-      handleOpenModal("Error", "No se pudo realizar la acción.", () => {});
+    } catch (error: any) {
+      console.error("Error al crear asignatura:", error);
+      const errorMessage =
+        error.response?.data?.message || "No se pudo realizar la acción.";
+      handleOpenModal("Error", errorMessage, () => {});
     }
   };
 
@@ -218,11 +231,21 @@ const CrearAsignatura = () => {
                     margin="normal"
                     variant="outlined"
                   />
-                  <button
-                    onClick={filtrarAreas}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200 mb-4">
-                    Filtrar
-                  </button>
+                  <div className="flex gap-2 mb-4">
+                    <button
+                      onClick={filtrarAreas}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
+                      Filtrar
+                    </button>
+                    <button
+                      onClick={() => {
+                        setFiltroAreas("");
+                        setCurrentUrlAreas("/facet/area/");
+                      }}
+                      className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
+                      Limpiar
+                    </button>
+                  </div>
 
                   {/* Tabla de Áreas */}
                   <TableContainer component={Paper}>
@@ -230,7 +253,6 @@ const CrearAsignatura = () => {
                       <TableHead>
                         <TableRow>
                           <TableCell>Nombre</TableCell>
-                          <TableCell>Departamento</TableCell>
                           <TableCell>Estado</TableCell>
                           <TableCell>Seleccionar</TableCell>
                         </TableRow>
@@ -239,13 +261,6 @@ const CrearAsignatura = () => {
                         {areas.map((area) => (
                           <TableRow key={area.id}>
                             <TableCell>{area.nombre}</TableCell>
-                            <TableCell>
-                              {
-                                departamentos.find(
-                                  (dep) => dep.id === area.departamento
-                                )?.nombre
-                              }
-                            </TableCell>
                             <TableCell>
                               {area.estado == 1 ? "Activo" : "Inactivo"}
                             </TableCell>
@@ -269,9 +284,7 @@ const CrearAsignatura = () => {
                   {/* Paginación */}
                   <div className="flex justify-between items-center mt-4">
                     <button
-                      onClick={() =>
-                        prevUrlAreas && setCurrentUrlAreas(prevUrlAreas)
-                      }
+                      onClick={() => prevUrlAreas && fetchAreas(prevUrlAreas)}
                       disabled={!prevUrlAreas}
                       className={`mr-2 px-3 py-1 rounded-md ${
                         !prevUrlAreas
@@ -285,9 +298,7 @@ const CrearAsignatura = () => {
                       {Math.ceil(totalItemsAreas / pageSizeAreas)}
                     </Typography>
                     <button
-                      onClick={() =>
-                        nextUrlAreas && setCurrentUrlAreas(nextUrlAreas)
-                      }
+                      onClick={() => nextUrlAreas && fetchAreas(nextUrlAreas)}
                       disabled={!nextUrlAreas}
                       className={`ml-2 px-3 py-1 rounded-md ${
                         !nextUrlAreas
