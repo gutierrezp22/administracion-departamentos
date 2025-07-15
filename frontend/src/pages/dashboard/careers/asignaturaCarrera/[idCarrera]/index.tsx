@@ -26,6 +26,7 @@ import { useRouter } from "next/router";
 import BasicModal from "@/utils/modal";
 import ModalConfirmacion from "@/utils/modalConfirmacion";
 import withAuth from "../../../../../components/withAut";
+import { API_BASE_URL } from "../../../../../utils/config";
 import API from "@/api/axiosConfig";
 
 const ListaAsignaturaCarrera = () => {
@@ -145,7 +146,7 @@ const ListaAsignaturaCarrera = () => {
 
       // Obtener todos los datos con paginación
       while (url) {
-        const response = await axios.get(url);
+        const response = await API.get(url);
         const { results, next } = response.data;
         allAsignaturasCarrera = [...allAsignaturasCarrera, ...results];
         url = next; // Continuar con la siguiente página si existe
