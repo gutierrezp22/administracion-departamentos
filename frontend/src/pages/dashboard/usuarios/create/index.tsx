@@ -216,157 +216,192 @@ const CrearUsuario = () => {
           </Typography>
         </div>
 
-        <div className="p-6">
-          <Paper className="p-6">
-            <form onSubmit={handleSubmit}>
-              <Grid container spacing={3}>
-                {/* Email */}
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    error={!!errors.email}
-                    helperText={errors.email}
-                    required
-                  />
-                </Grid>
-
-                {/* Contraseña */}
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Contraseña"
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) =>
-                      handleInputChange("password", e.target.value)
-                    }
-                    error={!!errors.password}
-                    helperText={errors.password}
-                    required
-                  />
-                </Grid>
-
-                {/* Confirmar Contraseña */}
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Confirmar Contraseña"
-                    type="password"
-                    value={formData.confirmPassword}
-                    onChange={(e) =>
-                      handleInputChange("confirmPassword", e.target.value)
-                    }
-                    error={!!errors.confirmPassword}
-                    helperText={errors.confirmPassword}
-                    required
-                  />
-                </Grid>
-
-                {/* Nombre */}
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Nombre"
-                    value={formData.nombre}
-                    onChange={(e) =>
-                      handleInputChange("nombre", e.target.value)
-                    }
-                    error={!!errors.nombre}
-                    helperText={errors.nombre}
-                    required
-                  />
-                </Grid>
-
-                {/* Apellido */}
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Apellido"
-                    value={formData.apellido}
-                    onChange={(e) =>
-                      handleInputChange("apellido", e.target.value)
-                    }
-                    error={!!errors.apellido}
-                    helperText={errors.apellido}
-                    required
-                  />
-                </Grid>
-
-                {/* Legajo */}
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Legajo"
-                    type="number"
-                    value={formData.legajo}
-                    onChange={(e) =>
-                      handleInputChange("legajo", e.target.value)
-                    }
-                    error={!!errors.legajo}
-                    helperText={errors.legajo}
-                    required
-                  />
-                </Grid>
-
-                {/* Documento */}
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Documento"
-                    type="number"
-                    value={formData.documento}
-                    onChange={(e) =>
-                      handleInputChange("documento", e.target.value)
-                    }
-                    error={!!errors.documento}
-                    helperText={errors.documento}
-                    required
-                  />
-                </Grid>
-
-                {/* Rol */}
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth error={!!errors.rol}>
-                    <InputLabel>Rol</InputLabel>
-                    <Select
-                      value={formData.rol}
-                      onChange={(e) => handleInputChange("rol", e.target.value)}
-                      label="Rol"
-                      required>
-                      {roles.map((rol) => (
-                        <MenuItem key={rol.id} value={rol.id}>
-                          {rol.descripcion}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                    {errors.rol && (
-                      <Typography variant="caption" color="error">
-                        {errors.rol}
-                      </Typography>
-                    )}
-                  </FormControl>
-                </Grid>
+        <div className="p-4">
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={2}>
+              {/* Información de Acceso */}
+              <Grid item xs={12}>
+                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                  Información de Acceso
+                </Typography>
               </Grid>
 
-              <div className="mt-6 flex justify-end">
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  disabled={loading}
-                  startIcon={
-                    loading ? <CircularProgress size={20} /> : <SaveIcon />
+              {/* Email */}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  error={!!errors.email}
+                  helperText={errors.email}
+                  required
+                  size="small"
+                />
+              </Grid>
+
+              {/* Contraseña */}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Contraseña"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) =>
+                    handleInputChange("password", e.target.value)
                   }
-                  className="bg-blue-500 hover:bg-blue-600">
-                  {loading ? "Creando..." : "Crear Usuario"}
-                </Button>
-              </div>
-            </form>
-          </Paper>
+                  error={!!errors.password}
+                  helperText={errors.password}
+                  required
+                  size="small"
+                />
+              </Grid>
+
+              {/* Confirmar Contraseña */}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Confirmar Contraseña"
+                  type="password"
+                  value={formData.confirmPassword}
+                  onChange={(e) =>
+                    handleInputChange("confirmPassword", e.target.value)
+                  }
+                  error={!!errors.confirmPassword}
+                  helperText={errors.confirmPassword}
+                  required
+                  size="small"
+                />
+              </Grid>
+
+              {/* Rol */}
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth error={!!errors.rol} size="small">
+                  <InputLabel>Rol</InputLabel>
+                  <Select
+                    value={formData.rol}
+                    onChange={(e) => handleInputChange("rol", e.target.value)}
+                    label="Rol"
+                    required>
+                    {roles.map((rol) => (
+                      <MenuItem key={rol.id} value={rol.id}>
+                        {rol.descripcion}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {errors.rol && (
+                    <Typography variant="caption" color="error">
+                      {errors.rol}
+                    </Typography>
+                  )}
+                </FormControl>
+              </Grid>
+
+              {/* Separador visual */}
+              <Grid item xs={12}>
+                <div className="border-t border-gray-200 my-4"></div>
+              </Grid>
+
+              {/* Información Personal */}
+              <Grid item xs={12}>
+                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                  Información Personal
+                </Typography>
+              </Grid>
+
+              {/* Nombre */}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Nombre"
+                  value={formData.nombre}
+                  onChange={(e) =>
+                    handleInputChange("nombre", e.target.value)
+                  }
+                  error={!!errors.nombre}
+                  helperText={errors.nombre}
+                  required
+                  size="small"
+                />
+              </Grid>
+
+              {/* Apellido */}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Apellido"
+                  value={formData.apellido}
+                  onChange={(e) =>
+                    handleInputChange("apellido", e.target.value)
+                  }
+                  error={!!errors.apellido}
+                  helperText={errors.apellido}
+                  required
+                  size="small"
+                />
+              </Grid>
+
+              {/* Separador visual */}
+              <Grid item xs={12}>
+                <div className="border-t border-gray-200 my-4"></div>
+              </Grid>
+
+              {/* Información Institucional */}
+              <Grid item xs={12}>
+                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                  Información Institucional
+                </Typography>
+              </Grid>
+
+              {/* Legajo */}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Legajo"
+                  type="number"
+                  value={formData.legajo}
+                  onChange={(e) =>
+                    handleInputChange("legajo", e.target.value)
+                  }
+                  error={!!errors.legajo}
+                  helperText={errors.legajo}
+                  required
+                  size="small"
+                />
+              </Grid>
+
+              {/* Documento */}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Documento"
+                  type="number"
+                  value={formData.documento}
+                  onChange={(e) =>
+                    handleInputChange("documento", e.target.value)
+                  }
+                  error={!!errors.documento}
+                  helperText={errors.documento}
+                  required
+                  size="small"
+                />
+              </Grid>
+            </Grid>
+
+            <div className="flex justify-center mt-6">
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={loading}
+                startIcon={
+                  loading ? <CircularProgress size={20} /> : <SaveIcon />
+                }
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                {loading ? "Creando..." : "Crear Usuario"}
+              </Button>
+            </div>
+          </form>
         </div>
       </div>
     </DashboardMenu>

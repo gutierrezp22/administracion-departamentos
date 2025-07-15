@@ -99,63 +99,87 @@ const CrearDepartamento = () => {
   return (
     <DashboardMenu>
       <Container maxWidth="lg">
-        <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
-          {" "}
-          <Typography variant="h4" gutterBottom className="text-gray-800">
-            {" "}
-            Departamento{" "}
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                label="Nombre"
-                value={nombre}
-                onChange={(e) =>
-                  setNombre(capitalizeFirstLetter(e.target.value))
-                }
-                fullWidth
-              />
+        <Paper elevation={3} className="bg-white shadow-lg rounded-lg">
+          {/* Título separado */}
+          <div className="p-4 border-b border-gray-200">
+            <Typography variant="h5" className="text-gray-800 font-semibold">
+              Crear Departamento
+            </Typography>
+          </div>
+          
+          {/* Contenido del formulario */}
+          <div className="p-4">
+            <Grid container spacing={2}>
+              {/* Sección: Información del Departamento */}
+              <Grid item xs={12}>
+                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                  Información del Departamento
+                </Typography>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Nombre"
+                  value={nombre}
+                  onChange={(e) =>
+                    setNombre(capitalizeFirstLetter(e.target.value))
+                  }
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Teléfono"
+                  value={telefono}
+                  onChange={(e) => setTelefono(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Interno"
+                  value={interno}
+                  onChange={(e) => setInterno(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="demo-simple-select-label">Estado</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    value={estado}
+                    label="Estado"
+                    onChange={(e) => setEstado(e.target.value)}>
+                    <MenuItem value={1}>Activo</MenuItem>
+                    <MenuItem value={0}>Inactivo</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              
+              {/* Botón de acción centrado */}
+              <Grid item xs={12}>
+                <div className="flex justify-center mt-6">
+                  <button
+                    onClick={crearNuevoDepartamento}
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Crear Departamento
+                  </button>
+                </div>
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Teléfono"
-                value={telefono}
-                onChange={(e) => setTelefono(e.target.value)}
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Interno"
-                value={interno}
-                onChange={(e) => setInterno(e.target.value)}
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth margin="none">
-                <InputLabel id="demo-simple-select-label">Estado</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={estado}
-                  label="Tipo"
-                  onChange={(e) => setEstado(e.target.value)}>
-                  <MenuItem value={1}>Activo</MenuItem>
-                  <MenuItem value={0}>Inactivo</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} marginBottom={2}>
-              {" "}
-              <button
-                onClick={crearNuevoDepartamento}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                {" "}
-                Crear{" "}
-              </button>{" "}
-            </Grid>
-          </Grid>
+          </div>
+          
           <BasicModal
             open={modalVisible}
             onClose={handleCloseModal}

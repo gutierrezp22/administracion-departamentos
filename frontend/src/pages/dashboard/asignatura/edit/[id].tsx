@@ -123,100 +123,143 @@ const EditarAsignatura: React.FC = () => {
   return (
     <DashboardMenu>
       <Container maxWidth="lg">
-        <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
-          <Typography variant="h4" gutterBottom className="text-gray-800">
-            Editar Asignatura
-          </Typography>
+        <div className="bg-white rounded-lg shadow-lg">
+          <div className="p-6 border-b border-gray-200">
+            <h1 className="text-2xl font-bold text-gray-800">
+              Editar Asignatura
+            </h1>
+          </div>
 
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                label="Nombre"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value.toUpperCase())}
-                fullWidth
-                variant="outlined"
-              />
+          <div className="p-4">
+            <Grid container spacing={2}>
+              {/* Sección de Información Básica */}
+              <Grid item xs={12}>
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
+                  Información Básica
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      label="Nombre de la Asignatura"
+                      value={nombre}
+                      onChange={(e) => setNombre(e.target.value.toUpperCase())}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      label="Código"
+                      value={codigo}
+                      onChange={(e) => setCodigo(e.target.value.toUpperCase())}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Grid>
+                </Grid>
+              </Grid>
+
+              {/* Separador visual */}
+              <Grid item xs={12}>
+                <div className="border-t border-gray-200 my-4"></div>
+              </Grid>
+
+              {/* Sección de Información Adicional */}
+              <Grid item xs={12}>
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
+                  Información Adicional
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      label="Módulo"
+                      value={modulo}
+                      onChange={(e) => setModulo(e.target.value.toUpperCase())}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      label="Link Programa Adjunto"
+                      value={programa}
+                      onChange={(e) => setPrograma(e.target.value)}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      select
+                      label="Tipo"
+                      value={tipo}
+                      onChange={(e) =>
+                        setTipo(e.target.value as TipoAsignatura)
+                      }
+                      fullWidth
+                      variant="outlined"
+                      size="small">
+                      <MenuItem value="Electiva">Electiva</MenuItem>
+                      <MenuItem value="Obligatoria">Obligatoria</MenuItem>
+                    </TextField>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      select
+                      label="Estado"
+                      value={estado}
+                      onChange={(e) => setEstado(e.target.value)}
+                      fullWidth
+                      variant="outlined"
+                      size="small">
+                      <MenuItem value={1}>Activo</MenuItem>
+                      <MenuItem value={0}>Inactivo</MenuItem>
+                    </TextField>
+                  </Grid>
+                </Grid>
+              </Grid>
+
+              {/* Botones de acción */}
+              <Grid item xs={12}>
+                <div className="flex justify-center gap-3 mt-6">
+                  <button
+                    onClick={edicionAsignatura}
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Guardar Cambios
+                  </button>
+                  <button
+                    onClick={() => setConfirmarEliminacion(true)}
+                    className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Eliminar Asignatura
+                  </button>
+                </div>
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Codigo"
-                value={codigo}
-                onChange={(e) => setCodigo(e.target.value.toUpperCase())}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Modulo"
-                value={modulo}
-                onChange={(e) => setModulo(e.target.value.toUpperCase())}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Link Programa Adjunto"
-                value={programa}
-                onChange={(e) => setPrograma(e.target.value)}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                select
-                label="Tipo"
-                value={tipo}
-                onChange={(e) => setTipo(e.target.value as TipoAsignatura)}
-                fullWidth
-                variant="outlined">
-                <MenuItem value="Electiva">Electiva</MenuItem>
-                <MenuItem value="Obligatoria">Obligatoria</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                select
-                label="Estado"
-                value={estado}
-                onChange={(e) => setEstado(e.target.value)}
-                fullWidth
-                variant="outlined">
-                <MenuItem value={1}>Activo</MenuItem>
-                <MenuItem value={0}>Inactivo</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={12} marginBottom={2}>
-              <button
-                onClick={edicionAsignatura}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                Editar
-              </button>
-              <button
-                onClick={() => setConfirmarEliminacion(true)}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200 ml-2">
-                Eliminar
-              </button>
-            </Grid>
-          </Grid>
-          <BasicModal
-            open={modalVisible}
-            onClose={handleCloseModal}
-            title={modalTitle}
-            content={modalMessage}
-          />
-          <ModalConfirmacion
-            open={confirmarEliminacion}
-            onClose={() => setConfirmarEliminacion(false)}
-            onConfirm={() => {
-              setConfirmarEliminacion(false);
-              eliminarAsignatura();
-            }}
-          />
-        </Paper>
+          </div>
+        </div>
+
+        <BasicModal
+          open={modalVisible}
+          onClose={handleCloseModal}
+          title={modalTitle}
+          content={modalMessage}
+        />
+        <ModalConfirmacion
+          open={confirmarEliminacion}
+          onClose={() => setConfirmarEliminacion(false)}
+          onConfirm={() => {
+            setConfirmarEliminacion(false);
+            eliminarAsignatura();
+          }}
+        />
       </Container>
     </DashboardMenu>
   );

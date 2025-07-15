@@ -52,9 +52,7 @@ const EditarDocente: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await API.get(
-          `/facet/docente/${id}/`
-        );
+        const response = await API.get(`/facet/docente/${id}/`);
         setPersona(response.data.persona);
         const responsePers = await API.get(
           `/facet/persona/${response.data.persona}/`
@@ -108,63 +106,106 @@ const EditarDocente: React.FC = () => {
   return (
     <DashboardMenu>
       <Container maxWidth="lg">
-        <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
-          <Typography variant="h4" gutterBottom className="text-gray-800">
-            Editar Docente
-          </Typography>
+        <Paper elevation={3} className="bg-white shadow-lg rounded-lg">
+          {/* Título separado */}
+          <div className="p-4 border-b border-gray-200">
+            <Typography variant="h5" className="text-gray-800 font-semibold">
+              Editar Docente
+            </Typography>
+          </div>
 
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                disabled
-                value={`${apellido} ${nombre}`}
-                fullWidth
-                variant="outlined"
-              />
+          {/* Contenido del formulario */}
+          <div className="p-4">
+            <Grid container spacing={2}>
+              {/* Sección: Información de la Persona */}
+              <Grid item xs={12}>
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
+                  Información de la Persona
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  disabled
+                  label="Nombre Completo"
+                  value={`${apellido} ${nombre}`}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="DNI"
+                  value={dni}
+                  disabled
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+
+              {/* Separador visual */}
+              <Grid item xs={12}>
+                <div className="border-t border-gray-200 my-4"></div>
+              </Grid>
+
+              {/* Sección: Información del Docente */}
+              <Grid item xs={12}>
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
+                  Información del Docente
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Observaciones"
+                  value={observaciones}
+                  onChange={(e) => setObservaciones(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  multiline
+                  rows={2}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  select
+                  label="Estado"
+                  value={estado}
+                  onChange={(e) => setEstado(Number(e.target.value))}
+                  fullWidth
+                  variant="outlined"
+                  size="small">
+                  <MenuItem value={1}>Activo</MenuItem>
+                  <MenuItem value={0}>Inactivo</MenuItem>
+                </TextField>
+              </Grid>
+
+              {/* Botones de acción centrados */}
+              <Grid item xs={12}>
+                <div className="flex justify-center gap-3 mt-6">
+                  <button
+                    onClick={edicionDepartamentoDocente}
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Guardar Cambios
+                  </button>
+                  <button
+                    onClick={() => setConfirmarEliminacion(true)}
+                    className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Eliminar
+                  </button>
+                </div>
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="DNI"
-                value={dni}
-                disabled
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Observaciones"
-                value={observaciones}
-                onChange={(e) => setObservaciones(e.target.value)}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                select
-                label="Estado"
-                value={estado}
-                onChange={(e) => setEstado(Number(e.target.value))}
-                fullWidth
-                variant="outlined">
-                <MenuItem value={1}>Activo</MenuItem>
-                <MenuItem value={0}>Inactivo</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={12} marginBottom={2}>
-              <button
-                onClick={edicionDepartamentoDocente}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                Editar
-              </button>
-              <button
-                onClick={() => setConfirmarEliminacion(true)}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200 ml-2">
-                Eliminar
-              </button>
-            </Grid>
-          </Grid>
+          </div>
 
           {/* Modales */}
           {modalVisible && (

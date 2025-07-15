@@ -93,11 +93,25 @@ const CrearJefe = () => {
 
   const fetchPersonas = async (url: string) => {
     try {
-      const response = await API.get(url);
+      // Si la URL es absoluta (comienza con http), extraer solo la parte de la ruta
+      let apiUrl = url;
+      if (url.startsWith("http")) {
+        const urlObj = new URL(url);
+        apiUrl = urlObj.pathname + urlObj.search;
+      }
+
+      const response = await API.get(apiUrl);
       setPersonas(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
       setTotalItems(response.data.count);
+
+      // Calcular la página actual basándose en los parámetros de la URL
+      const urlParams = new URLSearchParams(apiUrl.split("?")[1] || "");
+      const offset = parseInt(urlParams.get("offset") || "0");
+      const limit = parseInt(urlParams.get("limit") || "10");
+      const calculatedPage = Math.floor(offset / limit) + 1;
+      setCurrentPage(calculatedPage);
     } catch (error) {
       console.error("Error fetching paginated data:", error);
     }
@@ -129,12 +143,9 @@ const CrearJefe = () => {
 
     try {
       // 🔹 Verificar si la persona ya es un jefe
-      const response = await API.get(
-        `/facet/jefe/existe_jefe/`,
-        {
-          params: { persona_id: persona.id },
-        }
-      );
+      const response = await API.get(`/facet/jefe/existe_jefe/`, {
+        params: { persona_id: persona.id },
+      });
 
       if (response.data.existe) {
         handleOpenModal(
@@ -167,213 +178,259 @@ const CrearJefe = () => {
   return (
     <DashboardMenu>
       <Container maxWidth="lg">
-        <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
-          <Typography variant="h4" gutterBottom className="text-gray-800">
-            Agregar Jefe
-          </Typography>
+        <Paper elevation={3} className="bg-white shadow-lg rounded-lg">
+          {/* Título separado */}
+          <div className="p-4 border-b border-gray-200">
+            <Typography variant="h5" className="text-gray-800 font-semibold">
+              Agregar Jefe
+            </Typography>
+          </div>
 
-          <Grid container spacing={2}>
-            <Grid item xs={4}>
+          {/* Contenido del formulario */}
+          <div className="p-4">
+            <Grid container spacing={2}>
+              {/* Sección: Selección de Persona */}
+              <Grid item xs={12}>
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
+                  Selección de Persona
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12}>
+                <button
+                  onClick={handleOpenPersona}
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                  Seleccionar Persona
+                </button>
+              </Grid>
+
+              {/* Separador visual */}
+              <Grid item xs={12}>
+                <div className="border-t border-gray-200 my-4"></div>
+              </Grid>
+
+              {/* Sección: Información del Jefe */}
+              <Grid item xs={12}>
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
+                  Información del Jefe
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  disabled
+                  label="DNI"
+                  value={dni}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  disabled
+                  label="Nombre Completo"
+                  value={`${apellido} ${nombre}`}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Observaciones"
+                  value={observaciones}
+                  onChange={(e) => setObservaciones(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  multiline
+                  rows={2}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  select
+                  label="Estado"
+                  value={estado}
+                  onChange={(e) => setEstado(Number(e.target.value))}
+                  fullWidth
+                  variant="outlined"
+                  size="small">
+                  <MenuItem value={1}>Activo</MenuItem>
+                  <MenuItem value={0}>Inactivo</MenuItem>
+                </TextField>
+              </Grid>
+
+              {/* Botón de acción centrado */}
+              <Grid item xs={12}>
+                <div className="flex justify-center mt-6">
+                  <button
+                    onClick={crearNuevoJefeDepartamento}
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Crear Jefe
+                  </button>
+                </div>
+              </Grid>
+            </Grid>
+          </div>
+
+          <Dialog
+            open={openPersona}
+            onClose={handleClose}
+            maxWidth="md"
+            fullWidth>
+            <DialogTitle>Seleccionar Persona</DialogTitle>
+            <DialogContent>
+              <Grid container spacing={2} alignItems="center">
+                <Grid item xs={6}>
+                  <TextField
+                    label="Nombre"
+                    value={filtroNombre}
+                    onChange={(e) => setFiltroNombre(e.target.value)}
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    size="small"
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    label="Apellido"
+                    value={filtroApellido}
+                    onChange={(e) => setFiltroApellido(e.target.value)}
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    size="small"
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <TextField
+                    label="DNI"
+                    value={filtroDni}
+                    onChange={(e) => setFiltroDni(e.target.value)}
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    size="small"
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <TextField
+                    label="Legajo"
+                    value={filtroLegajo}
+                    onChange={(e) => setFiltroLegajo(e.target.value)}
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    size="small"
+                  />
+                </Grid>
+                <Grid
+                  item
+                  xs={4}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    height: "100%",
+                  }}>
+                  <button
+                    onClick={filtrarPersonas}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
+                    Filtrar
+                  </button>
+                </Grid>
+              </Grid>
+              <TableContainer component={Paper} style={{ marginTop: "20px" }}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>DNI</TableCell>
+                      <TableCell>Apellido</TableCell>
+                      <TableCell>Nombre</TableCell>
+                      <TableCell>Legajo</TableCell>
+                      <TableCell>Seleccionar</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {personas.map((p) => (
+                      <TableRow key={p.id}>
+                        <TableCell>{p.dni}</TableCell>
+                        <TableCell>{p.apellido}</TableCell>
+                        <TableCell>{p.nombre}</TableCell>
+                        <TableCell>{p.legajo}</TableCell>
+                        <TableCell>
+                          <button
+                            onClick={() => {
+                              setPersona(p);
+                              setApellido(p.apellido);
+                              setDni(p.dni);
+                              setNombre(p.nombre);
+                            }}
+                            className={`px-3 py-1 rounded-md transition-colors duration-200 border ${
+                              persona?.id === p.id
+                                ? "bg-green-500 text-white border-green-500 hover:bg-green-600"
+                                : "border-gray-300 hover:bg-gray-100"
+                            }`}>
+                            Seleccionar
+                          </button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </DialogContent>
+            <DialogActions>
               <button
-                onClick={handleOpenPersona}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                Seleccionar Persona
+                disabled={!prevUrl}
+                onClick={() => prevUrl && fetchPersonas(prevUrl)}
+                className={`mr-2 px-3 py-1 rounded-md ${
+                  !prevUrl
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-blue-500 hover:bg-blue-600 text-white"
+                }`}>
+                Anterior
               </button>
-
-              <Dialog
-                open={openPersona}
-                onClose={handleClose}
-                maxWidth="md"
-                fullWidth>
-                <DialogTitle>Seleccionar Persona</DialogTitle>
-                <DialogContent>
-                  <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={6}>
-                      <TextField
-                        label="Nombre"
-                        value={filtroNombre}
-                        onChange={(e) => setFiltroNombre(e.target.value)}
-                        fullWidth
-                        margin="normal"
-                        variant="outlined"
-                      />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="Apellido"
-                        value={filtroApellido}
-                        onChange={(e) => setFiltroApellido(e.target.value)}
-                        fullWidth
-                        margin="normal"
-                        variant="outlined"
-                      />
-                    </Grid>
-                    <Grid item xs={4}>
-                      <TextField
-                        label="DNI"
-                        value={filtroDni}
-                        onChange={(e) => setFiltroDni(e.target.value)}
-                        fullWidth
-                        margin="normal"
-                        variant="outlined"
-                      />
-                    </Grid>
-                    <Grid item xs={4}>
-                      <TextField
-                        label="Legajo"
-                        value={filtroLegajo}
-                        onChange={(e) => setFiltroLegajo(e.target.value)}
-                        fullWidth
-                        margin="normal"
-                        variant="outlined"
-                      />
-                    </Grid>
-                    <Grid
-                      item
-                      xs={4}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        height: "100%",
-                      }}>
-                      <button
-                        onClick={filtrarPersonas}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                        Filtrar
-                      </button>
-                    </Grid>
-                  </Grid>
-                  <TableContainer
-                    component={Paper}
-                    style={{ marginTop: "20px" }}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>DNI</TableCell>
-                          <TableCell>Apellido</TableCell>
-                          <TableCell>Nombre</TableCell>
-                          <TableCell>Legajo</TableCell>
-                          <TableCell>Seleccionar</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {personas.map((p) => (
-                          <TableRow key={p.id}>
-                            <TableCell>{p.dni}</TableCell>
-                            <TableCell>{p.apellido}</TableCell>
-                            <TableCell>{p.nombre}</TableCell>
-                            <TableCell>{p.legajo}</TableCell>
-                            <TableCell>
-                              <button
-                                onClick={() => {
-                                  setPersona(p);
-                                  setApellido(p.apellido);
-                                  setDni(p.dni);
-                                  setNombre(p.nombre);
-                                }}
-                                className={`px-3 py-1 rounded-md transition-colors duration-200 border ${
-                                  persona?.id === p.id
-                                    ? "bg-green-500 text-white border-green-500 hover:bg-green-600"
-                                    : "border-gray-300 hover:bg-gray-100"
-                                }`}>
-                                Seleccionar
-                              </button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </DialogContent>
-                <DialogActions>
-                  <button
-                    disabled={!prevUrl}
-                    onClick={() => prevUrl && fetchPersonas(prevUrl)}
-                    className={`mr-2 px-3 py-1 rounded-md ${
-                      !prevUrl
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-blue-500 hover:bg-blue-600 text-white"
-                    }`}>
-                    Anterior
-                  </button>
-                  <Typography>
-                    Página {currentPage} de {Math.ceil(totalItems / 10)}
-                  </Typography>
-                  <button
-                    disabled={!nextUrl}
-                    onClick={() => nextUrl && fetchPersonas(nextUrl)}
-                    className={`mr-2 px-3 py-1 rounded-md ${
-                      !nextUrl
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-blue-500 hover:bg-blue-600 text-white"
-                    }`}>
-                    Siguiente
-                  </button>
-                  <button
-                    onClick={handleClose}
-                    className="px-3 py-1 rounded-md border border-gray-300 hover:bg-gray-100">
-                    Cerrar
-                  </button>
-                  <button
-                    onClick={handleClose}
-                    disabled={!persona}
-                    className={`ml-2 px-3 py-1 rounded-md ${
-                      !persona
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-blue-500 hover:bg-blue-600 text-white"
-                    }`}>
-                    Confirmar Selección
-                  </button>
-                </DialogActions>
-              </Dialog>
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                disabled
-                label="DNI"
-                value={dni}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                disabled
-                value={`${apellido} ${nombre}`}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Observaciones"
-                value={observaciones}
-                onChange={(e) => setObservaciones(e.target.value)}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                select
-                label="Estado"
-                value={estado}
-                onChange={(e) => setEstado(Number(e.target.value))}
-                fullWidth
-                variant="outlined">
-                <MenuItem value={1}>Activo</MenuItem>
-                <MenuItem value={0}>Inactivo</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={12}>
+              <Typography>
+                Página {currentPage} de {Math.ceil(totalItems / 10)}
+              </Typography>
               <button
-                onClick={crearNuevoJefeDepartamento}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                Crear
+                disabled={!nextUrl}
+                onClick={() => nextUrl && fetchPersonas(nextUrl)}
+                className={`mr-2 px-3 py-1 rounded-md ${
+                  !nextUrl
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-blue-500 hover:bg-blue-600 text-white"
+                }`}>
+                Siguiente
               </button>
-            </Grid>
-          </Grid>
+              <button
+                onClick={handleClose}
+                className="px-3 py-1 rounded-md border border-gray-300 hover:bg-gray-100">
+                Cerrar
+              </button>
+              <button
+                onClick={handleClose}
+                disabled={!persona}
+                className={`ml-2 px-3 py-1 rounded-md ${
+                  !persona
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-blue-500 hover:bg-blue-600 text-white"
+                }`}>
+                Confirmar Selección
+              </button>
+            </DialogActions>
+          </Dialog>
+
           <BasicModal
             open={modalVisible}
             onClose={handleCloseModal}

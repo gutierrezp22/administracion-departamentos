@@ -52,16 +52,25 @@ const ListaNotificaciones = () => {
 
   const fetchData = async (url: string) => {
     try {
-      const response = await API.get(url);
+      // Si la URL es absoluta (comienza con http), extraer solo la parte de la ruta
+      let apiUrl = url;
+      if (url.startsWith('http')) {
+        const urlObj = new URL(url);
+        apiUrl = urlObj.pathname + urlObj.search;
+      }
+      
+      const response = await API.get(apiUrl);
       setNotificaciones(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
       setTotalItems(response.data.count);
-      setCurrentPage(
-        url.includes("page=")
-          ? parseInt(new URL(url).searchParams.get("page") || "1")
-          : 1
-      );
+      
+      // Calcular la página actual basándose en los parámetros de la URL
+      const urlParams = new URLSearchParams(apiUrl.split('?')[1] || '');
+      const offset = parseInt(urlParams.get('offset') || '0');
+      const limit = parseInt(urlParams.get('limit') || '10');
+      const calculatedPage = Math.floor(offset / limit) + 1;
+      setCurrentPage(calculatedPage);
     } catch (error) {
       Swal.fire({
         icon: "error",
