@@ -29,6 +29,7 @@ import timezone from "dayjs/plugin/timezone";
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import Tooltip from "@mui/material/Tooltip";
@@ -253,6 +254,36 @@ const ListaResoluciones = () => {
 
   const totalPages = Math.ceil(totalItems / pageSize);
 
+  const eliminarResolucion = async (id: number) => {
+    try {
+      const result = await Swal.fire({
+        title: "¿Estás seguro?",
+        text: "Esta acción no se puede deshacer",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar",
+      });
+
+      if (result.isConfirmed) {
+        await API.delete(`/facet/resolucion/${id}/`);
+
+        Swal.fire("¡Eliminado!", "La resolución ha sido eliminada.", "success");
+
+        // Recargar los datos
+        fetchData(currentUrl);
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudo eliminar la resolución.",
+      });
+    }
+  };
+
   // Modal de loading
   if (isLoading) {
     return (
@@ -427,15 +458,26 @@ const ListaResoluciones = () => {
                       </Tooltip>
                     </TableCell>
                     <TableCell>
-                      <button
-                        onClick={() =>
-                          router.push(
-                            `/dashboard/resoluciones/edit/${resolucion.id}`
-                          )
-                        }
-                        className="p-2 text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-100 transition-colors duration-200">
-                        <EditIcon />
-                      </button>
+                      <div className="flex items-center justify-center gap-2">
+                        <Tooltip title="Editar">
+                          <button
+                            onClick={() =>
+                              router.push(
+                                `/dashboard/resoluciones/edit/${resolucion.id}`
+                              )
+                            }
+                            className="p-2 text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-100 transition-colors duration-200">
+                            <EditIcon />
+                          </button>
+                        </Tooltip>
+                        <Tooltip title="Eliminar">
+                          <button
+                            onClick={() => eliminarResolucion(resolucion.id)}
+                            className="p-2 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-100 transition-colors duration-200">
+                            <DeleteIcon />
+                          </button>
+                        </Tooltip>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
