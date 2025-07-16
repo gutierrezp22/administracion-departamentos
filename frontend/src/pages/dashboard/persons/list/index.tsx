@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
 import axios from "axios";
+import API from "@/api/axiosConfig";
 import {
   Container,
   Table,
@@ -74,11 +75,25 @@ const ListaPersonas = () => {
 
   const fetchData = async (url: string) => {
     try {
-      const response = await axios.get(url);
+      // Si la URL es absoluta (comienza con http), extraer solo la parte de la ruta
+      let apiUrl = url;
+      if (url.startsWith("http")) {
+        const urlObj = new URL(url);
+        apiUrl = urlObj.pathname + urlObj.search;
+      }
+
+      const response = await API.get(apiUrl);
       setPersonas(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
       setTotalItems(response.data.count);
+
+      // Calcular la página actual basándose en los parámetros de la URL
+      const urlParams = new URLSearchParams(apiUrl.split("?")[1] || "");
+      const offset = parseInt(urlParams.get("offset") || "0");
+      const limit = parseInt(urlParams.get("limit") || "10");
+      const calculatedPage = Math.floor(offset / limit) + 1;
+      setCurrentPage(calculatedPage);
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -140,7 +155,7 @@ const ListaPersonas = () => {
       url += params.toString();
 
       while (url) {
-        const response = await axios.get(url);
+        const response = await API.get(url);
         const { results, next } = response.data;
         allPersonas = [...allPersonas, ...results];
         url = next;
@@ -193,7 +208,7 @@ const ListaPersonas = () => {
       });
 
       if (result.isConfirmed) {
-        await axios.delete(`${API_BASE_URL}/facet/persona/${id}/`);
+        await API.delete(`${API_BASE_URL}/facet/persona/${id}/`);
         Swal.fire("Eliminado!", "La persona ha sido eliminada.", "success");
         fetchData(currentUrl);
       }
@@ -272,16 +287,56 @@ const ListaPersonas = () => {
             <Table>
               <TableHead>
                 <TableRow className="bg-blue-500">
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Nombre</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Apellido</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>DNI</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Legajo</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Teléfono</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Email</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Interno</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Título</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Estado</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Acciones</TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Nombre
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Apellido
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    DNI
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Legajo
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Teléfono
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Email
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Interno
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Título
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Estado
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Acciones
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

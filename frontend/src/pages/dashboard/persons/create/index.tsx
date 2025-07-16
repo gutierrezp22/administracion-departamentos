@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
-import axios from 'axios';
 import {
   Container,
   Paper,
@@ -17,7 +16,6 @@ import BasicModal from '@/utils/modal';
 import { useRouter } from 'next/router';
 import DashboardMenu from '../../../dashboard';
 import withAuth from "../../../../components/withAut"; 
-import { API_BASE_URL } from "../../../../utils/config";
 import API from '@/api/axiosConfig';
 
 interface Titulo {
@@ -36,7 +34,7 @@ const CrearPersona = () => {
   const [telefono, setTelefono] = useState('');
   const [email, setEmail] = useState('');
   const [interno, setInterno] = useState('');
-  const [estado, setEstado] = useState('');
+  const [estado, setEstado] = useState('1'); // Valor por defecto: Activo
   const [titulos, setTitulos] = useState<Titulo[]>([]);
   const [tituloId, setTituloId] = useState<number | ''>('');
   const [modalVisible, setModalVisible] = useState(false);
@@ -66,7 +64,7 @@ const CrearPersona = () => {
   useEffect(() => {
     const fetchTitulos = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/facet/tipo-titulo/`);
+        const response = await API.get(`/facet/tipo-titulo/`);
         setTitulos(response.data.results);
       } catch (error) {
         console.error('Error al obtener títulos:', error);
@@ -82,22 +80,29 @@ const CrearPersona = () => {
 
   // Función para crear una nueva persona
   const crearNuevaPersona = async () => {
+    // Validar campos requeridos
+    if (!nombre.trim() || !apellido.trim() || !dni.trim()) {
+      handleOpenModal('Error', 'Los campos Nombre, Apellido y DNI son obligatorios.', () => {});
+      return;
+    }
+
     const nuevaPersona = {
-      nombre: nombre,
-      apellido: apellido,
-      telefono: telefono,
-      dni: dni,
+      nombre: nombre.trim(),
+      apellido: apellido.trim(),
+      telefono: telefono.trim() || null,
+      dni: dni.trim(),
       estado: estado,
-      email: email,
-      interno: interno,
-      legajo: legajo,
-      titulo: tituloId, // Añadido el campo título en la solicitud
+      email: email.trim() || null,
+      interno: interno.trim() ? parseInt(interno.trim()) : null,
+      legajo: legajo.trim() || null,
+      titulo: tituloId || null,
     };
 
     try {
       const response = await API.post(`/facet/persona/`, nuevaPersona);
       handleOpenModal('Éxito', 'Se creó la persona con éxito.', handleConfirmModal);
     } catch (error) {
+      console.error('Error al crear persona:', error);
       handleOpenModal('Error', 'No se pudo realizar la acción.', () => {});
     }
   };
@@ -105,68 +110,156 @@ const CrearPersona = () => {
   return (
     <DashboardMenu>
       <Container maxWidth="lg">
-                <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>          <Typography variant="h4" gutterBottom className="text-gray-800">            Personas          </Typography>
-
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField label="DNI" value={dni} onChange={(e) => setDni(e.target.value)} fullWidth />
+        <Paper elevation={3} className="bg-white shadow-lg rounded-lg">
+          {/* Título separado */}
+          <div className="p-4 border-b border-gray-200">
+            <Typography variant="h5" className="text-gray-800 font-semibold">
+              Crear Persona
+            </Typography>
+          </div>
+          
+          {/* Contenido del formulario */}
+          <div className="p-4">
+            <Grid container spacing={2}>
+              {/* Sección: Información Personal */}
+              <Grid item xs={12}>
+                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                  Información Personal
+                </Typography>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField 
+                  label="DNI" 
+                  value={dni} 
+                  onChange={(e) => setDni(e.target.value)} 
+                  fullWidth 
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Legajo"
+                  value={legajo}
+                  onChange={(e) => setLegajo(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Nombres"
+                  value={nombre}
+                  onChange={(e) => setNombre(capitalizeFirstLetter(e.target.value))}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Apellido"
+                  value={apellido}
+                  onChange={(e) => setApellido(capitalizeFirstLetter(e.target.value))}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              
+              {/* Separador visual */}
+              <Grid item xs={12}>
+                <div className="border-t border-gray-200 my-4"></div>
+              </Grid>
+              
+              {/* Sección: Información de Contacto */}
+              <Grid item xs={12}>
+                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                  Información de Contacto
+                </Typography>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField 
+                  label="Teléfono" 
+                  value={telefono} 
+                  onChange={(e) => setTelefono(e.target.value)} 
+                  fullWidth 
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField 
+                  label="Email" 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)} 
+                  fullWidth 
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField 
+                  label="Interno" 
+                  value={interno} 
+                  onChange={(e) => setInterno(e.target.value)} 
+                  fullWidth 
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Título</InputLabel>
+                  <Select 
+                    value={tituloId} 
+                    label="Título" 
+                    onChange={(e) => setTituloId(Number(e.target.value))}>
+                    <MenuItem value="">Sin título</MenuItem>
+                    {titulos.map((titulo) => (
+                      <MenuItem key={titulo.id} value={titulo.id}>
+                        {titulo.nombre}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Estado</InputLabel>
+                  <Select 
+                    value={estado} 
+                    label="Estado" 
+                    onChange={(e) => setEstado(e.target.value)}>
+                    <MenuItem value={1}>Activo</MenuItem>
+                    <MenuItem value={0}>Inactivo</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              
+              {/* Botón de acción centrado */}
+              <Grid item xs={12}>
+                <div className="flex justify-center mt-6">
+                  <button
+                    onClick={crearNuevaPersona}
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Crear Persona
+                  </button>
+                </div>
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Nombres"
-                value={nombre}
-                onChange={(e) => setNombre(capitalizeFirstLetter(e.target.value))}
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Apellido"
-                value={apellido}
-                onChange={(e) => setApellido(capitalizeFirstLetter(e.target.value))}
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField label="Teléfono" value={telefono} onChange={(e) => setTelefono(e.target.value)} fullWidth />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>Estado</InputLabel>
-                <Select value={estado} label="Estado" onChange={(e) => setEstado(e.target.value)}>
-                  <MenuItem value={1}>Activo</MenuItem>
-                  <MenuItem value={0}>Inactivo</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <TextField label="Email" value={email} onChange={(e) => setEmail(e.target.value)} fullWidth />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField label="Interno" value={interno} onChange={(e) => setInterno(e.target.value)} fullWidth />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField label="Legajo" value={legajo} onChange={(e) => setLegajo(e.target.value)} fullWidth />
-            </Grid>
-            <Grid item xs={12}>
-            <FormControl fullWidth>
-                <InputLabel id="titulo-label">Título</InputLabel>
-                <Select
-                  labelId="titulo-label"
-                  value={tituloId}
-                  onChange={(e) => setTituloId(Number(e.target.value))}
-                >
-                  <MenuItem value="">Sin título</MenuItem>
-                  {titulos.map((titulo) => (
-                    <MenuItem key={titulo.id} value={titulo.id}>
-                      {titulo.nombre}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-                        <Grid item xs={12} marginBottom={2}>              <button                onClick={crearNuevaPersona}                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">                Crear              </button>            </Grid>
-          </Grid>
+          </div>
+          
           <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} onConfirm={fn} />
         </Paper>
       </Container>

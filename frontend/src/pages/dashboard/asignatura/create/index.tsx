@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
-import axios from "axios";
 import {
   Container,
   Grid,
@@ -28,10 +27,8 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import BasicModal from "@/utils/modal";
 import { useRouter } from "next/router";
-import Swal from "sweetalert2";
 import DashboardMenu from "../../../dashboard";
 import withAuth from "../../../../components/withAut"; // Importa el HOC
-import { API_BASE_URL } from "../../../../utils/config";
 import API from "@/api/axiosConfig";
 
 dayjs.extend(utc);
@@ -47,21 +44,14 @@ const CrearAsignatura = () => {
     estado: 0 | 1;
   }
 
-  interface Departamento {
-    id: number;
-    nombre: string;
-    estado: 0 | 1;
-  }
-
   type TipoAsignatura = "Electiva" | "Obligatoria";
 
   const [areaSeleccionada, setAreaSeleccionada] = useState<Area | null>(null);
-  const [departamentos, setDepartamentos] = useState<Departamento[]>([]); // Definimos departamentos correctamente
   const [openAreaModal, setOpenAreaModal] = useState(false);
   const [nombre, setNombre] = useState("");
   const [codigo, setCodigo] = useState("");
-  const [estado, setEstado] = useState("");
-  const [tipo, setTipo] = useState("");
+  const [estado, setEstado] = useState("1"); // Valor por defecto: Activo
+  const [tipo, setTipo] = useState("Obligatoria"); // Valor por defecto
   const [modulo, setModulo] = useState("");
   const [programa, setPrograma] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
@@ -73,9 +63,8 @@ const CrearAsignatura = () => {
   const [filtroAreas, setFiltroAreas] = useState("");
   const [nextUrlAreas, setNextUrlAreas] = useState<string | null>(null);
   const [prevUrlAreas, setPrevUrlAreas] = useState<string | null>(null);
-  const [currentUrlAreas, setCurrentUrlAreas] = useState<string>(
-    `${API_BASE_URL}/facet/area/`
-  );
+  const [currentUrlAreas, setCurrentUrlAreas] =
+    useState<string>(`/facet/area/`);
   const [totalItemsAreas, setTotalItemsAreas] = useState<number>(0);
   const [currentPageAreas, setCurrentPageAreas] = useState<number>(1);
   const pageSizeAreas = 10; // Tamaño de página
@@ -114,7 +103,7 @@ const CrearAsignatura = () => {
 
   const fetchAreas = async (url: string) => {
     try {
-      const response = await axios.get(url);
+      const response = await API.get(url);
 
       setAreas(response.data.results); // Datos de la página actual
       setNextUrlAreas(response.data.next); // URL de la página siguiente
@@ -122,19 +111,22 @@ const CrearAsignatura = () => {
       setTotalItemsAreas(response.data.count); // Total de elementos
 
       // Calcula la página actual usando offset
-      const offset = new URL(url).searchParams.get("offset") || "0";
+      const fullUrl = url.startsWith("http")
+        ? url
+        : `${window.location.origin}${url}`;
+      const offset = new URL(fullUrl).searchParams.get("offset") || "0";
       setCurrentPageAreas(Math.floor(Number(offset) / pageSizeAreas) + 1);
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Error al obtener las áreas.",
-      });
+      console.error("Error al obtener áreas:", error);
+      setAreas([]);
+      setNextUrlAreas(null);
+      setPrevUrlAreas(null);
+      setTotalItemsAreas(0);
     }
   };
 
   const filtrarAreas = () => {
-    let url = `${API_BASE_URL}/facet/area/?`;
+    let url = `/facet/area/?`;
     const params = new URLSearchParams();
 
     if (filtroAreas) params.append("nombre__icontains", filtroAreas);
@@ -143,29 +135,47 @@ const CrearAsignatura = () => {
     setCurrentUrlAreas(url); // Actualiza la URL, lo que dispara el useEffect
   };
 
-  const handleFilterAreas = (filtro: string) => {
-    return areas.filter((area) =>
-      area.nombre.toLowerCase().includes(filtro.toLowerCase())
-    );
-  };
-
   const crearNuevaAsignatura = async () => {
+    // Validar campos requeridos
     if (!areaSeleccionada) {
-      Swal.fire({
-        icon: "warning",
-        title: "Advertencia",
-        text: "Debe seleccionar un área.",
-      });
+      handleOpenModal("Error", "Debe seleccionar un área.", () => {});
+      return;
+    }
+
+    if (!nombre.trim()) {
+      handleOpenModal(
+        "Error",
+        "El nombre de la asignatura es obligatorio.",
+        () => {}
+      );
+      return;
+    }
+
+    if (!codigo.trim()) {
+      handleOpenModal(
+        "Error",
+        "El código de la asignatura es obligatorio.",
+        () => {}
+      );
+      return;
+    }
+
+    if (!tipo) {
+      handleOpenModal(
+        "Error",
+        "Debe seleccionar un tipo de asignatura.",
+        () => {}
+      );
       return;
     }
 
     const nuevaAsignatura = {
       area: areaSeleccionada.id,
       departamento: areaSeleccionada.departamento,
-      codigo: codigo,
-      nombre: nombre,
-      modulo: modulo,
-      programa: programa,
+      codigo: codigo.trim(),
+      nombre: nombre.trim(),
+      modulo: modulo.trim() || null,
+      programa: programa.trim() || null,
       tipo: tipo,
       estado: estado,
     };
@@ -177,8 +187,11 @@ const CrearAsignatura = () => {
         "Se creó la asignatura con éxito.",
         handleConfirmModal
       );
-    } catch (error) {
-      handleOpenModal("Error", "No se pudo realizar la acción.", () => {});
+    } catch (error: any) {
+      console.error("Error al crear asignatura:", error);
+      const errorMessage =
+        error.response?.data?.message || "No se pudo realizar la acción.";
+      handleOpenModal("Error", errorMessage, () => {});
     }
   };
 
@@ -189,220 +202,289 @@ const CrearAsignatura = () => {
   return (
     <DashboardMenu>
       <Container maxWidth="lg">
-        <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
-          <Typography variant="h4" gutterBottom className="text-gray-800">
-            Asignatura
-          </Typography>
+        <div className="bg-white rounded-lg shadow-lg">
+          <div className="p-6 border-b border-gray-200">
+            <h1 className="text-2xl font-bold text-gray-800">Crear Asignatura</h1>
+          </div>
 
-          <Grid container spacing={2}>
-            <Grid item xs={4}>
-              <button
-                onClick={handleOpenAreaModal}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                Seleccionar Área
-              </button>
+          <div className="p-4">
+            <Grid container spacing={2}>
+              {/* Sección de Selección */}
+              <Grid item xs={12}>
+                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                  Selección Requerida
+                </Typography>
+                <button
+                  onClick={handleOpenAreaModal}
+                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                  Seleccionar Área
+                </button>
+                {areaSeleccionada && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mt-2 shadow-sm">
+                    <p className="text-sm font-medium text-gray-800">
+                      <span className="font-bold text-blue-700">Área:</span>{" "}
+                      <span className="text-gray-900">{areaSeleccionada.nombre}</span>
+                    </p>
+                  </div>
+                )}
+              </Grid>
 
-              <Dialog
-                open={openAreaModal}
-                onClose={handleCloseAreaModal}
-                maxWidth="md"
-                fullWidth>
-                <DialogTitle>Seleccionar Área</DialogTitle>
-                <DialogContent>
-                  {/* Filtro */}
-                  <TextField
-                    label="Buscar por Nombre"
-                    value={filtroAreas}
-                    onChange={(e) => setFiltroAreas(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                    variant="outlined"
-                  />
+              {/* Separador visual */}
+              <Grid item xs={12}>
+                <div className="border-t border-gray-200 my-4"></div>
+              </Grid>
+
+              {/* Sección de Información Básica */}
+              <Grid item xs={12}>
+                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                  Información Básica
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      label="Nombre de la Asignatura"
+                      value={nombre}
+                      onChange={(e) => setNombre(e.target.value.toUpperCase())}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      label="Código"
+                      value={codigo}
+                      onChange={(e) => setCodigo(e.target.value.toUpperCase())}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Grid>
+                </Grid>
+              </Grid>
+
+              {/* Separador visual */}
+              <Grid item xs={12}>
+                <div className="border-t border-gray-200 my-4"></div>
+              </Grid>
+
+              {/* Sección de Información Adicional */}
+              <Grid item xs={12}>
+                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                  Información Adicional
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      label="Módulo"
+                      value={modulo}
+                      onChange={(e) => setModulo(e.target.value.toUpperCase())}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      label="Link Programa Adjunto"
+                      value={programa}
+                      onChange={(e) => setPrograma(e.target.value)}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      select
+                      label="Tipo"
+                      value={tipo}
+                      onChange={(e) => setTipo(e.target.value as TipoAsignatura)}
+                      fullWidth
+                      variant="outlined"
+                      size="small">
+                      <MenuItem value="Electiva">Electiva</MenuItem>
+                      <MenuItem value="Obligatoria">Obligatoria</MenuItem>
+                    </TextField>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      select
+                      label="Estado"
+                      value={estado}
+                      onChange={(e) => setEstado(e.target.value)}
+                      fullWidth
+                      variant="outlined"
+                      size="small">
+                      <MenuItem value={1}>Activo</MenuItem>
+                      <MenuItem value={0}>Inactivo</MenuItem>
+                    </TextField>
+                  </Grid>
+                </Grid>
+              </Grid>
+
+              {/* Botón de acción principal */}
+              <Grid item xs={12}>
+                <div className="flex justify-center mt-6">
+                  <button
+                    onClick={crearNuevaAsignatura}
+                    className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 font-semibold">
+                    Crear Asignatura
+                  </button>
+                </div>
+              </Grid>
+            </Grid>
+          </div>
+        </div>
+
+        <Dialog
+          open={openAreaModal}
+          onClose={handleCloseAreaModal}
+          maxWidth="lg"
+          fullWidth
+          PaperProps={{
+            style: {
+              borderRadius: "12px",
+              boxShadow:
+                "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+            },
+          }}>
+          <DialogTitle className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold">
+            Seleccionar Área
+          </DialogTitle>
+          <DialogContent className="p-4">
+            {/* Filtro */}
+            <Grid container spacing={2} className="mb-4 mt-4">
+              <Grid item xs={12} sm={8}>
+                <TextField
+                  label="Buscar por Nombre"
+                  value={filtroAreas}
+                  onChange={(e) => setFiltroAreas(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <div className="flex gap-2">
                   <button
                     onClick={filtrarAreas}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200 mb-4">
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
                     Filtrar
                   </button>
-
-                  {/* Tabla de Áreas */}
-                  <TableContainer component={Paper}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Nombre</TableCell>
-                          <TableCell>Departamento</TableCell>
-                          <TableCell>Estado</TableCell>
-                          <TableCell>Seleccionar</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {areas.map((area) => (
-                          <TableRow key={area.id}>
-                            <TableCell>{area.nombre}</TableCell>
-                            <TableCell>
-                              {
-                                departamentos.find(
-                                  (dep) => dep.id === area.departamento
-                                )?.nombre
-                              }
-                            </TableCell>
-                            <TableCell>
-                              {area.estado == 1 ? "Activo" : "Inactivo"}
-                            </TableCell>
-                            <TableCell>
-                              <button
-                                onClick={() => setAreaSeleccionada(area)}
-                                className={`px-3 py-1 rounded-md transition-colors duration-200 border ${
-                                  areaSeleccionada?.id === area.id
-                                    ? "bg-green-500 text-white border-green-500 hover:bg-green-600"
-                                    : "border-gray-300 hover:bg-gray-100"
-                                }`}>
-                                Seleccionar
-                              </button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-
-                  {/* Paginación */}
-                  <div className="flex justify-between items-center mt-4">
-                    <button
-                      onClick={() =>
-                        prevUrlAreas && setCurrentUrlAreas(prevUrlAreas)
-                      }
-                      disabled={!prevUrlAreas}
-                      className={`mr-2 px-3 py-1 rounded-md ${
-                        !prevUrlAreas
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-blue-500 hover:bg-blue-600 text-white"
-                      }`}>
-                      Anterior
-                    </button>
-                    <Typography>
-                      Página {currentPageAreas} de{" "}
-                      {Math.ceil(totalItemsAreas / pageSizeAreas)}
-                    </Typography>
-                    <button
-                      onClick={() =>
-                        nextUrlAreas && setCurrentUrlAreas(nextUrlAreas)
-                      }
-                      disabled={!nextUrlAreas}
-                      className={`ml-2 px-3 py-1 rounded-md ${
-                        !nextUrlAreas
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-blue-500 hover:bg-blue-600 text-white"
-                      }`}>
-                      Siguiente
-                    </button>
-                  </div>
-                </DialogContent>
-                <DialogActions>
                   <button
-                    onClick={handleCloseAreaModal}
-                    className="px-3 py-1 rounded-md border border-gray-300 hover:bg-gray-100">
-                    Cerrar
+                    onClick={() => {
+                      setFiltroAreas("");
+                      setCurrentUrlAreas("/facet/area/");
+                    }}
+                    className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Limpiar
                   </button>
-                  <button
-                    onClick={confirmarSeleccionArea}
-                    disabled={!areaSeleccionada}
-                    className={`ml-2 px-3 py-1 rounded-md ${
-                      !areaSeleccionada
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-blue-500 hover:bg-blue-600 text-white"
-                    }`}>
-                    Confirmar Selección
-                  </button>
-                </DialogActions>
-              </Dialog>
+                </div>
+              </Grid>
             </Grid>
 
-            <Grid item xs={12}>
-              <TextField
-                disabled
-                label="Área Seleccionada"
-                value={areaSeleccionada?.nombre || ""}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Nombre"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value.toUpperCase())}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Código"
-                value={codigo}
-                onChange={(e) => setCodigo(e.target.value.toUpperCase())}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Módulo"
-                value={modulo}
-                onChange={(e) => setModulo(e.target.value.toUpperCase())}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Link Programa Adjunto"
-                value={programa}
-                onChange={(e) => setPrograma(e.target.value)}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                select
-                label="Tipo"
-                value={tipo}
-                onChange={(e) => setTipo(e.target.value as TipoAsignatura)}
-                fullWidth
-                variant="outlined">
-                <MenuItem value="Electiva">Electiva</MenuItem>
-                <MenuItem value="Obligatoria">Obligatoria</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                select
-                label="Estado"
-                value={estado}
-                onChange={(e) => setEstado(e.target.value)}
-                fullWidth
-                variant="outlined">
-                <MenuItem value={1}>Activo</MenuItem>
-                <MenuItem value={0}>Inactivo</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={12} marginBottom={2}>
+            {/* Tabla de Áreas */}
+            <TableContainer
+              component={Paper}
+              className="shadow-lg rounded-lg overflow-hidden"
+              style={{ maxHeight: "400px" }}>
+              <Table size="small">
+                <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
+                  <TableRow>
+                    <TableCell className="text-white font-semibold py-2">
+                      Nombre
+                    </TableCell>
+                    <TableCell className="text-white font-semibold py-2">
+                      Estado
+                    </TableCell>
+                    <TableCell className="text-white font-semibold py-2">
+                      Seleccionar
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {areas.map((area) => (
+                    <TableRow
+                      key={area.id}
+                      className="hover:bg-blue-50 transition-colors duration-200">
+                      <TableCell className="font-medium py-2">
+                        {area.nombre}
+                      </TableCell>
+                      <TableCell className="font-medium py-2">
+                        {area.estado == 1 ? "Activo" : "Inactivo"}
+                      </TableCell>
+                      <TableCell className="py-2">
+                        <button
+                          onClick={() => setAreaSeleccionada(area)}
+                          className={`px-3 py-1 rounded-lg transition-all duration-200 border font-medium text-sm ${
+                            areaSeleccionada?.id === area.id
+                              ? "bg-gradient-to-r from-green-500 to-green-600 text-white border-green-500 hover:from-green-600 hover:to-green-700 shadow-md transform hover:scale-105"
+                              : "border-gray-300 hover:bg-gray-100"
+                          }`}>
+                          Seleccionar
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            {/* Paginación */}
+            <div className="flex justify-between items-center mt-4">
               <button
-                onClick={crearNuevaAsignatura}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                Crear
+                onClick={() => prevUrlAreas && fetchAreas(prevUrlAreas)}
+                disabled={!prevUrlAreas}
+                className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm ${
+                  !prevUrlAreas
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
+                }`}>
+                Anterior
               </button>
-            </Grid>
-          </Grid>
-          <BasicModal
-            open={modalVisible}
-            onClose={handleCloseModal}
-            title={modalTitle}
-            content={modalMessage}
-            onConfirm={fn}
-          />
-        </Paper>
+              <Typography className="font-medium text-gray-700 text-sm">
+                Página {currentPageAreas} de{" "}
+                {Math.ceil(totalItemsAreas / pageSizeAreas)}
+              </Typography>
+              <button
+                onClick={() => nextUrlAreas && fetchAreas(nextUrlAreas)}
+                disabled={!nextUrlAreas}
+                className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm ${
+                  !nextUrlAreas
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
+                }`}>
+                Siguiente
+              </button>
+            </div>
+          </DialogContent>
+          <DialogActions className="p-4">
+            <button
+              onClick={handleCloseAreaModal}
+              className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-all duration-200 font-medium">
+              Cerrar
+            </button>
+            <button
+              onClick={confirmarSeleccionArea}
+              disabled={!areaSeleccionada}
+              className={`ml-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                !areaSeleccionada
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
+              }`}>
+              Confirmar Selección
+            </button>
+          </DialogActions>
+        </Dialog>
+
+        <BasicModal
+          open={modalVisible}
+          onClose={handleCloseModal}
+          title={modalTitle}
+          content={modalMessage}
+          onConfirm={fn}
+        />
       </Container>
     </DashboardMenu>
   );

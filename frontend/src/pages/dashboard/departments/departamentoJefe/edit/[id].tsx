@@ -136,107 +136,155 @@ const EditarDepartamentoJefe = () => {
 
   return (
     <DashboardMenu>
-      <div className="p-6">
-        <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
-          <Typography variant="h4" gutterBottom className="text-gray-800">
-            Editar Jefe de Departamento
-          </Typography>
+      <Container maxWidth="lg">
+        <Paper elevation={3} className="bg-white shadow-lg rounded-lg">
+          {/* Título separado */}
+          <div className="p-4 border-b border-gray-200">
+            <Typography variant="h5" className="text-gray-800 font-semibold">
+              Editar Jefe de Departamento
+            </Typography>
+          </div>
 
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                label="Nro Resolución"
-                value={resolucion?.nresolucion || ""}
-                fullWidth
-                InputProps={{ readOnly: true }}
-                variant="outlined"
-                className="mb-4"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Nombre Jefe"
-                value={`${jefe?.persona.nombre || ""} ${
-                  jefe?.persona.apellido || ""
-                }`}
-                fullWidth
-                InputProps={{ readOnly: true }}
-                variant="outlined"
-                className="mb-4"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Nombre Departamento"
-                value={departamento?.nombre || ""}
-                fullWidth
-                InputProps={{ readOnly: true }}
-                variant="outlined"
-                className="mb-4"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Observaciones"
-                value={observaciones}
-                onChange={(e) => setObservaciones(e.target.value)}
-                fullWidth
-                variant="outlined"
-                className="mb-4"
-                multiline
-                rows={3}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth variant="outlined" className="mb-4">
-                <InputLabel id="estado-label">Estado</InputLabel>
-                <Select
-                  labelId="estado-label"
-                  id="estado-select"
-                  value={estado}
-                  onChange={(e) => setEstado(e.target.value)}
-                  label="Estado"
-                >
-                  <MenuItem value="1">Activo</MenuItem>
-                  <MenuItem value="0">Inactivo</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label="Fecha de Inicio"
-                  value={fechaInicio}
-                  onChange={(date) => setFechaInicio(date)}
-                  className="w-full"
-                  slotProps={{ textField: { variant: "outlined", fullWidth: true } }}
+          {/* Contenido del formulario */}
+          <div className="p-4">
+            <Grid container spacing={2}>
+              {/* Sección: Información de la Asignación */}
+              <Grid item xs={12}>
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
+                  Información de la Asignación
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Nro Resolución"
+                  value={resolucion?.nresolucion || ""}
+                  fullWidth
+                  InputProps={{ readOnly: true }}
+                  variant="outlined"
+                  size="small"
                 />
-              </LocalizationProvider>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label="Fecha de Fin"
-                  value={fechaFin}
-                  onChange={(date) => setFechaFin(date)}
-                  className="w-full"
-                  slotProps={{ textField: { variant: "outlined", fullWidth: true } }}
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Nombre Jefe"
+                  value={`${jefe?.persona.nombre || ""} ${
+                    jefe?.persona.apellido || ""
+                  }`}
+                  fullWidth
+                  InputProps={{ readOnly: true }}
+                  variant="outlined"
+                  size="small"
                 />
-              </LocalizationProvider>
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  label="Nombre Departamento"
+                  value={departamento?.nombre || ""}
+                  fullWidth
+                  InputProps={{ readOnly: true }}
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+
+              {/* Separador visual */}
+              <Grid item xs={12}>
+                <div className="border-t border-gray-200 my-4"></div>
+              </Grid>
+
+              {/* Sección: Período y Estado */}
+              <Grid item xs={12}>
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
+                  Período y Estado
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    label="Fecha de Inicio"
+                    value={fechaInicio}
+                    onChange={(date) => setFechaInicio(date)}
+                    slotProps={{
+                      textField: {
+                        variant: "outlined",
+                        fullWidth: true,
+                        size: "small",
+                      },
+                    }}
+                  />
+                </LocalizationProvider>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    label="Fecha de Fin"
+                    value={fechaFin}
+                    onChange={(date) => setFechaFin(date)}
+                    slotProps={{
+                      textField: {
+                        variant: "outlined",
+                        fullWidth: true,
+                        size: "small",
+                      },
+                    }}
+                  />
+                </LocalizationProvider>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="estado-label">Estado</InputLabel>
+                  <Select
+                    labelId="estado-label"
+                    id="estado-select"
+                    value={estado}
+                    onChange={(e) => setEstado(e.target.value)}
+                    label="Estado">
+                    <MenuItem value="1">Activo</MenuItem>
+                    <MenuItem value="0">Inactivo</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Observaciones"
+                  value={observaciones}
+                  onChange={(e) => setObservaciones(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  multiline
+                  rows={2}
+                />
+              </Grid>
+
+              {/* Botones de acción centrados */}
+              <Grid item xs={12}>
+                <div className="flex justify-center gap-3 mt-6">
+                  <button
+                    onClick={edicionDepartamentoJefe}
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Guardar Cambios
+                  </button>
+                  <button
+                    onClick={() => setConfirmarEliminacion(true)}
+                    className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Eliminar
+                  </button>
+                </div>
+              </Grid>
             </Grid>
-            <Grid item xs={12} className="mt-4 flex gap-2">
-              <button
-                onClick={edicionDepartamentoJefe}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                Guardar Cambios
-              </button>
-              <button
-                onClick={() => setConfirmarEliminacion(true)}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors duration-200">
-                Eliminar
-              </button>
-            </Grid>
-          </Grid>
+          </div>
 
           <BasicModal
             open={modalVisible}
@@ -250,7 +298,7 @@ const EditarDepartamentoJefe = () => {
             onConfirm={() => eliminarJefeDepartamento()}
           />
         </Paper>
-      </div>
+      </Container>
     </DashboardMenu>
   );
 };

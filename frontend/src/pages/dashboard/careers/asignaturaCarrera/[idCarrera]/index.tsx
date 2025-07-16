@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
-import axios from "axios";
 import {
   Typography,
   Paper,
@@ -111,10 +110,10 @@ const ListaAsignaturaCarrera = () => {
     try {
       const [areasRes, asignaturasRes, deptosRes, asignaturasCarreraRes] =
         await Promise.all([
-          axios.get(`${API_BASE_URL}/facet/area/`),
-          axios.get(`${API_BASE_URL}/facet/asignatura/`),
-          axios.get(`${API_BASE_URL}/facet/departamento/`),
-          axios.get(`${API_BASE_URL}/facet/asignatura-carrera/`, {
+          API.get(`/facet/area/`),
+          API.get(`/facet/asignatura/`),
+          API.get(`/facet/departamento/`),
+          API.get(`/facet/asignatura-carrera/`, {
             params: { idcarrera: idCarrera },
           }),
         ]);
@@ -147,7 +146,7 @@ const ListaAsignaturaCarrera = () => {
 
       // Obtener todos los datos con paginación
       while (url) {
-        const response = await axios.get(url);
+        const response = await API.get(url);
         const { results, next } = response.data;
         allAsignaturasCarrera = [...allAsignaturasCarrera, ...results];
         url = next; // Continuar con la siguiente página si existe

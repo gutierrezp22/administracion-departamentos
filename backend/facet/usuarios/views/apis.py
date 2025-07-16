@@ -55,12 +55,35 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({'error':str(e)},status=status.HTTP_400_BAD_REQUEST)
     
     def list(self, request):
-        # queryset = User.objects.all().order_by('-date_joined')        
-        #Defino Paginator porque al redefinir el get (el metodo list) no pagina automaticamente por mas que este declarado en el ViewSet
         import ast 
         from django.db.models import Q
-        
         queryset = self.queryset
+        # Filtros por query params estándar
+        email = request.query_params.get('email__icontains')
+        if email:
+            queryset = queryset.filter(email__icontains=email)
+        apellido = request.query_params.get('apellido__icontains')
+        if apellido:
+            queryset = queryset.filter(apellido__icontains=apellido)
+        nombre = request.query_params.get('nombre__icontains')
+        if nombre:
+            queryset = queryset.filter(nombre__icontains=nombre)
+        legajo = request.query_params.get('legajo__icontains')
+        if legajo:
+            queryset = queryset.filter(legajo__icontains=legajo)
+        documento = request.query_params.get('documento__icontains')
+        if documento:
+            queryset = queryset.filter(documento__icontains=documento)
+        rol = request.query_params.get('rol')
+        if rol:
+            queryset = queryset.filter(rol__id=rol)
+        is_active = request.query_params.get('is_active')
+        if is_active is not None:
+            if is_active.lower() == 'true':
+                queryset = queryset.filter(is_active=True)
+            elif is_active.lower() == 'false':
+                queryset = queryset.filter(is_active=False)
+        # Filtros legacy por 'filters' (mantener compatibilidad)
         if request.query_params.get('filters'):
             filtros = ast.literal_eval(request.query_params.get('filters'))
             for filtro in filtros:
@@ -76,13 +99,9 @@ class UserViewSet(viewsets.ModelViewSet):
                     queryset = queryset.filter(documento__icontains=filtro['value'])
                 if filtro['id'] == 'rol_detalle':
                     queryset = queryset.filter(rol__descripcion__icontains=filtro['value'])
-
         paginator = LimitOffsetPagination()
         paginated_queryset = paginator.paginate_queryset(queryset, request)
-    
         serializer = UserSerializer(paginated_queryset, many=True)
-        
-        # return Response(serializer.data)
         return paginator.get_paginated_response(serializer.data)
     
     @action(detail=False, methods=['get'], url_path=r'busquedaEmail/(?P<email>[\w.%+-]+@[\w.-]+\.\w+)', name='busquedaEmail')

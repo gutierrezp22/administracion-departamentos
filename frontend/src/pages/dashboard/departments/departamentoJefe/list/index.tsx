@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
 import axios from "axios";
+import API from "@/api/axiosConfig";
 import {
   Container,
   Table,
@@ -33,6 +34,7 @@ import { API_BASE_URL } from "../../../../../utils/config";
 import {
   FilterContainer,
   FilterInput,
+  FilterSelect,
   EstadoFilter,
 } from "../../../../../components/Filters";
 
@@ -79,11 +81,11 @@ const ListaJefesDepartamentos = () => {
   const [filtroDepartamento, setFiltroDepartamento] = useState("");
   const [filtroResolucion, setFiltroResolucion] = useState("");
   const [filtroEstado, setFiltroEstado] = useState<string>("1");
-  const [mostrarVencimientos, setMostrarVencimientos] = useState(false);
+  const [filtroVencimientos, setFiltroVencimientos] = useState<string>("todos");
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>(
-    `${API_BASE_URL}/facet/jefe-departamento/list_detalle/`
+    `/facet/jefe-departamento/list_detalle/`
   );
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
@@ -97,11 +99,41 @@ const ListaJefesDepartamentos = () => {
 
   const fetchData = async (url: string) => {
     try {
-      const response = await axios.get(url);
-      setJefesDepartamentos(response.data.results);
+      // Si la URL es absoluta (comienza con http), extraer solo la parte de la ruta
+      let apiUrl = url;
+      if (url.startsWith("http")) {
+        const urlObj = new URL(url);
+        apiUrl = urlObj.pathname + urlObj.search;
+      }
+
+      const response = await API.get(apiUrl);
+      let filteredResults = response.data.results;
+
+      // Filtro temporal en el frontend para próximos vencimientos
+      if (filtroVencimientos === "proximos") {
+        const today = new Date();
+        const oneMonthFromNow = new Date();
+        oneMonthFromNow.setMonth(today.getMonth() + 1);
+
+        filteredResults = response.data.results.filter(
+          (jefe: JefeDepartamento) => {
+            const fechaFin = new Date(jefe.fecha_de_fin);
+            return fechaFin >= today && fechaFin <= oneMonthFromNow;
+          }
+        );
+      }
+
+      setJefesDepartamentos(filteredResults);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
-      setTotalItems(response.data.count);
+      setTotalItems(filteredResults.length);
+
+      // Calcular la página actual basándose en los parámetros de la URL
+      const urlParams = new URLSearchParams(apiUrl.split("?")[1] || "");
+      const offset = parseInt(urlParams.get("offset") || "0");
+      const limit = parseInt(urlParams.get("limit") || "10");
+      const calculatedPage = Math.floor(offset / limit) + 1;
+      setCurrentPage(calculatedPage);
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -112,11 +144,9 @@ const ListaJefesDepartamentos = () => {
   };
 
   const filtrarJefesDepartamentos = () => {
-    let baseUrl = mostrarVencimientos
-      ? `${API_BASE_URL}/facet/jefe-departamento/list_proximos_vencimientos/`
-      : `${API_BASE_URL}/facet/jefe-departamento/list_detalle/`;
-
+    let url = `/facet/jefe-departamento/list_detalle/`;
     const params = new URLSearchParams();
+
     if (filtroNombre !== "") {
       params.append("jefe__persona__nombre__icontains", filtroNombre);
     }
@@ -141,9 +171,12 @@ const ListaJefesDepartamentos = () => {
       params.append("resolucion__nresolucion__icontains", filtroResolucion);
     }
 
-    const finalUrl = params.toString()
-      ? `${baseUrl}?${params.toString()}`
-      : baseUrl;
+    // Filtro de vencimientos
+    if (filtroVencimientos === "proximos") {
+      params.append("proximos_vencimientos", "true");
+    }
+
+    const finalUrl = params.toString() ? `${url}?${params.toString()}` : url;
     setCurrentUrl(finalUrl);
   };
 
@@ -155,6 +188,7 @@ const ListaJefesDepartamentos = () => {
     setFiltroDepartamento("");
     setFiltroResolucion("");
     setFiltroEstado("1");
+    setFiltroVencimientos("todos");
   };
 
   const descargarExcel = async () => {
@@ -183,7 +217,7 @@ const ListaJefesDepartamentos = () => {
       url += params.toString();
 
       while (url) {
-        const response = await axios.get(url);
+        const response = await API.get(url);
         const { results, next } = response.data;
         allJefesDepartamentos = [...allJefesDepartamentos, ...results];
         url = next;
@@ -240,7 +274,7 @@ const ListaJefesDepartamentos = () => {
       });
 
       if (result.isConfirmed) {
-        await axios.delete(`${API_BASE_URL}/facet/jefe-departamento/${id}/`);
+        await API.delete(`${API_BASE_URL}/facet/jefe-departamento/${id}/`);
         Swal.fire(
           "Eliminado!",
           "El jefe de departamento ha sido eliminado.",
@@ -264,9 +298,7 @@ const ListaJefesDepartamentos = () => {
       <div className="bg-white rounded-lg shadow-lg">
         <div className="p-6 border-b border-gray-200">
           <h1 className="text-2xl font-bold text-gray-800">
-            {mostrarVencimientos
-              ? "Jefes de Departamento - Próximos Vencimientos"
-              : "Jefes de Departamento"}
+            Jefes de Departamento
           </h1>
         </div>
 
@@ -278,15 +310,6 @@ const ListaJefesDepartamentos = () => {
               }
               className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
               <AddIcon /> Agregar Jefe de Departamento
-            </button>
-            <button
-              onClick={() => setMostrarVencimientos(!mostrarVencimientos)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                mostrarVencimientos
-                  ? "bg-orange-500 hover:bg-orange-600 text-white"
-                  : "bg-gray-500 hover:bg-gray-600 text-white"
-              }`}>
-              {mostrarVencimientos ? "Ver Todos" : "Ver Próximos Vencimientos"}
             </button>
             <button
               onClick={descargarExcel}
@@ -335,6 +358,15 @@ const ListaJefesDepartamentos = () => {
               placeholder="Buscar por resolución"
             />
             <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
+            <FilterSelect
+              label="Vencimientos"
+              value={filtroVencimientos}
+              onChange={setFiltroVencimientos}
+              options={[
+                { value: "proximos", label: "Próximos Vencimientos (1 mes)" },
+              ]}
+              placeholder="Todos"
+            />
           </FilterContainer>
 
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">

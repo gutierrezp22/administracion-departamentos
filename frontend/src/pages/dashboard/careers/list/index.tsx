@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
 import axios from "axios";
+import API from "@/api/axiosConfig";
 import {
   Container,
   Table,
@@ -68,7 +69,7 @@ const ListaCarreras = () => {
 
   const fetchData = async (url: string) => {
     try {
-      const response = await axios.get(url);
+      const response = await API.get(url);
       setCarreras(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
@@ -161,7 +162,7 @@ const ListaCarreras = () => {
       url += params.toString();
 
       while (url) {
-        const response = await axios.get(url);
+        const response = await API.get(url);
         const { results, next } = response.data;
         allCarreras = [...allCarreras, ...results];
         url = next;
@@ -209,7 +210,7 @@ const ListaCarreras = () => {
       });
 
       if (result.isConfirmed) {
-        await axios.delete(`${API_BASE_URL}/facet/carrera/${id}/`);
+        await API.delete(`${API_BASE_URL}/facet/carrera/${id}/`);
         Swal.fire("Eliminado!", "La carrera ha sido eliminada.", "success");
         fetchData(currentUrl);
       }

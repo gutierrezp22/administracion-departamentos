@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
-import axios from "axios";
+import API from "@/api/axiosConfig";
 import {
   Container,
   Paper,
@@ -32,10 +32,8 @@ import timezone from "dayjs/plugin/timezone";
 import BasicModal from "@/utils/modal";
 import Swal from "sweetalert2";
 import { useRouter } from "next/router";
-import DashboardMenu from "../../../../dashboard";
+import DashboardMenu from "@/pages/dashboard";
 import withAuth from "../../../../../components/withAut";
-import { API_BASE_URL } from "../../../../../utils/config";
-import API from "../../../../../api/axiosConfig";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -103,9 +101,7 @@ const CrearDepartamentoJefe = () => {
   const [filtroFecha, setFiltroFecha] = useState<dayjs.Dayjs | null>(null);
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
-  const [currentUrl, setCurrentUrl] = useState<string>(
-    `${API_BASE_URL}/facet/resolucion/`
-  );
+  const [currentUrl, setCurrentUrl] = useState<string>(`/facet/resolucion/`);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -120,7 +116,7 @@ const CrearDepartamentoJefe = () => {
   const [nextUrlJefes, setNextUrlJefes] = useState<string | null>(null);
   const [prevUrlJefes, setPrevUrlJefes] = useState<string | null>(null);
   const [currentUrlJefes, setCurrentUrlJefes] = useState<string>(
-    `${API_BASE_URL}/facet/jefe/list_jefes_persona/`
+    `/facet/jefe/list_jefes_persona/`
   );
   const [totalItemsJefes, setTotalItemsJefes] = useState<number>(0);
   const [currentPageJefes, setCurrentPageJefes] = useState<number>(1);
@@ -136,12 +132,17 @@ const CrearDepartamentoJefe = () => {
     string | null
   >(null);
   const [currentUrlDepartamentos, setCurrentUrlDepartamentos] =
-    useState<string>(`${API_BASE_URL}/facet/departamento/`);
+    useState<string>(`/facet/departamento/`);
   const [totalItemsDepartamentos, setTotalItemsDepartamentos] =
     useState<number>(0);
   const [currentPageDepartamentos, setCurrentPageDepartamentos] =
     useState<number>(1);
   const pageSizeDepartamentos = 10;
+
+  // Función helper para normalizar URLs
+  const normalizeUrl = (url: string) => {
+    return url.replace(window.location.origin, "").replace(/^\/+/, "/");
+  };
 
   const handleOpenModal = (
     title: string,
@@ -171,21 +172,36 @@ const CrearDepartamentoJefe = () => {
     if (openJefe) fetchJefes(currentUrlJefes);
   }, [openJefe, currentUrlJefes]);
 
+  useEffect(() => {
+    if (openDepartamento) fetchDepartamentos(currentUrlDepartamentos);
+  }, [openDepartamento, currentUrlDepartamentos]);
+
   const fetchResoluciones = async (url: string) => {
     try {
-      const response = await axios.get(url);
+      console.log("Fetching resoluciones from URL:", url);
+      const response = await API.get(url);
       setResoluciones(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
       setTotalItems(response.data.count);
-      setCurrentPage(Math.ceil((response.data.offset || 0) / pageSize) + 1);
+
+      // Calcular la página actual usando offset
+      const fullUrl = url.startsWith("http")
+        ? url
+        : `${window.location.origin}${url}`;
+      const offset = new URL(fullUrl).searchParams.get("offset") || "0";
+      setCurrentPage(Math.floor(Number(offset) / pageSize) + 1);
     } catch (error) {
       console.error("Error al cargar las resoluciones:", error);
+      setResoluciones([]);
+      setNextUrl(null);
+      setPrevUrl(null);
+      setTotalItems(0);
     }
   };
 
   const filtrarResoluciones = () => {
-    let url = `${API_BASE_URL}/facet/resolucion/?`;
+    let url = `/facet/resolucion/?`;
     const params = new URLSearchParams();
 
     if (filtroNroExpediente)
@@ -197,70 +213,139 @@ const CrearDepartamentoJefe = () => {
       params.append("fecha__date", filtroFecha.format("YYYY-MM-DD"));
 
     url += params.toString();
-    setCurrentUrl(url);
+    setCurrentUrl(normalizeUrl(url));
   };
 
   const fetchJefes = async (url: string) => {
     try {
-      const response = await axios.get(url);
-      setJefes(response.data.results); // Datos de la página actual
-      setNextUrlJefes(response.data.next); // URL de la siguiente página
-      setPrevUrlJefes(response.data.previous); // URL de la página anterior
-      setTotalItemsJefes(response.data.count); // Total de elementos
+      console.log("Fetching jefes from URL:", url);
+      const response = await API.get(url);
+      setJefes(response.data.results);
+      setNextUrlJefes(response.data.next);
+      setPrevUrlJefes(response.data.previous);
+      setTotalItemsJefes(response.data.count);
 
-      // Calcular la página actual
-      const offset = new URL(url).searchParams.get("offset") || "0";
+      // Calcular la página actual usando offset
+      const fullUrl = url.startsWith("http")
+        ? url
+        : `${window.location.origin}${url}`;
+      const offset = new URL(fullUrl).searchParams.get("offset") || "0";
       setCurrentPageJefes(Math.floor(Number(offset) / pageSizeJefes) + 1);
     } catch (error) {
       console.error("Error al obtener los jefes:", error);
+      setJefes([]);
+      setNextUrlJefes(null);
+      setPrevUrlJefes(null);
+      setTotalItemsJefes(0);
     }
   };
 
   const filtrarJefes = () => {
-    let url = `${API_BASE_URL}/facet/jefe/list_jefes_persona/?`;
+    let url = `/facet/jefe/list_jefes_persona/?`;
     const params = new URLSearchParams();
 
     if (filtroNombre) params.append("persona__nombre__icontains", filtroNombre);
     if (filtroDni) params.append("persona__dni__icontains", filtroDni);
 
     url += params.toString();
-    setCurrentUrlJefes(url); // Actualiza la URL actual
+    setCurrentUrlJefes(normalizeUrl(url));
   };
 
   const fetchDepartamentos = async (url: string) => {
     try {
-      const response = await axios.get(url);
-      setDepartamentos(response.data.results); // Datos de la página actual
-      setNextUrlDepartamentos(response.data.next); // URL de la página siguiente
-      setPrevUrlDepartamentos(response.data.previous); // URL de la página anterior
-      setTotalItemsDepartamentos(response.data.count); // Total de elementos
+      console.log("Fetching departamentos from URL:", url);
+      const response = await API.get(url);
+      setDepartamentos(response.data.results);
+      setNextUrlDepartamentos(response.data.next);
+      setPrevUrlDepartamentos(response.data.previous);
+      setTotalItemsDepartamentos(response.data.count);
 
-      // Calcular la página actual
-      const offset = new URL(url).searchParams.get("offset") || "0";
+      // Calcular la página actual usando offset
+      const fullUrl = url.startsWith("http")
+        ? url
+        : `${window.location.origin}${url}`;
+      const offset = new URL(fullUrl).searchParams.get("offset") || "0";
       setCurrentPageDepartamentos(
         Math.floor(Number(offset) / pageSizeDepartamentos) + 1
       );
     } catch (error) {
       console.error("Error al obtener los departamentos:", error);
+      setDepartamentos([]);
+      setNextUrlDepartamentos(null);
+      setPrevUrlDepartamentos(null);
+      setTotalItemsDepartamentos(0);
     }
   };
 
   const filtrarDepartamentos = () => {
-    let url = `${API_BASE_URL}/facet/departamento/?`;
+    let url = `/facet/departamento/?`;
     const params = new URLSearchParams();
 
     if (filtroDepartamento)
       params.append("nombre__icontains", filtroDepartamento);
 
     url += params.toString();
-    setCurrentUrlDepartamentos(url); // Actualiza la URL actual
+    setCurrentUrlDepartamentos(normalizeUrl(url));
   };
 
-  useEffect(() => {
-    if (openDepartamento) fetchDepartamentos(currentUrlDepartamentos);
-  }, [openDepartamento, currentUrlDepartamentos]);
-
   const crearNuevoJefeDepartamento = async () => {
+    // Validación de campos requeridos
+    const camposFaltantes = [];
+
+    if (!selectedResolucion) {
+      camposFaltantes.push("Resolución");
+    }
+    if (!jefe) {
+      camposFaltantes.push("Jefe");
+    }
+    if (!departamento) {
+      camposFaltantes.push("Departamento");
+    }
+    if (!fechaInicio) {
+      camposFaltantes.push("Fecha de Inicio");
+    }
+    if (!fechaFin) {
+      camposFaltantes.push("Fecha de Fin");
+    }
+    if (!estado) {
+      camposFaltantes.push("Estado");
+    }
+
+    // Si faltan campos, mostrar error
+    if (camposFaltantes.length > 0) {
+      const mensaje = `Faltan los siguientes campos obligatorios:\n\n${camposFaltantes.join(
+        "\n"
+      )}`;
+      handleOpenModal("Error", mensaje, () => {});
+      return;
+    }
+
+    // Validación de fechas
+    const fechaInicioDate = fechaInicio?.toDate();
+    const fechaFinDate = fechaFin?.toDate();
+
+    if (fechaInicioDate && fechaFinDate && fechaInicioDate >= fechaFinDate) {
+      handleOpenModal(
+        "Error",
+        "La fecha de inicio debe ser anterior a la fecha de fin.",
+        () => {}
+      );
+      return;
+    }
+
+    // Validación de fechas futuras (solo para fecha de fin)
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    if (fechaFinDate && fechaFinDate < hoy) {
+      handleOpenModal(
+        "Error",
+        "La fecha de fin no puede ser anterior a hoy.",
+        () => {}
+      );
+      return;
+    }
+
     const nuevoJefeDepartamento = {
       departamento: departamento?.id,
       jefe: jefe?.id,
@@ -270,569 +355,697 @@ const CrearDepartamentoJefe = () => {
       observaciones: observaciones,
       estado: estado === "1" ? 1 : 0,
     };
+
     try {
       await API.post(`/facet/jefe-departamento/`, nuevoJefeDepartamento);
       handleOpenModal(
-        "Bien",
+        "Éxito",
         "Se creó el jefe de departamento con éxito",
         handleConfirmModal
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      handleOpenModal("Error", "No se pudo realizar la acción.", () => {});
+
+      // Manejo específico de errores del backend
+      let mensajeError = "No se pudo realizar la acción.";
+
+      if (error.response?.data) {
+        const errorData = error.response.data;
+
+        if (errorData.detail) {
+          mensajeError = errorData.detail;
+        } else if (typeof errorData === "object") {
+          // Si hay errores específicos por campo
+          const erroresCampos = Object.entries(errorData)
+            .map(
+              ([campo, errores]) =>
+                `${campo}: ${
+                  Array.isArray(errores) ? errores.join(", ") : errores
+                }`
+            )
+            .join("\n");
+          mensajeError = `Errores de validación:\n\n${erroresCampos}`;
+        }
+      }
+
+      handleOpenModal("Error", mensajeError, () => {});
     }
   };
 
   return (
     <DashboardMenu>
       <Container maxWidth="lg">
-        <div className="bg-white shadow-md rounded-md p-6 mt-5">
-          <Typography variant="h4" gutterBottom className="text-gray-800">
-            Agregar Jefe Departamento
-          </Typography>
+        <div className="bg-white rounded-lg shadow-lg">
+          <div className="p-6 border-b border-gray-200">
+            <h1 className="text-2xl font-bold text-gray-800">
+              Agregar Jefe Departamento
+            </h1>
+          </div>
 
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <button
-                onClick={() => setOpenResolucion(true)}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                Seleccionar Resolución
-              </button>
-              {/* Mostrar la resolución seleccionada */}
-              {selectedResolucion && (
-                <div className="bg-gray-50 rounded-md p-3 mt-3 shadow-sm">
-                  <p className="text-sm font-medium">
-                    <span className="font-bold">Nro Resolución:</span>{" "}
-                    {selectedResolucion.nresolucion}
-                  </p>
-                  <p className="text-sm font-medium">
-                    <span className="font-bold">Nro Expediente:</span>{" "}
-                    {selectedResolucion.nexpediente}
-                  </p>
-                </div>
-              )}
-              <Dialog
-                open={openResolucion}
-                onClose={() => setOpenResolucion(false)}
-                maxWidth="md"
-                fullWidth>
-                <DialogTitle>Seleccionar Resolución</DialogTitle>
-                <DialogContent>
-                  <Grid container spacing={2}>
-                    <Grid item xs={4}>
-                      <TextField
-                        label="Nro Expediente"
-                        value={filtroNroExpediente}
-                        onChange={(e) => setFiltroNroExpediente(e.target.value)}
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={4}>
-                      <TextField
-                        label="Nro Resolución"
-                        value={filtroNroResolucion}
-                        onChange={(e) => setFiltroNroResolucion(e.target.value)}
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={4}>
-                      <FormControl fullWidth>
-                        <InputLabel>Tipo</InputLabel>
-                        <Select
-                          value={filtroTipo}
-                          onChange={(e) => setFiltroTipo(e.target.value)}
-                          label="Tipo">
-                          <MenuItem value="">Todos</MenuItem>
-                          <MenuItem value="Rector">Rector</MenuItem>
-                          <MenuItem value="Decano">Decano</MenuItem>
-                          <MenuItem value="Consejo_Superior">
-                            Consejo Superior
-                          </MenuItem>
-                          <MenuItem value="Consejo_Directivo">
-                            Consejo Directivo
-                          </MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DatePicker
-                          label="Fecha"
-                          value={filtroFecha}
-                          onChange={(date) => setFiltroFecha(date)}
-                        />
-                      </LocalizationProvider>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <button
-                        onClick={filtrarResoluciones}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                        Filtrar
-                      </button>
-                    </Grid>
-                  </Grid>
-
-                  <TableContainer
-                    component={Paper}
-                    style={{ marginTop: "20px" }}>
-                    <Table>
-                      <TableHead className="bg-blue-500">
-                        <TableRow>
-                          <TableCell className="text-white">
-                            Nro Expediente
-                          </TableCell>
-                          <TableCell className="text-white">
-                            Nro Resolución
-                          </TableCell>
-                          <TableCell className="text-white">Tipo</TableCell>
-                          <TableCell className="text-white">Fecha</TableCell>
-                          <TableCell className="text-white">
-                            Seleccionar
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {resoluciones.map((resolucion) => (
-                          <TableRow
-                            key={resolucion.id}
-                            className="hover:bg-gray-50">
-                            <TableCell>{resolucion.nexpediente}</TableCell>
-                            <TableCell>{resolucion.nresolucion}</TableCell>
-                            <TableCell>{resolucion.tipo}</TableCell>
-                            <TableCell>
-                              {dayjs(
-                                resolucion.fecha,
-                                "DD/MM/YYYY HH:mm:ss"
-                              ).isValid()
-                                ? dayjs(
-                                    resolucion.fecha,
-                                    "DD/MM/YYYY HH:mm:ss"
-                                  ).format("DD/MM/YYYY")
-                                : "Fecha no disponible"}
-                            </TableCell>
-                            <TableCell>
-                              <button
-                                onClick={() => {
-                                  setSelectedResolucion(resolucion);
-                                  setOpenResolucion(false);
-                                }}
-                                className="border border-gray-300 hover:bg-gray-100 px-3 py-1 rounded-md transition-colors duration-200">
-                                Seleccionar
-                              </button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-
-                  <div className="flex justify-between items-center mt-4">
-                    <button
-                      onClick={() => {
-                        if (prevUrl) {
-                          setCurrentUrl(prevUrl);
-                          setCurrentPage((prev) => prev - 1);
-                        }
-                      }}
-                      disabled={!prevUrl}
-                      className={`px-3 py-1 rounded-md ${
-                        !prevUrl
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-blue-500 hover:bg-blue-600 text-white"
-                      }`}>
-                      Anterior
-                    </button>
-                    <Typography variant="body1">
-                      Página {currentPage} de {Math.ceil(totalItems / pageSize)}
-                    </Typography>
-                    <button
-                      onClick={() => {
-                        if (nextUrl) {
-                          setCurrentUrl(nextUrl);
-                          setCurrentPage((prev) => prev + 1);
-                        }
-                      }}
-                      disabled={!nextUrl}
-                      className={`px-3 py-1 rounded-md ${
-                        !nextUrl
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-blue-500 hover:bg-blue-600 text-white"
-                      }`}>
-                      Siguiente
-                    </button>
-                  </div>
-                </DialogContent>
-                <DialogActions>
-                  <button
-                    onClick={() => setOpenResolucion(false)}
-                    className="px-3 py-1 rounded-md border border-gray-300 hover:bg-gray-100">
-                    Cerrar
-                  </button>
-                </DialogActions>
-              </Dialog>
-            </Grid>
-            <Grid item xs={12}>
-              <button
-                onClick={() => setOpenJefe(true)}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                Seleccionar Jefe
-              </button>
-              <Dialog
-                open={openJefe}
-                onClose={() => setOpenJefe(false)}
-                maxWidth="md"
-                fullWidth>
-                <DialogTitle>Seleccionar Jefe</DialogTitle>
-                <DialogContent>
-                  <Grid container spacing={2} marginBottom={2}>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="Nombre"
-                        value={filtroNombre}
-                        onChange={(e) => setFiltroNombre(e.target.value)}
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <TextField
-                        label="DNI"
-                        value={filtroDni}
-                        onChange={(e) => setFiltroDni(e.target.value)}
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <button
-                        onClick={filtrarJefes}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                        Filtrar
-                      </button>
-                    </Grid>
-                  </Grid>
-
-                  {/* Tabla de Jefes */}
-                  <TableContainer component={Paper}>
-                    <Table>
-                      <TableHead className="bg-blue-500">
-                        <TableRow>
-                          <TableCell className="text-white">Nombre</TableCell>
-                          <TableCell className="text-white">Apellido</TableCell>
-                          <TableCell className="text-white">DNI</TableCell>
-                          <TableCell className="text-white">
-                            Seleccionar
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {jefes.map((j) => (
-                          <TableRow key={j.id} className="hover:bg-gray-50">
-                            <TableCell>{j.persona.nombre}</TableCell>
-                            <TableCell>{j.persona.apellido}</TableCell>
-                            <TableCell>{j.persona.dni}</TableCell>
-                            <TableCell>
-                              <button
-                                onClick={() => {
-                                  setJefe(j);
-                                  setOpenJefe(false);
-                                }}
-                                className="border border-gray-300 hover:bg-gray-100 px-3 py-1 rounded-md transition-colors duration-200">
-                                Seleccionar
-                              </button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-
-                  {/* Paginación */}
-                  <div className="flex justify-between items-center mt-4">
-                    <button
-                      onClick={() =>
-                        prevUrlJefes && setCurrentUrlJefes(prevUrlJefes)
-                      }
-                      disabled={!prevUrlJefes}
-                      className={`px-3 py-1 rounded-md ${
-                        !prevUrlJefes
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-blue-500 hover:bg-blue-600 text-white"
-                      }`}>
-                      Anterior
-                    </button>
-                    <Typography>
-                      Página {currentPageJefes} de{" "}
-                      {Math.ceil(totalItemsJefes / pageSizeJefes)}
-                    </Typography>
-                    <button
-                      onClick={() =>
-                        nextUrlJefes && setCurrentUrlJefes(nextUrlJefes)
-                      }
-                      disabled={!nextUrlJefes}
-                      className={`px-3 py-1 rounded-md ${
-                        !nextUrlJefes
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-blue-500 hover:bg-blue-600 text-white"
-                      }`}>
-                      Siguiente
-                    </button>
-                  </div>
-                </DialogContent>
-                <DialogActions>
-                  <button
-                    onClick={() => setOpenJefe(false)}
-                    className="px-3 py-1 rounded-md border border-gray-300 hover:bg-gray-100">
-                    Cerrar
-                  </button>
-                </DialogActions>
-              </Dialog>
-            </Grid>
-            {jefe && (
-              <>
-                {" "}
-                <Grid item xs={12}>
-                  {" "}
-                  <div className="mt-2">
-                    {" "}
-                    <TextField
-                      label="Nombre Jefe"
-                      value={`${jefe.persona.nombre} ${jefe.persona.apellido}`}
-                      fullWidth
-                      variant="outlined"
-                      InputProps={{ readOnly: true }}
-                    />{" "}
-                  </div>{" "}
-                </Grid>{" "}
-              </>
-            )}
-            <Grid item xs={12}>
-              <button
-                onClick={() => setOpenDepartamento(true)}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                Seleccionar Departamento
-              </button>
-              <Dialog
-                open={openDepartamento}
-                onClose={() => setOpenDepartamento(false)}
-                maxWidth="md"
-                fullWidth>
-                <DialogTitle>Seleccionar Departamento</DialogTitle>
-                <DialogContent>
-                  {/* Filtro */}
-                  <Grid container spacing={2} marginBottom={2}>
-                    <Grid item xs={12}>
-                      <TextField
-                        label="Nombre del Departamento"
-                        value={filtroDepartamento}
-                        onChange={(e) => setFiltroDepartamento(e.target.value)}
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <button
-                        onClick={filtrarDepartamentos}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                        Filtrar
-                      </button>
-                    </Grid>
-                  </Grid>
-
-                  {/* Tabla de Departamentos */}
-                  <TableContainer component={Paper}>
-                    <Table>
-                      <TableHead className="bg-blue-500">
-                        <TableRow>
-                          <TableCell className="text-white">Nombre</TableCell>
-                          <TableCell className="text-white">
-                            Seleccionar
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {departamentos.map((departamento) => (
-                          <TableRow
-                            key={departamento.id}
-                            className="hover:bg-gray-50">
-                            <TableCell>{departamento.nombre}</TableCell>
-                            <TableCell>
-                              <button
-                                onClick={() => {
-                                  setDepartamento(departamento);
-                                  setOpenDepartamento(false);
-                                }}
-                                className="border border-gray-300 hover:bg-gray-100 px-3 py-1 rounded-md transition-colors duration-200">
-                                Seleccionar
-                              </button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-
-                  {/* Paginación */}
-                  <div className="flex justify-between items-center mt-4">
-                    <button
-                      onClick={() =>
-                        prevUrlDepartamentos &&
-                        setCurrentUrlDepartamentos(prevUrlDepartamentos)
-                      }
-                      disabled={!prevUrlDepartamentos}
-                      className={`px-3 py-1 rounded-md ${
-                        !prevUrlDepartamentos
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-blue-500 hover:bg-blue-600 text-white"
-                      }`}>
-                      Anterior
-                    </button>
-                    <Typography>
-                      Página {currentPageDepartamentos} de{" "}
-                      {Math.ceil(
-                        totalItemsDepartamentos / pageSizeDepartamentos
-                      )}
-                    </Typography>
-                    <button
-                      onClick={() =>
-                        nextUrlDepartamentos &&
-                        setCurrentUrlDepartamentos(nextUrlDepartamentos)
-                      }
-                      disabled={!nextUrlDepartamentos}
-                      className={`px-3 py-1 rounded-md ${
-                        !nextUrlDepartamentos
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-blue-500 hover:bg-blue-600 text-white"
-                      }`}>
-                      Siguiente
-                    </button>
-                  </div>
-                </DialogContent>
-                <DialogActions>
-                  <button
-                    onClick={() => setOpenDepartamento(false)}
-                    className="px-3 py-1 rounded-md border border-gray-300 hover:bg-gray-100">
-                    Cerrar
-                  </button>
-                </DialogActions>
-              </Dialog>
-            </Grid>
-            {resolucion && (
-              <>
-                {" "}
-                <Grid item xs={12}>
-                  {" "}
-                  <div className="mt-2">
-                    {" "}
-                    <TextField
-                      label="Nro Resolución"
-                      value={resolucion.nresolucion}
-                      fullWidth
-                      variant="outlined"
-                      InputProps={{ readOnly: true }}
-                    />{" "}
-                  </div>{" "}
-                </Grid>{" "}
-                <Grid item xs={12}>
-                  {" "}
-                  <div className="mt-2">
-                    {" "}
-                    <TextField
-                      label="Nro Expediente"
-                      value={resolucion.nexpediente}
-                      fullWidth
-                      variant="outlined"
-                      InputProps={{ readOnly: true }}
-                    />{" "}
-                  </div>{" "}
-                </Grid>{" "}
-              </>
-            )}
-            {departamento && (
+          <div className="p-4">
+            <Grid container spacing={2}>
+              {/* Sección de Selecciones */}
               <Grid item xs={12}>
-                {" "}
-                <div className="mt-2">
-                  {" "}
-                  <TextField
-                    label="Nombre Departamento"
-                    value={departamento.nombre}
-                    fullWidth
-                    variant="outlined"
-                    InputProps={{ readOnly: true }}
-                  />{" "}
-                </div>{" "}
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
+                  Selecciones Requeridas
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={4}>
+                    <button
+                      onClick={() => setOpenResolucion(true)}
+                      className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                      Seleccionar Resolución
+                    </button>
+                    {/* Mostrar la resolución seleccionada */}
+                    {selectedResolucion && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mt-2 shadow-sm">
+                        <p className="text-sm font-medium text-gray-800">
+                          <span className="font-bold text-blue-700">
+                            Nro Resolución:
+                          </span>{" "}
+                          <span className="text-gray-900">
+                            {selectedResolucion.nresolucion}
+                          </span>
+                        </p>
+                        <p className="text-sm font-medium text-gray-800">
+                          <span className="font-bold text-blue-700">
+                            Nro Expediente:
+                          </span>{" "}
+                          <span className="text-gray-900">
+                            {selectedResolucion.nexpediente}
+                          </span>
+                        </p>
+                      </div>
+                    )}
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <button
+                      onClick={() => setOpenJefe(true)}
+                      className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                      Seleccionar Jefe
+                    </button>
+                    {jefe && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mt-2 shadow-sm">
+                        <p className="text-sm font-medium text-gray-800">
+                          <span className="font-bold text-blue-700">
+                            Nombre Jefe:
+                          </span>{" "}
+                          <span className="text-gray-900">{`${jefe.persona.nombre} ${jefe.persona.apellido}`}</span>
+                        </p>
+                      </div>
+                    )}
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <button
+                      onClick={() => setOpenDepartamento(true)}
+                      className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                      Seleccionar Departamento
+                    </button>
+                    {departamento && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mt-2 shadow-sm">
+                        <p className="text-sm font-medium text-gray-800">
+                          <span className="font-bold text-blue-700">
+                            Departamento:
+                          </span>{" "}
+                          <span className="text-gray-900">
+                            {departamento.nombre}
+                          </span>
+                        </p>
+                      </div>
+                    )}
+                  </Grid>
+                </Grid>
               </Grid>
-            )}
-            <Grid item xs={12}>
-              {" "}
-              <div className="mt-2">
-                {" "}
+
+              {/* Separador visual */}
+              <Grid item xs={12}>
+                <div className="border-t border-gray-200 my-4"></div>
+              </Grid>
+
+              {/* Sección de Información Adicional */}
+              <Grid item xs={12}>
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
+                  Información Adicional
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      label="Observaciones"
+                      value={observaciones}
+                      onChange={(e) => setObservaciones(e.target.value)}
+                      fullWidth
+                      variant="outlined"
+                      multiline
+                      rows={2}
+                      size="small"
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Estado</InputLabel>
+                      <Select
+                        value={estado}
+                        onChange={(e) => setEstado(e.target.value)}
+                        label="Estado">
+                        <MenuItem value="1">Activo</MenuItem>
+                        <MenuItem value="0">Inactivo</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                </Grid>
+              </Grid>
+
+              {/* Separador visual */}
+              <Grid item xs={12}>
+                <div className="border-t border-gray-200 my-4"></div>
+              </Grid>
+
+              {/* Sección de Fechas */}
+              <Grid item xs={12}>
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
+                  Período de Gestión
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DatePicker
+                        label="Fecha de Inicio"
+                        value={fechaInicio}
+                        onChange={(date) => setFechaInicio(date)}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            variant: "outlined",
+                            size: "small",
+                          },
+                        }}
+                      />
+                    </LocalizationProvider>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DatePicker
+                        label="Fecha de Fin"
+                        value={fechaFin}
+                        onChange={(date) => setFechaFin(date)}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            variant: "outlined",
+                            size: "small",
+                          },
+                        }}
+                      />
+                    </LocalizationProvider>
+                  </Grid>
+                </Grid>
+              </Grid>
+
+              {/* Botón de acción principal */}
+              <Grid item xs={12}>
+                <div className="flex justify-center mt-6">
+                  <button
+                    onClick={crearNuevoJefeDepartamento}
+                    className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 font-semibold">
+                    Crear Jefe Departamento
+                  </button>
+                </div>
+              </Grid>
+            </Grid>
+          </div>
+        </div>
+
+        {/* Dialog para Seleccionar Resolución */}
+        <Dialog
+          open={openResolucion}
+          onClose={() => setOpenResolucion(false)}
+          maxWidth="lg"
+          fullWidth
+          PaperProps={{
+            style: {
+              borderRadius: "12px",
+              boxShadow:
+                "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+            },
+          }}>
+          <DialogTitle className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold">
+            Seleccionar Resolución
+          </DialogTitle>
+          <DialogContent className="p-4">
+            <Grid container spacing={2} className="mb-4 mt-4">
+              <Grid item xs={12} sm={6} md={3}>
                 <TextField
-                  label="Observaciones"
-                  value={observaciones}
-                  onChange={(e) => setObservaciones(e.target.value)}
+                  label="Nro Expediente"
+                  value={filtroNroExpediente}
+                  onChange={(e) => setFiltroNroExpediente(e.target.value)}
                   fullWidth
                   variant="outlined"
-                />{" "}
-              </div>{" "}
-            </Grid>{" "}
-            <Grid item xs={12}>
-              {" "}
-              <div className="mt-2">
-                {" "}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
                 <TextField
-                  select
-                  label="Estado"
-                  value={estado}
-                  onChange={(e) => setEstado(e.target.value)}
+                  label="Nro Resolución"
+                  value={filtroNroResolucion}
+                  onChange={(e) => setFiltroNroResolucion(e.target.value)}
                   fullWidth
-                  variant="outlined">
-                  {" "}
-                  <MenuItem value="1">Activo</MenuItem>{" "}
-                  <MenuItem value="0">Inactivo</MenuItem>{" "}
-                </TextField>{" "}
-              </div>{" "}
-            </Grid>{" "}
-            <Grid item xs={12} marginBottom={2}>
-              {" "}
-              <div className="mt-2 mb-4">
-                {" "}
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Tipo</InputLabel>
+                  <Select
+                    value={filtroTipo}
+                    onChange={(e) => setFiltroTipo(e.target.value)}
+                    label="Tipo">
+                    <MenuItem value="">Todos</MenuItem>
+                    <MenuItem value="Rector">Rector</MenuItem>
+                    <MenuItem value="Decano">Decano</MenuItem>
+                    <MenuItem value="Consejo_Superior">
+                      Consejo Superior
+                    </MenuItem>
+                    <MenuItem value="Consejo_Directivo">
+                      Consejo Directivo
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  {" "}
-                  <div className="flex space-x-4">
-                    {" "}
-                    <DatePicker
-                      label="Fecha de Inicio"
-                      value={fechaInicio}
-                      onChange={(date) => setFechaInicio(date)}
-                    />{" "}
-                    <DatePicker
-                      label="Fecha de Fin"
-                      value={fechaFin}
-                      onChange={(date) => setFechaFin(date)}
-                    />{" "}
-                  </div>{" "}
-                </LocalizationProvider>{" "}
-              </div>{" "}
-            </Grid>{" "}
-            <Grid item xs={12} marginBottom={2}>
-              {" "}
-              <div className="mt-4 mb-4">
-                {" "}
-                <button
-                  onClick={crearNuevoJefeDepartamento}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                  {" "}
-                  Crear{" "}
-                </button>{" "}
-              </div>{" "}
+                  <DatePicker
+                    label="Fecha"
+                    value={filtroFecha}
+                    onChange={(date) => setFiltroFecha(date)}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        variant: "outlined",
+                        size: "small",
+                      },
+                    }}
+                  />
+                </LocalizationProvider>
+              </Grid>
+              <Grid item xs={12}>
+                <div className="flex gap-2">
+                  <button
+                    onClick={filtrarResoluciones}
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Filtrar
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFiltroNroExpediente("");
+                      setFiltroNroResolucion("");
+                      setFiltroTipo("");
+                      setFiltroFecha(null);
+                      setCurrentUrl("/facet/resolucion/");
+                    }}
+                    className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Limpiar
+                  </button>
+                </div>
+              </Grid>
             </Grid>
-          </Grid>
-          <BasicModal
-            open={modalVisible}
-            onClose={handleCloseModal}
-            title={modalTitle}
-            content={modalMessage}
-            onConfirm={fn}
-          />
-        </div>
+
+            <TableContainer
+              component={Paper}
+              className="shadow-lg rounded-lg overflow-hidden"
+              style={{ maxHeight: "400px" }}>
+              <Table size="small">
+                <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
+                  <TableRow>
+                    <TableCell className="text-white font-semibold py-2">
+                      Nro Expediente
+                    </TableCell>
+                    <TableCell className="text-white font-semibold py-2">
+                      Nro Resolución
+                    </TableCell>
+                    <TableCell className="text-white font-semibold py-2">
+                      Tipo
+                    </TableCell>
+                    <TableCell className="text-white font-semibold py-2">
+                      Fecha
+                    </TableCell>
+                    <TableCell className="text-white font-semibold py-2">
+                      Seleccionar
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {resoluciones.map((resolucion) => (
+                    <TableRow
+                      key={resolucion.id}
+                      className="hover:bg-blue-50 transition-colors duration-200">
+                      <TableCell className="font-medium py-2">
+                        {resolucion.nexpediente}
+                      </TableCell>
+                      <TableCell className="font-medium py-2">
+                        {resolucion.nresolucion}
+                      </TableCell>
+                      <TableCell className="font-medium py-2">
+                        {resolucion.tipo}
+                      </TableCell>
+                      <TableCell className="font-medium py-2">
+                        {resolucion.fecha}
+                      </TableCell>
+                      <TableCell className="py-2">
+                        <button
+                          onClick={() => {
+                            setSelectedResolucion(resolucion);
+                            setOpenResolucion(false);
+                          }}
+                          className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-3 py-1 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium text-sm">
+                          Seleccionar
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            <div className="flex justify-between items-center mt-4">
+              <button
+                onClick={() => prevUrl && setCurrentUrl(normalizeUrl(prevUrl))}
+                disabled={!prevUrl}
+                className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm ${
+                  !prevUrl
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
+                }`}>
+                Anterior
+              </button>
+              <Typography className="font-medium text-gray-700 text-sm">
+                Página {currentPage} de {Math.ceil(totalItems / pageSize)}
+              </Typography>
+              <button
+                onClick={() => nextUrl && setCurrentUrl(normalizeUrl(nextUrl))}
+                disabled={!nextUrl}
+                className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm ${
+                  !nextUrl
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
+                }`}>
+                Siguiente
+              </button>
+            </div>
+          </DialogContent>
+          <DialogActions className="p-4">
+            <button
+              onClick={() => setOpenResolucion(false)}
+              className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-all duration-200 font-medium">
+              Cerrar
+            </button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Dialog para Seleccionar Jefe */}
+        <Dialog
+          open={openJefe}
+          onClose={() => setOpenJefe(false)}
+          maxWidth="lg"
+          fullWidth
+          PaperProps={{
+            style: {
+              borderRadius: "12px",
+              boxShadow:
+                "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+            },
+          }}>
+          <DialogTitle className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold">
+            Seleccionar Jefe
+          </DialogTitle>
+          <DialogContent className="p-4">
+            <Grid container spacing={2} className="mb-4 mt-4">
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Nombre"
+                  value={filtroNombre}
+                  onChange={(e) => setFiltroNombre(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="DNI"
+                  value={filtroDni}
+                  onChange={(e) => setFiltroDni(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <div className="flex gap-2">
+                  <button
+                    onClick={filtrarJefes}
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Filtrar
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFiltroNombre("");
+                      setFiltroDni("");
+                      setCurrentUrlJefes("/facet/jefe/list_jefes_persona/");
+                    }}
+                    className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Limpiar
+                  </button>
+                </div>
+              </Grid>
+            </Grid>
+
+            <TableContainer
+              component={Paper}
+              className="shadow-lg rounded-lg overflow-hidden"
+              style={{ maxHeight: "400px" }}>
+              <Table size="small">
+                <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
+                  <TableRow>
+                    <TableCell className="text-white font-semibold py-2">
+                      Nombre
+                    </TableCell>
+                    <TableCell className="text-white font-semibold py-2">
+                      DNI
+                    </TableCell>
+                    <TableCell className="text-white font-semibold py-2">
+                      Seleccionar
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {jefes.map((jefe) => (
+                    <TableRow
+                      key={jefe.id}
+                      className="hover:bg-blue-50 transition-colors duration-200">
+                      <TableCell className="font-medium py-2">
+                        {`${jefe.persona.nombre} ${jefe.persona.apellido}`}
+                      </TableCell>
+                      <TableCell className="font-medium py-2">
+                        {jefe.persona.dni}
+                      </TableCell>
+                      <TableCell className="py-2">
+                        <button
+                          onClick={() => {
+                            setJefe(jefe);
+                            setOpenJefe(false);
+                          }}
+                          className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-3 py-1 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium text-sm">
+                          Seleccionar
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            <div className="flex justify-between items-center mt-4">
+              <button
+                onClick={() =>
+                  prevUrlJefes && setCurrentUrlJefes(normalizeUrl(prevUrlJefes))
+                }
+                disabled={!prevUrlJefes}
+                className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm ${
+                  !prevUrlJefes
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
+                }`}>
+                Anterior
+              </button>
+              <Typography className="font-medium text-gray-700 text-sm">
+                Página {currentPageJefes} de{" "}
+                {Math.ceil(totalItemsJefes / pageSizeJefes)}
+              </Typography>
+              <button
+                onClick={() =>
+                  nextUrlJefes && setCurrentUrlJefes(normalizeUrl(nextUrlJefes))
+                }
+                disabled={!nextUrlJefes}
+                className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm ${
+                  !nextUrlJefes
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
+                }`}>
+                Siguiente
+              </button>
+            </div>
+          </DialogContent>
+          <DialogActions className="p-4">
+            <button
+              onClick={() => setOpenJefe(false)}
+              className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-all duration-200 font-medium">
+              Cerrar
+            </button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Dialog para Seleccionar Departamento */}
+        <Dialog
+          open={openDepartamento}
+          onClose={() => setOpenDepartamento(false)}
+          maxWidth="lg"
+          fullWidth
+          PaperProps={{
+            style: {
+              borderRadius: "12px",
+              boxShadow:
+                "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+            },
+          }}>
+          <DialogTitle className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold">
+            Seleccionar Departamento
+          </DialogTitle>
+          <DialogContent className="p-4">
+            <Grid container spacing={2} className="mb-4 mt-4">
+              <Grid item xs={12}>
+                <TextField
+                  label="Nombre del Departamento"
+                  value={filtroDepartamento}
+                  onChange={(e) => setFiltroDepartamento(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <div className="flex gap-2">
+                  <button
+                    onClick={filtrarDepartamentos}
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Filtrar
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFiltroDepartamento("");
+                      setCurrentUrlDepartamentos("/facet/departamento/");
+                    }}
+                    className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Limpiar
+                  </button>
+                </div>
+              </Grid>
+            </Grid>
+
+            <TableContainer
+              component={Paper}
+              className="shadow-lg rounded-lg overflow-hidden"
+              style={{ maxHeight: "400px" }}>
+              <Table size="small">
+                <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
+                  <TableRow>
+                    <TableCell className="text-white font-semibold py-2">
+                      Nombre
+                    </TableCell>
+                    <TableCell className="text-white font-semibold py-2">
+                      Seleccionar
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {departamentos.map((departamento) => (
+                    <TableRow
+                      key={departamento.id}
+                      className="hover:bg-blue-50 transition-colors duration-200">
+                      <TableCell className="font-medium py-2">
+                        {departamento.nombre}
+                      </TableCell>
+                      <TableCell className="py-2">
+                        <button
+                          onClick={() => {
+                            setDepartamento(departamento);
+                            setOpenDepartamento(false);
+                          }}
+                          className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-3 py-1 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium text-sm">
+                          Seleccionar
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            <div className="flex justify-between items-center mt-4">
+              <button
+                onClick={() =>
+                  prevUrlDepartamentos &&
+                  setCurrentUrlDepartamentos(normalizeUrl(prevUrlDepartamentos))
+                }
+                disabled={!prevUrlDepartamentos}
+                className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm ${
+                  !prevUrlDepartamentos
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
+                }`}>
+                Anterior
+              </button>
+              <Typography className="font-medium text-gray-700 text-sm">
+                Página {currentPageDepartamentos} de{" "}
+                {Math.ceil(totalItemsDepartamentos / pageSizeDepartamentos)}
+              </Typography>
+              <button
+                onClick={() =>
+                  nextUrlDepartamentos &&
+                  setCurrentUrlDepartamentos(normalizeUrl(nextUrlDepartamentos))
+                }
+                disabled={!nextUrlDepartamentos}
+                className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm ${
+                  !nextUrlDepartamentos
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
+                }`}>
+                Siguiente
+              </button>
+            </div>
+          </DialogContent>
+          <DialogActions className="p-4">
+            <button
+              onClick={() => setOpenDepartamento(false)}
+              className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-all duration-200 font-medium">
+              Cerrar
+            </button>
+          </DialogActions>
+        </Dialog>
+
+        <BasicModal
+          open={modalVisible}
+          onClose={handleCloseModal}
+          title={modalTitle}
+          content={modalMessage}
+          onConfirm={fn}
+        />
       </Container>
     </DashboardMenu>
   );

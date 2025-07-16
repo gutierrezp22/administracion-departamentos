@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
-import axios from "axios";
 import {
   Container,
   Grid,
@@ -19,8 +18,7 @@ import BasicModal from "@/utils/modal";
 import ModalConfirmacion from "@/utils/modalConfirmacion";
 import { useRouter } from "next/router";
 import DashboardMenu from "../..";
-import withAuth from "../../../../components/withAut"; 
-import { API_BASE_URL } from "../../../../utils/config";
+import withAuth from "../../../../components/withAut";
 import API from "@/api/axiosConfig";
 
 dayjs.extend(utc);
@@ -48,9 +46,7 @@ const EditarResolucion = () => {
     const fetchData = async () => {
       if (idResolucion) {
         try {
-          const response = await axios.get(
-            `${API_BASE_URL}/facet/resolucion/${idResolucion}/`
-          );
+          const response = await API.get(`/facet/resolucion/${idResolucion}/`);
 
           setNroExpediente(response.data.nexpediente);
           setNroResolucion(response.data.nresolucion);
@@ -189,93 +185,142 @@ const EditarResolucion = () => {
 
   return (
     <>
-    <DashboardMenu>
-    <Container maxWidth="lg">
-          <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
-            <Typography variant="h4" gutterBottom className="text-gray-800">
-          Editar Resolución
-        </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <TextField
-              label="Nro Expediente"
-              value={nroExpediente}
-              onChange={(e) => setNroExpediente(e.target.value)}
-              fullWidth
-                  variant="outlined"
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Nro Resolución"
-              value={nroResolucion}
-              onChange={(e) => setNroResolucion(e.target.value)}
-              fullWidth
-                  variant="outlined"
-            />
-          </Grid>
-          <Grid item xs={12}>
-                <TextField
-                  select
-                  fullWidth
-                  label="Tipo"
-              value={tipo}
-              onChange={(e) => setTipo(e.target.value)}
-                  variant="outlined">
-              <MenuItem value="Rector">Rector</MenuItem>
-              <MenuItem value="Decano">Decano</MenuItem>
-              <MenuItem value="Consejo_Superior">Consejo Superior</MenuItem>
-                  <MenuItem value="Consejo_Directivo">
-                    Consejo Directivo
-                  </MenuItem>
-                </TextField>
-        </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Link Documento Adjunto"
-              value={adjunto}
-              onChange={(e) => setAdjunto(e.target.value)}
-              fullWidth
-                  variant="outlined"
-            />
-          </Grid>
-          <Grid item xs={12}>
-                <TextField
-                  select
-                  fullWidth
-                  label="Estado"
-                value={estado}
-                onChange={(e) => setEstado(e.target.value)}
-                  variant="outlined">
-                  <MenuItem value="1">Activo</MenuItem>
-                  <MenuItem value="0">Inactivo</MenuItem>
-                </TextField>
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Observaciones"
-              value={observaciones}
-              onChange={(e) => setObservaciones(e.target.value)}
-              fullWidth
-                  variant="outlined"
-            />
-          </Grid>
-          <Grid item xs={12} marginBottom={2}>
-                <button
-                  onClick={edicionResolucion}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-              Editar
-                </button>
-                <button
-                  onClick={() => setConfirmarEliminacion(true)}
-                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200 ml-2">
-              Eliminar
-                </button>
-          </Grid>
-        </Grid>
-      </Paper>
-    </Container>
-    </DashboardMenu>
+      <DashboardMenu>
+        <Container maxWidth="lg">
+          <Paper elevation={3} className="bg-white shadow-lg rounded-lg">
+            {/* Título separado */}
+            <div className="p-4 border-b border-gray-200">
+              <Typography variant="h5" className="text-gray-800 font-semibold">
+                Editar Resolución
+              </Typography>
+            </div>
+
+            {/* Contenido del formulario */}
+            <div className="p-4">
+              <Grid container spacing={2}>
+                {/* Sección: Información Principal */}
+                <Grid item xs={12}>
+                  <Typography
+                    variant="h6"
+                    className="text-gray-700 font-semibold mb-3">
+                    Información Principal
+                  </Typography>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Nro Expediente"
+                    value={nroExpediente}
+                    onChange={(e) => setNroExpediente(e.target.value)}
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Nro Resolución"
+                    value={nroResolucion}
+                    onChange={(e) => setNroResolucion(e.target.value)}
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    select
+                    fullWidth
+                    label="Tipo"
+                    value={tipo}
+                    onChange={(e) => setTipo(e.target.value)}
+                    variant="outlined"
+                    size="small">
+                    <MenuItem value="Rector">Rector</MenuItem>
+                    <MenuItem value="Decano">Decano</MenuItem>
+                    <MenuItem value="Consejo_Superior">
+                      Consejo Superior
+                    </MenuItem>
+                    <MenuItem value="Consejo_Directivo">
+                      Consejo Directivo
+                    </MenuItem>
+                  </TextField>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    select
+                    fullWidth
+                    label="Estado"
+                    value={estado}
+                    onChange={(e) => setEstado(e.target.value)}
+                    variant="outlined"
+                    size="small">
+                    <MenuItem value="1">Activo</MenuItem>
+                    <MenuItem value="0">Inactivo</MenuItem>
+                  </TextField>
+                </Grid>
+
+                {/* Separador visual */}
+                <Grid item xs={12}>
+                  <div className="border-t border-gray-200 my-4"></div>
+                </Grid>
+
+                {/* Sección: Documento y Observaciones */}
+                <Grid item xs={12}>
+                  <Typography
+                    variant="h6"
+                    className="text-gray-700 font-semibold mb-3">
+                    Documento y Observaciones
+                  </Typography>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    label="Link Documento Adjunto"
+                    value={adjunto}
+                    onChange={(e) => setAdjunto(e.target.value)}
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    label="Observaciones"
+                    value={observaciones}
+                    onChange={(e) => setObservaciones(e.target.value)}
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                    multiline
+                    rows={2}
+                  />
+                </Grid>
+
+                {/* Botones de acción centrados */}
+                <Grid item xs={12}>
+                  <div className="flex justify-center gap-3 mt-6">
+                    <button
+                      onClick={edicionResolucion}
+                      className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                      Guardar Cambios
+                    </button>
+                    <button
+                      onClick={() => setConfirmarEliminacion(true)}
+                      className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                      Eliminar
+                    </button>
+                  </div>
+                </Grid>
+              </Grid>
+            </div>
+          </Paper>
+        </Container>
+      </DashboardMenu>
 
       {renderModalConfirmacion()}
       {renderBasicModal()}

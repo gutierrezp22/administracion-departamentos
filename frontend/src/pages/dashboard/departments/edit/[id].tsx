@@ -95,61 +95,98 @@ const EditarDepartamento = () => {
   return (
     <DashboardMenu>
       <Container maxWidth="lg">
-        <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
-          {" "}
-          <Typography variant="h4" gutterBottom className="text-gray-800">
-            {" "}
-            Departamentos{" "}
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                label="Nombres"
-                value={departamento.nombre}
-                onChange={(e) =>
-                  setDepartamento({ ...departamento, nombre: e.target.value })
-                }
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Teléfono"
-                value={departamento.telefono}
-                onChange={(e) =>
-                  setDepartamento({ ...departamento, telefono: e.target.value })
-                }
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth margin="none">
-                <InputLabel id="estado-label">Estado </InputLabel>
-                <Select
-                  labelId="estado-label"
-                  id="estado-select"
-                  value={departamento.estado}
-                  label="Estado"
+        <Paper elevation={3} className="bg-white shadow-lg rounded-lg">
+          {/* Título separado */}
+          <div className="p-4 border-b border-gray-200">
+            <Typography variant="h5" className="text-gray-800 font-semibold">
+              Editar Departamento
+            </Typography>
+          </div>
+          
+          {/* Contenido del formulario */}
+          <div className="p-4">
+            <Grid container spacing={2}>
+              {/* Sección: Información del Departamento */}
+              <Grid item xs={12}>
+                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                  Información del Departamento
+                </Typography>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Nombre"
+                  value={departamento.nombre}
                   onChange={(e) =>
-                    setDepartamento({ ...departamento, estado: e.target.value })
-                  }>
-                  <MenuItem value={1}>Activo</MenuItem>
-                  <MenuItem value={0}>Inactivo</MenuItem>
-                </Select>
-              </FormControl>
+                    setDepartamento({ ...departamento, nombre: e.target.value })
+                  }
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Teléfono"
+                  value={departamento.telefono}
+                  onChange={(e) =>
+                    setDepartamento({ ...departamento, telefono: e.target.value })
+                  }
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Interno"
+                  value={departamento.interno}
+                  onChange={(e) =>
+                    setDepartamento({ ...departamento, interno: e.target.value })
+                  }
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="estado-label">Estado</InputLabel>
+                  <Select
+                    labelId="estado-label"
+                    id="estado-select"
+                    value={departamento.estado}
+                    label="Estado"
+                    onChange={(e) =>
+                      setDepartamento({ ...departamento, estado: e.target.value })
+                    }>
+                    <MenuItem value={1}>Activo</MenuItem>
+                    <MenuItem value={0}>Inactivo</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              
+              {/* Botones de acción centrados */}
+              <Grid item xs={12}>
+                <div className="flex justify-center gap-3 mt-6">
+                  <button
+                    onClick={edicionDepartamento}
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Guardar Cambios
+                  </button>
+                  <button
+                    onClick={() => setConfirmarEliminacion(true)}
+                    className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Eliminar
+                  </button>
+                </div>
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Interno"
-                value={departamento.interno}
-                onChange={(e) =>
-                  setDepartamento({ ...departamento, interno: e.target.value })
-                }
-                fullWidth
-              />
-            </Grid>
-                        <Grid item xs={12} marginBottom={2}>              <button                onClick={edicionDepartamento}                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">                Editar              </button>              <button                onClick={() => setConfirmarEliminacion(true)}                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200 ml-2">                Eliminar              </button>            </Grid>
-          </Grid>
+          </div>
+          
           <BasicModal
             open={modalVisible}
             onClose={handleCloseModal}

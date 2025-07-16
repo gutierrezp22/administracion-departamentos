@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
 import axios from "axios";
+import API from "@/api/axiosConfig";
 import {
   Container,
   Table,
@@ -86,7 +87,7 @@ const ListaResoluciones = () => {
   const fetchData = async (url: string) => {
     try {
       setIsLoading(true);
-      const response = await axios.get(url);
+      const response = await API.get(url);
       setResoluciones(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
@@ -190,7 +191,7 @@ const ListaResoluciones = () => {
 
       // Obtiene todos los datos para el Excel
       while (url) {
-        const response = await axios.get(url);
+        const response = await API.get(url);
         const { results, next } = response.data;
         allResoluciones = [...allResoluciones, ...results];
         url = next;

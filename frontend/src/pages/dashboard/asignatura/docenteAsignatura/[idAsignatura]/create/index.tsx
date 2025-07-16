@@ -297,342 +297,471 @@ const CrearDocenteAsignatura: React.FC = () => {
   return (
     <DashboardMenu>
       <Container maxWidth="lg">
-        <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
-          <Typography variant="h4" gutterBottom className="text-gray-800">
-            Agregar Docente en Asignatura
-          </Typography>
+        <div className="bg-white rounded-lg shadow-lg">
+          <div className="p-6 border-b border-gray-200">
+            <h1 className="text-2xl font-bold text-gray-800">
+              Agregar Docente en Asignatura
+            </h1>
+          </div>
 
-          <Grid container spacing={2}>
-            {/* Seleccionar Docente */}
-            <Grid item xs={4}>
-              <button
-                onClick={handleOpenPersona}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                Seleccionar Docente
-              </button>
+          <div className="p-4">
+            <Grid container spacing={2}>
+              {/* Sección de Selecciones */}
+              <Grid item xs={12}>
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
+                  Selecciones Requeridas
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <button
+                      onClick={handleOpenPersona}
+                      className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                      Seleccionar Docente
+                    </button>
+                    {persona && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mt-2 shadow-sm">
+                        <p className="text-sm font-medium text-gray-800">
+                          <span className="font-bold text-blue-700">
+                            Docente:
+                          </span>{" "}
+                          <span className="text-gray-900">
+                            {persona.persona_detalle
+                              ? `${persona.persona_detalle.nombre} ${persona.persona_detalle.apellido}`
+                              : "N/A"}
+                          </span>
+                        </p>
+                      </div>
+                    )}
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <button
+                      onClick={handleOpenResolucion}
+                      className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                      Seleccionar Resolución
+                    </button>
+                    {resolucion && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mt-2 shadow-sm">
+                        <p className="text-sm font-medium text-gray-800">
+                          <span className="font-bold text-blue-700">
+                            Resolución:
+                          </span>{" "}
+                          <span className="text-gray-900">
+                            {resolucion.nresolucion}
+                          </span>
+                        </p>
+                      </div>
+                    )}
+                  </Grid>
+                </Grid>
+              </Grid>
 
-              <Dialog
-                open={openPersona}
-                onClose={handleClosePersona}
-                maxWidth="md"
-                fullWidth>
-                <DialogTitle>Seleccionar Docente</DialogTitle>
-                <DialogContent>
-                  <TextField
-                    label="Buscar por DNI o Nombre"
-                    value={filtroDni}
-                    onChange={(e) => setFiltroDni(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                    variant="outlined"
-                  />
-                  <TableContainer component={Paper}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>DNI</TableCell>
-                          <TableCell>Nombre</TableCell>
-                          <TableCell>Apellido</TableCell>
-                          <TableCell>Legajo</TableCell>
-                          <TableCell>Seleccionar</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {personas.map((docente) => (
-                          <TableRow key={docente.id}>
-                            <TableCell>
-                              {docente.persona_detalle?.dni || "N/A"}
-                            </TableCell>
-                            <TableCell>
-                              {docente.persona_detalle?.nombre || "N/A"}
-                            </TableCell>
-                            <TableCell>
-                              {docente.persona_detalle?.apellido || "N/A"}
-                            </TableCell>
-                            <TableCell>
-                              {docente.persona_detalle?.legajo || "N/A"}
-                            </TableCell>
-                            <TableCell>
-                              <button
-                                onClick={() => {
-                                  setPersona(docente);
-                                  handleClosePersona();
-                                }}
-                                className="px-3 py-1 rounded-md border border-gray-300 hover:bg-gray-100">
-                                Seleccionar
-                              </button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                  <div className="flex justify-between items-center mt-4">
-                    <button
-                      onClick={() =>
-                        prevUrlPersonas && fetchDataPersonas(prevUrlPersonas)
-                      }
-                      disabled={!prevUrlPersonas}
-                      className={`mr-2 px-3 py-1 rounded-md ${
-                        !prevUrlPersonas
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-blue-500 hover:bg-blue-600 text-white"
-                      }`}>
-                      Anterior
-                    </button>
-                    <Typography>
-                      Página {currentPagePersonas} de{" "}
-                      {Math.ceil(totalItemsPersonas / pageSizePersonas)}
-                    </Typography>
-                    <button
-                      onClick={() =>
-                        nextUrlPersonas && fetchDataPersonas(nextUrlPersonas)
-                      }
-                      disabled={!nextUrlPersonas}
-                      className={`ml-2 px-3 py-1 rounded-md ${
-                        !nextUrlPersonas
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-blue-500 hover:bg-blue-600 text-white"
-                      }`}>
-                      Siguiente
-                    </button>
-                  </div>
-                </DialogContent>
-                <DialogActions>
+              {/* Separador visual */}
+              <Grid item xs={12}>
+                <div className="border-t border-gray-200 my-4"></div>
+              </Grid>
+
+              {/* Sección de Información de la Asignatura */}
+              <Grid item xs={12}>
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
+                  Información de la Asignatura
+                </Typography>
+                <TextField
+                  label="Asignatura"
+                  value={asignatura}
+                  fullWidth
+                  disabled
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+
+              {/* Separador visual */}
+              <Grid item xs={12}>
+                <div className="border-t border-gray-200 my-4"></div>
+              </Grid>
+
+              {/* Sección de Información Adicional */}
+              <Grid item xs={12}>
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
+                  Información Adicional
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      label="Observaciones"
+                      value={observaciones}
+                      onChange={(e) => setObservaciones(e.target.value)}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      label="Dedicación"
+                      value={dedicacion}
+                      onChange={(e) => setDedicacion(e.target.value)}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      label="Condición"
+                      value={condicion}
+                      onChange={(e) => setCondicion(e.target.value)}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      label="Cargo"
+                      value={cargo}
+                      onChange={(e) => setCargo(e.target.value)}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      select
+                      label="Estado"
+                      value={estado}
+                      onChange={(e) => setEstado(e.target.value)}
+                      fullWidth
+                      variant="outlined"
+                      size="small">
+                      <MenuItem value="1">Activo</MenuItem>
+                      <MenuItem value="0">Inactivo</MenuItem>
+                    </TextField>
+                  </Grid>
+                </Grid>
+              </Grid>
+
+              {/* Separador visual */}
+              <Grid item xs={12}>
+                <div className="border-t border-gray-200 my-4"></div>
+              </Grid>
+
+              {/* Sección de Fechas */}
+              <Grid item xs={12}>
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
+                  Período de Asignación
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      label="Fecha Inicio"
+                      type="date"
+                      value={fechaInicio}
+                      onChange={(e) => setFechaInicio(e.target.value)}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      label="Fecha Fin"
+                      type="date"
+                      value={fechaFin}
+                      onChange={(e) => setFechaFin(e.target.value)}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              </Grid>
+
+              {/* Botón de acción principal */}
+              <Grid item xs={12}>
+                <div className="flex justify-center mt-6">
                   <button
-                    onClick={handleClosePersona}
-                    className="px-3 py-1 rounded-md border border-gray-300 hover:bg-gray-100">
-                    Cerrar
+                    onClick={crearDocenteAsignatura}
+                    className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 font-semibold">
+                    Crear Asignación
                   </button>
-                </DialogActions>
-              </Dialog>
+                </div>
+              </Grid>
             </Grid>
-            {/* Mostrar Nombre y Apellido del Docente Seleccionado */}
-            <Grid item xs={12}>
-              <TextField
-                label="Nombre y Apellido del Docente"
-                value={
-                  persona?.persona_detalle
-                    ? `${persona.persona_detalle.nombre} ${persona.persona_detalle.apellido}`
-                    : ""
+          </div>
+        </div>
+
+        {/* Dialog para Seleccionar Docente */}
+        <Dialog
+          open={openPersona}
+          onClose={handleClosePersona}
+          maxWidth="lg"
+          fullWidth
+          PaperProps={{
+            style: {
+              borderRadius: "12px",
+              boxShadow:
+                "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+            },
+          }}>
+          <DialogTitle className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold">
+            Seleccionar Docente
+          </DialogTitle>
+          <DialogContent className="p-4">
+            <Grid container spacing={2} className="mb-4 mt-4">
+              <Grid item xs={12}>
+                <TextField
+                  label="Buscar por DNI o Nombre"
+                  value={filtroDni}
+                  onChange={(e) => setFiltroDni(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+            </Grid>
+
+            <TableContainer
+              component={Paper}
+              className="shadow-lg rounded-lg overflow-hidden"
+              style={{ maxHeight: "400px" }}>
+              <Table size="small">
+                <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
+                  <TableRow>
+                    <TableCell className="text-white font-semibold py-2">
+                      DNI
+                    </TableCell>
+                    <TableCell className="text-white font-semibold py-2">
+                      Nombre
+                    </TableCell>
+                    <TableCell className="text-white font-semibold py-2">
+                      Apellido
+                    </TableCell>
+                    <TableCell className="text-white font-semibold py-2">
+                      Legajo
+                    </TableCell>
+                    <TableCell className="text-white font-semibold py-2">
+                      Seleccionar
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {personas.map((docente) => (
+                    <TableRow
+                      key={docente.id}
+                      className="hover:bg-blue-50 transition-colors duration-200">
+                      <TableCell className="font-medium py-2">
+                        {docente.persona_detalle?.dni || "N/A"}
+                      </TableCell>
+                      <TableCell className="font-medium py-2">
+                        {docente.persona_detalle?.nombre || "N/A"}
+                      </TableCell>
+                      <TableCell className="font-medium py-2">
+                        {docente.persona_detalle?.apellido || "N/A"}
+                      </TableCell>
+                      <TableCell className="font-medium py-2">
+                        {docente.persona_detalle?.legajo || "N/A"}
+                      </TableCell>
+                      <TableCell className="py-2">
+                        <button
+                          onClick={() => {
+                            setPersona(docente);
+                            handleClosePersona();
+                          }}
+                          className="px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-100 font-medium text-sm">
+                          Seleccionar
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            <div className="flex justify-between items-center mt-4">
+              <button
+                onClick={() =>
+                  prevUrlPersonas && fetchDataPersonas(prevUrlPersonas)
                 }
-                fullWidth
-                disabled
-                variant="outlined"
-              />
-            </Grid>
-
-            {/* Seleccionar Resolución */}
-            <Grid item xs={4}>
-              <button
-                onClick={handleOpenResolucion}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                Seleccionar Resolución
+                disabled={!prevUrlPersonas}
+                className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm ${
+                  !prevUrlPersonas
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
+                }`}>
+                Anterior
               </button>
+              <Typography className="font-medium text-gray-700 text-sm">
+                Página {currentPagePersonas} de{" "}
+                {Math.ceil(totalItemsPersonas / pageSizePersonas)}
+              </Typography>
+              <button
+                onClick={() =>
+                  nextUrlPersonas && fetchDataPersonas(nextUrlPersonas)
+                }
+                disabled={!nextUrlPersonas}
+                className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm ${
+                  !nextUrlPersonas
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
+                }`}>
+                Siguiente
+              </button>
+            </div>
+          </DialogContent>
+          <DialogActions className="p-4">
+            <button
+              onClick={handleClosePersona}
+              className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-all duration-200 font-medium">
+              Cerrar
+            </button>
+          </DialogActions>
+        </Dialog>
 
-              <Dialog
-                open={openResolucion}
-                onClose={handleCloseResolucion}
-                maxWidth="md"
-                fullWidth>
-                <DialogTitle>Seleccionar Resolución</DialogTitle>
-                <DialogContent>
-                  <TextField
-                    label="Buscar por Nro Expediente o Resolución"
-                    value={filtroNroResolucion}
-                    onChange={(e) => setFiltroNroResolucion(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                    variant="outlined"
-                  />
-                  <TableContainer component={Paper}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Nro Expediente</TableCell>
-                          <TableCell>Nro Resolución</TableCell>
-                          <TableCell>Tipo</TableCell>
-                          <TableCell>Fecha</TableCell>
-                          <TableCell>Seleccionar</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {resoluciones.map((resol) => (
-                          <TableRow key={resol.id}>
-                            <TableCell>{resol.nexpediente || "N/A"}</TableCell>
-                            <TableCell>{resol.nresolucion || "N/A"}</TableCell>
-                            <TableCell>{resol.tipo || "N/A"}</TableCell>
-                            <TableCell>
-                              {dayjs(resol.fecha).format("DD/MM/YYYY") || "N/A"}
-                            </TableCell>
-                            <TableCell>
-                              <button
-                                onClick={() => {
-                                  setResolucion(resol);
-                                  handleCloseResolucion();
-                                }}
-                                className="px-3 py-1 rounded-md border border-gray-300 hover:bg-gray-100">
-                                Seleccionar
-                              </button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                  <div className="flex justify-between items-center mt-4">
-                    <button
-                      onClick={() =>
-                        prevUrlResoluciones &&
-                        fetchDataResoluciones(prevUrlResoluciones)
-                      }
-                      disabled={!prevUrlResoluciones}
-                      className={`mr-2 px-3 py-1 rounded-md ${
-                        !prevUrlResoluciones
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-blue-500 hover:bg-blue-600 text-white"
-                      }`}>
-                      Anterior
-                    </button>
-                    <Typography>
-                      Página {currentPageResoluciones} de{" "}
-                      {Math.ceil(totalItemsResoluciones / pageSizeResoluciones)}
-                    </Typography>
-                    <button
-                      onClick={() =>
-                        nextUrlResoluciones &&
-                        fetchDataResoluciones(nextUrlResoluciones)
-                      }
-                      disabled={!nextUrlResoluciones}
-                      className={`ml-2 px-3 py-1 rounded-md ${
-                        !nextUrlResoluciones
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-blue-500 hover:bg-blue-600 text-white"
-                      }`}>
-                      Siguiente
-                    </button>
-                  </div>
-                </DialogContent>
-                <DialogActions>
-                  <button
-                    onClick={handleCloseResolucion}
-                    className="px-3 py-1 rounded-md border border-gray-300 hover:bg-gray-100">
-                    Cerrar
-                  </button>
-                </DialogActions>
-              </Dialog>
-            </Grid>
-
-            {/* Mostrar Nro de Resolución Seleccionada */}
-            <Grid item xs={12}>
-              <TextField
-                label="Nro Resolución Seleccionada"
-                value={resolucion ? resolucion.nresolucion : ""}
-                fullWidth
-                disabled
-                variant="outlined"
-              />
-            </Grid>
-
-            {/* Otros campos de entrada */}
-            <Grid item xs={12}>
-              <TextField
-                label="Asignatura"
-                value={asignatura}
-                fullWidth
-                disabled
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Observaciones"
-                value={observaciones}
-                onChange={(e) => setObservaciones(e.target.value)}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Dedicacion"
-                value={dedicacion}
-                onChange={(e) => setDedicacion(e.target.value)}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Condicion"
-                value={condicion}
-                onChange={(e) => setCondicion(e.target.value)}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Cargo"
-                value={cargo}
-                onChange={(e) => setCargo(e.target.value)}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                select
-                label="Estado"
-                value={estado}
-                onChange={(e) => setEstado(e.target.value)}
-                fullWidth
-                variant="outlined">
-                <MenuItem value="1">Activo</MenuItem>
-                <MenuItem value="0">Inactivo</MenuItem>
-              </TextField>
-            </Grid>
-
-            {/* Fecha de Inicio y Fin */}
-            <Grid container item xs={12} spacing={2} marginBottom={2}>
-              <Grid item xs={6}>
+        {/* Dialog para Seleccionar Resolución */}
+        <Dialog
+          open={openResolucion}
+          onClose={handleCloseResolucion}
+          maxWidth="lg"
+          fullWidth
+          PaperProps={{
+            style: {
+              borderRadius: "12px",
+              boxShadow:
+                "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+            },
+          }}>
+          <DialogTitle className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold">
+            Seleccionar Resolución
+          </DialogTitle>
+          <DialogContent className="p-4">
+            <Grid container spacing={2} className="mb-4 mt-4">
+              <Grid item xs={12}>
                 <TextField
-                  label="Fecha Inicio"
-                  type="date"
-                  value={fechaInicio}
-                  onChange={(e) => setFechaInicio(e.target.value)}
+                  label="Buscar por Nro Expediente o Resolución"
+                  value={filtroNroResolucion}
+                  onChange={(e) => setFiltroNroResolucion(e.target.value)}
                   fullWidth
                   variant="outlined"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
-              </Grid>
-
-              <Grid item xs={6}>
-                <TextField
-                  label="Fecha Fin"
-                  type="date"
-                  value={fechaFin}
-                  onChange={(e) => setFechaFin(e.target.value)}
-                  fullWidth
-                  variant="outlined"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
+                  size="small"
                 />
               </Grid>
             </Grid>
 
-            <Grid item xs={12} marginBottom={2}>
+            <TableContainer
+              component={Paper}
+              className="shadow-lg rounded-lg overflow-hidden"
+              style={{ maxHeight: "400px" }}>
+              <Table size="small">
+                <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
+                  <TableRow>
+                    <TableCell className="text-white font-semibold py-2">
+                      Nro Expediente
+                    </TableCell>
+                    <TableCell className="text-white font-semibold py-2">
+                      Nro Resolución
+                    </TableCell>
+                    <TableCell className="text-white font-semibold py-2">
+                      Tipo
+                    </TableCell>
+                    <TableCell className="text-white font-semibold py-2">
+                      Fecha
+                    </TableCell>
+                    <TableCell className="text-white font-semibold py-2">
+                      Seleccionar
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {resoluciones.map((resol) => (
+                    <TableRow
+                      key={resol.id}
+                      className="hover:bg-blue-50 transition-colors duration-200">
+                      <TableCell className="font-medium py-2">
+                        {resol.nexpediente || "N/A"}
+                      </TableCell>
+                      <TableCell className="font-medium py-2">
+                        {resol.nresolucion || "N/A"}
+                      </TableCell>
+                      <TableCell className="font-medium py-2">
+                        {resol.tipo || "N/A"}
+                      </TableCell>
+                      <TableCell className="font-medium py-2">
+                        {dayjs(resol.fecha).format("DD/MM/YYYY") || "N/A"}
+                      </TableCell>
+                      <TableCell className="py-2">
+                        <button
+                          onClick={() => {
+                            setResolucion(resol);
+                            handleCloseResolucion();
+                          }}
+                          className="px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-100 font-medium text-sm">
+                          Seleccionar
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            <div className="flex justify-between items-center mt-4">
               <button
-                onClick={crearDocenteAsignatura}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                Crear
+                onClick={() =>
+                  prevUrlResoluciones &&
+                  fetchDataResoluciones(prevUrlResoluciones)
+                }
+                disabled={!prevUrlResoluciones}
+                className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm ${
+                  !prevUrlResoluciones
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
+                }`}>
+                Anterior
               </button>
-            </Grid>
-          </Grid>
-        </Paper>
+              <Typography className="font-medium text-gray-700 text-sm">
+                Página {currentPageResoluciones} de{" "}
+                {Math.ceil(totalItemsResoluciones / pageSizeResoluciones)}
+              </Typography>
+              <button
+                onClick={() =>
+                  nextUrlResoluciones &&
+                  fetchDataResoluciones(nextUrlResoluciones)
+                }
+                disabled={!nextUrlResoluciones}
+                className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm ${
+                  !nextUrlResoluciones
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
+                }`}>
+                Siguiente
+              </button>
+            </div>
+          </DialogContent>
+          <DialogActions className="p-4">
+            <button
+              onClick={handleCloseResolucion}
+              className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-all duration-200 font-medium">
+              Cerrar
+            </button>
+          </DialogActions>
+        </Dialog>
+
         <BasicModal
           open={modalVisible}
           onClose={handleCloseModal}

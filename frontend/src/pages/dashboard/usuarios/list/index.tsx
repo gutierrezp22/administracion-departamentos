@@ -72,7 +72,7 @@ const ListaUsuarios = () => {
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>(
-    `${API_BASE_URL}/facet/users/?is_active=true`
+    `/facet/users/?is_active=true`
   );
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
@@ -91,7 +91,7 @@ const ListaUsuarios = () => {
 
   const fetchRoles = async () => {
     try {
-      const response = await API.get(`${API_BASE_URL}/facet/roles/`);
+      const response = await API.get(`/facet/roles/`);
       setRoles(
         Array.isArray(response.data) ? response.data : response.data.results
       );
@@ -120,7 +120,7 @@ const ListaUsuarios = () => {
   };
 
   const filtrarUsuarios = () => {
-    let url = `${API_BASE_URL}/facet/users/?`;
+    let url = `/facet/users/?`;
     const params = new URLSearchParams();
 
     if (filtroEmail !== "") {
@@ -159,13 +159,13 @@ const ListaUsuarios = () => {
     setFiltroDocumento("");
     setFiltroRol("");
     setFiltroEstado("1");
-    setCurrentUrl(`${API_BASE_URL}/facet/users/?is_active=true`);
+    setCurrentUrl(`/facet/users/?is_active=true`);
   };
 
   const descargarExcel = async () => {
     try {
       let allUsuarios: Usuario[] = [];
-      let url = `${API_BASE_URL}/facet/users/?`;
+      let url = `/facet/users/?`;
       const params = new URLSearchParams();
 
       if (filtroEmail !== "") params.append("email__icontains", filtroEmail);
@@ -243,7 +243,7 @@ const ListaUsuarios = () => {
       });
 
       if (result.isConfirmed) {
-        await API.patch(`${API_BASE_URL}/facet/users/${id}/`, {
+        await API.patch(`/facet/users/${id}/`, {
           is_active: false,
         });
         Swal.fire("Desactivado!", "El usuario ha sido desactivado.", "success");
@@ -268,7 +268,7 @@ const ListaUsuarios = () => {
       });
 
       if (result.isConfirmed) {
-        await API.patch(`${API_BASE_URL}/facet/users/${id}/`, {
+        await API.patch(`/facet/users/${id}/`, {
           is_active: true,
         });
         Swal.fire("Activado!", "El usuario ha sido activado.", "success");
