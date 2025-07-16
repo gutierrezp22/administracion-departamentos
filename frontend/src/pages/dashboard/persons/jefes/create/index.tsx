@@ -93,7 +93,16 @@ const CrearJefe = () => {
 
   // Función para normalizar URLs de paginación
   const normalizeUrl = (url: string) => {
-    return url.replace(window.location.origin, "").replace(/^\/+/, "/");
+    // Remover el dominio si está presente
+    let normalizedUrl = url.replace(window.location.origin, "");
+
+    // Remover /api/ extra si está presente al inicio
+    normalizedUrl = normalizedUrl.replace(/^\/api\//, "/");
+
+    // Asegurar que empiece con /
+    normalizedUrl = normalizedUrl.replace(/^\/+/, "/");
+
+    return normalizedUrl;
   };
 
   const fetchPersonas = async (url: string) => {
@@ -109,10 +118,12 @@ const CrearJefe = () => {
 
       const response = await API.get(apiUrl);
       setPersonas(response.data.results);
-      
+
       // Normalizar las URLs de paginación que vienen del backend
       setNextUrl(response.data.next ? normalizeUrl(response.data.next) : null);
-      setPrevUrl(response.data.previous ? normalizeUrl(response.data.previous) : null);
+      setPrevUrl(
+        response.data.previous ? normalizeUrl(response.data.previous) : null
+      );
       setTotalItems(response.data.count);
 
       // Calcular la página actual basándose en los parámetros de la URL
