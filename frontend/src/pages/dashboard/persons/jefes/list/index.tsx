@@ -37,6 +37,11 @@ import {
   EstadoFilter,
 } from "../../../../../components/Filters";
 
+// Función para normalizar URLs de paginación
+const normalizeUrl = (url: string) => {
+  return url.replace(window.location.origin, "").replace(/^\/+/, "/");
+};
+
 const ListaJefes = () => {
   interface Jefe {
     id: number;
@@ -64,7 +69,7 @@ const ListaJefes = () => {
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>(
-    `${API_BASE_URL}/facet/jefe/list_jefes_persona/?estado=1`
+    `/facet/jefe/list_jefes_persona/?estado=1`
   );
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
@@ -80,21 +85,23 @@ const ListaJefes = () => {
     try {
       // Si la URL es absoluta (comienza con http), extraer solo la parte de la ruta
       let apiUrl = url;
-      if (url.startsWith('http')) {
+      if (url.startsWith("http")) {
         const urlObj = new URL(url);
         apiUrl = urlObj.pathname + urlObj.search;
       }
-      
+
       const response = await API.get(apiUrl);
       setJefes(response.data.results);
-      setNextUrl(response.data.next);
-      setPrevUrl(response.data.previous);
+      setNextUrl(response.data.next ? normalizeUrl(response.data.next) : null);
+      setPrevUrl(
+        response.data.previous ? normalizeUrl(response.data.previous) : null
+      );
       setTotalItems(response.data.count);
-      
+
       // Calcular la página actual basándose en los parámetros de la URL
-      const urlParams = new URLSearchParams(apiUrl.split('?')[1] || '');
-      const offset = parseInt(urlParams.get('offset') || '0');
-      const limit = parseInt(urlParams.get('limit') || '10');
+      const urlParams = new URLSearchParams(apiUrl.split("?")[1] || "");
+      const offset = parseInt(urlParams.get("offset") || "0");
+      const limit = parseInt(urlParams.get("limit") || "10");
       const calculatedPage = Math.floor(offset / limit) + 1;
       setCurrentPage(calculatedPage);
     } catch (error) {
@@ -107,7 +114,7 @@ const ListaJefes = () => {
   };
 
   const filtrarJefes = () => {
-    let url = `${API_BASE_URL}/facet/jefe/list_jefes_persona/?`;
+    let url = `/facet/jefe/list_jefes_persona/?`;
     const params = new URLSearchParams();
     if (filtroNombre !== "") {
       params.append("persona__nombre__icontains", filtroNombre);
@@ -136,13 +143,13 @@ const ListaJefes = () => {
     setFiltroDni("");
     setFiltroLegajo("");
     setFiltroEstado("1");
-    setCurrentUrl(`${API_BASE_URL}/facet/jefe/list_jefes_persona/?estado=1`);
+    setCurrentUrl(`/facet/jefe/list_jefes_persona/?estado=1`);
   };
 
   const descargarExcel = async () => {
     try {
       let allJefes: Jefe[] = [];
-      let url = `${API_BASE_URL}/facet/jefe/list_jefes_persona/?`;
+      let url = `/facet/jefe/list_jefes_persona/?`;
       const params = new URLSearchParams();
 
       if (filtroNombre !== "")
@@ -213,7 +220,7 @@ const ListaJefes = () => {
       });
 
       if (result.isConfirmed) {
-        await API.delete(`${API_BASE_URL}/facet/jefe/${id}/`);
+        await API.delete(`/facet/jefe/${id}/`);
         Swal.fire("Eliminado!", "El jefe ha sido eliminado.", "success");
         fetchData(currentUrl);
       }
@@ -277,16 +284,56 @@ const ListaJefes = () => {
             <Table>
               <TableHead>
                 <TableRow className="bg-blue-500">
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Nombre</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Apellido</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>DNI</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Legajo</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Teléfono</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Email</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Interno</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Observaciones</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Estado</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Acciones</TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Nombre
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Apellido
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    DNI
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Legajo
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Teléfono
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Email
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Interno
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Observaciones
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Estado
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Acciones
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

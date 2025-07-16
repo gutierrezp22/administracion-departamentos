@@ -37,6 +37,11 @@ import {
   EstadoFilter,
 } from "../../../../../components/Filters";
 
+// Función para normalizar URLs de paginación
+const normalizeUrl = (url: string) => {
+  return url.replace(window.location.origin, "").replace(/^\/+/, "/");
+};
+
 const ListaDocentes = () => {
   interface Docente {
     id: number;
@@ -62,7 +67,7 @@ const ListaDocentes = () => {
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>(
-    `${API_BASE_URL}/facet/docente/?estado=1`
+    `/facet/docente/?estado=1`
   );
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
@@ -85,8 +90,10 @@ const ListaDocentes = () => {
 
       const response = await API.get(apiUrl);
       setDocentes(response.data.results);
-      setNextUrl(response.data.next);
-      setPrevUrl(response.data.previous);
+      setNextUrl(response.data.next ? normalizeUrl(response.data.next) : null);
+      setPrevUrl(
+        response.data.previous ? normalizeUrl(response.data.previous) : null
+      );
       setTotalItems(response.data.count);
 
       // Calcular la página actual basándose en los parámetros de la URL
@@ -105,7 +112,7 @@ const ListaDocentes = () => {
   };
 
   const filtrarDocentes = () => {
-    let url = `${API_BASE_URL}/facet/docente/?`;
+    let url = `/facet/docente/?`;
     const params = new URLSearchParams();
     if (filtroNombre !== "") {
       params.append("persona__nombre__icontains", filtroNombre);
@@ -134,13 +141,13 @@ const ListaDocentes = () => {
     setFiltroDni("");
     setFiltroLegajo("");
     setFiltroEstado("1");
-    setCurrentUrl(`${API_BASE_URL}/facet/docente/?estado=1`);
+    setCurrentUrl(`/facet/docente/?estado=1`);
   };
 
   const descargarExcel = async () => {
     try {
       let allDocentes: Docente[] = [];
-      let url = `${API_BASE_URL}/facet/docente/?`;
+      let url = `/facet/docente/?`;
       const params = new URLSearchParams();
 
       if (filtroNombre !== "")
@@ -209,7 +216,7 @@ const ListaDocentes = () => {
       });
 
       if (result.isConfirmed) {
-        await API.delete(`${API_BASE_URL}/facet/docente/${id}/`);
+        await API.delete(`/facet/docente/${id}/`);
         Swal.fire("Eliminado!", "El docente ha sido eliminado.", "success");
         fetchData(currentUrl);
       }

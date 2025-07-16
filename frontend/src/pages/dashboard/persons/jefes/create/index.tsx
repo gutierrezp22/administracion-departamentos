@@ -91,6 +91,11 @@ const CrearJefe = () => {
     setOpenPersona(false);
   };
 
+  // Función para normalizar URLs de paginación
+  const normalizeUrl = (url: string) => {
+    return url.replace(window.location.origin, "").replace(/^\/+/, "/");
+  };
+
   const fetchPersonas = async (url: string) => {
     try {
       // Si la URL es absoluta (comienza con http), extraer solo la parte de la ruta
@@ -102,8 +107,8 @@ const CrearJefe = () => {
 
       const response = await API.get(apiUrl);
       setPersonas(response.data.results);
-      setNextUrl(response.data.next);
-      setPrevUrl(response.data.previous);
+      setNextUrl(response.data.next ? normalizeUrl(response.data.next) : null);
+      setPrevUrl(response.data.previous ? normalizeUrl(response.data.previous) : null);
       setTotalItems(response.data.count);
 
       // Calcular la página actual basándose en los parámetros de la URL

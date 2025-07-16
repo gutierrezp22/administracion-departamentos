@@ -46,6 +46,11 @@ import {
   EstadoFilter,
 } from "../../../../components/Filters";
 
+// Función para normalizar URLs de paginación
+const normalizeUrl = (url: string) => {
+  return url.replace(window.location.origin, "").replace(/^\/+/, "/");
+};
+
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -70,9 +75,7 @@ const ListaResoluciones = () => {
   const [filtroEstado, setFiltroEstado] = useState<string>("1");
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
-  const [currentUrl, setCurrentUrl] = useState<string>(
-    `${API_BASE_URL}/facet/resolucion/`
-  );
+  const [currentUrl, setCurrentUrl] = useState<string>(`/facet/resolucion/`);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -89,8 +92,10 @@ const ListaResoluciones = () => {
       setIsLoading(true);
       const response = await API.get(url);
       setResoluciones(response.data.results);
-      setNextUrl(response.data.next);
-      setPrevUrl(response.data.previous);
+      setNextUrl(response.data.next ? normalizeUrl(response.data.next) : null);
+      setPrevUrl(
+        response.data.previous ? normalizeUrl(response.data.previous) : null
+      );
       setTotalItems(response.data.count);
       // Pequeño delay para asegurar que los estilos se cargan
       setTimeout(() => setIsLoading(false), 500);
@@ -105,7 +110,7 @@ const ListaResoluciones = () => {
   };
 
   const filtrarResoluciones = () => {
-    let url = `${API_BASE_URL}/facet/resolucion/?`;
+    let url = `/facet/resolucion/?`;
     const params = new URLSearchParams();
 
     if (filtroNExpediente !== "") {
@@ -141,7 +146,7 @@ const ListaResoluciones = () => {
   };
 
   const handlePageChange = (newPage: number) => {
-    let url = `${API_BASE_URL}/facet/resolucion/?`;
+    let url = `/facet/resolucion/?`;
     const params = new URLSearchParams();
 
     if (filtroNExpediente !== "") {
@@ -172,7 +177,7 @@ const ListaResoluciones = () => {
   const descargarExcel = async () => {
     try {
       let allResoluciones: Resolucion[] = [];
-      let url = `${API_BASE_URL}/facet/resolucion/?`;
+      let url = `/facet/resolucion/?`;
       const params = new URLSearchParams();
 
       // Agrega los filtros actuales al URL de exportación
@@ -324,15 +329,51 @@ const ListaResoluciones = () => {
             <Table>
               <TableHead>
                 <TableRow className="bg-blue-500">
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Nro Expediente</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Nro Resolución</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Tipo</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Fecha</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Carga</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Estado</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Adjunto</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Observaciones</TableCell>
-                  <TableCell className="text-white font-semibold" style={{ color: '#fff' }}>Acciones</TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Nro Expediente
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Nro Resolución
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Tipo
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Fecha
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Carga
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Estado
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Adjunto
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Observaciones
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Acciones
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
