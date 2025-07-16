@@ -110,17 +110,19 @@ const CrearResolucion = () => {
               Crear Resolución
             </Typography>
           </div>
-          
+
           {/* Contenido del formulario */}
           <div className="p-4">
             <Grid container spacing={2}>
               {/* Sección: Información Principal */}
               <Grid item xs={12}>
-                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
                   Información Principal
                 </Typography>
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
                 <TextField
                   label="Nro Expediente"
@@ -129,9 +131,48 @@ const CrearResolucion = () => {
                   fullWidth
                   variant="outlined"
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
                 <TextField
                   label="Nro Resolución"
@@ -140,9 +181,48 @@ const CrearResolucion = () => {
                   fullWidth
                   variant="outlined"
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
                 <TextField
                   select
@@ -151,14 +231,62 @@ const CrearResolucion = () => {
                   value={tipo}
                   onChange={(e) => setTipo(e.target.value)}
                   variant="outlined"
-                  size="small">
+                  size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                    "& .MuiSelect-icon": {
+                      color: "#6b7280",
+                      transition: "color 0.2s ease",
+                    },
+                    "&:hover .MuiSelect-icon": {
+                      color: "#3b82f6",
+                    },
+                  }}>
                   <MenuItem value="Rector">Rector</MenuItem>
                   <MenuItem value="Decano">Decano</MenuItem>
                   <MenuItem value="Consejo_Superior">Consejo Superior</MenuItem>
-                  <MenuItem value="Consejo_Directivo">Consejo Directivo</MenuItem>
+                  <MenuItem value="Consejo_Directivo">
+                    Consejo Directivo
+                  </MenuItem>
                 </TextField>
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
                 <TextField
                   select
@@ -167,24 +295,72 @@ const CrearResolucion = () => {
                   value={estado}
                   onChange={(e) => setEstado(e.target.value)}
                   variant="outlined"
-                  size="small">
+                  size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                    "& .MuiSelect-icon": {
+                      color: "#6b7280",
+                      transition: "color 0.2s ease",
+                    },
+                    "&:hover .MuiSelect-icon": {
+                      color: "#3b82f6",
+                    },
+                  }}>
                   <MenuItem value="1">Activo</MenuItem>
                   <MenuItem value="0">Inactivo</MenuItem>
                 </TextField>
               </Grid>
-              
+
               {/* Separador visual */}
               <Grid item xs={12}>
                 <div className="border-t border-gray-200 my-4"></div>
               </Grid>
-              
+
               {/* Sección: Documento y Fecha */}
               <Grid item xs={12}>
-                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
                   Documento y Fecha
                 </Typography>
               </Grid>
-              
+
               <Grid item xs={12}>
                 <TextField
                   label="Link Documento Adjunto"
@@ -193,9 +369,48 @@ const CrearResolucion = () => {
                   fullWidth
                   variant="outlined"
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
@@ -208,16 +423,55 @@ const CrearResolucion = () => {
                       }
                     }}
                     slotProps={{
-                      textField: { 
-                        fullWidth: true, 
+                      textField: {
+                        fullWidth: true,
                         variant: "outlined",
-                        size: "small"
+                        size: "small",
+                        className: "modern-input",
+                        sx: {
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: "8px",
+                            backgroundColor: "#ffffff",
+                            border: "1px solid #d1d5db",
+                            transition: "all 0.2s ease",
+                            "&:hover": {
+                              borderColor: "#3b82f6",
+                              backgroundColor: "#ffffff",
+                              boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                            },
+                            "&.Mui-focused": {
+                              borderColor: "#3b82f6",
+                              backgroundColor: "#ffffff",
+                              boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                            },
+                          },
+                          "& .MuiInputLabel-root": {
+                            color: "#6b7280",
+                            fontWeight: "500",
+                            backgroundColor: "#ffffff",
+                            padding: "0 4px",
+                            "&.Mui-focused": {
+                              color: "#3b82f6",
+                              fontWeight: "600",
+                              backgroundColor: "#ffffff",
+                            },
+                            "&.MuiFormLabel-filled": {
+                              backgroundColor: "#ffffff",
+                            },
+                          },
+                          "& .MuiInputBase-input": {
+                            color: "#1f2937",
+                            fontWeight: "500",
+                            fontSize: "0.875rem",
+                            padding: "8px 12px",
+                          },
+                        },
                       },
                     }}
                   />
                 </LocalizationProvider>
               </Grid>
-              
+
               {/* Botón de acción centrado */}
               <Grid item xs={12}>
                 <div className="flex justify-center mt-6">
@@ -230,7 +484,7 @@ const CrearResolucion = () => {
               </Grid>
             </Grid>
           </div>
-          
+
           {/* Modal */}
           {modalVisible && (
             <div

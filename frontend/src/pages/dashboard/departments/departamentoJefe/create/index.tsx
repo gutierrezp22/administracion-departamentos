@@ -141,7 +141,17 @@ const CrearDepartamentoJefe = () => {
 
   // Función helper para normalizar URLs
   const normalizeUrl = (url: string) => {
-    return url.replace(window.location.origin, "").replace(/^\/+/, "/");
+    // Si la URL es absoluta (comienza con http/https), extraer solo la parte de la ruta
+    if (url.startsWith("http")) {
+      const urlObj = new URL(url);
+      const normalizedUrl = urlObj.pathname + urlObj.search;
+      console.log("Normalized URL:", normalizedUrl);
+      return normalizedUrl;
+    }
+    // Si es relativa, asegurar que comience con /
+    const normalizedUrl = url.replace(/^\/+/, "/");
+    console.log("Normalized URL:", normalizedUrl);
+    return normalizedUrl;
   };
 
   const handleOpenModal = (
@@ -181,8 +191,10 @@ const CrearDepartamentoJefe = () => {
       console.log("Fetching resoluciones from URL:", url);
       const response = await API.get(url);
       setResoluciones(response.data.results);
-      setNextUrl(response.data.next);
-      setPrevUrl(response.data.previous);
+      setNextUrl(response.data.next ? normalizeUrl(response.data.next) : null);
+      setPrevUrl(
+        response.data.previous ? normalizeUrl(response.data.previous) : null
+      );
       setTotalItems(response.data.count);
 
       // Calcular la página actual usando offset
@@ -221,8 +233,12 @@ const CrearDepartamentoJefe = () => {
       console.log("Fetching jefes from URL:", url);
       const response = await API.get(url);
       setJefes(response.data.results);
-      setNextUrlJefes(response.data.next);
-      setPrevUrlJefes(response.data.previous);
+      setNextUrlJefes(
+        response.data.next ? normalizeUrl(response.data.next) : null
+      );
+      setPrevUrlJefes(
+        response.data.previous ? normalizeUrl(response.data.previous) : null
+      );
       setTotalItemsJefes(response.data.count);
 
       // Calcular la página actual usando offset
@@ -256,8 +272,12 @@ const CrearDepartamentoJefe = () => {
       console.log("Fetching departamentos from URL:", url);
       const response = await API.get(url);
       setDepartamentos(response.data.results);
-      setNextUrlDepartamentos(response.data.next);
-      setPrevUrlDepartamentos(response.data.previous);
+      setNextUrlDepartamentos(
+        response.data.next ? normalizeUrl(response.data.next) : null
+      );
+      setPrevUrlDepartamentos(
+        response.data.previous ? normalizeUrl(response.data.previous) : null
+      );
       setTotalItemsDepartamentos(response.data.count);
 
       // Calcular la página actual usando offset
@@ -502,19 +522,105 @@ const CrearDepartamentoJefe = () => {
                       multiline
                       rows={2}
                       size="small"
+                      className="modern-input"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          backgroundColor: "#ffffff",
+                          border: "1px solid #d1d5db",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                          "&.Mui-focused": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "#6b7280",
+                          fontWeight: "500",
+                          backgroundColor: "#ffffff",
+                          padding: "0 4px",
+                          "&.Mui-focused": {
+                            color: "#3b82f6",
+                            fontWeight: "600",
+                            backgroundColor: "#ffffff",
+                          },
+                          "&.MuiFormLabel-filled": {
+                            backgroundColor: "#ffffff",
+                          },
+                        },
+                        "& .MuiInputBase-input": {
+                          color: "#1f2937",
+                          fontWeight: "500",
+                          fontSize: "0.875rem",
+                          padding: "8px 12px",
+                        },
+                      }}
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
-                    <FormControl fullWidth size="small">
-                      <InputLabel>Estado</InputLabel>
-                      <Select
-                        value={estado}
-                        onChange={(e) => setEstado(e.target.value)}
-                        label="Estado">
-                        <MenuItem value="1">Activo</MenuItem>
-                        <MenuItem value="0">Inactivo</MenuItem>
-                      </Select>
-                    </FormControl>
+                    <TextField
+                      select
+                      fullWidth
+                      label="Estado"
+                      value={estado}
+                      onChange={(e) => setEstado(e.target.value)}
+                      variant="outlined"
+                      size="small"
+                      className="modern-input"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          backgroundColor: "#ffffff",
+                          border: "1px solid #d1d5db",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                          "&.Mui-focused": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "#6b7280",
+                          fontWeight: "500",
+                          backgroundColor: "#ffffff",
+                          padding: "0 4px",
+                          "&.Mui-focused": {
+                            color: "#3b82f6",
+                            fontWeight: "600",
+                            backgroundColor: "#ffffff",
+                          },
+                          "&.MuiFormLabel-filled": {
+                            backgroundColor: "#ffffff",
+                          },
+                        },
+                        "& .MuiInputBase-input": {
+                          color: "#1f2937",
+                          fontWeight: "500",
+                          fontSize: "0.875rem",
+                          padding: "8px 12px",
+                        },
+                        "& .MuiSelect-icon": {
+                          color: "#6b7280",
+                          transition: "color 0.2s ease",
+                        },
+                        "&:hover .MuiSelect-icon": {
+                          color: "#3b82f6",
+                        },
+                      }}>
+                      <MenuItem value="1">Activo</MenuItem>
+                      <MenuItem value="0">Inactivo</MenuItem>
+                    </TextField>
                   </Grid>
                 </Grid>
               </Grid>
@@ -543,6 +649,47 @@ const CrearDepartamentoJefe = () => {
                             fullWidth: true,
                             variant: "outlined",
                             size: "small",
+                            className: "modern-input",
+                            sx: {
+                              "& .MuiOutlinedInput-root": {
+                                borderRadius: "8px",
+                                backgroundColor: "#ffffff",
+                                border: "1px solid #d1d5db",
+                                transition: "all 0.2s ease",
+                                "&:hover": {
+                                  borderColor: "#3b82f6",
+                                  backgroundColor: "#ffffff",
+                                  boxShadow:
+                                    "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                                },
+                                "&.Mui-focused": {
+                                  borderColor: "#3b82f6",
+                                  backgroundColor: "#ffffff",
+                                  boxShadow:
+                                    "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                                },
+                              },
+                              "& .MuiInputLabel-root": {
+                                color: "#6b7280",
+                                fontWeight: "500",
+                                backgroundColor: "#ffffff",
+                                padding: "0 4px",
+                                "&.Mui-focused": {
+                                  color: "#3b82f6",
+                                  fontWeight: "600",
+                                  backgroundColor: "#ffffff",
+                                },
+                                "&.MuiFormLabel-filled": {
+                                  backgroundColor: "#ffffff",
+                                },
+                              },
+                              "& .MuiInputBase-input": {
+                                color: "#1f2937",
+                                fontWeight: "500",
+                                fontSize: "0.875rem",
+                                padding: "8px 12px",
+                              },
+                            },
                           },
                         }}
                       />
@@ -559,6 +706,47 @@ const CrearDepartamentoJefe = () => {
                             fullWidth: true,
                             variant: "outlined",
                             size: "small",
+                            className: "modern-input",
+                            sx: {
+                              "& .MuiOutlinedInput-root": {
+                                borderRadius: "8px",
+                                backgroundColor: "#ffffff",
+                                border: "1px solid #d1d5db",
+                                transition: "all 0.2s ease",
+                                "&:hover": {
+                                  borderColor: "#3b82f6",
+                                  backgroundColor: "#ffffff",
+                                  boxShadow:
+                                    "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                                },
+                                "&.Mui-focused": {
+                                  borderColor: "#3b82f6",
+                                  backgroundColor: "#ffffff",
+                                  boxShadow:
+                                    "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                                },
+                              },
+                              "& .MuiInputLabel-root": {
+                                color: "#6b7280",
+                                fontWeight: "500",
+                                backgroundColor: "#ffffff",
+                                padding: "0 4px",
+                                "&.Mui-focused": {
+                                  color: "#3b82f6",
+                                  fontWeight: "600",
+                                  backgroundColor: "#ffffff",
+                                },
+                                "&.MuiFormLabel-filled": {
+                                  backgroundColor: "#ffffff",
+                                },
+                              },
+                              "& .MuiInputBase-input": {
+                                color: "#1f2937",
+                                fontWeight: "500",
+                                fontSize: "0.875rem",
+                                padding: "8px 12px",
+                              },
+                            },
                           },
                         }}
                       />

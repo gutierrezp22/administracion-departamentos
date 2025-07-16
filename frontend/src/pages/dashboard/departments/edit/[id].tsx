@@ -14,7 +14,7 @@ import {
   Grid,
 } from "@mui/material";
 import BasicModal from "@/utils/modal";
-import ModalConfirmacion from "@/utils/modalConfirmacion";
+
 import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -34,7 +34,6 @@ const EditarDepartamento = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
-  const [confirmarEliminacion, setConfirmarEliminacion] = useState(false);
 
   const [departamento, setDepartamento] = useState({
     nombre: "",
@@ -80,18 +79,6 @@ const EditarDepartamento = () => {
     }
   };
 
-  const eliminarDepartamento = async () => {
-    try {
-      await API.delete(`/facet/departamento/${idDepartamento}/`);
-      handleOpenModal(
-        "Departamento Eliminado",
-        "La acción se realizó con éxito."
-      );
-    } catch (error) {
-      handleOpenModal("Error", "NO se pudo realizar la acción.");
-    }
-  };
-
   return (
     <DashboardMenu>
       <Container maxWidth="lg">
@@ -102,17 +89,19 @@ const EditarDepartamento = () => {
               Editar Departamento
             </Typography>
           </div>
-          
+
           {/* Contenido del formulario */}
           <div className="p-4">
             <Grid container spacing={2}>
               {/* Sección: Información del Departamento */}
               <Grid item xs={12}>
-                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
                   Información del Departamento
                 </Typography>
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
                 <TextField
                   label="Nombre"
@@ -123,37 +112,160 @@ const EditarDepartamento = () => {
                   fullWidth
                   variant="outlined"
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
                 <TextField
                   label="Teléfono"
                   value={departamento.telefono}
                   onChange={(e) =>
-                    setDepartamento({ ...departamento, telefono: e.target.value })
+                    setDepartamento({
+                      ...departamento,
+                      telefono: e.target.value,
+                    })
                   }
                   fullWidth
                   variant="outlined"
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
                 <TextField
                   label="Interno"
                   value={departamento.interno}
                   onChange={(e) =>
-                    setDepartamento({ ...departamento, interno: e.target.value })
+                    setDepartamento({
+                      ...departamento,
+                      interno: e.target.value,
+                    })
                   }
                   fullWidth
                   variant="outlined"
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)"
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)"
+                      }
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff"
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff"
+                      }
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px"
+                    }
+                  }}
                 />
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
-                <FormControl fullWidth size="small">
+                <FormControl fullWidth size="small" className="modern-input">
                   <InputLabel id="estado-label">Estado</InputLabel>
                   <Select
                     labelId="estado-label"
@@ -161,46 +273,82 @@ const EditarDepartamento = () => {
                     value={departamento.estado}
                     label="Estado"
                     onChange={(e) =>
-                      setDepartamento({ ...departamento, estado: e.target.value })
-                    }>
+                      setDepartamento({
+                        ...departamento,
+                        estado: e.target.value,
+                      })
+                    }
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "8px",
+                        backgroundColor: "#ffffff",
+                        border: "1px solid #d1d5db",
+                        transition: "all 0.2s ease",
+                        "&:hover": {
+                          borderColor: "#3b82f6",
+                          backgroundColor: "#ffffff",
+                          boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)"
+                        },
+                        "&.Mui-focused": {
+                          borderColor: "#3b82f6",
+                          backgroundColor: "#ffffff",
+                          boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)"
+                        }
+                      },
+                      "& .MuiInputLabel-root": {
+                        color: "#6b7280",
+                        fontWeight: "500",
+                        backgroundColor: "#ffffff",
+                        padding: "0 4px",
+                        "&.Mui-focused": {
+                          color: "#3b82f6",
+                          fontWeight: "600",
+                          backgroundColor: "#ffffff"
+                        },
+                        "&.MuiFormLabel-filled": {
+                          backgroundColor: "#ffffff"
+                        }
+                      },
+                      "& .MuiInputBase-input": {
+                        color: "#1f2937",
+                        fontWeight: "500",
+                        fontSize: "0.875rem",
+                        padding: "8px 12px"
+                      },
+                      "& .MuiSelect-icon": {
+                        color: "#6b7280",
+                        transition: "color 0.2s ease"
+                      },
+                      "&:hover .MuiSelect-icon": {
+                        color: "#3b82f6"
+                      }
+                    }}>
                     <MenuItem value={1}>Activo</MenuItem>
                     <MenuItem value={0}>Inactivo</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
-              
-              {/* Botones de acción centrados */}
+
+              {/* Botón de acción centrado */}
               <Grid item xs={12}>
-                <div className="flex justify-center gap-3 mt-6">
+                <div className="flex justify-center mt-6">
                   <button
                     onClick={edicionDepartamento}
                     className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
                     Guardar Cambios
                   </button>
-                  <button
-                    onClick={() => setConfirmarEliminacion(true)}
-                    className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                    Eliminar
-                  </button>
                 </div>
               </Grid>
             </Grid>
           </div>
-          
+
           <BasicModal
             open={modalVisible}
             onClose={handleCloseModal}
             title={modalTitle}
             content={modalMessage}
           />
-          <ModalConfirmacion
-            open={confirmarEliminacion}
-            onClose={() => setConfirmarEliminacion(false)}
-            onConfirm={() => {
-              setConfirmarEliminacion(false);
-              eliminarDepartamento();
-            }}
-          />
+
         </Paper>
       </Container>
     </DashboardMenu>

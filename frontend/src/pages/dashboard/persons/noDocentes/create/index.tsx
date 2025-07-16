@@ -95,7 +95,7 @@ const CrearNoDocente = () => {
     let normalizedUrl = url.replace(window.location.origin, "");
 
     // Remover /api/ extra si está presente al inicio
-    normalizedUrl = normalizedUrl.replace(/^\/api\//, "/");
+    normalizedUrl = normalizedUrl.replace(/^\/api\/api\//, "/api/");
 
     // Asegurar que empiece con /
     normalizedUrl = normalizedUrl.replace(/^\/+/, "/");
@@ -113,15 +113,22 @@ const CrearNoDocente = () => {
       }
 
       console.log("Fetching URL:", apiUrl); // Debug log
+      console.log("Original URL:", url); // Debug log
 
       const response = await API.get(apiUrl);
       setPersonas(response.data.results);
 
       // Normalizar las URLs de paginación que vienen del backend
-      setNextUrl(response.data.next ? normalizeUrl(response.data.next) : null);
-      setPrevUrl(
-        response.data.previous ? normalizeUrl(response.data.previous) : null
-      );
+      const normalizedNext = response.data.next ? normalizeUrl(response.data.next) : null;
+      const normalizedPrev = response.data.previous ? normalizeUrl(response.data.previous) : null;
+      
+      console.log("Original next URL:", response.data.next);
+      console.log("Normalized next URL:", normalizedNext);
+      console.log("Original prev URL:", response.data.previous);
+      console.log("Normalized prev URL:", normalizedPrev);
+      
+      setNextUrl(normalizedNext);
+      setPrevUrl(normalizedPrev);
       setTotalItems(response.data.count);
 
       // Calcular la página actual basándose en los parámetros de la URL
@@ -238,6 +245,45 @@ const CrearNoDocente = () => {
                   fullWidth
                   variant="outlined"
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
 
@@ -249,6 +295,45 @@ const CrearNoDocente = () => {
                   fullWidth
                   variant="outlined"
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
 
@@ -262,21 +347,107 @@ const CrearNoDocente = () => {
                   size="small"
                   multiline
                   rows={2}
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
 
               <Grid item xs={12} md={6}>
-                <TextField
-                  select
-                  label="Estado"
-                  value={estado}
-                  onChange={(e) => setEstado(Number(e.target.value))}
-                  fullWidth
-                  variant="outlined"
-                  size="small">
-                  <MenuItem value={1}>Activo</MenuItem>
-                  <MenuItem value={0}>Inactivo</MenuItem>
-                </TextField>
+                <FormControl 
+                  fullWidth 
+                  size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                    "& .MuiSelect-icon": {
+                      color: "#6b7280",
+                      transition: "color 0.2s ease",
+                    },
+                    "&:hover .MuiSelect-icon": {
+                      color: "#3b82f6",
+                    },
+                  }}>
+                  <InputLabel>Estado</InputLabel>
+                  <Select
+                    value={estado}
+                    label="Estado"
+                    onChange={(e) => setEstado(Number(e.target.value))}>
+                    <MenuItem value={1}>Activo</MenuItem>
+                    <MenuItem value={0}>Inactivo</MenuItem>
+                  </Select>
+                </FormControl>
               </Grid>
 
               {/* Botón de acción centrado */}

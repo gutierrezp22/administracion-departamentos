@@ -30,7 +30,7 @@ import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 import DashboardMenu from "../../..";
 import withAuth from "../../../../../components/withAut";
-import { API_BASE_URL } from "../../../../../utils/config";
+
 import {
   FilterContainer,
   FilterInput,
@@ -194,7 +194,7 @@ const ListaJefesDepartamentos = () => {
   const descargarExcel = async () => {
     try {
       let allJefesDepartamentos: JefeDepartamento[] = [];
-      let url = `${API_BASE_URL}/facet/jefe-departamento/?`;
+      let url = `/facet/jefe-departamento/?`;
       const params = new URLSearchParams();
 
       if (filtroNombre !== "")
@@ -274,7 +274,7 @@ const ListaJefesDepartamentos = () => {
       });
 
       if (result.isConfirmed) {
-        await API.delete(`${API_BASE_URL}/facet/jefe-departamento/${id}/`);
+        await API.delete(`/facet/jefe-departamento/${id}/`);
         Swal.fire(
           "Eliminado!",
           "El jefe de departamento ha sido eliminado.",

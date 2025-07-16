@@ -8,9 +8,6 @@ import {
   TextField,
   Button,
   Grid,
-  FormControl,
-  InputLabel,
-  Select,
   MenuItem,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -20,7 +17,7 @@ import dayjs, { Dayjs } from "dayjs";
 import { useRouter } from "next/router";
 import DashboardMenu from "../../..";
 import BasicModal from "@/utils/modal";
-import ModalConfirmacion from "@/utils/modalConfirmacion";
+
 import withAuth from "../../../../../components/withAut";
 import { API_BASE_URL } from "../../../../../utils/config";
 import API from "../../../../../api/axiosConfig";
@@ -62,7 +59,6 @@ const EditarDepartamentoJefe = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
-  const [confirmarEliminacion, setConfirmarEliminacion] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -88,19 +84,6 @@ const EditarDepartamentoJefe = () => {
 
     fetchData();
   }, [id]);
-
-  const eliminarJefeDepartamento = async () => {
-    try {
-      await API.delete(`/facet/jefe-departamento/${id}/`);
-      handleOpenModal(
-        "Departamento Jefe Eliminado",
-        "La acción se realizó con éxito."
-      );
-    } catch (error) {
-      console.error("Error al hacer la solicitud DELETE:", error);
-      handleOpenModal("Error", "NO se pudo realizar la acción.");
-    }
-  };
 
   const edicionDepartamentoJefe = async () => {
     const jefeDepartamentoEditado = {
@@ -165,6 +148,45 @@ const EditarDepartamentoJefe = () => {
                   InputProps={{ readOnly: true }}
                   variant="outlined"
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
 
@@ -178,6 +200,45 @@ const EditarDepartamentoJefe = () => {
                   InputProps={{ readOnly: true }}
                   variant="outlined"
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
 
@@ -189,6 +250,45 @@ const EditarDepartamentoJefe = () => {
                   InputProps={{ readOnly: true }}
                   variant="outlined"
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
 
@@ -217,6 +317,45 @@ const EditarDepartamentoJefe = () => {
                         variant: "outlined",
                         fullWidth: true,
                         size: "small",
+                        className: "modern-input",
+                        sx: {
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: "8px",
+                            backgroundColor: "#ffffff",
+                            border: "1px solid #d1d5db",
+                            transition: "all 0.2s ease",
+                            "&:hover": {
+                              borderColor: "#3b82f6",
+                              backgroundColor: "#ffffff",
+                              boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                            },
+                            "&.Mui-focused": {
+                              borderColor: "#3b82f6",
+                              backgroundColor: "#ffffff",
+                              boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                            },
+                          },
+                          "& .MuiInputLabel-root": {
+                            color: "#6b7280",
+                            fontWeight: "500",
+                            backgroundColor: "#ffffff",
+                            padding: "0 4px",
+                            "&.Mui-focused": {
+                              color: "#3b82f6",
+                              fontWeight: "600",
+                              backgroundColor: "#ffffff",
+                            },
+                            "&.MuiFormLabel-filled": {
+                              backgroundColor: "#ffffff",
+                            },
+                          },
+                          "& .MuiInputBase-input": {
+                            color: "#1f2937",
+                            fontWeight: "500",
+                            fontSize: "0.875rem",
+                            padding: "8px 12px",
+                          },
+                        },
                       },
                     }}
                   />
@@ -234,6 +373,45 @@ const EditarDepartamentoJefe = () => {
                         variant: "outlined",
                         fullWidth: true,
                         size: "small",
+                        className: "modern-input",
+                        sx: {
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: "8px",
+                            backgroundColor: "#ffffff",
+                            border: "1px solid #d1d5db",
+                            transition: "all 0.2s ease",
+                            "&:hover": {
+                              borderColor: "#3b82f6",
+                              backgroundColor: "#ffffff",
+                              boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                            },
+                            "&.Mui-focused": {
+                              borderColor: "#3b82f6",
+                              backgroundColor: "#ffffff",
+                              boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                            },
+                          },
+                          "& .MuiInputLabel-root": {
+                            color: "#6b7280",
+                            fontWeight: "500",
+                            backgroundColor: "#ffffff",
+                            padding: "0 4px",
+                            "&.Mui-focused": {
+                              color: "#3b82f6",
+                              fontWeight: "600",
+                              backgroundColor: "#ffffff",
+                            },
+                            "&.MuiFormLabel-filled": {
+                              backgroundColor: "#ffffff",
+                            },
+                          },
+                          "& .MuiInputBase-input": {
+                            color: "#1f2937",
+                            fontWeight: "500",
+                            fontSize: "0.875rem",
+                            padding: "8px 12px",
+                          },
+                        },
                       },
                     }}
                   />
@@ -241,18 +419,63 @@ const EditarDepartamentoJefe = () => {
               </Grid>
 
               <Grid item xs={12} md={6}>
-                <FormControl fullWidth size="small">
-                  <InputLabel id="estado-label">Estado</InputLabel>
-                  <Select
-                    labelId="estado-label"
-                    id="estado-select"
-                    value={estado}
-                    onChange={(e) => setEstado(e.target.value)}
-                    label="Estado">
-                    <MenuItem value="1">Activo</MenuItem>
-                    <MenuItem value="0">Inactivo</MenuItem>
-                  </Select>
-                </FormControl>
+                <TextField
+                  select
+                  label="Estado"
+                  value={estado}
+                  onChange={(e) => setEstado(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                    "& .MuiSelect-icon": {
+                      color: "#6b7280",
+                      transition: "color 0.2s ease",
+                    },
+                    "&:hover .MuiSelect-icon": {
+                      color: "#3b82f6",
+                    },
+                  }}>
+                  <MenuItem value="1">Activo</MenuItem>
+                  <MenuItem value="0">Inactivo</MenuItem>
+                </TextField>
               </Grid>
 
               <Grid item xs={12} md={6}>
@@ -265,21 +488,55 @@ const EditarDepartamentoJefe = () => {
                   size="small"
                   multiline
                   rows={2}
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
 
-              {/* Botones de acción centrados */}
+              {/* Botón de acción centrado */}
               <Grid item xs={12}>
-                <div className="flex justify-center gap-3 mt-6">
+                <div className="flex justify-center mt-6">
                   <button
                     onClick={edicionDepartamentoJefe}
                     className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
                     Guardar Cambios
-                  </button>
-                  <button
-                    onClick={() => setConfirmarEliminacion(true)}
-                    className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                    Eliminar
                   </button>
                 </div>
               </Grid>
@@ -291,11 +548,6 @@ const EditarDepartamentoJefe = () => {
             onClose={handleCloseModal}
             title={modalTitle}
             content={modalMessage}
-          />
-          <ModalConfirmacion
-            open={confirmarEliminacion}
-            onClose={() => setConfirmarEliminacion(false)}
-            onConfirm={() => eliminarJefeDepartamento()}
           />
         </Paper>
       </Container>

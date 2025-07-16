@@ -28,7 +28,7 @@ import { saveAs } from "file-saver";
 import { useRouter } from "next/router"; // Importa useRouter de Next.js
 import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut"; // Importa el HOC
-import { API_BASE_URL } from "../../../../utils/config";
+
 import {
   FilterContainer,
   FilterInput,
@@ -54,12 +54,19 @@ const ListaDepartamentos = () => {
   const [filtroEstado, setFiltroEstado] = useState<string>("1");
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
-  const [currentUrl, setCurrentUrl] = useState<string>(
-    `${API_BASE_URL}/facet/departamento/`
-  );
+  const [currentUrl, setCurrentUrl] = useState<string>(`/facet/departamento/`);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
+
+  // Función para normalizar URLs y evitar duplicación de /api/api/ en producción
+  const normalizeUrl = (url: string) => {
+    if (url.startsWith("http")) {
+      const urlObj = new URL(url);
+      return urlObj.pathname + urlObj.search;
+    }
+    return url.replace(/^\/+/, "/");
+  };
 
   useEffect(() => {
     fetchData(currentUrl);
@@ -69,8 +76,22 @@ const ListaDepartamentos = () => {
     try {
       const response = await API.get(url);
       setDepartamentos(response.data.results);
-      setNextUrl(response.data.next);
-      setPrevUrl(response.data.previous);
+
+      // Normalizar URLs de paginación para evitar problemas en producción
+      const normalizedNext = response.data.next
+        ? normalizeUrl(response.data.next)
+        : null;
+      const normalizedPrev = response.data.previous
+        ? normalizeUrl(response.data.previous)
+        : null;
+
+      console.log("Original next URL:", response.data.next);
+      console.log("Normalized next URL:", normalizedNext);
+      console.log("Original prev URL:", response.data.previous);
+      console.log("Normalized prev URL:", normalizedPrev);
+
+      setNextUrl(normalizedNext);
+      setPrevUrl(normalizedPrev);
       setTotalItems(response.data.count);
     } catch (error) {
       Swal.fire({
@@ -82,7 +103,7 @@ const ListaDepartamentos = () => {
   };
 
   const filtrarDepartamentos = () => {
-    let url = `${API_BASE_URL}/facet/departamento/?`;
+    let url = `/facet/departamento/?`;
     const params = new URLSearchParams();
     if (filtroNombre !== "") {
       params.append("nombre__icontains", filtroNombre);
@@ -108,7 +129,7 @@ const ListaDepartamentos = () => {
   };
 
   const handlePageChange = (newPage: number) => {
-    let url = `${API_BASE_URL}/facet/departamento/?`;
+    let url = `/facet/departamento/?`;
     const params = new URLSearchParams();
 
     if (filtroNombre !== "") {
@@ -136,7 +157,7 @@ const ListaDepartamentos = () => {
     try {
       let allDepartamentos: Departamento[] = [];
 
-      let url = `${API_BASE_URL}/facet/departamento/?`;
+      let url = `/facet/departamento/?`;
       const params = new URLSearchParams();
       if (filtroNombre !== "") {
         params.append("nombre__icontains", filtroNombre);
@@ -162,7 +183,9 @@ const ListaDepartamentos = () => {
             interno: departamento.interno,
           })),
         ];
-        url = next;
+
+        // Normalizar la URL de paginación para la siguiente iteración
+        url = next ? normalizeUrl(next) : '';
       }
 
       const workbook = XLSX.utils.book_new();
@@ -195,7 +218,7 @@ const ListaDepartamentos = () => {
       });
 
       if (result.isConfirmed) {
-        await API.delete(`${API_BASE_URL}/facet/departamento/${id}/`);
+        await API.delete(`/facet/departamento/${id}/`);
         Swal.fire(
           "Eliminado!",
           "El departamento ha sido eliminado.",

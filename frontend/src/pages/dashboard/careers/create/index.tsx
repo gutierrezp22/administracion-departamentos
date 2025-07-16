@@ -78,81 +78,96 @@ const CrearCarrera = () => {
 
   return (
     <DashboardMenu>
-      <div className="p-6">
-        <Paper elevation={3} style={{ padding: "20px", marginTop: "20px" }}>
-          <Typography variant="h4" gutterBottom className="text-gray-800">
-            Carrera
-          </Typography>
+      <div className="p-4">
+        <div className="bg-white rounded-lg shadow-lg">
+          <div className="p-4 border-b border-gray-200">
+            <h1 className="text-2xl font-bold text-gray-800">Crear Carrera</h1>
+          </div>
 
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                label="Nombre"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                fullWidth
-                variant="outlined"
-              />
+          <div className="p-4">
+            <Typography
+              variant="h6"
+              className="text-gray-700 font-semibold mb-3">
+              Información de la Carrera
+            </Typography>
+
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Nombre"
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  select
+                  label="Tipo"
+                  value={tipo}
+                  onChange={(e) => setTipo(e.target.value as TipoCarrera)}
+                  fullWidth
+                  variant="outlined"
+                  size="small">
+                  <MenuItem value="Pregrado">Pregrado</MenuItem>
+                  <MenuItem value="Grado">Grado</MenuItem>
+                  <MenuItem value="Posgrado">Posgrado</MenuItem>
+                </TextField>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Plan de Estudio"
+                  value={planEstudio}
+                  onChange={(e) => setPlanEstudio(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Sitio"
+                  value={sitio}
+                  onChange={(e) => setsitio(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  select
+                  label="Estado"
+                  value={estado}
+                  onChange={(e) => setEstado(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  size="small">
+                  <MenuItem value={1}>Activo</MenuItem>
+                  <MenuItem value={0}>Inactivo</MenuItem>
+                </TextField>
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                select
-                label="Tipo"
-                value={tipo}
-                onChange={(e) => setTipo(e.target.value as TipoCarrera)}
-                fullWidth
-                variant="outlined">
-                <MenuItem value="Pregrado">Pregrado</MenuItem>
-                <MenuItem value="Grado">Grado</MenuItem>
-                <MenuItem value="Posgrado">Posgrado</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Plan de Estudio"
-                value={planEstudio}
-                onChange={(e) => setPlanEstudio(e.target.value)}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Sitio"
-                value={sitio}
-                onChange={(e) => setsitio(e.target.value)}
-                fullWidth
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                select
-                label="Estado"
-                value={estado}
-                onChange={(e) => setEstado(e.target.value)}
-                fullWidth
-                variant="outlined">
-                <MenuItem value={1}>Activo</MenuItem>
-                <MenuItem value={0}>Inactivo</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={12} marginBottom={2}>
+
+            <div className="flex justify-center mt-6">
               <button
                 onClick={crearNuevaCarrera}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                Crear
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                Crear Carrera
               </button>
-            </Grid>
-          </Grid>
-          <BasicModal
-            open={modalVisible}
-            onClose={handleCloseModal}
-            title={modalTitle}
-            content={modalMessage}
-            onConfirm={fn}
-          />
-        </Paper>
+            </div>
+          </div>
+        </div>
+
+        <BasicModal
+          open={modalVisible}
+          onClose={handleCloseModal}
+          title={modalTitle}
+          content={modalMessage}
+          onConfirm={fn}
+        />
       </div>
     </DashboardMenu>
   );
