@@ -98,15 +98,19 @@ const CrearJefe = () => {
 
   const fetchPersonas = async (url: string) => {
     try {
-      // Si la URL es absoluta (comienza con http), extraer solo la parte de la ruta
+      // Normalizar la URL de entrada si es absoluta
       let apiUrl = url;
       if (url.startsWith("http")) {
         const urlObj = new URL(url);
         apiUrl = urlObj.pathname + urlObj.search;
       }
 
+      console.log("Fetching URL:", apiUrl); // Debug log
+
       const response = await API.get(apiUrl);
       setPersonas(response.data.results);
+      
+      // Normalizar las URLs de paginación que vienen del backend
       setNextUrl(response.data.next ? normalizeUrl(response.data.next) : null);
       setPrevUrl(response.data.previous ? normalizeUrl(response.data.previous) : null);
       setTotalItems(response.data.count);
