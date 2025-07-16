@@ -37,6 +37,11 @@ import {
   EstadoFilter,
 } from "../../../../../components/Filters";
 
+// Función para normalizar URLs de paginación
+const normalizeUrl = (url: string) => {
+  return url.replace(window.location.origin, "").replace(/^\/+/, "/");
+};
+
 const ListaNoDocentes = () => {
   interface NoDocente {
     id: number;
@@ -62,7 +67,7 @@ const ListaNoDocentes = () => {
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>(
-    `${API_BASE_URL}/facet/nodocente/?estado=1`
+    `/facet/nodocente/?estado=1`
   );
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
@@ -85,14 +90,16 @@ const ListaNoDocentes = () => {
 
       const response = await API.get(apiUrl);
       setNoDocentes(response.data.results);
-      setNextUrl(response.data.next);
-      setPrevUrl(response.data.previous);
+      setNextUrl(response.data.next ? normalizeUrl(response.data.next) : null);
+      setPrevUrl(
+        response.data.previous ? normalizeUrl(response.data.previous) : null
+      );
       setTotalItems(response.data.count);
-      
+
       // Calcular la página actual basándose en los parámetros de la URL
-      const urlParams = new URLSearchParams(apiUrl.split('?')[1] || '');
-      const offset = parseInt(urlParams.get('offset') || '0');
-      const limit = parseInt(urlParams.get('limit') || '10');
+      const urlParams = new URLSearchParams(apiUrl.split("?")[1] || "");
+      const offset = parseInt(urlParams.get("offset") || "0");
+      const limit = parseInt(urlParams.get("limit") || "10");
       const calculatedPage = Math.floor(offset / limit) + 1;
       setCurrentPage(calculatedPage);
     } catch (error) {
@@ -105,7 +112,7 @@ const ListaNoDocentes = () => {
   };
 
   const filtrarNoDocentes = () => {
-    let url = `${API_BASE_URL}/facet/nodocente/?`;
+    let url = `/facet/nodocente/?`;
     const params = new URLSearchParams();
     if (filtroNombre) params.append("persona__nombre__icontains", filtroNombre);
     if (filtroApellido)
@@ -127,13 +134,13 @@ const ListaNoDocentes = () => {
     setFiltroDni("");
     setFiltroLegajo("");
     setFiltroEstado("1");
-    setCurrentUrl(`${API_BASE_URL}/facet/nodocente/?estado=1`);
+    setCurrentUrl(`/facet/nodocente/?estado=1`);
   };
 
   const descargarExcel = async () => {
     try {
       let allNoDocentes: NoDocente[] = [];
-      let url = `${API_BASE_URL}/facet/nodocente/?`;
+      let url = `/facet/nodocente/?`;
       const params = new URLSearchParams();
 
       if (filtroNombre !== "")
@@ -202,7 +209,7 @@ const ListaNoDocentes = () => {
       });
 
       if (result.isConfirmed) {
-        await API.delete(`${API_BASE_URL}/facet/nodocente/${id}/`);
+        await API.delete(`/facet/nodocente/${id}/`);
         Swal.fire("Eliminado!", "El no docente ha sido eliminado.", "success");
         fetchData(currentUrl);
       }

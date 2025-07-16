@@ -38,6 +38,11 @@ import {
   EstadoFilter,
 } from "../../../../components/Filters";
 
+// Función para normalizar URLs de paginación
+const normalizeUrl = (url: string) => {
+  return url.replace(window.location.origin, "").replace(/^\/+/, "/");
+};
+
 const ListaPersonas = () => {
   interface Persona {
     id: number;
@@ -61,7 +66,7 @@ const ListaPersonas = () => {
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>(
-    `${API_BASE_URL}/facet/persona/?estado=1`
+    `/facet/persona/?estado=1`
   );
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
@@ -84,8 +89,10 @@ const ListaPersonas = () => {
 
       const response = await API.get(apiUrl);
       setPersonas(response.data.results);
-      setNextUrl(response.data.next);
-      setPrevUrl(response.data.previous);
+      setNextUrl(response.data.next ? normalizeUrl(response.data.next) : null);
+      setPrevUrl(
+        response.data.previous ? normalizeUrl(response.data.previous) : null
+      );
       setTotalItems(response.data.count);
 
       // Calcular la página actual basándose en los parámetros de la URL
@@ -104,7 +111,7 @@ const ListaPersonas = () => {
   };
 
   const filtrarPersonas = () => {
-    let url = `${API_BASE_URL}/facet/persona/?`;
+    let url = `/facet/persona/?`;
     const params = new URLSearchParams();
     if (filtroNombre !== "") {
       params.append("nombre__icontains", filtroNombre);
@@ -133,13 +140,13 @@ const ListaPersonas = () => {
     setFiltroDni("");
     setFiltroLegajo("");
     setFiltroEstado("1");
-    setCurrentUrl(`${API_BASE_URL}/facet/persona/?estado=1`);
+    setCurrentUrl(`/facet/persona/?estado=1`);
   };
 
   const descargarExcel = async () => {
     try {
       let allPersonas: Persona[] = [];
-      let url = `${API_BASE_URL}/facet/persona/?`;
+      let url = `/facet/persona/?`;
       const params = new URLSearchParams();
 
       if (filtroNombre !== "") params.append("nombre__icontains", filtroNombre);
@@ -208,7 +215,7 @@ const ListaPersonas = () => {
       });
 
       if (result.isConfirmed) {
-        await API.delete(`${API_BASE_URL}/facet/persona/${id}/`);
+        await API.delete(`/facet/persona/${id}/`);
         Swal.fire("Eliminado!", "La persona ha sido eliminada.", "success");
         fetchData(currentUrl);
       }
