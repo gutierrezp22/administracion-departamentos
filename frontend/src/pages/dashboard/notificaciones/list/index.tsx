@@ -40,7 +40,7 @@ const ListaNotificaciones = () => {
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>(
-    `${API_BASE_URL}/facet/notificacion/`
+    `/facet/notificacion/`
   );
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
@@ -106,7 +106,7 @@ const ListaNotificaciones = () => {
 
     params.append("page_size", pageSize.toString());
 
-    const newUrl = `${API_BASE_URL}/facet/notificacion/?${params.toString()}`;
+    const newUrl = `/facet/notificacion/?${params.toString()}`;
     setCurrentUrl(newUrl);
   };
 
@@ -117,7 +117,7 @@ const ListaNotificaciones = () => {
       fecha_creacion: "",
       mensaje: "",
     });
-    setCurrentUrl(`${API_BASE_URL}/facet/notificacion/`);
+    setCurrentUrl(`/facet/notificacion/`);
   };
 
   const mostrarMensaje = (mensaje: string) => {

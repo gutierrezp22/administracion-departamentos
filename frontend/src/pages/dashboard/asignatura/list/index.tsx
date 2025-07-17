@@ -70,7 +70,7 @@ const ListaAsignaturas = () => {
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>(
-    `${API_BASE_URL}/facet/asignatura/`
+    `/facet/asignatura/`
   );
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
@@ -99,7 +99,7 @@ const ListaAsignaturas = () => {
   };
 
   const filtrarAsignaturas = () => {
-    let url = `${API_BASE_URL}/facet/asignatura/?`;
+    let url = `/facet/asignatura/?`;
     const params = new URLSearchParams();
     if (filtroNombre !== "") {
       params.append("nombre__icontains", filtroNombre);
@@ -137,7 +137,7 @@ const ListaAsignaturas = () => {
   };
 
   const handlePageChange = (newPage: number) => {
-    let url = `${API_BASE_URL}/facet/asignatura/?`;
+    let url = `/facet/asignatura/?`;
     const params = new URLSearchParams();
 
     if (filtroNombre !== "") {
@@ -182,7 +182,7 @@ const ListaAsignaturas = () => {
       });
 
       if (result.isConfirmed) {
-        await API.delete(`${API_BASE_URL}/facet/asignatura/${id}/`);
+        await API.delete(`/facet/asignatura/${id}/`);
         Swal.fire("Eliminado!", "La asignatura ha sido eliminada.", "success");
         fetchData(currentUrl);
       }
@@ -196,7 +196,7 @@ const ListaAsignaturas = () => {
   const descargarExcel = async () => {
     try {
       let allAsignaturas: Asignatura[] = [];
-      let url = `${API_BASE_URL}/facet/asignatura/?`;
+      let url = `/facet/asignatura/?`;
       const params = new URLSearchParams();
 
       if (filtroNombre !== "") params.append("nombre__icontains", filtroNombre);

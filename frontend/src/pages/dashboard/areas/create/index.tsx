@@ -232,6 +232,45 @@ const CrearArea = () => {
                       fullWidth
                       variant="outlined"
                       size="small"
+                      className="modern-input"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          backgroundColor: "#ffffff",
+                          border: "1px solid #d1d5db",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.5)",
+                          },
+                          "&.Mui-focused": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.5)",
+                          },
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "#6b7280",
+                          fontWeight: "500",
+                          backgroundColor: "#ffffff",
+                          padding: "0 4px",
+                          "&.Mui-focused": {
+                            color: "#3b82f6",
+                            fontWeight: "600",
+                            backgroundColor: "#ffffff",
+                          },
+                          "&.MuiFormLabel-filled": {
+                            backgroundColor: "#ffffff",
+                          },
+                        },
+                        "& .MuiInputBase-input": {
+                          color: "#1f2937",
+                          fontWeight: "500",
+                          fontSize: "0.875rem",
+                          padding: "8px 12px",
+                        },
+                      }}
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
@@ -242,7 +281,53 @@ const CrearArea = () => {
                       onChange={(e) => setEstado(e.target.value)}
                       fullWidth
                       variant="outlined"
-                      size="small">
+                      size="small"
+                      className="modern-input"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          backgroundColor: "#ffffff",
+                          border: "1px solid #d1d5db",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.5)",
+                          },
+                          "&.Mui-focused": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.5)",
+                          },
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "#6b7280",
+                          fontWeight: "500",
+                          backgroundColor: "#ffffff",
+                          padding: "0 4px",
+                          "&.Mui-focused": {
+                            color: "#3b82f6",
+                            fontWeight: "600",
+                            backgroundColor: "#ffffff",
+                          },
+                          "&.MuiFormLabel-filled": {
+                            backgroundColor: "#ffffff",
+                          },
+                        },
+                        "& .MuiInputBase-input": {
+                          color: "#1f2937",
+                          fontWeight: "500",
+                          fontSize: "0.875rem",
+                          padding: "8px 12px",
+                        },
+                        "& .MuiSelect-icon": {
+                          color: "#6b7280",
+                          transition: "color 0.2s ease",
+                        },
+                        "&:hover .MuiSelect-icon": {
+                          color: "#3b82f6",
+                        },
+                      }}>
                       <MenuItem value={1}>Activo</MenuItem>
                       <MenuItem value={0}>Inactivo</MenuItem>
                     </TextField>

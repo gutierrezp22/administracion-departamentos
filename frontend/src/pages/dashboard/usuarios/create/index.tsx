@@ -221,7 +221,9 @@ const CrearUsuario = () => {
             <Grid container spacing={2}>
               {/* Información de Acceso */}
               <Grid item xs={12}>
-                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
                   Información de Acceso
                 </Typography>
               </Grid>
@@ -238,6 +240,45 @@ const CrearUsuario = () => {
                   helperText={errors.email}
                   required
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#326ce5",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 160, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#326ce5",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 160, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#326ce5",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiFormLabel-filled": {
+                      backgroundColor: "#ffffff",
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
 
@@ -255,6 +296,45 @@ const CrearUsuario = () => {
                   helperText={errors.password}
                   required
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#326ce5",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 160, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#326ce5",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 160, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#326ce5",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiFormLabel-filled": {
+                      backgroundColor: "#ffffff",
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
 
@@ -272,30 +352,112 @@ const CrearUsuario = () => {
                   helperText={errors.confirmPassword}
                   required
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#326ce5",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 160, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#326ce5",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 160, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#326ce5",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiFormLabel-filled": {
+                      backgroundColor: "#ffffff",
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
 
               {/* Rol */}
               <Grid item xs={12} md={6}>
-                <FormControl fullWidth error={!!errors.rol} size="small">
-                  <InputLabel>Rol</InputLabel>
-                  <Select
-                    value={formData.rol}
-                    onChange={(e) => handleInputChange("rol", e.target.value)}
-                    label="Rol"
-                    required>
-                    {roles.map((rol) => (
-                      <MenuItem key={rol.id} value={rol.id}>
-                        {rol.descripcion}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  {errors.rol && (
-                    <Typography variant="caption" color="error">
-                      {errors.rol}
-                    </Typography>
-                  )}
-                </FormControl>
+                <TextField
+                  select
+                  fullWidth
+                  label="Rol"
+                  value={formData.rol}
+                  onChange={(e) => handleInputChange("rol", e.target.value)}
+                  error={!!errors.rol}
+                  helperText={errors.rol}
+                  required
+                  size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#326ce5",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 160, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#326ce5",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 160, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#326ce5",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiFormLabel-filled": {
+                      backgroundColor: "#ffffff",
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                    "& .MuiSelect-icon": {
+                      color: "#6b7280",
+                      transition: "color 0.2s ease",
+                    },
+                    "&:hover .MuiSelect-icon": {
+                      color: "#326ce5",
+                    },
+                  }}>
+                  {roles.map((rol) => (
+                    <MenuItem key={rol.id} value={rol.id}>
+                      {rol.descripcion}
+                    </MenuItem>
+                  ))}
+                </TextField>
               </Grid>
 
               {/* Separador visual */}
@@ -305,7 +467,9 @@ const CrearUsuario = () => {
 
               {/* Información Personal */}
               <Grid item xs={12}>
-                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
                   Información Personal
                 </Typography>
               </Grid>
@@ -316,13 +480,50 @@ const CrearUsuario = () => {
                   fullWidth
                   label="Nombre"
                   value={formData.nombre}
-                  onChange={(e) =>
-                    handleInputChange("nombre", e.target.value)
-                  }
+                  onChange={(e) => handleInputChange("nombre", e.target.value)}
                   error={!!errors.nombre}
                   helperText={errors.nombre}
                   required
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#326ce5",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 160, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#326ce5",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 160, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#326ce5",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiFormLabel-filled": {
+                      backgroundColor: "#ffffff",
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
 
@@ -339,6 +540,45 @@ const CrearUsuario = () => {
                   helperText={errors.apellido}
                   required
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#326ce5",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 160, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#326ce5",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 160, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#326ce5",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiFormLabel-filled": {
+                      backgroundColor: "#ffffff",
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
 
@@ -349,7 +589,9 @@ const CrearUsuario = () => {
 
               {/* Información Institucional */}
               <Grid item xs={12}>
-                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                <Typography
+                  variant="h6"
+                  className="text-gray-700 font-semibold mb-3">
                   Información Institucional
                 </Typography>
               </Grid>
@@ -361,13 +603,50 @@ const CrearUsuario = () => {
                   label="Legajo"
                   type="number"
                   value={formData.legajo}
-                  onChange={(e) =>
-                    handleInputChange("legajo", e.target.value)
-                  }
+                  onChange={(e) => handleInputChange("legajo", e.target.value)}
                   error={!!errors.legajo}
                   helperText={errors.legajo}
                   required
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#326ce5",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 160, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#326ce5",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 160, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#326ce5",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiFormLabel-filled": {
+                      backgroundColor: "#ffffff",
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
 
@@ -385,6 +664,45 @@ const CrearUsuario = () => {
                   helperText={errors.documento}
                   required
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#326ce5",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 160, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#326ce5",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 160, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#326ce5",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiFormLabel-filled": {
+                      backgroundColor: "#ffffff",
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
             </Grid>

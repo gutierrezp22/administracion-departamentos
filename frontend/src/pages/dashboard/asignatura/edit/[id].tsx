@@ -12,7 +12,6 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import BasicModal from "@/utils/modal";
-import ModalConfirmacion from "@/utils/modalConfirmacion";
 import { useRouter } from "next/router";
 import Swal from "sweetalert2";
 import DashboardMenu from "../../../dashboard";
@@ -31,7 +30,6 @@ const EditarAsignatura: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
-  const [confirmarEliminacion, setConfirmarEliminacion] = useState(false);
 
   const handleOpenModal = (title: string, message: string) => {
     setModalTitle(title);
@@ -108,18 +106,6 @@ const EditarAsignatura: React.FC = () => {
     }
   };
 
-  const eliminarAsignatura = async () => {
-    try {
-      await API.delete(`/facet/asignatura/${idAsignatura}/`);
-      handleOpenModal(
-        "Asignatura Eliminada",
-        "La acción se realizó con éxito."
-      );
-    } catch (error) {
-      handleOpenModal("Error", "NO se pudo realizar la acción.");
-    }
-  };
-
   return (
     <DashboardMenu>
       <Container maxWidth="lg">
@@ -148,6 +134,45 @@ const EditarAsignatura: React.FC = () => {
                       fullWidth
                       variant="outlined"
                       size="small"
+                      className="modern-input"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          backgroundColor: "#ffffff",
+                          border: "1px solid #d1d5db",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                          "&.Mui-focused": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "#6b7280",
+                          fontWeight: "500",
+                          backgroundColor: "#ffffff",
+                          padding: "0 4px",
+                          "&.Mui-focused": {
+                            color: "#3b82f6",
+                            fontWeight: "600",
+                            backgroundColor: "#ffffff",
+                          },
+                          "&.MuiFormLabel-filled": {
+                            backgroundColor: "#ffffff",
+                          },
+                        },
+                        "& .MuiInputBase-input": {
+                          color: "#1f2937",
+                          fontWeight: "500",
+                          fontSize: "0.875rem",
+                          padding: "8px 12px",
+                        },
+                      }}
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
@@ -158,6 +183,45 @@ const EditarAsignatura: React.FC = () => {
                       fullWidth
                       variant="outlined"
                       size="small"
+                      className="modern-input"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          backgroundColor: "#ffffff",
+                          border: "1px solid #d1d5db",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                          "&.Mui-focused": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "#6b7280",
+                          fontWeight: "500",
+                          backgroundColor: "#ffffff",
+                          padding: "0 4px",
+                          "&.Mui-focused": {
+                            color: "#3b82f6",
+                            fontWeight: "600",
+                            backgroundColor: "#ffffff",
+                          },
+                          "&.MuiFormLabel-filled": {
+                            backgroundColor: "#ffffff",
+                          },
+                        },
+                        "& .MuiInputBase-input": {
+                          color: "#1f2937",
+                          fontWeight: "500",
+                          fontSize: "0.875rem",
+                          padding: "8px 12px",
+                        },
+                      }}
                     />
                   </Grid>
                 </Grid>
@@ -184,6 +248,45 @@ const EditarAsignatura: React.FC = () => {
                       fullWidth
                       variant="outlined"
                       size="small"
+                      className="modern-input"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          backgroundColor: "#ffffff",
+                          border: "1px solid #d1d5db",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                          "&.Mui-focused": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "#6b7280",
+                          fontWeight: "500",
+                          backgroundColor: "#ffffff",
+                          padding: "0 4px",
+                          "&.Mui-focused": {
+                            color: "#3b82f6",
+                            fontWeight: "600",
+                            backgroundColor: "#ffffff",
+                          },
+                          "&.MuiFormLabel-filled": {
+                            backgroundColor: "#ffffff",
+                          },
+                        },
+                        "& .MuiInputBase-input": {
+                          color: "#1f2937",
+                          fontWeight: "500",
+                          fontSize: "0.875rem",
+                          padding: "8px 12px",
+                        },
+                      }}
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
@@ -194,6 +297,45 @@ const EditarAsignatura: React.FC = () => {
                       fullWidth
                       variant="outlined"
                       size="small"
+                      className="modern-input"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          backgroundColor: "#ffffff",
+                          border: "1px solid #d1d5db",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                          "&.Mui-focused": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "#6b7280",
+                          fontWeight: "500",
+                          backgroundColor: "#ffffff",
+                          padding: "0 4px",
+                          "&.Mui-focused": {
+                            color: "#3b82f6",
+                            fontWeight: "600",
+                            backgroundColor: "#ffffff",
+                          },
+                          "&.MuiFormLabel-filled": {
+                            backgroundColor: "#ffffff",
+                          },
+                        },
+                        "& .MuiInputBase-input": {
+                          color: "#1f2937",
+                          fontWeight: "500",
+                          fontSize: "0.875rem",
+                          padding: "8px 12px",
+                        },
+                      }}
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
@@ -206,7 +348,46 @@ const EditarAsignatura: React.FC = () => {
                       }
                       fullWidth
                       variant="outlined"
-                      size="small">
+                      size="small"
+                      className="modern-input"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          backgroundColor: "#ffffff",
+                          border: "1px solid #d1d5db",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                          "&.Mui-focused": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "#6b7280",
+                          fontWeight: "500",
+                          backgroundColor: "#ffffff",
+                          padding: "0 4px",
+                          "&.Mui-focused": {
+                            color: "#3b82f6",
+                            fontWeight: "600",
+                            backgroundColor: "#ffffff",
+                          },
+                          "&.MuiFormLabel-filled": {
+                            backgroundColor: "#ffffff",
+                          },
+                        },
+                        "& .MuiInputBase-input": {
+                          color: "#1f2937",
+                          fontWeight: "500",
+                          fontSize: "0.875rem",
+                          padding: "8px 12px",
+                        },
+                      }}>
                       <MenuItem value="Electiva">Electiva</MenuItem>
                       <MenuItem value="Obligatoria">Obligatoria</MenuItem>
                     </TextField>
@@ -219,7 +400,46 @@ const EditarAsignatura: React.FC = () => {
                       onChange={(e) => setEstado(e.target.value)}
                       fullWidth
                       variant="outlined"
-                      size="small">
+                      size="small"
+                      className="modern-input"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          backgroundColor: "#ffffff",
+                          border: "1px solid #d1d5db",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                          "&.Mui-focused": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "#6b7280",
+                          fontWeight: "500",
+                          backgroundColor: "#ffffff",
+                          padding: "0 4px",
+                          "&.Mui-focused": {
+                            color: "#3b82f6",
+                            fontWeight: "600",
+                            backgroundColor: "#ffffff",
+                          },
+                          "&.MuiFormLabel-filled": {
+                            backgroundColor: "#ffffff",
+                          },
+                        },
+                        "& .MuiInputBase-input": {
+                          color: "#1f2937",
+                          fontWeight: "500",
+                          fontSize: "0.875rem",
+                          padding: "8px 12px",
+                        },
+                      }}>
                       <MenuItem value={1}>Activo</MenuItem>
                       <MenuItem value={0}>Inactivo</MenuItem>
                     </TextField>
@@ -229,16 +449,11 @@ const EditarAsignatura: React.FC = () => {
 
               {/* Botones de acción */}
               <Grid item xs={12}>
-                <div className="flex justify-center gap-3 mt-6">
+                <div className="flex justify-center mt-6">
                   <button
                     onClick={edicionAsignatura}
                     className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
                     Guardar Cambios
-                  </button>
-                  <button
-                    onClick={() => setConfirmarEliminacion(true)}
-                    className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                    Eliminar Asignatura
                   </button>
                 </div>
               </Grid>
@@ -251,14 +466,6 @@ const EditarAsignatura: React.FC = () => {
           onClose={handleCloseModal}
           title={modalTitle}
           content={modalMessage}
-        />
-        <ModalConfirmacion
-          open={confirmarEliminacion}
-          onClose={() => setConfirmarEliminacion(false)}
-          onConfirm={() => {
-            setConfirmarEliminacion(false);
-            eliminarAsignatura();
-          }}
         />
       </Container>
     </DashboardMenu>

@@ -289,30 +289,113 @@ const EditarUsuario = () => {
                   helperText={errors.email}
                   required
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3267d6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3267d6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3267d6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiFormLabel-filled": {
+                      backgroundColor: "#ffffff",
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
 
               {/* Rol */}
               <Grid item xs={12} md={6}>
-                <FormControl fullWidth error={!!errors.rol} size="small">
-                  <InputLabel>Rol</InputLabel>
-                  <Select
-                    value={formData.rol}
-                    onChange={(e) => handleInputChange("rol", e.target.value)}
-                    label="Rol"
-                    required>
-                    {roles.map((rol) => (
-                      <MenuItem key={rol.id} value={rol.id}>
-                        {rol.descripcion}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  {errors.rol && (
-                    <Typography variant="caption" color="error">
-                      {errors.rol}
-                    </Typography>
-                  )}
-                </FormControl>
+                <TextField
+                  select
+                  fullWidth
+                  label="Rol"
+                  value={formData.rol}
+                  onChange={(e) => handleInputChange("rol", e.target.value)}
+                  error={!!errors.rol}
+                  helperText={errors.rol}
+                  required
+                  size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3267d6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3267d6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3267d6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiFormLabel-filled": {
+                      backgroundColor: "#ffffff",
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                    "& .MuiSelect-icon": {
+                      color: "#6b7280",
+                      transition: "color 0.2s ease",
+                    },
+                    "&:hover .MuiSelect-icon": {
+                      color: "#3267d6",
+                    },
+                  }}
+                >
+                  {roles.map((rol) => (
+                    <MenuItem key={rol.id} value={rol.id}>
+                      {rol.descripcion}
+                    </MenuItem>
+                  ))}
+                </TextField>
               </Grid>
 
               {/* Separador visual */}
@@ -340,6 +423,45 @@ const EditarUsuario = () => {
                   helperText={errors.nombre}
                   required
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3267d6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3267d6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3267d6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiFormLabel-filled": {
+                      backgroundColor: "#ffffff",
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
 
@@ -356,6 +478,45 @@ const EditarUsuario = () => {
                   helperText={errors.apellido}
                   required
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3267d6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3267d6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3267d6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiFormLabel-filled": {
+                      backgroundColor: "#ffffff",
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
 
@@ -385,6 +546,45 @@ const EditarUsuario = () => {
                   helperText={errors.legajo}
                   required
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3267d6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3267d6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3267d6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiFormLabel-filled": {
+                      backgroundColor: "#ffffff",
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
 
@@ -402,6 +602,45 @@ const EditarUsuario = () => {
                   helperText={errors.documento}
                   required
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3267d6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3267d6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3267d6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiFormLabel-filled": {
+                      backgroundColor: "#ffffff",
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
 
