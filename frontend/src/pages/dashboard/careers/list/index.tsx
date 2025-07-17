@@ -55,7 +55,7 @@ const ListaCarreras = () => {
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>(
-    `${API_BASE_URL}/facet/carrera/`
+    `/facet/carrera/`
   );
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
@@ -84,7 +84,7 @@ const ListaCarreras = () => {
   };
 
   const filtrarCarreras = () => {
-    let url = `${API_BASE_URL}/facet/carrera/?`;
+    let url = `/facet/carrera/?`;
     const params = new URLSearchParams();
     if (filtroNombre !== "") {
       params.append("nombre__icontains", filtroNombre);
@@ -114,7 +114,7 @@ const ListaCarreras = () => {
   };
 
   const handlePageChange = (newPage: number) => {
-    let url = `${API_BASE_URL}/facet/carrera/?`;
+    let url = `/facet/carrera/?`;
     const params = new URLSearchParams();
 
     if (filtroNombre !== "") {
@@ -142,7 +142,7 @@ const ListaCarreras = () => {
   const descargarExcel = async () => {
     try {
       let allCarreras: Carrera[] = [];
-      let url = `${API_BASE_URL}/facet/carrera/?`;
+      let url = `/facet/carrera/?`;
       const params = new URLSearchParams();
 
       if (filtroNombre !== "") {
@@ -210,7 +210,7 @@ const ListaCarreras = () => {
       });
 
       if (result.isConfirmed) {
-        await API.delete(`${API_BASE_URL}/facet/carrera/${id}/`);
+        await API.delete(`/facet/carrera/${id}/`);
         Swal.fire("Eliminado!", "La carrera ha sido eliminada.", "success");
         fetchData(currentUrl);
       }

@@ -6,7 +6,6 @@ import dayjs from "dayjs"; // Asegúrate de tener instalada esta dependencia
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import BasicModal from "@/utils/modal";
-import ModalConfirmacion from "@/utils/modalConfirmacion";
 import { useRouter } from "next/router"; // Importa useRouter de Next.js
 import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut";
@@ -24,7 +23,6 @@ const EditarCarrera: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
-  const [confirmarEliminacion, setConfirmarEliminacion] = useState(false);
 
   const handleOpenModal = (title: string, message: string) => {
     setModalTitle(title); // Establecer el título del modal
@@ -104,16 +102,6 @@ const EditarCarrera: React.FC = () => {
     }
   };
 
-  const eliminarCarrera = async () => {
-    try {
-      await API.delete(`/facet/carrera/${idCarrera}/`);
-      handleOpenModal("Carrera Eliminada", "La acción se realizó con éxito.");
-    } catch (error) {
-      console.error("Error al hacer la solicitud DELETE:", error);
-      handleOpenModal("Error", "NO se pudo realizar la acción.");
-    }
-  };
-
   return (
     <DashboardMenu>
       <div className="p-4">
@@ -121,12 +109,14 @@ const EditarCarrera: React.FC = () => {
           <div className="p-4 border-b border-gray-200">
             <h1 className="text-2xl font-bold text-gray-800">Editar Carrera</h1>
           </div>
-          
+
           <div className="p-4">
-            <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+            <Typography
+              variant="h6"
+              className="text-gray-700 font-semibold mb-3">
               Información de la Carrera
             </Typography>
-            
+
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
                 <TextField
@@ -136,6 +126,45 @@ const EditarCarrera: React.FC = () => {
                   fullWidth
                   variant="outlined"
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -146,7 +175,53 @@ const EditarCarrera: React.FC = () => {
                   onChange={(e) => setTipo(e.target.value as TipoCarrera)}
                   fullWidth
                   variant="outlined"
-                  size="small">
+                  size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                    "& .MuiSelect-icon": {
+                      color: "#6b7280",
+                      transition: "color 0.2s ease",
+                    },
+                    "&:hover .MuiSelect-icon": {
+                      color: "#3b82f6",
+                    },
+                  }}>
                   <MenuItem value="Pregrado">Pregrado</MenuItem>
                   <MenuItem value="Grado">Grado</MenuItem>
                   <MenuItem value="Posgrado">Posgrado</MenuItem>
@@ -160,6 +235,45 @@ const EditarCarrera: React.FC = () => {
                   fullWidth
                   variant="outlined"
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -170,6 +284,45 @@ const EditarCarrera: React.FC = () => {
                   fullWidth
                   variant="outlined"
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -180,41 +333,74 @@ const EditarCarrera: React.FC = () => {
                   onChange={(e) => setEstado(e.target.value)}
                   fullWidth
                   variant="outlined"
-                  size="small">
+                  size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                      "&.MuiFormLabel-filled": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                    "& .MuiSelect-icon": {
+                      color: "#6b7280",
+                      transition: "color 0.2s ease",
+                    },
+                    "&:hover .MuiSelect-icon": {
+                      color: "#3b82f6",
+                    },
+                  }}>
                   <MenuItem value="1">Activo</MenuItem>
                   <MenuItem value="0">Inactivo</MenuItem>
                 </TextField>
               </Grid>
             </Grid>
-            
-            <div className="flex justify-center gap-4 mt-6">
+
+            <div className="flex justify-center mt-6">
               <button
                 onClick={edicionCarrera}
                 className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
                 Guardar Cambios
               </button>
-              <button
-                onClick={() => setConfirmarEliminacion(true)}
-                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                Eliminar Carrera
-              </button>
             </div>
           </div>
         </div>
-        
+
         <BasicModal
           open={modalVisible}
           onClose={handleCloseModal}
           title={modalTitle}
           content={modalMessage}
-        />
-        <ModalConfirmacion
-          open={confirmarEliminacion}
-          onClose={() => setConfirmarEliminacion(false)}
-          onConfirm={() => {
-            setConfirmarEliminacion(false);
-            eliminarCarrera();
-          }}
         />
       </div>
     </DashboardMenu>

@@ -20,11 +20,38 @@ API.interceptors.request.use((config) => {
     config.headers["Authorization"] = `Bearer ${token}`;
   }
 
-  // Si la URL es relativa y empieza con /facet/, ajustar la baseURL para evitar duplicación de /api/
-  if (config.url && config.url.startsWith("/facet/")) {
-    // Remover /api/ del final de la baseURL si existe
-    const baseURL = API_BASE_URL.replace(/\/api\/?$/, "");
-    config.baseURL = baseURL;
+  // Normalizar URLs para asegurar consistencia
+  if (config.url) {
+    // Si la URL contiene un dominio completo, extraer solo la parte relativa
+    if (config.url.includes("://")) {
+      try {
+        const urlObj = new URL(config.url);
+        config.url = urlObj.pathname + urlObj.search;
+      } catch (e) {
+        // Si no se puede parsear, usar la URL tal como está
+      }
+    }
+    
+    // Remover cualquier duplicación de /api/ en la URL
+    config.url = config.url.replace(/\/api\/facet\//, "/facet/");
+    config.url = config.url.replace(/\/api\/login\//, "/login/");
+    
+    // Determinar si estamos en producción (docentes.facet.unt.edu.ar)
+    const isProduction = API_BASE_URL.includes("docentes.facet.unt.edu.ar");
+    
+    // Asegurar que todas las URLs tengan el formato correcto según el entorno
+    if (isProduction) {
+      // En producción: TODAS las URLs necesitan /api/
+      if (!API_BASE_URL.endsWith("/api")) {
+        config.url = `/api${config.url}`;
+        config.baseURL = API_BASE_URL.replace(/\/api\/?$/, "");
+      } else {
+        config.baseURL = API_BASE_URL;
+      }
+    } else {
+      // En desarrollo: todas las URLs van directas sin /api/
+      config.baseURL = API_BASE_URL.replace(/\/api\/?$/, "");
+    }
   }
 
   return config;

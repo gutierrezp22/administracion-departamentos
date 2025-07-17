@@ -31,6 +31,7 @@ import { useRouter } from "next/router";
 import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut";
 import { API_BASE_URL } from "../../../../utils/config";
+import { normalizeUrl } from "../../../../utils/urlHelpers";
 import {
   FilterContainer,
   FilterInput,
@@ -55,7 +56,7 @@ const ListaAreas = () => {
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>(
-    `${API_BASE_URL}/facet/area/?estado=1`
+    "/facet/area/?estado=1"
   );
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
@@ -69,7 +70,7 @@ const ListaAreas = () => {
 
   const fetchData = async (url: string) => {
     try {
-      const response = await API.get(url);
+      const response = await API.get(normalizeUrl(url));
       setAreas(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
@@ -84,7 +85,7 @@ const ListaAreas = () => {
   };
 
   const filtrarAreas = () => {
-    let url = `${API_BASE_URL}/facet/area/?`;
+    let url = `/facet/area/?`;
     const params = new URLSearchParams();
     if (filtroNombre !== "") {
       params.append("nombre__icontains", filtroNombre);
@@ -103,11 +104,11 @@ const ListaAreas = () => {
   const limpiarFiltros = () => {
     setFiltroNombre("");
     setFiltroEstado("1");
-    setCurrentUrl(`${API_BASE_URL}/facet/area/?estado=1`);
+    setCurrentUrl(`/facet/area/?estado=1`);
   };
 
   const handlePageChange = (newPage: number) => {
-    let url = `${API_BASE_URL}/facet/area/?`;
+    let url = `/facet/area/?`;
     const params = new URLSearchParams();
 
     if (filtroNombre !== "") {
@@ -129,7 +130,7 @@ const ListaAreas = () => {
   const descargarExcel = async () => {
     try {
       let allAreas: Area[] = [];
-      let url = `${API_BASE_URL}/facet/area/?`;
+      let url = `/facet/area/?`;
       const params = new URLSearchParams();
 
       if (filtroNombre !== "") {
@@ -190,7 +191,7 @@ const ListaAreas = () => {
       });
 
       if (result.isConfirmed) {
-        await API.delete(`${API_BASE_URL}/facet/area/${id}/`);
+        await API.delete(`/facet/area/${id}/`);
         Swal.fire("Eliminado!", "El área ha sido eliminada.", "success");
         fetchData(currentUrl);
       }

@@ -98,7 +98,7 @@ const CrearDocenteAsignatura: React.FC = () => {
   const [nextUrlPersonas, setNextUrlPersonas] = useState<string | null>(null);
   const [prevUrlPersonas, setPrevUrlPersonas] = useState<string | null>(null);
   const [currentUrlPersonas, setCurrentUrlPersonas] = useState<string>(
-    `${API_BASE_URL}/facet/docente/`
+    `/facet/docente/`
   );
   const [currentPagePersonas, setCurrentPagePersonas] = useState<number>(1);
   const [totalItemsPersonas, setTotalItemsPersonas] = useState<number>(0);
@@ -111,7 +111,7 @@ const CrearDocenteAsignatura: React.FC = () => {
     null
   );
   const [currentUrlResoluciones, setCurrentUrlResoluciones] = useState<string>(
-    `${API_BASE_URL}/facet/resolucion/`
+    `/facet/resolucion/`
   );
   const [currentPageResoluciones, setCurrentPageResoluciones] =
     useState<number>(1);
@@ -127,8 +127,8 @@ const CrearDocenteAsignatura: React.FC = () => {
 
   const fetchAsignatura = async (id: string) => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/facet/asignatura/${id}/`
+      const response = await API.get(
+        `/facet/asignatura/${id}/`
       );
       setAsignatura(response.data.nombre); // Asume que `nombre` es el campo de la asignatura
     } catch (error) {
@@ -142,7 +142,7 @@ const CrearDocenteAsignatura: React.FC = () => {
 
   const fetchDataPersonas = async (url: string) => {
     try {
-      const response = await axios.get(url);
+      const response = await API.get(url);
       setPersonas(response.data.results);
       setNextUrlPersonas(response.data.next);
       setPrevUrlPersonas(response.data.previous);
@@ -176,7 +176,7 @@ const CrearDocenteAsignatura: React.FC = () => {
   // Función para cargar las resoluciones
   const fetchDataResoluciones = async (url: string) => {
     try {
-      const response = await axios.get(url);
+      const response = await API.get(url);
       setResoluciones(response.data.results);
       setNextUrlResoluciones(response.data.next);
       setPrevUrlResoluciones(response.data.previous);
@@ -376,6 +376,46 @@ const CrearDocenteAsignatura: React.FC = () => {
                   disabled
                   variant="outlined"
                   size="small"
+                  className="modern-input"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      backgroundColor: "#ffffff",
+                      border: 1,
+                      borderColor: "#d1d5db",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                      "&.Mui-focused": {
+                        borderColor: "#3b82f6",
+                        backgroundColor: "#ffffff",
+                        boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6b7280",
+                      fontWeight: "500",
+                      backgroundColor: "#ffffff",
+                      padding: "0 4px",
+                      "&.Mui-focused": {
+                        color: "#3b82f6",
+                        fontWeight: "600",
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                    "& .MuiFormLabel-filled": {
+                      backgroundColor: "#ffffff",
+                    },
+                    "& .MuiInputBase-input": {
+                      color: "#1f2937",
+                      fontWeight: "500",
+                      fontSize: "0.875rem",
+                      padding: "8px 12px",
+                    },
+                  }}
                 />
               </Grid>
 
@@ -400,6 +440,46 @@ const CrearDocenteAsignatura: React.FC = () => {
                       fullWidth
                       variant="outlined"
                       size="small"
+                      className="modern-input"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          backgroundColor: "#ffffff",
+                          border: 1,
+                          borderColor: "#d1d5db",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                          "&.Mui-focused": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "#6b7280",
+                          fontWeight: "500",
+                          backgroundColor: "#ffffff",
+                          padding: "0 4px",
+                          "&.Mui-focused": {
+                            color: "#3b82f6",
+                            fontWeight: "600",
+                            backgroundColor: "#ffffff",
+                          },
+                        },
+                        "& .MuiFormLabel-filled": {
+                          backgroundColor: "#ffffff",
+                        },
+                        "& .MuiInputBase-input": {
+                          color: "#1f2937",
+                          fontWeight: "500",
+                          fontSize: "0.875rem",
+                          padding: "8px 12px",
+                        },
+                      }}
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
@@ -410,6 +490,46 @@ const CrearDocenteAsignatura: React.FC = () => {
                       fullWidth
                       variant="outlined"
                       size="small"
+                      className="modern-input"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          backgroundColor: "#ffffff",
+                          border: 1,
+                          borderColor: "#d1d5db",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                          "&.Mui-focused": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "#6b7280",
+                          fontWeight: "500",
+                          backgroundColor: "#ffffff",
+                          padding: "0 4px",
+                          "&.Mui-focused": {
+                            color: "#3b82f6",
+                            fontWeight: "600",
+                            backgroundColor: "#ffffff",
+                          },
+                        },
+                        "& .MuiFormLabel-filled": {
+                          backgroundColor: "#ffffff",
+                        },
+                        "& .MuiInputBase-input": {
+                          color: "#1f2937",
+                          fontWeight: "500",
+                          fontSize: "0.875rem",
+                          padding: "8px 12px",
+                        },
+                      }}
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
@@ -420,6 +540,46 @@ const CrearDocenteAsignatura: React.FC = () => {
                       fullWidth
                       variant="outlined"
                       size="small"
+                      className="modern-input"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          backgroundColor: "#ffffff",
+                          border: 1,
+                          borderColor: "#d1d5db",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                          "&.Mui-focused": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "#6b7280",
+                          fontWeight: "500",
+                          backgroundColor: "#ffffff",
+                          padding: "0 4px",
+                          "&.Mui-focused": {
+                            color: "#3b82f6",
+                            fontWeight: "600",
+                            backgroundColor: "#ffffff",
+                          },
+                        },
+                        "& .MuiFormLabel-filled": {
+                          backgroundColor: "#ffffff",
+                        },
+                        "& .MuiInputBase-input": {
+                          color: "#1f2937",
+                          fontWeight: "500",
+                          fontSize: "0.875rem",
+                          padding: "8px 12px",
+                        },
+                      }}
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
@@ -430,6 +590,46 @@ const CrearDocenteAsignatura: React.FC = () => {
                       fullWidth
                       variant="outlined"
                       size="small"
+                      className="modern-input"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          backgroundColor: "#ffffff",
+                          border: 1,
+                          borderColor: "#d1d5db",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                          "&.Mui-focused": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "#6b7280",
+                          fontWeight: "500",
+                          backgroundColor: "#ffffff",
+                          padding: "0 4px",
+                          "&.Mui-focused": {
+                            color: "#3b82f6",
+                            fontWeight: "600",
+                            backgroundColor: "#ffffff",
+                          },
+                        },
+                        "& .MuiFormLabel-filled": {
+                          backgroundColor: "#ffffff",
+                        },
+                        "& .MuiInputBase-input": {
+                          color: "#1f2937",
+                          fontWeight: "500",
+                          fontSize: "0.875rem",
+                          padding: "8px 12px",
+                        },
+                      }}
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
@@ -440,7 +640,55 @@ const CrearDocenteAsignatura: React.FC = () => {
                       onChange={(e) => setEstado(e.target.value)}
                       fullWidth
                       variant="outlined"
-                      size="small">
+                      size="small"
+                      className="modern-input"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          backgroundColor: "#ffffff",
+                          border: 1,
+                          borderColor: "#d1d5db",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                          "&.Mui-focused": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "#6b7280",
+                          fontWeight: "500",
+                          backgroundColor: "#ffffff",
+                          padding: "0 4px",
+                          "&.Mui-focused": {
+                            color: "#3b82f6",
+                            fontWeight: "600",
+                            backgroundColor: "#ffffff",
+                          },
+                        },
+                        "& .MuiFormLabel-filled": {
+                          backgroundColor: "#ffffff",
+                        },
+                        "& .MuiInputBase-input": {
+                          color: "#1f2937",
+                          fontWeight: "500",
+                          fontSize: "0.875rem",
+                          padding: "8px 12px",
+                        },
+                        "& .MuiSelect-icon": {
+                          color: "#6b7280",
+                          transition: "color 0.2s ease",
+                        },
+                        "&:hover .MuiSelect-icon": {
+                          color: "#32",
+                        },
+                      }}
+                    >
                       <MenuItem value="1">Activo</MenuItem>
                       <MenuItem value="0">Inactivo</MenuItem>
                     </TextField>
@@ -470,8 +718,48 @@ const CrearDocenteAsignatura: React.FC = () => {
                       fullWidth
                       variant="outlined"
                       size="small"
+                      className="modern-input"
                       InputLabelProps={{
                         shrink: true,
+                      }}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          backgroundColor: "#ffffff",
+                          border: 1,
+                          borderColor: "#d1d5db",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                          "&.Mui-focused": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "#6b7280",
+                          fontWeight: "500",
+                          backgroundColor: "#ffffff",
+                          padding: "0 4px",
+                          "&.Mui-focused": {
+                            color: "#3b82f6",
+                            fontWeight: "600",
+                            backgroundColor: "#ffffff",
+                          },
+                        },
+                        "& .MuiFormLabel-filled": {
+                          backgroundColor: "#ffffff",
+                        },
+                        "& .MuiInputBase-input": {
+                          color: "#1f2937",
+                          fontWeight: "500",
+                          fontSize: "0.875rem",
+                          padding: "8px 12px",
+                        },
                       }}
                     />
                   </Grid>
@@ -484,8 +772,48 @@ const CrearDocenteAsignatura: React.FC = () => {
                       fullWidth
                       variant="outlined"
                       size="small"
+                      className="modern-input"
                       InputLabelProps={{
                         shrink: true,
+                      }}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          backgroundColor: "#ffffff",
+                          border: 1,
+                          borderColor: "#d1d5db",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                          "&.Mui-focused": {
+                            borderColor: "#3b82f6",
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
+                          },
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "#6b7280",
+                          fontWeight: "500",
+                          backgroundColor: "#ffffff",
+                          padding: "0 4px",
+                          "&.Mui-focused": {
+                            color: "#3b82f6",
+                            fontWeight: "600",
+                            backgroundColor: "#ffffff",
+                          },
+                        },
+                        "& .MuiFormLabel-filled": {
+                          backgroundColor: "#ffffff",
+                        },
+                        "& .MuiInputBase-input": {
+                          color: "#1f2937",
+                          fontWeight: "500",
+                          fontSize: "0.875rem",
+                          padding: "8px 12px",
+                        },
                       }}
                     />
                   </Grid>
