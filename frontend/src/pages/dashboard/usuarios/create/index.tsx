@@ -50,7 +50,7 @@ const CrearUsuario = () => {
 
   const fetchRoles = async () => {
     try {
-      const response = await API.get(`${API_BASE_URL}/facet/roles/`);
+      const response = await API.get(`/facet/roles/`);
       setRoles(
         Array.isArray(response.data) ? response.data : response.data.results
       );
@@ -155,7 +155,7 @@ const CrearUsuario = () => {
         is_active: true,
       };
 
-      await API.post(`${API_BASE_URL}/facet/users/`, userData);
+      await API.post(`/facet/users/`, userData);
 
       Swal.fire({
         icon: "success",

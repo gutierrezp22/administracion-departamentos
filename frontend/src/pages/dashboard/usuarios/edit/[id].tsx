@@ -70,7 +70,7 @@ const EditarUsuario = () => {
 
   const fetchRoles = async () => {
     try {
-      const response = await API.get(`${API_BASE_URL}/facet/roles/`);
+      const response = await API.get(`/facet/roles/`);
       console.log("Respuesta de roles:", response.data);
       setRoles(
         Array.isArray(response.data) ? response.data : response.data.results
@@ -87,7 +87,7 @@ const EditarUsuario = () => {
 
   const fetchUsuario = async () => {
     try {
-      const response = await API.get(`${API_BASE_URL}/facet/users/${id}/`);
+      const response = await API.get(`/facet/users/${id}/`);
       const userData = response.data;
       setUsuario(userData);
       setFormData({
@@ -194,7 +194,7 @@ const EditarUsuario = () => {
         is_active: formData.is_active,
       };
 
-      await API.put(`${API_BASE_URL}/facet/users/${id}/`, userData);
+      await API.put(`/facet/users/${id}/`, userData);
 
       Swal.fire({
         icon: "success",
