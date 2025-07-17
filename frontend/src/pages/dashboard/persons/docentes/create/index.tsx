@@ -91,16 +91,11 @@ const CrearDocente = () => {
 
   // Función para normalizar URLs de paginación
   const normalizeUrl = (url: string) => {
-    // Remover el dominio si está presente
-    let normalizedUrl = url.replace(window.location.origin, "");
-
-    // Remover /api/ extra si está presente al inicio
-    normalizedUrl = normalizedUrl.replace(/^\/api\/api\//, "/api/");
-
-    // Asegurar que empiece con /
-    normalizedUrl = normalizedUrl.replace(/^\/+/, "/");
-
-    return normalizedUrl;
+    if (url.startsWith("http")) {
+      const urlObj = new URL(url);
+      return urlObj.pathname + urlObj.search;
+    }
+    return url.replace(/^\/+/, "/");
   };
 
   const fetchPersonas = async (url: string) => {
@@ -396,8 +391,8 @@ const CrearDocente = () => {
               </Grid>
 
               <Grid item xs={12} md={6}>
-                <FormControl 
-                  fullWidth 
+                <FormControl
+                  fullWidth
                   size="small"
                   className="modern-input"
                   sx={{

@@ -2,11 +2,10 @@
 import * as React from "react";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import Swal from "sweetalert2";
-import { API_BASE_URL } from "../../utils/config";
 import { FiLock, FiMail } from "react-icons/fi"; // Using Feather icons from react-icons
 import "../../app/globals.css"; // Importamos los estilos globales de Tailwind
+import API from "@/api/axiosConfig";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,8 +34,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-
-      const response = await axios.post(`${API_BASE_URL}/login/token/`, {
+      const response = await API.post(`/login/token/`, {
         email,
         password,
       });
