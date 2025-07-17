@@ -19,6 +19,14 @@ API.interceptors.request.use((config) => {
   if (token) {
     config.headers["Authorization"] = `Bearer ${token}`;
   }
+
+  // Si la URL es relativa y empieza con /facet/, ajustar la baseURL para evitar duplicación de /api/
+  if (config.url && config.url.startsWith("/facet/")) {
+    // Remover /api/ del final de la baseURL si existe
+    const baseURL = API_BASE_URL.replace(/\/api\/?$/, "");
+    config.baseURL = baseURL;
+  }
+
   return config;
 });
 
