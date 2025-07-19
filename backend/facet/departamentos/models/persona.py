@@ -12,6 +12,7 @@ class Persona(BaseModel):
     interno = models.IntegerField(blank=True, null=True)
     legajo = models.CharField(blank=True, null=True)
     titulo = models.ForeignKey(TipoTitulo, on_delete=models.SET_NULL, null=True, blank=True)
+    fecha_nacimiento = models.DateField(blank=True, null=True, help_text="Fecha de nacimiento para cálculo de jubilación")
 
     def __str__(self):
         return f"{self.apellido,self.nombre}"

@@ -1,4 +1,4 @@
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import viewsets, status
@@ -52,8 +52,21 @@ class JefeViewSet(viewsets.ModelViewSet):
         # Realizar la consulta de Jefes con datos de Persona
         jefes = Jefe.objects.select_related('persona').all()
         
+        # Aplicar filtros si están presentes
+        if 'persona__nombre__icontains' in request.query_params:
+            jefes = jefes.filter(persona__nombre__icontains=request.query_params['persona__nombre__icontains'])
+        
+        if 'persona__dni__icontains' in request.query_params:
+            jefes = jefes.filter(persona__dni__icontains=request.query_params['persona__dni__icontains'])
+            
+        if 'estado' in request.query_params:
+            jefes = jefes.filter(estado=request.query_params['estado'])
+        else:
+            # Por defecto, mostrar solo activos
+            jefes = jefes.filter(estado='1')
+        
         # Paginación
-        paginator = PageNumberPagination()
+        paginator = LimitOffsetPagination()
         paginated_jefes = paginator.paginate_queryset(jefes, request)
 
         # Construir los datos paginados

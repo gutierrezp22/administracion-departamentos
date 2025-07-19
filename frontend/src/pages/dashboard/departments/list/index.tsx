@@ -44,6 +44,8 @@ interface Departamento {
   telefono: string;
   estado: string;
   interno: string;
+  mail_departamento: string;
+  mail_jefe_departamento: string;
 }
 
 const ListaDepartamentos = () => {
@@ -181,6 +183,8 @@ const ListaDepartamentos = () => {
             telefono: departamento.telefono,
             estado: departamento.estado,
             interno: departamento.interno,
+            mail_departamento: departamento.mail_departamento || '',
+            mail_jefe_departamento: departamento.mail_jefe_departamento || '',
           })),
         ];
 
@@ -299,6 +303,16 @@ const ListaDepartamentos = () => {
                   <TableCell
                     className="text-white font-semibold"
                     style={{ color: "#fff" }}>
+                    Mail Departamento
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
+                    Mail Jefe
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
                     Estado
                   </TableCell>
                   <TableCell
@@ -319,6 +333,12 @@ const ListaDepartamentos = () => {
                     </TableCell>
                     <TableCell className="text-gray-800">
                       {departamento.interno}
+                    </TableCell>
+                    <TableCell className="text-gray-800">
+                      {departamento.mail_departamento || '-'}
+                    </TableCell>
+                    <TableCell className="text-gray-800">
+                      {departamento.mail_jefe_departamento || '-'}
                     </TableCell>
                     <TableCell className="text-gray-800">
                       {departamento.estado === "1" ? "Activo" : "Inactivo"}

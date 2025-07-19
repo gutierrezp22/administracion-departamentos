@@ -24,6 +24,7 @@ import { useRouter } from "next/router"; // Importa useRouter de Next.js
 import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut";
 import API from "@/api/axiosConfig";
+import { formatFechaParaBackend } from "@/utils/dateHelpers";
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -84,7 +85,7 @@ const CrearResolucion = () => {
       adjunto: adjunto,
       observaciones: "", // Puedes asignar el valor que corresponda
       fechadecarga: new Date(), // Usamos la fecha actual
-      fecha: fecha ? fecha.toISOString() : null, // Convierte la fecha a formato ISO si existe
+      fecha: formatFechaParaBackend(fecha), // Convierte la fecha a formato YYYY-MM-DD para el backend
       estado: estado,
     };
 
@@ -422,6 +423,7 @@ const CrearResolucion = () => {
                         setFecha(fechaSeleccionada);
                       }
                     }}
+                    format="DD/MM/YYYY"
                     slotProps={{
                       textField: {
                         fullWidth: true,

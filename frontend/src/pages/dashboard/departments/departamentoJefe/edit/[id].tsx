@@ -21,6 +21,7 @@ import BasicModal from "@/utils/modal";
 import withAuth from "../../../../../components/withAut";
 import { API_BASE_URL } from "../../../../../utils/config";
 import API from "../../../../../api/axiosConfig";
+import { parseFechaDDMMYYYY, formatFechaParaBackend } from "@/utils/dateHelpers";
 
 const EditarDepartamentoJefe = () => {
   const router = useRouter();
@@ -69,8 +70,8 @@ const EditarDepartamentoJefe = () => {
           );
           const data = response.data;
 
-          setFechaInicio(dayjs(data.fecha_de_inicio));
-          setFechaFin(data.fecha_de_fin ? dayjs(data.fecha_de_fin) : null);
+          setFechaInicio(parseFechaDDMMYYYY(data.fecha_de_inicio));
+          setFechaFin(parseFechaDDMMYYYY(data.fecha_de_fin));
           setObservaciones(data.observaciones);
           setEstado(String(data.estado));
           setDepartamento(data.departamento);
@@ -87,8 +88,8 @@ const EditarDepartamentoJefe = () => {
 
   const edicionDepartamentoJefe = async () => {
     const jefeDepartamentoEditado = {
-      fecha_de_inicio: fechaInicio?.toISOString(),
-      fecha_de_fin: fechaFin?.toISOString(),
+      fecha_de_inicio: formatFechaParaBackend(fechaInicio),
+      fecha_de_fin: formatFechaParaBackend(fechaFin),
       observaciones,
       estado: Number(estado),
       departamento: departamento?.id,
@@ -312,6 +313,7 @@ const EditarDepartamentoJefe = () => {
                     label="Fecha de Inicio"
                     value={fechaInicio}
                     onChange={(date) => setFechaInicio(date)}
+                    format="DD/MM/YYYY"
                     slotProps={{
                       textField: {
                         variant: "outlined",
@@ -368,6 +370,7 @@ const EditarDepartamentoJefe = () => {
                     label="Fecha de Fin"
                     value={fechaFin}
                     onChange={(date) => setFechaFin(date)}
+                    format="DD/MM/YYYY"
                     slotProps={{
                       textField: {
                         variant: "outlined",

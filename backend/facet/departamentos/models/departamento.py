@@ -6,6 +6,8 @@ class Departamento(BaseModel):
     telefono = models.CharField(max_length=45, blank=True, null=True)
     estado = models.CharField(max_length=1, blank=False, null=False)
     interno = models.CharField(max_length=45, blank=True, null=True)
+    mail_departamento = models.EmailField(blank=True, null=True)
+    mail_jefe_departamento = models.EmailField(blank=True, null=True)
 
 
     def __str__(self):

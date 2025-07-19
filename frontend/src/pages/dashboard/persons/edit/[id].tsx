@@ -12,10 +12,18 @@ import {
   FormControl,
   Typography,
 } from "@mui/material";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from "dayjs";
 import { useRouter } from "next/router";
 import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut";
 import API from "@/api/axiosConfig";
+import {
+  parseFechaDDMMYYYY,
+  formatFechaParaBackend,
+} from "@/utils/dateHelpers";
 
 const EditarPersona: React.FC = () => {
   const router = useRouter();
@@ -36,6 +44,7 @@ const EditarPersona: React.FC = () => {
     interno: number | null; // ⚡ Interno ahora es un número entero o null
     legajo: string;
     titulo: number | null;
+    fecha_nacimiento: string | null;
   }
 
   interface Titulo {
@@ -50,8 +59,11 @@ const EditarPersona: React.FC = () => {
   const [legajo, setLegajo] = useState("");
   const [telefono, setTelefono] = useState("");
   const [email, setEmail] = useState("");
-  const [interno, setInterno] = useState<number | "">(""); // ⚡ Asegurar tipo seguro
+  const [interno, setInterno] = useState<number | null>(null); // ⚡ Asegurar tipo seguro
   const [estado, setEstado] = useState("1");
+  const [fechaNacimiento, setFechaNacimiento] = useState<dayjs.Dayjs | null>(
+    null
+  );
   const [titulos, setTitulos] = useState<Titulo[]>([]);
   const [tituloId, setTituloId] = useState<number | "">("");
 
@@ -92,9 +104,10 @@ const EditarPersona: React.FC = () => {
       setLegajo(persona.legajo ?? "");
       setTelefono(persona.telefono ?? "");
       setEmail(persona.email ?? "");
-      setInterno(persona.interno ?? ""); // ⚡ Asegurar tipo seguro
+      setInterno(persona.interno); // ⚡ Asegurar tipo seguro
       setEstado(String(persona.estado ?? "1"));
       setTituloId(persona.titulo ?? "");
+      setFechaNacimiento(parseFechaDDMMYYYY(persona.fecha_nacimiento));
     }
   }, [persona]);
 
@@ -118,9 +131,10 @@ const EditarPersona: React.FC = () => {
       dni: dni.trim(),
       estado: estado, // CharField, no Number
       email: email.trim() || null,
-      interno: interno !== "" ? Number(interno) : null,
+      interno: interno,
       legajo: legajo.trim() || null,
       titulo: tituloId || null,
+      fecha_nacimiento: formatFechaParaBackend(fechaNacimiento),
     };
 
     try {
@@ -355,6 +369,63 @@ const EditarPersona: React.FC = () => {
                 />
               </Grid>
 
+              <Grid item xs={12} md={6}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    label="Fecha de Nacimiento"
+                    value={fechaNacimiento}
+                    onChange={(date) => setFechaNacimiento(date)}
+                    format="DD/MM/YYYY"
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        variant: "outlined",
+                        size: "small",
+                        className: "modern-input",
+                        sx: {
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: "8px",
+                            backgroundColor: "#ffffff",
+                            border: "1px solid #d1d5db",
+                            transition: "all 0.2s ease",
+                            "&:hover": {
+                              borderColor: "#3b82f6",
+                              backgroundColor: "#ffffff",
+                              boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                            },
+                            "&.Mui-focused": {
+                              borderColor: "#3b82f6",
+                              backgroundColor: "#ffffff",
+                              boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                            },
+                          },
+                          "& .MuiInputLabel-root": {
+                            color: "#6b7280",
+                            fontWeight: "500",
+                            backgroundColor: "#ffffff",
+                            padding: "0 4px",
+                            "&.Mui-focused": {
+                              color: "#3b82f6",
+                              fontWeight: "600",
+                              backgroundColor: "#ffffff",
+                            },
+                            "&.MuiFormLabel-filled": {
+                              backgroundColor: "#ffffff",
+                            },
+                          },
+                          "& .MuiInputBase-input": {
+                            color: "#1f2937",
+                            fontWeight: "500",
+                            fontSize: "0.875rem",
+                            padding: "8px 12px",
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </LocalizationProvider>
+              </Grid>
+
               {/* Separador visual */}
               <Grid item xs={12}>
                 <div className="border-t border-gray-200 my-4"></div>
@@ -473,10 +544,12 @@ const EditarPersona: React.FC = () => {
                 <TextField
                   label="Interno"
                   type="number"
-                  value={interno}
+                  value={
+                    interno !== null && interno !== undefined ? interno : ""
+                  }
                   onChange={(e) =>
                     setInterno(
-                      e.target.value === "" ? "" : Number(e.target.value)
+                      e.target.value === "" ? null : Number(e.target.value)
                     )
                   }
                   fullWidth

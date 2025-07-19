@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
-import axios from "axios";
+import API from "@/api/axiosConfig";
 import {
   Container,
   Table,
@@ -31,7 +31,6 @@ import dayjs from "dayjs";
 import EditIcon from "@mui/icons-material/Edit";
 import Link from "next/link";
 import withAuth from "../../../../../components/withAut"; // Importa el HOC
-import { API_BASE_URL } from "../../../../../utils/config";
 import Swal from "sweetalert2";
 import MarkEmailReadIcon from "@mui/icons-material/MarkEmailRead";
 import EmailIcon from "@mui/icons-material/Email";
@@ -110,7 +109,7 @@ const ListaDocenteAsignatura: React.FC = () => {
     if (idAsignatura) {
       // Cargar información de la asignatura
       fetchAsignaturaInfo();
-      const initialUrl = `${API_BASE_URL}/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`;
+      const initialUrl = `/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`;
       setCurrentUrl(initialUrl);
     }
   }, [idAsignatura]);
@@ -123,8 +122,8 @@ const ListaDocenteAsignatura: React.FC = () => {
 
   const fetchAsignaturaInfo = async () => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/facet/asignatura/${idAsignatura}/`
+      const response = await API.get(
+        `/facet/asignatura/${idAsignatura}/`
       );
       setAsignaturaNombre(response.data.nombre);
     } catch (error) {
@@ -134,7 +133,7 @@ const ListaDocenteAsignatura: React.FC = () => {
 
   const fetchData = async (url: string) => {
     try {
-      const response = await axios.get(url);
+      const response = await API.get(url);
       const data = response.data;
 
       setAsignaturaDocentes(data.results || data);
@@ -167,15 +166,15 @@ const ListaDocenteAsignatura: React.FC = () => {
   const toggleVencimientos = () => {
     setMostrarVencimientos(!mostrarVencimientos);
     const baseUrl = mostrarVencimientos
-      ? `${API_BASE_URL}/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`
-      : `${API_BASE_URL}/facet/asignatura-docente/proximos_a_vencer/?asignatura=${idAsignatura}`;
+      ? `/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`
+      : `/facet/asignatura-docente/proximos_a_vencer/?asignatura=${idAsignatura}`;
     setCurrentUrl(baseUrl);
   };
 
   const filtrarAsignaturaDocentes = () => {
     let baseUrl = mostrarVencimientos
-      ? `${API_BASE_URL}/facet/asignatura-docente/proximos_a_vencer/?asignatura=${idAsignatura}`
-      : `${API_BASE_URL}/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`;
+      ? `/facet/asignatura-docente/proximos_a_vencer/?asignatura=${idAsignatura}`
+      : `/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`;
 
     const params = new URLSearchParams();
 
@@ -217,8 +216,8 @@ const ListaDocenteAsignatura: React.FC = () => {
     setFiltroEstado("1");
 
     const baseUrl = mostrarVencimientos
-      ? `${API_BASE_URL}/facet/asignatura-docente/proximos_a_vencer/?asignatura=${idAsignatura}`
-      : `${API_BASE_URL}/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`;
+      ? `/facet/asignatura-docente/proximos_a_vencer/?asignatura=${idAsignatura}`
+      : `/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`;
     setCurrentUrl(baseUrl);
   };
 
@@ -226,8 +225,8 @@ const ListaDocenteAsignatura: React.FC = () => {
     if (newPage < 1 || newPage > totalPages) return;
 
     let baseUrl = mostrarVencimientos
-      ? `${API_BASE_URL}/facet/asignatura-docente/proximos_a_vencer/?asignatura=${idAsignatura}`
-      : `${API_BASE_URL}/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`;
+      ? `/facet/asignatura-docente/proximos_a_vencer/?asignatura=${idAsignatura}`
+      : `/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`;
 
     const params = new URLSearchParams();
 
@@ -263,7 +262,7 @@ const ListaDocenteAsignatura: React.FC = () => {
 
   const enviarNotificacion = async (id: number, email: string) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/facet/notificacion/`, {
+      const response = await API.post(`/facet/notificacion/`, {
         persona: id,
         mensaje: `Estimado/a docente, le recordamos que debe actualizar su documentación académica. Gracias.`,
       });
@@ -315,8 +314,8 @@ const ListaDocenteAsignatura: React.FC = () => {
     try {
       let allDocentes: AsignaturaDocente[] = [];
       let baseUrl = mostrarVencimientos
-        ? `${API_BASE_URL}/facet/asignatura-docente/proximos_a_vencer/?asignatura=${idAsignatura}`
-        : `${API_BASE_URL}/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`;
+        ? `/facet/asignatura-docente/proximos_a_vencer/?asignatura=${idAsignatura}`
+        : `/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`;
 
       const params = new URLSearchParams();
 
@@ -349,7 +348,7 @@ const ListaDocenteAsignatura: React.FC = () => {
 
       // Obtener todos los datos para el Excel
       while (url) {
-        const response = await axios.get(url);
+        const response = await API.get(url);
         const { results, next } = response.data;
         allDocentes = [...allDocentes, ...results];
         url = next;
