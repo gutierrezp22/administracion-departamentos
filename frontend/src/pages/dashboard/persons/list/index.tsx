@@ -69,6 +69,7 @@ const ListaPersonas = () => {
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [viewPersona, setViewPersona] = useState<Persona | null>(null);
   const [modalViewVisible, setModalViewVisible] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [titulos, setTitulos] = useState<{ id: number; nombre: string }[]>([]);
   const [currentUrl, setCurrentUrl] = useState<string>(
     `/facet/persona/?estado=1`
@@ -163,6 +164,7 @@ const ListaPersonas = () => {
 
   const descargarExcel = async () => {
     try {
+      setIsDownloading(true);
       let allPersonas: Persona[] = [];
       let url = `/facet/persona/?`;
       const params = new URLSearchParams();
@@ -211,7 +213,13 @@ const ListaPersonas = () => {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
       saveAs(excelBlob, "personas.xlsx");
+      
+      // Simular un pequeño delay para mostrar el modal antes de cerrar
+      setTimeout(() => {
+        setIsDownloading(false);
+      }, 1500);
     } catch (error) {
+      setIsDownloading(false);
       Swal.fire({
         icon: "error",
         title: "Error al descargar",
@@ -681,6 +689,23 @@ const ListaPersonas = () => {
                 className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors duration-200">
                 Editar
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de descarga de Excel */}
+      {isDownloading && (
+        <div className="fixed inset-0 flex items-center justify-center z-[10000]">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl p-8 w-96 z-[10001] relative">
+            <h3 className="text-xl font-bold text-center mb-2">Descargando Excel</h3>
+            <hr className="my-3 border-gray-200" />
+            <div className="flex flex-col items-center mb-6">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+              <p className="text-gray-600 text-lg text-center">
+                La descarga está en curso, por favor espere...
+              </p>
             </div>
           </div>
         </div>
