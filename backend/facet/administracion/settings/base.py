@@ -25,10 +25,10 @@ INSTALLED_APPS = [
     "knox",
     "simple_history",
     "corsheaders",
-    "django_extensions",
+    # "django_extensions",  # Comentado temporalmente - requiere instalación
     'django_filters',
     "coreapi",
-    "multiselectfield",
+    # "multiselectfield",  # Comentado temporalmente - requiere instalación
     # Celery apps
     "django_celery_beat",
     "django_celery_results",
