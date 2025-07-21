@@ -106,7 +106,7 @@ const ListaJefesDepartamentos = () => {
         apiUrl = urlObj.pathname + urlObj.search;
       }
 
-      const response = await API.get(apiUrl);
+      const response = await API.get(url);
       let filteredResults = response.data.results;
 
       // Filtro temporal en el frontend para próximos vencimientos
@@ -124,16 +124,10 @@ const ListaJefesDepartamentos = () => {
       }
 
       setJefesDepartamentos(filteredResults);
-      setNextUrl(response.data.next);
-      setPrevUrl(response.data.previous);
+      setNextUrl(response.data.next ? normalizeUrl(response.data.next) : null);
+      setPrevUrl(response.data.previous ? normalizeUrl(response.data.previous) : null);
       setTotalItems(filteredResults.length);
 
-      // Calcular la página actual basándose en los parámetros de la URL
-      const urlParams = new URLSearchParams(apiUrl.split("?")[1] || "");
-      const offset = parseInt(urlParams.get("offset") || "0");
-      const limit = parseInt(urlParams.get("limit") || "10");
-      const calculatedPage = Math.floor(offset / limit) + 1;
-      setCurrentPage(calculatedPage);
     } catch (error) {
       Swal.fire({
         icon: "error",

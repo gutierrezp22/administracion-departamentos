@@ -99,27 +99,13 @@ const ListaPersonas = () => {
 
   const fetchData = async (url: string) => {
     try {
-      // Si la URL es absoluta (comienza con http), extraer solo la parte de la ruta
-      let apiUrl = url;
-      if (url.startsWith("http")) {
-        const urlObj = new URL(url);
-        apiUrl = urlObj.pathname + urlObj.search;
-      }
-
-      const response = await API.get(apiUrl);
+      const response = await API.get(url);
       setPersonas(response.data.results);
       setNextUrl(response.data.next ? normalizeUrl(response.data.next) : null);
       setPrevUrl(
         response.data.previous ? normalizeUrl(response.data.previous) : null
       );
       setTotalItems(response.data.count);
-
-      // Calcular la página actual basándose en los parámetros de la URL
-      const urlParams = new URLSearchParams(apiUrl.split("?")[1] || "");
-      const offset = parseInt(urlParams.get("offset") || "0");
-      const limit = parseInt(urlParams.get("limit") || "10");
-      const calculatedPage = Math.floor(offset / limit) + 1;
-      setCurrentPage(calculatedPage);
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -506,8 +492,10 @@ const ListaPersonas = () => {
           <div className="flex justify-between items-center mt-6">
             <button
               onClick={() => {
-                prevUrl && setCurrentUrl(prevUrl);
-                setCurrentPage(currentPage - 1);
+                if (prevUrl) {
+                  setCurrentUrl(prevUrl);
+                  setCurrentPage(currentPage - 1);
+                }
               }}
               disabled={!prevUrl}
               className={`px-4 py-2 rounded-lg font-medium ${
@@ -522,8 +510,10 @@ const ListaPersonas = () => {
             </span>
             <button
               onClick={() => {
-                nextUrl && setCurrentUrl(nextUrl);
-                setCurrentPage(currentPage + 1);
+                if (nextUrl) {
+                  setCurrentUrl(nextUrl);
+                  setCurrentPage(currentPage + 1);
+                }
               }}
               disabled={!nextUrl}
               className={`px-4 py-2 rounded-lg font-medium ${
