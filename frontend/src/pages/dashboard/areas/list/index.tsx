@@ -65,6 +65,7 @@ const ListaAreas = () => {
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const router = useRouter();
 
@@ -74,12 +75,16 @@ const ListaAreas = () => {
 
   const fetchData = async (url: string) => {
     try {
+      setIsLoading(true);
       const response = await API.get(url);
       setAreas(response.data.results);
       setNextUrl(response.data.next ? normalizeUrl(response.data.next) : null);
       setPrevUrl(response.data.previous ? normalizeUrl(response.data.previous) : null);
       setTotalItems(response.data.count);
+      // Pequeño delay para asegurar que los estilos se cargan
+      setTimeout(() => setIsLoading(false), 500);
     } catch (error) {
+      setIsLoading(false);
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -205,6 +210,22 @@ const ListaAreas = () => {
   };
 
   const totalPages = Math.ceil(totalItems / pageSize);
+
+  // Modal de loading
+  if (isLoading) {
+    return (
+      <DashboardMenu>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+            <p className="text-gray-700 text-lg font-medium">
+              Cargando áreas...
+            </p>
+          </div>
+        </div>
+      </DashboardMenu>
+    );
+  }
 
   return (
     <DashboardMenu>
