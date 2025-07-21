@@ -43,6 +43,11 @@ import {
 } from "../../../../../components/Filters";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
+// Función para normalizar URLs de paginación
+const normalizeUrl = (url: string) => {
+  return url.replace(window.location.origin, "").replace(/^/+/, "/");
+};
+
 const ListaDocenteAsignatura: React.FC = () => {
   const router = useRouter();
   const { idAsignatura } = router.query;
@@ -137,8 +142,8 @@ const ListaDocenteAsignatura: React.FC = () => {
       const data = response.data;
 
       setAsignaturaDocentes(data.results || data);
-      setPrevUrl(data.previous || null);
-      setNextUrl(data.next || null);
+      setPrevUrl(data.previous ? normalizeUrl(data.previous) : null);
+      setNextUrl(data.next ? normalizeUrl(data.next) : null);
       setTotalItems(data.count || 0);
       setTotalPages(Math.ceil((data.count || 0) / pageSize));
 

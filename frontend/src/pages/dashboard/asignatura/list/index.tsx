@@ -39,6 +39,11 @@ import {
   EstadoFilter,
 } from "../../../../components/Filters";
 
+// Función para normalizar URLs de paginación
+const normalizeUrl = (url: string) => {
+  return url.replace(window.location.origin, "").replace(/^/+/, "/");
+};
+
 const ListaAsignaturas = () => {
   interface Asignatura {
     id: number;
@@ -86,8 +91,8 @@ const ListaAsignaturas = () => {
     try {
       const response = await API.get(url);
       setAsignaturas(response.data.results);
-      setNextUrl(response.data.next);
-      setPrevUrl(response.data.previous);
+      setNextUrl(response.data.next ? normalizeUrl(response.data.next) : null);
+      setPrevUrl(response.data.previous ? normalizeUrl(response.data.previous) : null);
       setTotalItems(response.data.count);
     } catch (error) {
       Swal.fire({

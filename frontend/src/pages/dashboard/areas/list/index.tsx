@@ -31,12 +31,16 @@ import { useRouter } from "next/router";
 import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut";
 import { API_BASE_URL } from "../../../../utils/config";
-import { normalizeUrl } from "../../../../utils/urlHelpers";
 import {
   FilterContainer,
   FilterInput,
   EstadoFilter,
 } from "../../../../components/Filters";
+
+// Función para normalizar URLs de paginación
+const normalizeUrl = (url: string) => {
+  return url.replace(window.location.origin, "").replace(/^/+/, "/");
+};
 
 const ListaAreas = () => {
   interface Area {
@@ -70,10 +74,10 @@ const ListaAreas = () => {
 
   const fetchData = async (url: string) => {
     try {
-      const response = await API.get(normalizeUrl(url));
+      const response = await API.get(url);
       setAreas(response.data.results);
-      setNextUrl(response.data.next);
-      setPrevUrl(response.data.previous);
+      setNextUrl(response.data.next ? normalizeUrl(response.data.next) : null);
+      setPrevUrl(response.data.previous ? normalizeUrl(response.data.previous) : null);
       setTotalItems(response.data.count);
     } catch (error) {
       Swal.fire({
