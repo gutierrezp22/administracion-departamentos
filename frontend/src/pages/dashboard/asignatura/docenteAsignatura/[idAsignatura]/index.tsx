@@ -22,6 +22,7 @@ import {
   Checkbox,
   Tooltip,
 } from "@mui/material";
+import ResponsiveTable from "../../../../../components/ResponsiveTable";
 import AddIcon from "@mui/icons-material/Add";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -45,7 +46,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 // Función para normalizar URLs de paginación
 const normalizeUrl = (url: string) => {
-  return url.replace(window.location.origin, "").replace(/^/+/, "/");
+  return url.replace(window.location.origin, "").replace(/^\/+/, "/");
 };
 
 const ListaDocenteAsignatura: React.FC = () => {
@@ -518,32 +519,32 @@ const ListaDocenteAsignatura: React.FC = () => {
             <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
           </FilterContainer>
 
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <ResponsiveTable>
             <Table>
               <TableHead>
-                <TableRow className="bg-blue-500">
-                  <TableCell className="text-white font-semibold">
+                <TableRow>
+                  <TableCell>
                     Nombre
                   </TableCell>
-                  <TableCell className="text-white font-semibold">
+                  <TableCell>
                     DNI
                   </TableCell>
-                  <TableCell className="text-white font-semibold">
+                  <TableCell>
                     Condición
                   </TableCell>
-                  <TableCell className="text-white font-semibold">
+                  <TableCell>
                     Cargo
                   </TableCell>
-                  <TableCell className="text-white font-semibold">
+                  <TableCell>
                     Dedicación
                   </TableCell>
-                  <TableCell className="text-white font-semibold">
+                  <TableCell>
                     Fecha Inicio
                   </TableCell>
-                  <TableCell className="text-white font-semibold">
+                  <TableCell>
                     Fecha Vencimiento
                   </TableCell>
-                  <TableCell className="text-white font-semibold">
+                  <TableCell>
                     Acciones
                   </TableCell>
                 </TableRow>
@@ -643,7 +644,7 @@ const ListaDocenteAsignatura: React.FC = () => {
                 )}
               </TableBody>
             </Table>
-          </div>
+          </ResponsiveTable>
 
           <div className="flex justify-between items-center mt-6">
             <button

@@ -20,6 +20,7 @@ import {
   Grid,
   Chip,
 } from "@mui/material";
+import ResponsiveTable from "../../../../components/ResponsiveTable";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -485,118 +486,84 @@ const ListaUsuarios = () => {
           </FilterContainer>
 
           <div className="mt-6">
-            <TableContainer component={Paper} className="shadow-lg">
-              <Table>
-                <TableHead>
-                  <TableRow className="bg-blue-500">
-                    <TableCell
-                      className="text-white font-semibold"
-                      style={{ color: "#fff" }}>
-                      Email
+            <ResponsiveTable className="shadow-lg">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Nombre</TableCell>
+                  <TableCell>Apellido</TableCell>
+                  <TableCell>Legajo</TableCell>
+                  <TableCell>Documento</TableCell>
+                  <TableCell>Rol</TableCell>
+                  <TableCell>Estado</TableCell>
+                  <TableCell>Acciones</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {usuarios.map((usuario) => (
+                  <TableRow key={usuario.id} className="hover:bg-gray-50">
+                    <TableCell>{usuario.email}</TableCell>
+                    <TableCell>{usuario.nombre}</TableCell>
+                    <TableCell>{usuario.apellido}</TableCell>
+                    <TableCell>{usuario.legajo}</TableCell>
+                    <TableCell>{usuario.documento}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={usuario.rol_detalle || "Sin rol"}
+                        color="primary"
+                        size="small"
+                      />
                     </TableCell>
-                    <TableCell
-                      className="text-white font-semibold"
-                      style={{ color: "#fff" }}>
-                      Nombre
+                    <TableCell>
+                      <Chip
+                        label={usuario.is_active ? "Activo" : "Inactivo"}
+                        color={usuario.is_active ? "success" : "error"}
+                        size="small"
+                      />
                     </TableCell>
-                    <TableCell
-                      className="text-white font-semibold"
-                      style={{ color: "#fff" }}>
-                      Apellido
-                    </TableCell>
-                    <TableCell
-                      className="text-white font-semibold"
-                      style={{ color: "#fff" }}>
-                      Legajo
-                    </TableCell>
-                    <TableCell
-                      className="text-white font-semibold"
-                      style={{ color: "#fff" }}>
-                      Documento
-                    </TableCell>
-                    <TableCell
-                      className="text-white font-semibold"
-                      style={{ color: "#fff" }}>
-                      Rol
-                    </TableCell>
-                    <TableCell
-                      className="text-white font-semibold"
-                      style={{ color: "#fff" }}>
-                      Estado
-                    </TableCell>
-                    <TableCell
-                      className="text-white font-semibold"
-                      style={{ color: "#fff" }}>
-                      Acciones
+                    <TableCell>
+                      <div className="flex items-center justify-center gap-2">
+                        <Tooltip title="Ver detalles">
+                          <button
+                            onClick={() => verUsuario(usuario.id)}
+                            className="p-2 text-green-600 hover:text-green-800 rounded-lg hover:bg-green-100 transition-colors duration-200">
+                            <VisibilityIcon />
+                          </button>
+                        </Tooltip>
+                        <Tooltip title="Editar">
+                          <button
+                            onClick={() =>
+                              router.push(
+                                `/dashboard/usuarios/edit/${usuario.id}`
+                              )
+                            }
+                            className="p-2 text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-100 transition-colors duration-200">
+                            <EditIcon />
+                          </button>
+                        </Tooltip>
+                        {usuario.is_active ? (
+                          <Tooltip title="Desactivar">
+                            <button
+                              onClick={() => eliminarUsuario(usuario.id)}
+                              className="p-2 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-100 transition-colors duration-200">
+                              <DeleteIcon />
+                            </button>
+                          </Tooltip>
+                        ) : (
+                          <Tooltip title="Activar">
+                            <button
+                              onClick={() => activarUsuario(usuario.id)}
+                              className="p-2 text-green-600 hover:text-green-800 rounded-lg hover:bg-green-100 transition-colors duration-200">
+                              <PersonIcon />
+                            </button>
+                          </Tooltip>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {usuarios.map((usuario) => (
-                    <TableRow key={usuario.id} className="hover:bg-gray-50">
-                      <TableCell>{usuario.email}</TableCell>
-                      <TableCell>{usuario.nombre}</TableCell>
-                      <TableCell>{usuario.apellido}</TableCell>
-                      <TableCell>{usuario.legajo}</TableCell>
-                      <TableCell>{usuario.documento}</TableCell>
-                      <TableCell>
-                        <Chip
-                          label={usuario.rol_detalle || "Sin rol"}
-                          color="primary"
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={usuario.is_active ? "Activo" : "Inactivo"}
-                          color={usuario.is_active ? "success" : "error"}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center justify-center gap-2">
-                          <Tooltip title="Ver detalles">
-                            <button
-                              onClick={() => verUsuario(usuario.id)}
-                              className="p-2 text-green-600 hover:text-green-800 rounded-lg hover:bg-green-100 transition-colors duration-200">
-                              <VisibilityIcon />
-                            </button>
-                          </Tooltip>
-                          <Tooltip title="Editar">
-                            <button
-                              onClick={() =>
-                                router.push(
-                                  `/dashboard/usuarios/edit/${usuario.id}`
-                                )
-                              }
-                              className="p-2 text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-100 transition-colors duration-200">
-                              <EditIcon />
-                            </button>
-                          </Tooltip>
-                          {usuario.is_active ? (
-                            <Tooltip title="Desactivar">
-                              <button
-                                onClick={() => eliminarUsuario(usuario.id)}
-                                className="p-2 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-100 transition-colors duration-200">
-                                <DeleteIcon />
-                              </button>
-                            </Tooltip>
-                          ) : (
-                            <Tooltip title="Activar">
-                              <button
-                                onClick={() => activarUsuario(usuario.id)}
-                                className="p-2 text-green-600 hover:text-green-800 rounded-lg hover:bg-green-100 transition-colors duration-200">
-                                <PersonIcon />
-                              </button>
-                            </Tooltip>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                ))}
+              </TableBody>
+            </ResponsiveTable>
 
           <div className="flex justify-between items-center mt-6">
             <button

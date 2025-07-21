@@ -59,7 +59,7 @@ const getFieldDisplayName = (fieldName: string): string => {
 
 // Función para normalizar URLs de paginación
 const normalizeUrl = (url: string) => {
-  return url.replace(window.location.origin, "").replace(/^/+/, "/");
+  return url.replace(window.location.origin, "").replace(/^\/+/, "/");
 };
 
 const CrearDocenteAsignatura: React.FC = () => {
