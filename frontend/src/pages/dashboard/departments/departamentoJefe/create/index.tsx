@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
 import API from "@/api/axiosConfig";
+import { formatFechaParaBackend } from "@/utils/dateHelpers";
 import {
   Container,
   Paper,
@@ -144,12 +145,14 @@ const CrearDepartamentoJefe = () => {
     // Si la URL es absoluta (comienza con http/https), extraer solo la parte de la ruta
     if (url.startsWith("http")) {
       const urlObj = new URL(url);
-      const normalizedUrl = urlObj.pathname + urlObj.search;
+      let normalizedUrl = urlObj.pathname + urlObj.search;
+      // Remover /api/ si está presente en la URL normalizada
+      normalizedUrl = normalizedUrl.replace(/^\/api/, "");
       console.log("Normalized URL:", normalizedUrl);
       return normalizedUrl;
     }
-    // Si es relativa, asegurar que comience con /
-    const normalizedUrl = url.replace(/^\/+/, "/");
+    // Si es relativa, asegurar que comience con / y remover /api/ si está presente
+    const normalizedUrl = url.replace(/^\/+/, "/").replace(/^\/api/, "");
     console.log("Normalized URL:", normalizedUrl);
     return normalizedUrl;
   };
@@ -222,7 +225,7 @@ const CrearDepartamentoJefe = () => {
       params.append("nresolucion__icontains", filtroNroResolucion);
     if (filtroTipo) params.append("tipo", filtroTipo);
     if (filtroFecha)
-      params.append("fecha__date", filtroFecha.format("YYYY-MM-DD"));
+      params.append("fecha__date", formatFechaParaBackend(filtroFecha) || "");
 
     url += params.toString();
     setCurrentUrl(normalizeUrl(url));
@@ -232,14 +235,17 @@ const CrearDepartamentoJefe = () => {
     try {
       console.log("Fetching jefes from URL:", url);
       const response = await API.get(url);
-      setJefes(response.data.results);
+      console.log("Response data:", response.data);
+      console.log("Jefes encontrados:", response.data.results?.length || 0);
+
+      setJefes(response.data.results || []);
       setNextUrlJefes(
         response.data.next ? normalizeUrl(response.data.next) : null
       );
       setPrevUrlJefes(
         response.data.previous ? normalizeUrl(response.data.previous) : null
       );
-      setTotalItemsJefes(response.data.count);
+      setTotalItemsJefes(response.data.count || 0);
 
       // Calcular la página actual usando offset
       const fullUrl = url.startsWith("http")
@@ -247,8 +253,9 @@ const CrearDepartamentoJefe = () => {
         : `${window.location.origin}${url}`;
       const offset = new URL(fullUrl).searchParams.get("offset") || "0";
       setCurrentPageJefes(Math.floor(Number(offset) / pageSizeJefes) + 1);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al obtener los jefes:", error);
+      console.error("Error details:", error.response?.data);
       setJefes([]);
       setNextUrlJefes(null);
       setPrevUrlJefes(null);
@@ -264,6 +271,8 @@ const CrearDepartamentoJefe = () => {
     if (filtroDni) params.append("persona__dni__icontains", filtroDni);
 
     url += params.toString();
+    console.log("Filtro URL generada:", url);
+    setCurrentPageJefes(1); // Reiniciar a página 1
     setCurrentUrlJefes(normalizeUrl(url));
   };
 
@@ -370,8 +379,8 @@ const CrearDepartamentoJefe = () => {
       departamento: departamento?.id,
       jefe: jefe?.id,
       resolucion: selectedResolucion?.id,
-      fecha_de_inicio: fechaInicio?.toISOString(),
-      fecha_de_fin: fechaFin?.toISOString(),
+      fecha_de_inicio: formatFechaParaBackend(fechaInicio),
+      fecha_de_fin: formatFechaParaBackend(fechaFin),
       observaciones: observaciones,
       estado: estado === "1" ? 1 : 0,
     };
@@ -644,6 +653,7 @@ const CrearDepartamentoJefe = () => {
                         label="Fecha de Inicio"
                         value={fechaInicio}
                         onChange={(date) => setFechaInicio(date)}
+                        format="DD/MM/YYYY"
                         slotProps={{
                           textField: {
                             fullWidth: true,
@@ -701,6 +711,7 @@ const CrearDepartamentoJefe = () => {
                         label="Fecha de Fin"
                         value={fechaFin}
                         onChange={(date) => setFechaFin(date)}
+                        format="DD/MM/YYYY"
                         slotProps={{
                           textField: {
                             fullWidth: true,
@@ -832,6 +843,7 @@ const CrearDepartamentoJefe = () => {
                     label="Fecha"
                     value={filtroFecha}
                     onChange={(date) => setFiltroFecha(date)}
+                    format="DD/MM/YYYY"
                     slotProps={{
                       textField: {
                         fullWidth: true,

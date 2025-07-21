@@ -32,6 +32,7 @@ import ModalConfirmacion from "@/utils/modalConfirmacion";
 import withAuth from "../../../../../../components/withAut"; // Importa el HOC
 import { API_BASE_URL } from "../../../../../../utils/config";
 import API from "@/api/axiosConfig";
+import { parseFechaDDMMYYYY, formatFechaParaBackend } from "@/utils/dateHelpers";
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -137,17 +138,9 @@ const EditarDocenteAsignatura: React.FC = () => {
       setDedicacion(data.dedicacion);
       setCondicion(data.condicion);
       setCargo(data.cargo);
-      // Parsear las fechas
-      const parsedFechaInicio = dayjs(
-        data.fecha_de_inicio,
-        "DD/MM/YYYY HH:mm:ss"
-      );
-      const parsedFechaFin = dayjs(
-        data.fecha_de_vencimiento,
-        "DD/MM/YYYY HH:mm:ss"
-      );
-      setFechaInicio(parsedFechaInicio.isValid() ? parsedFechaInicio : null);
-      setFechaFin(parsedFechaFin.isValid() ? parsedFechaFin : null);
+      // Parsear las fechas usando la función helper
+      setFechaInicio(parseFechaDDMMYYYY(data.fecha_de_inicio));
+      setFechaFin(parseFechaDDMMYYYY(data.fecha_de_vencimiento));
     } catch (error) {
       console.error("Error fetching asignatura docente:", error);
     }
@@ -168,10 +161,8 @@ const EditarDocenteAsignatura: React.FC = () => {
       resolucion: resolucion.id, // Incluye el ID de la resolución
       observaciones,
       estado,
-      fecha_de_inicio:
-        fechaInicio && fechaInicio.isValid() ? fechaInicio.toISOString() : null,
-      fecha_de_vencimiento:
-        fechaFin && fechaFin.isValid() ? fechaFin.toISOString() : null,
+      fecha_de_inicio: formatFechaParaBackend(fechaInicio),
+      fecha_de_vencimiento: formatFechaParaBackend(fechaFin),
       dedicacion,
       condicion,
       cargo,
@@ -339,6 +330,7 @@ const EditarDocenteAsignatura: React.FC = () => {
                         label="Fecha Inicio"
                         value={fechaInicio}
                         onChange={(date) => setFechaInicio(date)}
+                        format="DD/MM/YYYY"
                         slotProps={{
                           textField: {
                             fullWidth: true,
@@ -355,6 +347,7 @@ const EditarDocenteAsignatura: React.FC = () => {
                         label="Fecha Fin"
                         value={fechaFin}
                         onChange={(date) => setFechaFin(date)}
+                        format="DD/MM/YYYY"
                         slotProps={{
                           textField: {
                             fullWidth: true,

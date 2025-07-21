@@ -230,9 +230,25 @@ const CrearJefe = () => {
               <Grid item xs={12}>
                 <button
                   onClick={handleOpenPersona}
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
                   Seleccionar Persona
                 </button>
+                {persona && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mt-2 shadow-sm">
+                    <p className="text-sm font-medium text-gray-800">
+                      <span className="font-bold text-blue-700">
+                        Persona Seleccionada:
+                      </span>{" "}
+                      <span className="text-gray-900">{`${persona.apellido}, ${persona.nombre}`}</span>
+                    </p>
+                    <p className="text-sm font-medium text-gray-800">
+                      <span className="font-bold text-blue-700">
+                        DNI:
+                      </span>{" "}
+                      <span className="text-gray-900">{persona.dni}</span>
+                    </p>
+                  </div>
+                )}
               </Grid>
 
               {/* Separador visual */}
@@ -478,101 +494,133 @@ const CrearJefe = () => {
           <Dialog
             open={openPersona}
             onClose={handleClose}
-            maxWidth="md"
-            fullWidth>
-            <DialogTitle>Seleccionar Persona</DialogTitle>
-            <DialogContent>
-              <Grid container spacing={2} alignItems="center">
-                <Grid item xs={6}>
+            maxWidth="lg"
+            fullWidth
+            PaperProps={{
+              style: {
+                borderRadius: "12px",
+                boxShadow:
+                  "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+              },
+            }}>
+            <DialogTitle className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold">
+              Seleccionar Persona
+            </DialogTitle>
+            <DialogContent className="p-4">
+              <Grid container spacing={2} className="mb-4 mt-4">
+                <Grid item xs={12} sm={6}>
                   <TextField
                     label="Nombre"
                     value={filtroNombre}
                     onChange={(e) => setFiltroNombre(e.target.value)}
                     fullWidth
-                    margin="normal"
                     variant="outlined"
                     size="small"
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     label="Apellido"
                     value={filtroApellido}
                     onChange={(e) => setFiltroApellido(e.target.value)}
                     fullWidth
-                    margin="normal"
                     variant="outlined"
                     size="small"
                   />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     label="DNI"
                     value={filtroDni}
                     onChange={(e) => setFiltroDni(e.target.value)}
                     fullWidth
-                    margin="normal"
                     variant="outlined"
                     size="small"
                   />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={12} sm={6}>
                   <TextField
                     label="Legajo"
                     value={filtroLegajo}
                     onChange={(e) => setFiltroLegajo(e.target.value)}
                     fullWidth
-                    margin="normal"
                     variant="outlined"
                     size="small"
                   />
                 </Grid>
-                <Grid
-                  item
-                  xs={4}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    height: "100%",
-                  }}>
-                  <button
-                    onClick={filtrarPersonas}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md shadow-md transition-colors duration-200">
-                    Filtrar
-                  </button>
+                <Grid item xs={12}>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={filtrarPersonas}
+                      className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                      Filtrar
+                    </button>
+                    <button
+                      onClick={() => {
+                        setFiltroNombre("");
+                        setFiltroApellido("");
+                        setFiltroDni("");
+                        setFiltroLegajo("");
+                        fetchPersonas("/facet/persona/");
+                      }}
+                      className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                      Limpiar
+                    </button>
+                  </div>
                 </Grid>
               </Grid>
-              <TableContainer component={Paper} style={{ marginTop: "20px" }}>
-                <Table>
-                  <TableHead>
+
+              <TableContainer
+                component={Paper}
+                className="shadow-lg rounded-lg overflow-hidden"
+                style={{ maxHeight: "400px" }}>
+                <Table size="small">
+                  <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
                     <TableRow>
-                      <TableCell>DNI</TableCell>
-                      <TableCell>Apellido</TableCell>
-                      <TableCell>Nombre</TableCell>
-                      <TableCell>Legajo</TableCell>
-                      <TableCell>Seleccionar</TableCell>
+                      <TableCell className="text-white font-semibold py-2">
+                        DNI
+                      </TableCell>
+                      <TableCell className="text-white font-semibold py-2">
+                        Apellido
+                      </TableCell>
+                      <TableCell className="text-white font-semibold py-2">
+                        Nombre
+                      </TableCell>
+                      <TableCell className="text-white font-semibold py-2">
+                        Legajo
+                      </TableCell>
+                      <TableCell className="text-white font-semibold py-2">
+                        Seleccionar
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {personas.map((p) => (
-                      <TableRow key={p.id}>
-                        <TableCell>{p.dni}</TableCell>
-                        <TableCell>{p.apellido}</TableCell>
-                        <TableCell>{p.nombre}</TableCell>
-                        <TableCell>{p.legajo}</TableCell>
-                        <TableCell>
+                      <TableRow
+                        key={p.id}
+                        className="hover:bg-blue-50 transition-colors duration-200">
+                        <TableCell className="font-medium py-2">
+                          {p.dni}
+                        </TableCell>
+                        <TableCell className="font-medium py-2">
+                          {p.apellido}
+                        </TableCell>
+                        <TableCell className="font-medium py-2">
+                          {p.nombre}
+                        </TableCell>
+                        <TableCell className="font-medium py-2">
+                          {p.legajo}
+                        </TableCell>
+                        <TableCell className="py-2">
                           <button
                             onClick={() => {
                               setPersona(p);
                               setApellido(p.apellido);
                               setDni(p.dni);
                               setNombre(p.nombre);
+                              handleClose();
                             }}
-                            className={`px-3 py-1 rounded-md transition-colors duration-200 border ${
-                              persona?.id === p.id
-                                ? "bg-green-500 text-white border-green-500 hover:bg-green-600"
-                                : "border-gray-300 hover:bg-gray-100"
-                            }`}>
+                            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-3 py-1 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium text-sm">
                             Seleccionar
                           </button>
                         </TableCell>
@@ -581,45 +629,38 @@ const CrearJefe = () => {
                   </TableBody>
                 </Table>
               </TableContainer>
+
+              <div className="flex justify-between items-center mt-4">
+                <button
+                  onClick={() => prevUrl && fetchPersonas(prevUrl)}
+                  disabled={!prevUrl}
+                  className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm ${
+                    !prevUrl
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
+                  }`}>
+                  Anterior
+                </button>
+                <Typography className="font-medium text-gray-700 text-sm">
+                  Página {currentPage} de {Math.ceil(totalItems / 10)}
+                </Typography>
+                <button
+                  onClick={() => nextUrl && fetchPersonas(nextUrl)}
+                  disabled={!nextUrl}
+                  className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm ${
+                    !nextUrl
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
+                  }`}>
+                  Siguiente
+                </button>
+              </div>
             </DialogContent>
-            <DialogActions>
-              <button
-                disabled={!prevUrl}
-                onClick={() => prevUrl && fetchPersonas(prevUrl)}
-                className={`mr-2 px-3 py-1 rounded-md ${
-                  !prevUrl
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-blue-500 hover:bg-blue-600 text-white"
-                }`}>
-                Anterior
-              </button>
-              <Typography>
-                Página {currentPage} de {Math.ceil(totalItems / 10)}
-              </Typography>
-              <button
-                disabled={!nextUrl}
-                onClick={() => nextUrl && fetchPersonas(nextUrl)}
-                className={`mr-2 px-3 py-1 rounded-md ${
-                  !nextUrl
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-blue-500 hover:bg-blue-600 text-white"
-                }`}>
-                Siguiente
-              </button>
+            <DialogActions className="p-4">
               <button
                 onClick={handleClose}
-                className="px-3 py-1 rounded-md border border-gray-300 hover:bg-gray-100">
+                className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-all duration-200 font-medium">
                 Cerrar
-              </button>
-              <button
-                onClick={handleClose}
-                disabled={!persona}
-                className={`ml-2 px-3 py-1 rounded-md ${
-                  !persona
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-blue-500 hover:bg-blue-600 text-white"
-                }`}>
-                Confirmar Selección
               </button>
             </DialogActions>
           </Dialog>

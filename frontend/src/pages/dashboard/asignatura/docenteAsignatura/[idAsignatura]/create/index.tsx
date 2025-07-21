@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
-import axios from "axios";
 import {
   Container,
   Table,
@@ -33,12 +32,30 @@ import DashboardMenu from "../../../../../dashboard";
 import { useRouter } from "next/router";
 import BasicModal from "@/utils/modal";
 import withAuth from "../../../../../../components/withAut"; // Importa el HOC
-import { API_BASE_URL } from "../../../../../../utils/config";
 import API from "@/api/axiosConfig";
+import { formatFechaParaBackend } from "@/utils/dateHelpers";
 
 // Habilita los plugins
 dayjs.extend(utc);
 dayjs.extend(timezone);
+
+// Helper para traducir nombres de campos a nombres amigables
+const getFieldDisplayName = (fieldName: string): string => {
+  const fieldNames: { [key: string]: string } = {
+    'cargo': 'Cargo',
+    'condicion': 'Condición',
+    'dedicacion': 'Dedicación',
+    'observaciones': 'Observaciones',
+    'fecha_de_inicio': 'Fecha de Inicio',
+    'fecha_de_vencimiento': 'Fecha de Fin',
+    'docente': 'Docente',
+    'asignatura': 'Asignatura',
+    'resolucion': 'Resolución',
+    'estado': 'Estado'
+  };
+  
+  return fieldNames[fieldName] || fieldName;
+};
 
 const CrearDocenteAsignatura: React.FC = () => {
   const router = useRouter();
@@ -149,7 +166,8 @@ const CrearDocenteAsignatura: React.FC = () => {
       setTotalItemsPersonas(response.data.count);
 
       // Calcular página actual
-      const offset = new URL(url).searchParams.get("offset") || "0";
+      const urlParams = new URLSearchParams(url.split('?')[1] || '');
+      const offset = urlParams.get("offset") || "0";
       setCurrentPagePersonas(Math.floor(Number(offset) / pageSizePersonas) + 1);
     } catch (error) {
       console.error("Error fetching data for personas:", error);
@@ -173,6 +191,20 @@ const CrearDocenteAsignatura: React.FC = () => {
     });
   };
 
+  // Función para filtrar docentes desde el servidor
+  const filtrarDocentes = () => {
+    let url = `/facet/docente/?`;
+    const params = new URLSearchParams();
+
+    if (filtroDni.trim()) {
+      // Usar el campo 'search' global que busca en múltiples campos
+      params.append("search", filtroDni);
+    }
+
+    url += params.toString();
+    fetchDataPersonas(url);
+  };
+
   // Función para cargar las resoluciones
   const fetchDataResoluciones = async (url: string) => {
     try {
@@ -183,7 +215,8 @@ const CrearDocenteAsignatura: React.FC = () => {
       setTotalItemsResoluciones(response.data.count);
 
       // Calcular página actual
-      const offset = new URL(url).searchParams.get("offset") || "0";
+      const urlParams = new URLSearchParams(url.split('?')[1] || '');
+      const offset = urlParams.get("offset") || "0";
       setCurrentPageResoluciones(
         Math.floor(Number(offset) / pageSizeResoluciones) + 1
       );
@@ -204,11 +237,23 @@ const CrearDocenteAsignatura: React.FC = () => {
       const nroResolucionMatch = res.nresolucion?.includes(filtro) ?? false;
       const tipoMatch =
         res.tipo?.toLowerCase().includes(filtro.toLowerCase()) ?? false;
-      const fechaMatch = filtroFecha
-        ? dayjs(res.fecha).isSame(filtroFecha, "day")
-        : true;
-      return expedienteMatch || nroResolucionMatch || tipoMatch || fechaMatch;
+      return expedienteMatch || nroResolucionMatch || tipoMatch;
     });
+  };
+
+  // Función para filtrar resoluciones desde el servidor
+  const filtrarResoluciones = () => {
+    let url = `/facet/resolucion/?`;
+    const params = new URLSearchParams();
+
+    if (filtroNroResolucion.trim()) {
+      // Buscar en expediente y resolución
+      params.append("nexpediente__icontains", filtroNroResolucion);
+      params.append("nresolucion__icontains", filtroNroResolucion);
+    }
+
+    url += params.toString();
+    fetchDataResoluciones(url);
   };
 
   const [filtroNroResolucion, setFiltroNroResolucion] = useState("");
@@ -271,8 +316,8 @@ const CrearDocenteAsignatura: React.FC = () => {
       resolucion: resolucion.id,
       observaciones: observaciones,
       estado: estado,
-      fecha_de_inicio: fechaInicio ? new Date(fechaInicio).toISOString() : null,
-      fecha_de_vencimiento: fechaFin ? new Date(fechaFin).toISOString() : null,
+      fecha_de_inicio: formatFechaParaBackend(fechaInicio),
+      fecha_de_vencimiento: formatFechaParaBackend(fechaFin),
       dedicacion: dedicacion,
       condicion: condicion,
       cargo: cargo,
@@ -288,9 +333,30 @@ const CrearDocenteAsignatura: React.FC = () => {
         "Se creó el docente en Asignatura con Exito.",
         handleConfirmModal
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al crear docente asignatura:", error);
-      handleOpenModal("Error", "NO se pudo realizar la acción.", () => {});
+      
+      let errorMessage = "NO se pudo realizar la acción.";
+      
+      // Si hay errores específicos del backend, mostrarlos
+      if (error.response && error.response.data) {
+        const errors = error.response.data;
+        const errorMessages: string[] = [];
+        
+        // Procesar cada campo con error
+        Object.keys(errors).forEach(field => {
+          if (Array.isArray(errors[field]) && errors[field].length > 0) {
+            const fieldName = getFieldDisplayName(field);
+            errorMessages.push(`${fieldName}: ${errors[field][0]}`);
+          }
+        });
+        
+        if (errorMessages.length > 0) {
+          errorMessage = errorMessages.join('\n');
+        }
+      }
+      
+      handleOpenModal("Error", errorMessage, () => {});
     }
   };
 
@@ -852,7 +918,7 @@ const CrearDocenteAsignatura: React.FC = () => {
           </DialogTitle>
           <DialogContent className="p-4">
             <Grid container spacing={2} className="mb-4 mt-4">
-              <Grid item xs={12}>
+              <Grid item xs={12} sm={8}>
                 <TextField
                   label="Buscar por DNI o Nombre"
                   value={filtroDni}
@@ -861,6 +927,23 @@ const CrearDocenteAsignatura: React.FC = () => {
                   variant="outlined"
                   size="small"
                 />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <div className="flex gap-2">
+                  <button
+                    onClick={filtrarDocentes}
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Filtrar
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFiltroDni("");
+                      fetchDataPersonas(`/facet/docente/`);
+                    }}
+                    className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Limpiar
+                  </button>
+                </div>
               </Grid>
             </Grid>
 
@@ -979,7 +1062,7 @@ const CrearDocenteAsignatura: React.FC = () => {
           </DialogTitle>
           <DialogContent className="p-4">
             <Grid container spacing={2} className="mb-4 mt-4">
-              <Grid item xs={12}>
+              <Grid item xs={12} sm={8}>
                 <TextField
                   label="Buscar por Nro Expediente o Resolución"
                   value={filtroNroResolucion}
@@ -988,6 +1071,23 @@ const CrearDocenteAsignatura: React.FC = () => {
                   variant="outlined"
                   size="small"
                 />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <div className="flex gap-2">
+                  <button
+                    onClick={filtrarResoluciones}
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Filtrar
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFiltroNroResolucion("");
+                      fetchDataResoluciones(`/facet/resolucion/`);
+                    }}
+                    className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
+                    Limpiar
+                  </button>
+                </div>
               </Grid>
             </Grid>
 
@@ -1030,7 +1130,15 @@ const CrearDocenteAsignatura: React.FC = () => {
                         {resol.tipo || "N/A"}
                       </TableCell>
                       <TableCell className="font-medium py-2">
-                        {dayjs(resol.fecha).format("DD/MM/YYYY") || "N/A"}
+                        {resol.fecha 
+                          ? (dayjs(resol.fecha).isValid() 
+                              ? dayjs(resol.fecha).format("DD/MM/YYYY") 
+                              : "Fecha inválida")
+                          : (resol.fecha_creacion 
+                              ? (dayjs(resol.fecha_creacion).isValid() 
+                                  ? dayjs(resol.fecha_creacion).format("DD/MM/YYYY") 
+                                  : "Fecha inválida")
+                              : "N/A")}
                       </TableCell>
                       <TableCell className="py-2">
                         <button

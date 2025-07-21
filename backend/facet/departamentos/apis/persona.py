@@ -7,6 +7,8 @@ from ..serializers import PersonaSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
+from datetime import date, timedelta
+from django.utils import timezone
 
 class PersonaViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
@@ -18,7 +20,8 @@ class PersonaViewSet(viewsets.ModelViewSet):
         'legajo': ['icontains'],       
         'apellido': ['icontains'], 
         'nombre': ['icontains'],
-        'dni': ['icontains'], 
+        'dni': ['icontains'],
+        'fecha_nacimiento': ['exact', 'gte', 'lte'],  # Filtrar por fecha de nacimiento
     }
     search_fields = ['nombre', 'apellido', 'dni', 'legajo']
 
@@ -66,7 +69,8 @@ class PersonaViewSet(viewsets.ModelViewSet):
                     'email': persona.email,
                     'interno': persona.interno,
                     'legajo': persona.legajo,
-                    'titulo': persona.titulo.nombre if persona.titulo else None  # 🔥 Ahora devuelve el nombre del título
+                    'titulo': persona.titulo.nombre if persona.titulo else None,
+                    'fecha_nacimiento': persona.fecha_nacimiento
                 }
                 for persona in page
             ]
@@ -84,9 +88,80 @@ class PersonaViewSet(viewsets.ModelViewSet):
                 'email': persona.email,
                 'interno': persona.interno,
                 'legajo': persona.legajo,
-                'titulo': persona.titulo.nombre if persona.titulo else None
+                'titulo': persona.titulo.nombre if persona.titulo else None,
+                'fecha_nacimiento': persona.fecha_nacimiento
             }
             for persona in queryset
         ]
 
         return Response(personas_data)
+
+    @action(detail=False, methods=['get'], url_path='proximos-jubilados')
+    def proximos_jubilados(self, request):
+        """Obtiene personas próximas a jubilarse (65 y 70 años)"""
+        edad_65 = request.query_params.get('edad_65', 'true').lower() == 'true'
+        edad_70 = request.query_params.get('edad_70', 'true').lower() == 'true'
+        
+        hoy = date.today()
+        personas_jubilacion = []
+        
+        # Calcular fechas de referencia
+        if edad_65:
+            # Personas que cumplen 65 años en los próximos 2 años
+            fecha_65_inicio = hoy - timedelta(days=65*365)
+            fecha_65_fin = hoy - timedelta(days=63*365)
+            
+            personas_65 = self.get_queryset().filter(
+                fecha_nacimiento__gte=fecha_65_fin,
+                fecha_nacimiento__lte=fecha_65_inicio
+            )
+            
+            for persona in personas_65:
+                if persona.fecha_nacimiento:
+                    edad_actual = (hoy - persona.fecha_nacimiento).days // 365
+                    personas_jubilacion.append({
+                        'id': persona.id,
+                        'nombre': persona.nombre,
+                        'apellido': persona.apellido,
+                        'dni': persona.dni,
+                        'legajo': persona.legajo,
+                        'fecha_nacimiento': persona.fecha_nacimiento,
+                        'edad_actual': edad_actual,
+                        'tipo_jubilacion': '65 años',
+                        'email': persona.email,
+                        'titulo': persona.titulo.nombre if persona.titulo else None
+                    })
+        
+        if edad_70:
+            # Personas que cumplen 70 años en los próximos 2 años
+            fecha_70_inicio = hoy - timedelta(days=70*365)
+            fecha_70_fin = hoy - timedelta(days=68*365)
+            
+            personas_70 = self.get_queryset().filter(
+                fecha_nacimiento__gte=fecha_70_fin,
+                fecha_nacimiento__lte=fecha_70_inicio
+            )
+            
+            for persona in personas_70:
+                if persona.fecha_nacimiento:
+                    edad_actual = (hoy - persona.fecha_nacimiento).days // 365
+                    personas_jubilacion.append({
+                        'id': persona.id,
+                        'nombre': persona.nombre,
+                        'apellido': persona.apellido,
+                        'dni': persona.dni,
+                        'legajo': persona.legajo,
+                        'fecha_nacimiento': persona.fecha_nacimiento,
+                        'edad_actual': edad_actual,
+                        'tipo_jubilacion': '70 años',
+                        'email': persona.email,
+                        'titulo': persona.titulo.nombre if persona.titulo else None
+                    })
+        
+        # Ordenar por edad (mayor a menor)
+        personas_jubilacion.sort(key=lambda x: x['edad_actual'], reverse=True)
+        
+        return Response({
+            'count': len(personas_jubilacion),
+            'results': personas_jubilacion
+        })

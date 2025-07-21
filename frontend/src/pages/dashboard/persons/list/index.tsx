@@ -25,6 +25,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PeopleIcon from "@mui/icons-material/People";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import Swal from "sweetalert2";
@@ -54,7 +55,8 @@ const ListaPersonas = () => {
     email: string;
     interno: string;
     estado: string;
-    titulo: string;
+    titulo: string | number | null;
+    fecha_nacimiento: string | null;
   }
 
   const [personas, setPersonas] = useState<Persona[]>([]);
@@ -65,6 +67,10 @@ const ListaPersonas = () => {
   const [filtroEstado, setFiltroEstado] = useState<string>("1");
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
+  const [viewPersona, setViewPersona] = useState<Persona | null>(null);
+  const [modalViewVisible, setModalViewVisible] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [titulos, setTitulos] = useState<{ id: number; nombre: string }[]>([]);
   const [currentUrl, setCurrentUrl] = useState<string>(
     `/facet/persona/?estado=1`
   );
@@ -77,6 +83,19 @@ const ListaPersonas = () => {
   useEffect(() => {
     fetchData(currentUrl);
   }, [currentUrl]);
+
+  useEffect(() => {
+    const fetchTitulos = async () => {
+      try {
+        const response = await API.get(`/facet/tipo-titulo/`);
+        setTitulos(response.data.results);
+      } catch (error) {
+        console.error("Error al obtener títulos:", error);
+      }
+    };
+
+    fetchTitulos();
+  }, []);
 
   const fetchData = async (url: string) => {
     try {
@@ -145,6 +164,7 @@ const ListaPersonas = () => {
 
   const descargarExcel = async () => {
     try {
+      setIsDownloading(true);
       let allPersonas: Persona[] = [];
       let url = `/facet/persona/?`;
       const params = new URLSearchParams();
@@ -178,7 +198,8 @@ const ListaPersonas = () => {
           Teléfono: persona.telefono,
           Email: persona.email,
           Interno: persona.interno,
-          Título: persona.titulo,
+          Título: obtenerNombreTitulo(persona.titulo),
+          "Fecha de Nacimiento": formatearFecha(persona.fecha_nacimiento),
           Estado: persona.estado === "1" ? "Activo" : "Inactivo",
         }))
       );
@@ -192,12 +213,32 @@ const ListaPersonas = () => {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
       saveAs(excelBlob, "personas.xlsx");
+      
+      // Simular un pequeño delay para mostrar el modal antes de cerrar
+      setTimeout(() => {
+        setIsDownloading(false);
+      }, 1500);
     } catch (error) {
+      setIsDownloading(false);
       Swal.fire({
         icon: "error",
         title: "Error al descargar",
         text: "Se produjo un error al exportar los datos.",
       });
+    }
+  };
+
+  const verPersona = async (id: number) => {
+    try {
+      const response = await API.get(`/facet/persona/${id}/`);
+      setViewPersona(response.data);
+      setModalViewVisible(true);
+    } catch (error) {
+      Swal.fire(
+        "Error!",
+        "No se pudo obtener los datos de la persona.",
+        "error"
+      );
     }
   };
 
@@ -222,6 +263,54 @@ const ListaPersonas = () => {
     } catch (error) {
       Swal.fire("Error!", "No se pudo eliminar la persona.", "error");
     }
+  };
+
+  const formatearFecha = (fecha: string | null) => {
+    if (!fecha) return "No especificada";
+
+    try {
+      // Si la fecha ya está en formato DD/MM/YYYY, la devolvemos tal como está
+      if (fecha.includes("/")) {
+        return fecha;
+      }
+
+      // Si la fecha está en formato YYYY-MM-DD, la convertimos
+      if (fecha.includes("-")) {
+        const parts = fecha.split("-");
+        if (parts.length === 3) {
+          const [year, month, day] = parts;
+          return `${day}/${month}/${year}`;
+        }
+      }
+
+      return "Fecha inválida";
+    } catch (error) {
+      console.error("Error al formatear fecha:", fecha, error);
+      return "Fecha inválida";
+    }
+  };
+
+  const obtenerNombreTitulo = (titulo: string | number | null) => {
+    if (!titulo) return "Sin título";
+
+    // Si es un string, puede ser el nombre del título (de la lista) o un ID
+    if (typeof titulo === "string") {
+      // Si es un número (ID), buscar en la lista de títulos
+      if (!isNaN(parseInt(titulo))) {
+        const tituloObj = titulos.find((t) => t.id === parseInt(titulo));
+        return tituloObj ? tituloObj.nombre : "Sin título";
+      }
+      // Si no es un número, asumir que es el nombre del título
+      return titulo;
+    }
+
+    // Si es un número, buscar en la lista de títulos
+    if (typeof titulo === "number") {
+      const tituloObj = titulos.find((t) => t.id === titulo);
+      return tituloObj ? tituloObj.nombre : "Sin título";
+    }
+
+    return "Sin título";
   };
 
   const totalPages = Math.ceil(totalItems / pageSize);
@@ -337,6 +426,11 @@ const ListaPersonas = () => {
                   <TableCell
                     className="text-white font-semibold"
                     style={{ color: "#fff" }}>
+                    Fecha de Nacimiento
+                  </TableCell>
+                  <TableCell
+                    className="text-white font-semibold"
+                    style={{ color: "#fff" }}>
                     Estado
                   </TableCell>
                   <TableCell
@@ -371,7 +465,10 @@ const ListaPersonas = () => {
                       {persona.interno}
                     </TableCell>
                     <TableCell className="text-gray-800">
-                      {persona.titulo}
+                      {obtenerNombreTitulo(persona.titulo)}
+                    </TableCell>
+                    <TableCell className="text-gray-800">
+                      {formatearFecha(persona.fecha_nacimiento)}
                     </TableCell>
                     <TableCell className="text-gray-800">
                       {persona.estado === "1" ? "Activo" : "Inactivo"}
@@ -379,15 +476,23 @@ const ListaPersonas = () => {
                     <TableCell>
                       <div className="flex gap-2">
                         <button
+                          onClick={() => verPersona(persona.id)}
+                          className="p-2 text-green-600 hover:text-green-800 rounded-lg hover:bg-green-100 transition-colors duration-200"
+                          title="Ver detalles">
+                          <VisibilityIcon />
+                        </button>
+                        <button
                           onClick={() =>
                             router.push(`/dashboard/persons/edit/${persona.id}`)
                           }
-                          className="p-2 text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-100 transition-colors duration-200">
+                          className="p-2 text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-100 transition-colors duration-200"
+                          title="Editar">
                           <EditIcon />
                         </button>
                         <button
                           onClick={() => eliminarPersona(persona.id)}
-                          className="p-2 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-100 transition-colors duration-200">
+                          className="p-2 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-100 transition-colors duration-200"
+                          title="Eliminar">
                           <DeleteIcon />
                         </button>
                       </div>
@@ -431,6 +536,180 @@ const ListaPersonas = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal de vista de persona */}
+      {modalViewVisible && viewPersona && (
+        <div
+          className="fixed inset-0 flex items-center justify-center z-[10000]"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}>
+          <div
+            className="fixed inset-0 bg-black opacity-50"
+            onClick={() => setModalViewVisible(false)}></div>
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto z-[10001] relative">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-xl font-bold text-gray-900">
+                Detalles de la Persona
+              </h3>
+            </div>
+
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Información Personal */}
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold text-gray-700 border-b pb-2">
+                    Información Personal
+                  </h4>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        DNI
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {viewPersona.dni || "No especificado"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Legajo
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {viewPersona.legajo || "No especificado"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Nombres
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {viewPersona.nombre || "No especificado"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Apellido
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {viewPersona.apellido || "No especificado"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Fecha de Nacimiento
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {formatearFecha(viewPersona.fecha_nacimiento)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Información de Contacto */}
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold text-gray-700 border-b pb-2">
+                    Información de Contacto
+                  </h4>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Teléfono
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {viewPersona.telefono || "No especificado"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Email
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {viewPersona.email || "No especificado"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Interno
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {viewPersona.interno || "No especificado"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Título
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {obtenerNombreTitulo(viewPersona.titulo)}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Estado
+                      </label>
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          viewPersona.estado === "1"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}>
+                        {viewPersona.estado === "1" ? "Activo" : "Inactivo"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                onClick={() => setModalViewVisible(false)}
+                className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors duration-200">
+                Cerrar
+              </button>
+              <button
+                onClick={() => {
+                  setModalViewVisible(false);
+                  router.push(`/dashboard/persons/edit/${viewPersona.id}`);
+                }}
+                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors duration-200">
+                Editar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de descarga de Excel */}
+      {isDownloading && (
+        <div className="fixed inset-0 flex items-center justify-center z-[10000]">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl p-8 w-96 z-[10001] relative">
+            <h3 className="text-xl font-bold text-center mb-2">Descargando Excel</h3>
+            <hr className="my-3 border-gray-200" />
+            <div className="flex flex-col items-center mb-6">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+              <p className="text-gray-600 text-lg text-center">
+                La descarga está en curso, por favor espere...
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardMenu>
   );
 };

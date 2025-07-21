@@ -12,11 +12,16 @@ import {
   Grid,
   Typography,
 } from "@mui/material";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from "dayjs";
 import BasicModal from "@/utils/modal";
 import { useRouter } from "next/router";
 import DashboardMenu from "../../../dashboard";
 import withAuth from "../../../../components/withAut";
 import API from "@/api/axiosConfig";
+import { formatFechaParaBackend } from "@/utils/dateHelpers";
 
 interface Titulo {
   id: number;
@@ -35,6 +40,7 @@ const CrearPersona = () => {
   const [email, setEmail] = useState("");
   const [interno, setInterno] = useState("");
   const [estado, setEstado] = useState("1"); // Valor por defecto: Activo
+  const [fechaNacimiento, setFechaNacimiento] = useState<dayjs.Dayjs | null>(null);
   const [titulos, setTitulos] = useState<Titulo[]>([]);
   const [tituloId, setTituloId] = useState<number | "">("");
   const [modalVisible, setModalVisible] = useState(false);
@@ -104,6 +110,7 @@ const CrearPersona = () => {
       interno: interno.trim() ? parseInt(interno.trim()) : null,
       legajo: legajo.trim() || null,
       titulo: tituloId || null,
+      fecha_nacimiento: formatFechaParaBackend(fechaNacimiento),
     };
 
     try {
@@ -344,6 +351,63 @@ const CrearPersona = () => {
                     },
                   }}
                 />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    label="Fecha de Nacimiento"
+                    value={fechaNacimiento}
+                    onChange={(date) => setFechaNacimiento(date)}
+                    format="DD/MM/YYYY"
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        variant: "outlined",
+                        size: "small",
+                        className: "modern-input",
+                        sx: {
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: "8px",
+                            backgroundColor: "#ffffff",
+                            border: "1px solid #d1d5db",
+                            transition: "all 0.2s ease",
+                            "&:hover": {
+                              borderColor: "#3b82f6",
+                              backgroundColor: "#ffffff",
+                              boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                            },
+                            "&.Mui-focused": {
+                              borderColor: "#3b82f6",
+                              backgroundColor: "#ffffff",
+                              boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                            },
+                          },
+                          "& .MuiInputLabel-root": {
+                            color: "#6b7280",
+                            fontWeight: "500",
+                            backgroundColor: "#ffffff",
+                            padding: "0 4px",
+                            "&.Mui-focused": {
+                              color: "#3b82f6",
+                              fontWeight: "600",
+                              backgroundColor: "#ffffff",
+                            },
+                            "&.MuiFormLabel-filled": {
+                              backgroundColor: "#ffffff",
+                            },
+                          },
+                          "& .MuiInputBase-input": {
+                            color: "#1f2937",
+                            fontWeight: "500",
+                            fontSize: "0.875rem",
+                            padding: "8px 12px",
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </LocalizationProvider>
               </Grid>
 
               {/* Separador visual */}

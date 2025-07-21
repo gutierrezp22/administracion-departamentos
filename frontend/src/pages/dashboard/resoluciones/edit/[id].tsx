@@ -20,6 +20,7 @@ import { useRouter } from "next/router";
 import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut";
 import API from "@/api/axiosConfig";
+import { parseFechaDDMMYYYY, formatFechaParaBackend } from "@/utils/dateHelpers";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -53,8 +54,7 @@ const EditarResolucion = () => {
           setTipo(response.data.tipo);
           setAdjunto(response.data.adjunto);
 
-          const parsedFecha = dayjs(response.data.fecha, "DD/MM/YYYY HH:mm:ss");
-          setFecha(parsedFecha.isValid() ? parsedFecha : null);
+          setFecha(parseFechaDDMMYYYY(response.data.fecha));
 
           setObservaciones(response.data.observaciones);
           setEstado(String(response.data.estado));
@@ -74,7 +74,7 @@ const EditarResolucion = () => {
       tipo: tipo || "",
       adjunto: adjunto,
       observaciones: observaciones,
-      fecha: fecha && fecha.isValid() ? fecha.toISOString() : "",
+      fecha: formatFechaParaBackend(fecha),
       estado: estado,
     };
 

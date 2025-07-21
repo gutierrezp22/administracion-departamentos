@@ -81,6 +81,9 @@ const ListaResoluciones = () => {
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [viewResolucion, setViewResolucion] = useState<Resolucion | null>(null);
+  const [modalViewVisible, setModalViewVisible] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const router = useRouter();
 
@@ -177,6 +180,7 @@ const ListaResoluciones = () => {
 
   const descargarExcel = async () => {
     try {
+      setIsDownloading(true);
       let allResoluciones: Resolucion[] = [];
       let url = `/facet/resolucion/?`;
       const params = new URLSearchParams();
@@ -243,7 +247,13 @@ const ListaResoluciones = () => {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
       saveAs(excelBlob, "resoluciones.xlsx");
+      
+      // Simular un pequeño delay para mostrar el modal antes de cerrar
+      setTimeout(() => {
+        setIsDownloading(false);
+      }, 1500);
     } catch (error) {
+      setIsDownloading(false);
       Swal.fire({
         icon: "error",
         title: "Error al descargar",
@@ -253,6 +263,20 @@ const ListaResoluciones = () => {
   };
 
   const totalPages = Math.ceil(totalItems / pageSize);
+
+  const verResolucion = async (id: number) => {
+    try {
+      const response = await API.get(`/facet/resolucion/${id}/`);
+      setViewResolucion(response.data);
+      setModalViewVisible(true);
+    } catch (error) {
+      Swal.fire(
+        "Error!",
+        "No se pudo obtener los datos de la resolución.",
+        "error"
+      );
+    }
+  };
 
   const eliminarResolucion = async (id: number) => {
     try {
@@ -459,6 +483,13 @@ const ListaResoluciones = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-center gap-2">
+                        <Tooltip title="Ver detalles">
+                          <button
+                            onClick={() => verResolucion(resolucion.id)}
+                            className="p-2 text-green-600 hover:text-green-800 rounded-lg hover:bg-green-100 transition-colors duration-200">
+                            <VisibilityIcon />
+                          </button>
+                        </Tooltip>
                         <Tooltip title="Editar">
                           <button
                             onClick={() =>
@@ -512,6 +543,193 @@ const ListaResoluciones = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal de vista de resolución */}
+      {modalViewVisible && viewResolucion && (
+        <div
+          className="fixed inset-0 flex items-center justify-center z-[10000]"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}>
+          <div
+            className="fixed inset-0 bg-black opacity-50"
+            onClick={() => setModalViewVisible(false)}></div>
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto z-[10001] relative">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-xl font-bold text-gray-900">
+                Detalles de la Resolución
+              </h3>
+            </div>
+
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Información Principal */}
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold text-gray-700 border-b pb-2">
+                    Información Principal
+                  </h4>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        N° Expediente
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {viewResolucion.nexpediente || "No especificado"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        N° Resolución
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {viewResolucion.nresolucion || "No especificado"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Tipo
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {viewResolucion.tipo === "Consejo_Superior"
+                          ? "Consejo Superior"
+                          : viewResolucion.tipo === "Consejo_Directivo"
+                          ? "Consejo Directivo"
+                          : viewResolucion.tipo || "No especificado"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Estado
+                      </label>
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          viewResolucion.estado == 1
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}>
+                        {viewResolucion.estado == 1 ? "Activo" : "Inactivo"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Información de Fechas y Archivos */}
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold text-gray-700 border-b pb-2">
+                    Fechas y Archivos
+                  </h4>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Fecha
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {dayjs(viewResolucion.fecha, "DD/MM/YYYY HH:mm:ss").isValid()
+                          ? dayjs(viewResolucion.fecha, "DD/MM/YYYY HH:mm:ss").format(
+                              "DD/MM/YYYY"
+                            )
+                          : "No disponible"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Fecha de Carga
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {dayjs(
+                          viewResolucion.fecha_creacion,
+                          "DD/MM/YYYY HH:mm:ss"
+                        ).isValid()
+                          ? dayjs(viewResolucion.fecha_creacion, "DD/MM/YYYY").format(
+                              "DD/MM/YYYY"
+                            )
+                          : "No disponible"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Adjunto
+                      </label>
+                      {viewResolucion.adjunto ? (
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={viewResolucion.adjunto}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium">
+                            <TextSnippetIcon />
+                            Ver archivo
+                          </a>
+                        </div>
+                      ) : (
+                        <p className="text-gray-500 italic">Sin adjunto</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Observaciones - Ancho completo */}
+              {viewResolucion.observaciones && (
+                <div className="mt-6">
+                  <h4 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">
+                    Observaciones
+                  </h4>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-gray-900 whitespace-pre-wrap">
+                      {viewResolucion.observaciones}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                onClick={() => setModalViewVisible(false)}
+                className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors duration-200">
+                Cerrar
+              </button>
+              <button
+                onClick={() => {
+                  setModalViewVisible(false);
+                  router.push(`/dashboard/resoluciones/edit/${viewResolucion.id}`);
+                }}
+                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors duration-200">
+                Editar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de descarga de Excel */}
+      {isDownloading && (
+        <div className="fixed inset-0 flex items-center justify-center z-[10000]">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white rounded-lg shadow-xl p-8 w-96 z-[10001] relative">
+            <h3 className="text-xl font-bold text-center mb-2">Descargando Excel</h3>
+            <hr className="my-3 border-gray-200" />
+            <div className="flex flex-col items-center mb-6">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+              <p className="text-gray-600 text-lg text-center">
+                La descarga está en curso, por favor espere...
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardMenu>
   );
 };
