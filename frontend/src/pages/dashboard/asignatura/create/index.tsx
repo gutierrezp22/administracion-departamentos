@@ -663,7 +663,7 @@ const CrearAsignatura = () => {
             <TableContainer
               component={Paper}
               className="shadow-lg rounded-lg overflow-hidden"
-              style={{ maxHeight: "400px" }}>
+              style={{ maxHeight: "400px", overflow: "auto" }}>
               <Table size="small">
                 <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
                   <TableRow>
@@ -692,10 +692,10 @@ const CrearAsignatura = () => {
                       <TableCell className="py-2">
                         <button
                           onClick={() => setAreaSeleccionada(area)}
-                          className={`px-3 py-1 rounded-lg transition-all duration-200 border font-medium text-sm ${
+                          className={`px-3 py-1 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium text-sm ${
                             areaSeleccionada?.id === area.id
-                              ? "bg-gradient-to-r from-green-500 to-green-600 text-white border-green-500 hover:from-green-600 hover:to-green-700 shadow-md transform hover:scale-105"
-                              : "border-gray-300 hover:bg-gray-100"
+                              ? "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+                              : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
                           }`}>
                           Seleccionar
                         </button>

@@ -955,7 +955,7 @@ const CrearDocenteAsignatura: React.FC = () => {
             <TableContainer
               component={Paper}
               className="shadow-lg rounded-lg overflow-hidden"
-              style={{ maxHeight: "400px" }}>
+              style={{ maxHeight: "400px", overflow: "auto" }}>
               <Table size="small">
                 <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
                   <TableRow>
@@ -999,7 +999,7 @@ const CrearDocenteAsignatura: React.FC = () => {
                             setPersona(docente);
                             handleClosePersona();
                           }}
-                          className="px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-100 font-medium text-sm">
+                          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-1 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium text-sm">
                           Seleccionar
                         </button>
                       </TableCell>
@@ -1099,7 +1099,7 @@ const CrearDocenteAsignatura: React.FC = () => {
             <TableContainer
               component={Paper}
               className="shadow-lg rounded-lg overflow-hidden"
-              style={{ maxHeight: "400px" }}>
+              style={{ maxHeight: "400px", overflow: "auto" }}>
               <Table size="small">
                 <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
                   <TableRow>
@@ -1151,7 +1151,7 @@ const CrearDocenteAsignatura: React.FC = () => {
                             setResolucion(resol);
                             handleCloseResolucion();
                           }}
-                          className="px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-100 font-medium text-sm">
+                          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-1 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium text-sm">
                           Seleccionar
                         </button>
                       </TableCell>

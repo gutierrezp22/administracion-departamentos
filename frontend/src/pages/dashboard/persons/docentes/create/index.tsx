@@ -562,7 +562,7 @@ const CrearDocente = () => {
               <TableContainer
                 component={Paper}
                 className="shadow-lg rounded-lg overflow-hidden"
-                style={{ maxHeight: "400px" }}>
+                style={{ maxHeight: "400px", overflow: "auto" }}>
                 <Table size="small">
                   <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
                     <TableRow>
@@ -609,7 +609,7 @@ const CrearDocente = () => {
                               setNombre(p.nombre);
                               handleClose();
                             }}
-                            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-3 py-1 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium text-sm">
+                            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-1 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium text-sm">
                             Seleccionar
                           </button>
                         </TableCell>

@@ -823,7 +823,7 @@ const ListaCarreras = () => {
                 <TableContainer
                   component={Paper}
                   className="shadow-lg rounded-lg overflow-hidden"
-                  style={{ maxHeight: "400px" }}>
+                  style={{ maxHeight: "400px", overflow: "auto" }}>
                   <Table size="small">
                     <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
                       <TableRow>
