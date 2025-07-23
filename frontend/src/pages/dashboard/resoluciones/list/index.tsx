@@ -20,6 +20,7 @@ import {
   FormControl,
   Grid,
 } from "@mui/material";
+import ResponsiveTable from "../../../../components/ResponsiveTable";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -380,57 +381,38 @@ const ListaResoluciones = () => {
             <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
           </FilterContainer>
 
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <Table>
-              <TableHead>
-                <TableRow className="bg-blue-500">
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Nro Expediente
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Nro Resolución
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Tipo
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Fecha
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Carga
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Estado
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Adjunto
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Observaciones
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Acciones
-                  </TableCell>
-                </TableRow>
-              </TableHead>
+          <ResponsiveTable>
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  Nro Expediente
+                </TableCell>
+                <TableCell>
+                  Nro Resolución
+                </TableCell>
+                <TableCell>
+                  Tipo
+                </TableCell>
+                <TableCell>
+                  Fecha
+                </TableCell>
+                <TableCell>
+                  Carga
+                </TableCell>
+                <TableCell>
+                  Estado
+                </TableCell>
+                <TableCell>
+                  Adjunto
+                </TableCell>
+                <TableCell>
+                  Observaciones
+                </TableCell>
+                <TableCell>
+                  Acciones
+                </TableCell>
+              </TableRow>
+            </TableHead>
               <TableBody>
                 {resoluciones.map((resolucion) => (
                   <TableRow key={resolucion.id} className="hover:bg-gray-50">
@@ -513,8 +495,7 @@ const ListaResoluciones = () => {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
-          </div>
+          </ResponsiveTable>
 
           <div className="flex justify-between items-center mt-6">
             <button

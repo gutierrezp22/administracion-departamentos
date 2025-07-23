@@ -75,17 +75,35 @@ const CrearDepartamento = () => {
     router.push("/dashboard/departments/"); // Redirige después de cerrar el modal
   };
 
+  const validarEmail = (email) => {
+    if (!email) return true; // Los emails son opcionales
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const crearNuevoDepartamento = async () => {
+    // Validar emails antes de enviar
+    if (mailDepartamento && !validarEmail(mailDepartamento)) {
+      handleOpenModal("Error", "El Email del Departamento no tiene un formato válido.", () => {});
+      return;
+    }
+    
+    if (mailJefeDepartamento && !validarEmail(mailJefeDepartamento)) {
+      handleOpenModal("Error", "El Email del Jefe del Departamento no tiene un formato válido.", () => {});
+      return;
+    }
+
     let nuevoDepartamento = {
       nombre: nombre,
       telefono: telefono,
       estado: Number(estado), // Asegúrate de convertir a número
       interno: interno,
-      mail_departamento: mailDepartamento,
-      mail_jefe_departamento: mailJefeDepartamento,
+      mail_departamento: mailDepartamento || null,
+      mail_jefe_departamento: mailJefeDepartamento || null,
     };
 
     try {
+      console.log("Datos enviados:", nuevoDepartamento);
       const response = await API.post(
         "/facet/departamento/",
         nuevoDepartamento
@@ -96,7 +114,40 @@ const CrearDepartamento = () => {
         handleConfirmModal
       );
     } catch (error) {
-      handleOpenModal("Error", "NO se pudo realizar la acción.", () => {});
+      console.error("Error completo:", error);
+      console.error("Error response:", error.response?.data);
+      console.error("Error status:", error.response?.status);
+      
+      let errorMessage = "NO se pudo realizar la acción.";
+      if (error.response?.data) {
+        if (typeof error.response.data === 'string') {
+          errorMessage = error.response.data;
+        } else if (error.response.data.detail) {
+          errorMessage = error.response.data.detail;
+        } else if (error.response.data.message) {
+          errorMessage = error.response.data.message;
+        } else {
+          // Formatear errores de validación del backend
+          const errors = [];
+          for (const field in error.response.data) {
+            const fieldErrors = error.response.data[field];
+            if (Array.isArray(fieldErrors)) {
+              fieldErrors.forEach(err => {
+                let fieldName = field;
+                if (field === 'mail_departamento') fieldName = 'Email del Departamento';
+                else if (field === 'mail_jefe_departamento') fieldName = 'Email del Jefe';
+                else if (field === 'nombre') fieldName = 'Nombre';
+                else if (field === 'telefono') fieldName = 'Teléfono';
+                
+                errors.push(`${fieldName}: ${err}`);
+              });
+            }
+          }
+          errorMessage = errors.length > 0 ? errors.join('\n') : JSON.stringify(error.response.data);
+        }
+      }
+      
+      handleOpenModal("Error", errorMessage, () => {});
     }
   };
 

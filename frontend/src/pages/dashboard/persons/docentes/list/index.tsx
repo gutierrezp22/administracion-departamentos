@@ -20,6 +20,7 @@ import {
   FormControl,
   Grid,
 } from "@mui/material";
+import ResponsiveTable from "../../../../../components/ResponsiveTable";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -72,6 +73,7 @@ const ListaDocentes = () => {
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const router = useRouter();
 
@@ -81,28 +83,18 @@ const ListaDocentes = () => {
 
   const fetchData = async (url: string) => {
     try {
-      // Si la URL es absoluta (comienza con http), extraer solo la parte de la ruta
-      let apiUrl = url;
-      if (url.startsWith("http")) {
-        const urlObj = new URL(url);
-        apiUrl = urlObj.pathname + urlObj.search;
-      }
-
-      const response = await API.get(apiUrl);
+      setIsLoading(true);
+      const response = await API.get(url);
       setDocentes(response.data.results);
       setNextUrl(response.data.next ? normalizeUrl(response.data.next) : null);
       setPrevUrl(
         response.data.previous ? normalizeUrl(response.data.previous) : null
       );
       setTotalItems(response.data.count);
-
-      // Calcular la página actual basándose en los parámetros de la URL
-      const urlParams = new URLSearchParams(apiUrl.split("?")[1] || "");
-      const offset = parseInt(urlParams.get("offset") || "0");
-      const limit = parseInt(urlParams.get("limit") || "10");
-      const calculatedPage = Math.floor(offset / limit) + 1;
-      setCurrentPage(calculatedPage);
+      // Pequeño delay para asegurar que los estilos se cargan
+      setTimeout(() => setIsLoading(false), 500);
     } catch (error) {
+      setIsLoading(false);
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -227,6 +219,22 @@ const ListaDocentes = () => {
 
   const totalPages = Math.ceil(totalItems / pageSize);
 
+  // Modal de loading
+  if (isLoading) {
+    return (
+      <DashboardMenu>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+            <p className="text-gray-700 text-lg font-medium">
+              Cargando docentes...
+            </p>
+          </div>
+        </div>
+      </DashboardMenu>
+    );
+  }
+
   return (
     <DashboardMenu>
       <div className="bg-white rounded-lg shadow-lg">
@@ -276,57 +284,38 @@ const ListaDocentes = () => {
             <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
           </FilterContainer>
 
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <Table>
-              <TableHead>
-                <TableRow className="bg-blue-500">
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Nombre
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Apellido
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    DNI
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Legajo
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Teléfono
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Email
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Interno
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Estado
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Acciones
-                  </TableCell>
-                </TableRow>
-              </TableHead>
+          <ResponsiveTable>
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  Nombre
+                </TableCell>
+                <TableCell>
+                  Apellido
+                </TableCell>
+                <TableCell>
+                  DNI
+                </TableCell>
+                <TableCell>
+                  Legajo
+                </TableCell>
+                <TableCell>
+                  Teléfono
+                </TableCell>
+                <TableCell>
+                  Email
+                </TableCell>
+                <TableCell>
+                  Interno
+                </TableCell>
+                <TableCell>
+                  Estado
+                </TableCell>
+                <TableCell>
+                  Acciones
+                </TableCell>
+              </TableRow>
+            </TableHead>
               <TableBody>
                 {docentes.map((docente) => (
                   <TableRow key={docente.id} className="hover:bg-gray-50">
@@ -391,8 +380,7 @@ const ListaDocentes = () => {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
-          </div>
+          </ResponsiveTable>
 
           <div className="flex justify-between items-center mt-6">
             <button

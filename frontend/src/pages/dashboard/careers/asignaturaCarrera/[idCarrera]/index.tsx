@@ -15,6 +15,7 @@ import {
   FormControl,
   Select,
 } from "@mui/material";
+import ResponsiveTable from "../../../../../components/ResponsiveTable";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -353,24 +354,24 @@ const ListaAsignaturaCarrera = () => {
             </button>
           </div>
 
-          <TableContainer component={Paper} className="mb-4">
+          <ResponsiveTable>
             <Table>
               <TableHead>
-                <TableRow className="bg-blue-500 text-white">
-                  <TableCell className="text-white font-medium">
+                <TableRow>
+                  <TableCell>
                     Código
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell>
                     Asignatura
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell>
                     Módulo
                   </TableCell>
-                  <TableCell className="text-white font-medium">
+                  <TableCell>
                     Departamento
                   </TableCell>
-                  <TableCell className="text-white font-medium">Área</TableCell>
-                  <TableCell className="text-white font-medium" align="center">
+                  <TableCell>Área</TableCell>
+                  <TableCell align="center">
                     Acciones
                   </TableCell>
                 </TableRow>
@@ -423,7 +424,7 @@ const ListaAsignaturaCarrera = () => {
                 )}
               </TableBody>
             </Table>
-          </TableContainer>
+          </ResponsiveTable>
 
           <div className="flex justify-between items-center mt-4">
             <button

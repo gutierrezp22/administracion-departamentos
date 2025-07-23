@@ -57,6 +57,11 @@ const getFieldDisplayName = (fieldName: string): string => {
   return fieldNames[fieldName] || fieldName;
 };
 
+// Función para normalizar URLs de paginación
+const normalizeUrl = (url: string) => {
+  return url.replace(window.location.origin, "").replace(/^\/+/, "/");
+};
+
 const CrearDocenteAsignatura: React.FC = () => {
   const router = useRouter();
   const { idAsignatura } = router.query;
@@ -161,8 +166,8 @@ const CrearDocenteAsignatura: React.FC = () => {
     try {
       const response = await API.get(url);
       setPersonas(response.data.results);
-      setNextUrlPersonas(response.data.next);
-      setPrevUrlPersonas(response.data.previous);
+      setNextUrlPersonas(response.data.next ? normalizeUrl(response.data.next) : null);
+      setPrevUrlPersonas(response.data.previous ? normalizeUrl(response.data.previous) : null);
       setTotalItemsPersonas(response.data.count);
 
       // Calcular página actual
@@ -210,8 +215,8 @@ const CrearDocenteAsignatura: React.FC = () => {
     try {
       const response = await API.get(url);
       setResoluciones(response.data.results);
-      setNextUrlResoluciones(response.data.next);
-      setPrevUrlResoluciones(response.data.previous);
+      setNextUrlResoluciones(response.data.next ? normalizeUrl(response.data.next) : null);
+      setPrevUrlResoluciones(response.data.previous ? normalizeUrl(response.data.previous) : null);
       setTotalItemsResoluciones(response.data.count);
 
       // Calcular página actual

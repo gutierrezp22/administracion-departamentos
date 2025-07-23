@@ -20,6 +20,7 @@ import {
   FormControl,
   Grid,
 } from "@mui/material";
+import ResponsiveTable from "../../../../components/ResponsiveTable";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -38,6 +39,11 @@ import {
   FilterSelect,
   EstadoFilter,
 } from "../../../../components/Filters";
+
+// Función para normalizar URLs de paginación
+const normalizeUrl = (url: string) => {
+  return url.replace(window.location.origin, "").replace(/^\/+/, "/");
+};
 
 const ListaAsignaturas = () => {
   interface Asignatura {
@@ -75,6 +81,7 @@ const ListaAsignaturas = () => {
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const router = useRouter();
 
@@ -84,12 +91,16 @@ const ListaAsignaturas = () => {
 
   const fetchData = async (url: string) => {
     try {
+      setIsLoading(true);
       const response = await API.get(url);
       setAsignaturas(response.data.results);
-      setNextUrl(response.data.next);
-      setPrevUrl(response.data.previous);
+      setNextUrl(response.data.next ? normalizeUrl(response.data.next) : null);
+      setPrevUrl(response.data.previous ? normalizeUrl(response.data.previous) : null);
       setTotalItems(response.data.count);
+      // Pequeño delay para asegurar que los estilos se cargan
+      setTimeout(() => setIsLoading(false), 500);
     } catch (error) {
+      setIsLoading(false);
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -192,6 +203,22 @@ const ListaAsignaturas = () => {
   };
 
   const totalPages = Math.ceil(totalItems / pageSize);
+
+  // Modal de loading
+  if (isLoading) {
+    return (
+      <DashboardMenu>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+            <p className="text-gray-700 text-lg font-medium">
+              Cargando asignaturas...
+            </p>
+          </div>
+        </div>
+      </DashboardMenu>
+    );
+  }
 
   const descargarExcel = async () => {
     try {
@@ -307,62 +334,41 @@ const ListaAsignaturas = () => {
             <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
           </FilterContainer>
 
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <Table>
-              <TableHead>
-                <TableRow className="bg-blue-500">
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Código
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Nombre
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Módulo
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Programa
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Tipo
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Área
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Departamento
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Estado
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Docentes
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Acciones
-                  </TableCell>
-                </TableRow>
-              </TableHead>
+          <ResponsiveTable>
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  Código
+                </TableCell>
+                <TableCell>
+                  Nombre
+                </TableCell>
+                <TableCell>
+                  Módulo
+                </TableCell>
+                <TableCell>
+                  Programa
+                </TableCell>
+                <TableCell>
+                  Tipo
+                </TableCell>
+                <TableCell>
+                  Área
+                </TableCell>
+                <TableCell>
+                  Departamento
+                </TableCell>
+                <TableCell>
+                  Estado
+                </TableCell>
+                <TableCell>
+                  Docentes
+                </TableCell>
+                <TableCell>
+                  Acciones
+                </TableCell>
+              </TableRow>
+            </TableHead>
               <TableBody>
                 {asignaturas.map((asignatura) => (
                   <TableRow key={asignatura.id} className="hover:bg-gray-50">
@@ -423,8 +429,7 @@ const ListaAsignaturas = () => {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
-          </div>
+          </ResponsiveTable>
 
           <div className="flex justify-between items-center mt-6">
             <button

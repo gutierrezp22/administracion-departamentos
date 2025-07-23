@@ -18,6 +18,7 @@ import {
   InputLabel,
   FormControl,
 } from "@mui/material";
+import ResponsiveTable from "../../../../components/ResponsiveTable";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import ViewComfyIcon from "@mui/icons-material/ViewComfy";
@@ -60,6 +61,7 @@ const ListaDepartamentos = () => {
   const [totalItems, setTotalItems] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Función para normalizar URLs y evitar duplicación de /api/api/ en producción
   const normalizeUrl = (url: string) => {
@@ -76,6 +78,7 @@ const ListaDepartamentos = () => {
 
   const fetchData = async (url: string) => {
     try {
+      setIsLoading(true);
       const response = await API.get(url);
       setDepartamentos(response.data.results);
 
@@ -101,6 +104,8 @@ const ListaDepartamentos = () => {
         title: "Error",
         text: "Error al obtener los datos.",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -235,6 +240,22 @@ const ListaDepartamentos = () => {
     }
   };
 
+  // Modal de loading
+  if (isLoading) {
+    return (
+      <DashboardMenu>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+            <p className="text-gray-700 text-lg font-medium">
+              Cargando departamentos...
+            </p>
+          </div>
+        </div>
+      </DashboardMenu>
+    );
+  }
+
   return (
     <DashboardMenu>
       <div className="bg-white rounded-lg shadow-lg">
@@ -281,47 +302,32 @@ const ListaDepartamentos = () => {
             <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
           </FilterContainer>
 
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <Table>
-              <TableHead>
-                <TableRow className="bg-blue-500">
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Nombre
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Teléfono
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Interno
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Mail Departamento
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Mail Jefe
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Estado
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Acciones
-                  </TableCell>
-                </TableRow>
-              </TableHead>
+          <ResponsiveTable>
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  Nombre
+                </TableCell>
+                <TableCell>
+                  Teléfono
+                </TableCell>
+                <TableCell>
+                  Interno
+                </TableCell>
+                <TableCell>
+                  Mail Departamento
+                </TableCell>
+                <TableCell>
+                  Mail Jefe
+                </TableCell>
+                <TableCell>
+                  Estado
+                </TableCell>
+                <TableCell>
+                  Acciones
+                </TableCell>
+              </TableRow>
+            </TableHead>
               <TableBody>
                 {departamentos.map((departamento) => (
                   <TableRow key={departamento.id} className="hover:bg-gray-50">
@@ -364,8 +370,7 @@ const ListaDepartamentos = () => {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
-          </div>
+          </ResponsiveTable>
 
           <div className="flex justify-between items-center mt-6">
             <button
