@@ -24,6 +24,7 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
+import ResponsiveTable from "../../../../components/ResponsiveTable";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -679,85 +680,73 @@ const ListaCarreras = () => {
               <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
             </FilterContainer>
 
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <Table>
-                <TableHead>
-                  <TableRow className="bg-blue-500">
-                    <TableCell
-                      className="text-white font-semibold"
-                      style={{ color: "#fff" }}>
-                      Nombre
+            <ResponsiveTable>
+              <TableHead>
+                <TableRow>
+                  <TableCell>
+                    Nombre
+                  </TableCell>
+                  <TableCell>
+                    Tipo
+                  </TableCell>
+                  <TableCell>
+                    Plan de Estudio
+                  </TableCell>
+                  <TableCell>
+                    Estado
+                  </TableCell>
+                  <TableCell>
+                    Acciones
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {carreras.map((carrera) => (
+                  <TableRow
+                    key={carrera.id}
+                    className="hover:bg-gray-50 transition-colors duration-150">
+                    <TableCell className="text-gray-800">
+                      {carrera.nombre}
                     </TableCell>
-                    <TableCell
-                      className="text-white font-semibold"
-                      style={{ color: "#fff" }}>
-                      Tipo
+                    <TableCell className="text-gray-800">
+                      {carrera.tipo}
                     </TableCell>
-                    <TableCell
-                      className="text-white font-semibold"
-                      style={{ color: "#fff" }}>
-                      Plan de Estudio
+                    <TableCell className="text-gray-800">
+                      {carrera.planestudio}
                     </TableCell>
-                    <TableCell
-                      className="text-white font-semibold"
-                      style={{ color: "#fff" }}>
-                      Estado
+                    <TableCell className="text-gray-800">
+                      {carrera.estado === "1" ? "Activo" : "Inactivo"}
                     </TableCell>
-                    <TableCell
-                      className="text-white font-semibold"
-                      style={{ color: "#fff" }}>
-                      Acciones
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => verAsignaturasCarrera(carrera)}
+                          className="p-2 text-green-600 hover:text-green-800 rounded-full hover:bg-green-100 transition-colors duration-200"
+                          title="Ver Asignaturas">
+                          <SubjectIcon />
+                        </button>
+                        <button
+                          onClick={() =>
+                            router.push(
+                              `/dashboard/careers/edit/${carrera.id}`
+                            )
+                          }
+                          className="p-2 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-100 transition-colors duration-200"
+                          title="Editar">
+                          <EditIcon />
+                        </button>
+                        <button
+                          onClick={() => eliminarCarrera(carrera.id)}
+                          className="p-2 text-red-600 hover:text-red-800 rounded-full hover:bg-red-100 transition-colors duration-200"
+                          title="Eliminar">
+                          <DeleteIcon />
+                        </button>
+                      </div>
                     </TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {carreras.map((carrera) => (
-                    <TableRow
-                      key={carrera.id}
-                      className="hover:bg-gray-50 transition-colors duration-150">
-                      <TableCell className="text-gray-800">
-                        {carrera.nombre}
-                      </TableCell>
-                      <TableCell className="text-gray-800">
-                        {carrera.tipo}
-                      </TableCell>
-                      <TableCell className="text-gray-800">
-                        {carrera.planestudio}
-                      </TableCell>
-                      <TableCell className="text-gray-800">
-                        {carrera.estado === "1" ? "Activo" : "Inactivo"}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => verAsignaturasCarrera(carrera)}
-                            className="p-2 text-green-600 hover:text-green-800 rounded-full hover:bg-green-100 transition-colors duration-200"
-                            title="Ver Asignaturas">
-                            <SubjectIcon />
-                          </button>
-                          <button
-                            onClick={() =>
-                              router.push(
-                                `/dashboard/careers/edit/${carrera.id}`
-                              )
-                            }
-                            className="p-2 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-100 transition-colors duration-200"
-                            title="Editar">
-                            <EditIcon />
-                          </button>
-                          <button
-                            onClick={() => eliminarCarrera(carrera.id)}
-                            className="p-2 text-red-600 hover:text-red-800 rounded-full hover:bg-red-100 transition-colors duration-200"
-                            title="Eliminar">
-                            <DeleteIcon />
-                          </button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                ))}
+              </TableBody>
+            </ResponsiveTable>
 
             <div className="flex justify-between items-center mt-6">
               <button
@@ -834,7 +823,7 @@ const ListaCarreras = () => {
                 <TableContainer
                   component={Paper}
                   className="shadow-lg rounded-lg overflow-hidden"
-                  style={{ maxHeight: "400px" }}>
+                  style={{ maxHeight: "400px", overflow: "auto" }}>
                   <Table size="small">
                     <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
                       <TableRow>

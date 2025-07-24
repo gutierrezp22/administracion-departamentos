@@ -20,6 +20,7 @@ import {
   FormControl,
   Grid,
 } from "@mui/material";
+import ResponsiveTable from "../../../../components/ResponsiveTable";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -41,7 +42,7 @@ import {
 
 // Función para normalizar URLs de paginación
 const normalizeUrl = (url: string) => {
-  return url.replace(window.location.origin, "").replace(/^/+/, "/");
+  return url.replace(window.location.origin, "").replace(/^\/+/, "/");
 };
 
 const ListaAsignaturas = () => {
@@ -333,62 +334,41 @@ const ListaAsignaturas = () => {
             <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
           </FilterContainer>
 
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <Table>
-              <TableHead>
-                <TableRow className="bg-blue-500">
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Código
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Nombre
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Módulo
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Programa
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Tipo
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Área
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Departamento
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Estado
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Docentes
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Acciones
-                  </TableCell>
-                </TableRow>
-              </TableHead>
+          <ResponsiveTable>
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  Código
+                </TableCell>
+                <TableCell>
+                  Nombre
+                </TableCell>
+                <TableCell>
+                  Módulo
+                </TableCell>
+                <TableCell>
+                  Programa
+                </TableCell>
+                <TableCell>
+                  Tipo
+                </TableCell>
+                <TableCell>
+                  Área
+                </TableCell>
+                <TableCell>
+                  Departamento
+                </TableCell>
+                <TableCell>
+                  Estado
+                </TableCell>
+                <TableCell>
+                  Docentes
+                </TableCell>
+                <TableCell>
+                  Acciones
+                </TableCell>
+              </TableRow>
+            </TableHead>
               <TableBody>
                 {asignaturas.map((asignatura) => (
                   <TableRow key={asignatura.id} className="hover:bg-gray-50">
@@ -449,8 +429,7 @@ const ListaAsignaturas = () => {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
-          </div>
+          </ResponsiveTable>
 
           <div className="flex justify-between items-center mt-6">
             <button

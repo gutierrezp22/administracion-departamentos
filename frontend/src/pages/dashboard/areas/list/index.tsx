@@ -20,6 +20,7 @@ import {
   FormControl,
   Grid,
 } from "@mui/material";
+import ResponsiveTable from "../../../../components/ResponsiveTable";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -39,7 +40,7 @@ import {
 
 // Función para normalizar URLs de paginación
 const normalizeUrl = (url: string) => {
-  return url.replace(window.location.origin, "").replace(/^/+/, "/");
+  return url.replace(window.location.origin, "").replace(/^\/+/, "/");
 };
 
 const ListaAreas = () => {
@@ -259,59 +260,45 @@ const ListaAreas = () => {
               <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
             </FilterContainer>
 
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <Table>
-                <TableHead>
-                  <TableRow className="bg-blue-500">
-                    <TableCell
-                      className="text-white font-semibold"
-                      style={{ color: "#fff" }}>
-                      Nombre
+            <ResponsiveTable>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Nombre</TableCell>
+                  <TableCell>Estado</TableCell>
+                  <TableCell>Acciones</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {areas.map((area) => (
+                  <TableRow
+                    key={area.id}
+                    className="hover:bg-gray-50 transition-colors duration-150">
+                    <TableCell className="text-gray-800">
+                      {area.nombre}
                     </TableCell>
-                    <TableCell
-                      className="text-white font-semibold"
-                      style={{ color: "#fff" }}>
-                      Estado
+                    <TableCell className="text-gray-800">
+                      {area.estado === "1" ? "Activo" : "Inactivo"}
                     </TableCell>
-                    <TableCell
-                      className="text-white font-semibold"
-                      style={{ color: "#fff" }}>
-                      Acciones
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() =>
+                            router.push(`/dashboard/areas/edit/${area.id}`)
+                          }
+                          className="p-2 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-100 transition-colors duration-200">
+                          <EditIcon />
+                        </button>
+                        <button
+                          onClick={() => eliminarArea(area.id)}
+                          className="p-2 text-red-600 hover:text-red-800 rounded-full hover:bg-red-100 transition-colors duration-200">
+                          <DeleteIcon />
+                        </button>
+                      </div>
                     </TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {areas.map((area) => (
-                    <TableRow
-                      key={area.id}
-                      className="hover:bg-gray-50 transition-colors duration-150">
-                      <TableCell className="text-gray-800">
-                        {area.nombre}
-                      </TableCell>
-                      <TableCell className="text-gray-800">
-                        {area.estado === "1" ? "Activo" : "Inactivo"}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() =>
-                              router.push(`/dashboard/areas/edit/${area.id}`)
-                            }
-                            className="p-2 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-100 transition-colors duration-200">
-                            <EditIcon />
-                          </button>
-                          <button
-                            onClick={() => eliminarArea(area.id)}
-                            className="p-2 text-red-600 hover:text-red-800 rounded-full hover:bg-red-100 transition-colors duration-200">
-                            <DeleteIcon />
-                          </button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                ))}
+              </TableBody>
+            </ResponsiveTable>
 
             <div className="flex justify-between items-center mt-6">
               <button

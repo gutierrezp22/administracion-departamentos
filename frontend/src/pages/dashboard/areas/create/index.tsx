@@ -169,9 +169,6 @@ const CrearArea = () => {
     }
   };
 
-  const confirmarSeleccionDepartamento = () => {
-    handleCloseDepartamentoModal();
-  };
 
   return (
     <DashboardMenu>
@@ -434,15 +431,16 @@ const CrearArea = () => {
                       </TableCell>
                       <TableCell className="py-2">
                         <button
-                          onClick={() =>
-                            setDepartamentoSeleccionado(departamento)
-                          }
-                          className={`px-3 py-1 rounded-lg transition-all duration-200 border font-medium text-sm ${
+                          onClick={() => {
+                            setDepartamentoSeleccionado(departamento);
+                            handleCloseDepartamentoModal();
+                          }}
+                          className={`px-3 py-1 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium text-sm ${
                             departamentoSeleccionado?.id === departamento.id
-                              ? "bg-gradient-to-r from-green-500 to-green-600 text-white border-green-500 hover:from-green-600 hover:to-green-700 shadow-md transform hover:scale-105"
-                              : "border-gray-300 hover:bg-gray-100"
+                              ? "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+                              : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
                           }`}>
-                          Seleccionar
+                          {departamentoSeleccionado?.id === departamento.id ? "Seleccionado" : "Seleccionar"}
                         </button>
                       </TableCell>
                     </TableRow>
@@ -483,16 +481,6 @@ const CrearArea = () => {
               onClick={handleCloseDepartamentoModal}
               className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-all duration-200 font-medium">
               Cerrar
-            </button>
-            <button
-              onClick={confirmarSeleccionDepartamento}
-              disabled={!departamentoSeleccionado}
-              className={`ml-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                !departamentoSeleccionado
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
-              }`}>
-              Confirmar Selección
             </button>
           </DialogActions>
         </Dialog>

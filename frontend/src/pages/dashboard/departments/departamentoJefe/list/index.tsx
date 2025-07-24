@@ -20,6 +20,7 @@ import {
   FormControl,
   Grid,
 } from "@mui/material";
+import ResponsiveTable from "../../../../../components/ResponsiveTable";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -30,6 +31,7 @@ import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 import DashboardMenu from "../../..";
 import withAuth from "../../../../../components/withAut";
+import { normalizeUrl } from "../../../../../utils/urlHelpers";
 
 import {
   FilterContainer,
@@ -363,42 +365,41 @@ const ListaJefesDepartamentos = () => {
             />
           </FilterContainer>
 
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <Table>
-              <TableHead>
-                <TableRow className="bg-blue-500">
-                  <TableCell className="text-white font-semibold">
-                    Nombre
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Apellido
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    DNI
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Legajo
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Departamento
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Resolución
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Fecha Inicio
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Fecha Fin
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Estado
-                  </TableCell>
-                  <TableCell className="text-white font-semibold">
-                    Acciones
-                  </TableCell>
-                </TableRow>
-              </TableHead>
+          <ResponsiveTable>
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  Nombre
+                </TableCell>
+                <TableCell>
+                  Apellido
+                </TableCell>
+                <TableCell>
+                  DNI
+                </TableCell>
+                <TableCell>
+                  Legajo
+                </TableCell>
+                <TableCell>
+                  Departamento
+                </TableCell>
+                <TableCell>
+                  Resolución
+                </TableCell>
+                <TableCell>
+                  Fecha Inicio
+                </TableCell>
+                <TableCell>
+                  Fecha Fin
+                </TableCell>
+                <TableCell>
+                  Estado
+                </TableCell>
+                <TableCell>
+                  Acciones
+                </TableCell>
+              </TableRow>
+            </TableHead>
               <TableBody>
                 {jefesDepartamentos.map((jefeDepartamento) => (
                   <TableRow
@@ -458,8 +459,7 @@ const ListaJefesDepartamentos = () => {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
-          </div>
+          </ResponsiveTable>
 
           <div className="flex justify-between items-center mt-6">
             <button

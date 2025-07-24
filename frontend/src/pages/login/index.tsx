@@ -160,13 +160,13 @@ export default function LoginPage() {
               </label>
             </div>
 
-            {/* <div className="text-sm">
+            <div className="text-sm">
               <a
-                href="#"
+                href="/login/forgot-password"
                 className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200">
                 ¿Olvidó su contraseña?
               </a>
-            </div> */}
+            </div>
           </div>
 
           <div>

@@ -212,7 +212,7 @@ const CrearAsignaturaCarrera = () => {
                       variant="outlined"
                       size="small"
                     />
-                    <TableContainer component={Paper} className="mt-4" style={{ maxHeight: '400px' }}>
+                    <TableContainer component={Paper} className="mt-4" style={{ maxHeight: '400px', overflow: 'auto' }}>
                       <Table size="small">
                         <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
                           <TableRow>

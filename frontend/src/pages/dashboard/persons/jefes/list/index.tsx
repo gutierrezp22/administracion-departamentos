@@ -36,6 +36,7 @@ import {
   FilterInput,
   EstadoFilter,
 } from "../../../../../components/Filters";
+import ResponsiveTable from "../../../../../components/ResponsiveTable";
 
 // Función para normalizar URLs de paginación
 const normalizeUrl = (url: string) => {
@@ -287,115 +288,50 @@ const ListaJefes = () => {
             <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
           </FilterContainer>
 
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <Table>
-              <TableHead>
-                <TableRow className="bg-blue-500">
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Nombre
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Apellido
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    DNI
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Legajo
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Teléfono
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Email
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Interno
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Observaciones
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Estado
-                  </TableCell>
-                  <TableCell
-                    className="text-white font-semibold"
-                    style={{ color: "#fff" }}>
-                    Acciones
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {jefes.map((jefe) => (
-                  <TableRow key={jefe.id} className="hover:bg-gray-50">
-                    <TableCell className="text-gray-800">
-                      {jefe.persona.nombre}
-                    </TableCell>
-                    <TableCell className="text-gray-800">
-                      {jefe.persona.apellido}
-                    </TableCell>
-                    <TableCell className="text-gray-800">
-                      {jefe.persona.dni}
-                    </TableCell>
-                    <TableCell className="text-gray-800">
-                      {jefe.persona.legajo}
-                    </TableCell>
-                    <TableCell className="text-gray-800">
-                      {jefe.persona.telefono}
-                    </TableCell>
-                    <TableCell className="text-gray-800">
-                      {jefe.persona.email}
-                    </TableCell>
-                    <TableCell className="text-gray-800">
-                      {jefe.persona.interno}
-                    </TableCell>
-                    <TableCell className="text-gray-800">
-                      {jefe.observaciones}
-                    </TableCell>
-                    <TableCell className="text-gray-800">
-                      {jefe.estado === "1" ? "Activo" : "Inactivo"}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() =>
-                            router.push(
-                              `/dashboard/persons/jefes/edit/${jefe.id}`
-                            )
-                          }
-                          className="p-2 text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-100 transition-colors duration-200">
-                          <EditIcon />
-                        </button>
-                        <button
-                          onClick={() => eliminarJefe(jefe.id)}
-                          className="p-2 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-100 transition-colors duration-200">
-                          <DeleteIcon />
-                        </button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          <ResponsiveTable
+            columns={[
+              { key: 'nombre', header: 'Nombre' },
+              { key: 'apellido', header: 'Apellido' },
+              { key: 'dni', header: 'DNI' },
+              { key: 'legajo', header: 'Legajo' },
+              { key: 'telefono', header: 'Teléfono' },
+              { key: 'email', header: 'Email' },
+              { key: 'interno', header: 'Interno' },
+              { key: 'observaciones', header: 'Observaciones' },
+              { key: 'estado', header: 'Estado' },
+              { key: 'acciones', header: 'Acciones' },
+            ]}
+            data={jefes.map((jefe) => ({
+              id: jefe.id,
+              nombre: jefe.persona.nombre,
+              apellido: jefe.persona.apellido,
+              dni: jefe.persona.dni,
+              legajo: jefe.persona.legajo,
+              telefono: jefe.persona.telefono,
+              email: jefe.persona.email,
+              interno: jefe.persona.interno,
+              observaciones: jefe.observaciones,
+              estado: jefe.estado === "1" ? "Activo" : "Inactivo",
+              acciones: (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() =>
+                      router.push(
+                        `/dashboard/persons/jefes/edit/${jefe.id}`
+                      )
+                    }
+                    className="p-2 text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-100 transition-colors duration-200">
+                    <EditIcon />
+                  </button>
+                  <button
+                    onClick={() => eliminarJefe(jefe.id)}
+                    className="p-2 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-100 transition-colors duration-200">
+                    <DeleteIcon />
+                  </button>
+                </div>
+              ),
+            }))}
+          />
 
           <div className="flex justify-between items-center mt-6">
             <button
