@@ -121,7 +121,7 @@ const CrearDepartamento = () => {
 				"Se creó el departamento con éxito.",
 				handleConfirmModal
 			);
-		} catch (error) {
+		} catch (error: any) {
 			console.error("Error completo:", error);
 			console.error("Error response:", error.response?.data);
 			console.error("Error status:", error.response?.status);
@@ -136,7 +136,7 @@ const CrearDepartamento = () => {
 					errorMessage = error.response.data.message;
 				} else {
 					// Formatear errores de validación del backend
-					const errors = [];
+					const errors: string[] = [];
 					for (const field in error.response.data) {
 						const fieldErrors = error.response.data[field];
 						if (Array.isArray(fieldErrors)) {
