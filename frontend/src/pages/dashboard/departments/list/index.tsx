@@ -74,7 +74,7 @@ const ListaDepartamentos = () => {
 
   useEffect(() => {
     fetchData(currentUrl);
-  }, [currentUrl]);
+  }, [currentUrl, fetchData]);
 
   const fetchData = async (url: string) => {
     try {

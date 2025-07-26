@@ -28,7 +28,6 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import DashboardMenu from "../../../..";
 import { useRouter } from "next/router";
 import BasicModal from "@/utils/modal";
-import ModalConfirmacion from "@/utils/modalConfirmacion";
 import withAuth from "../../../../../../components/withAut"; // Importa el HOC
 import { API_BASE_URL } from "../../../../../../utils/config";
 import API from "@/api/axiosConfig";
@@ -44,7 +43,6 @@ const EditarDocenteAsignatura: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
-  const [confirmarEliminacion, setConfirmarEliminacion] = useState(false);
 
   const handleOpenModal = (title: string, message: string) => {
     setModalTitle(title);
@@ -125,8 +123,8 @@ const EditarDocenteAsignatura: React.FC = () => {
 
   const fetchDocenteAsignatura = async (id: string) => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/facet/asignatura-docente/${id}/`
+      const response = await API.get(
+        `/facet/asignatura-docente/${id}/`
       );
       const data = response.data;
 
@@ -180,18 +178,6 @@ const EditarDocenteAsignatura: React.FC = () => {
     }
   };
 
-  const eliminarPersona = async () => {
-    try {
-      await API.delete(`/facet/asignatura-docente/${idDocenteAsignatura}/`);
-      handleOpenModal(
-        "Docente en Asignatura Eliminado",
-        "La acción se realizó con éxito."
-      );
-    } catch (error) {
-      console.error("Error al hacer la solicitud DELETE:", error);
-      handleOpenModal("Error", "No se pudo realizar la acción.");
-    }
-  };
 
   return (
     <DashboardMenu>
@@ -253,7 +239,7 @@ const EditarDocenteAsignatura: React.FC = () => {
 
               {/* Sección de Información Adicional */}
               <Grid item xs={12}>
-                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                <Typography variant="h6" className="text-gray-700 font-semibold mb-3 mt-6">
                   Información Adicional
                 </Typography>
                 <Grid container spacing={2}>
@@ -269,33 +255,65 @@ const EditarDocenteAsignatura: React.FC = () => {
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <TextField
+                      select
                       label="Dedicación"
                       value={dedicacion}
                       onChange={(e) => setDedicacion(e.target.value)}
                       fullWidth
                       variant="outlined"
                       size="small"
-                    />
+                    >
+                      <MenuItem value="EXCL">EXCL</MenuItem>
+                      <MenuItem value="SIMP">SIMP</MenuItem>
+                      <MenuItem value="SEMI">SEMI</MenuItem>
+                      <MenuItem value="35HS">35HS</MenuItem>
+                    </TextField>
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <TextField
+                      select
                       label="Condición"
                       value={condicion}
                       onChange={(e) => setCondicion(e.target.value)}
                       fullWidth
                       variant="outlined"
                       size="small"
-                    />
+                    >
+                      <MenuItem value="Regular">Regular</MenuItem>
+                      <MenuItem value="Interino">Interino</MenuItem>
+                      <MenuItem value="Transitorio">Transitorio</MenuItem>
+                      <MenuItem value="Licencia sin goce de sueldo">Licencia sin goce de sueldo</MenuItem>
+                      <MenuItem value="Renuncia">Renuncia</MenuItem>
+                      <MenuItem value="Licencia con goce de sueldo">Licencia con goce de sueldo</MenuItem>
+                    </TextField>
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <TextField
+                      select
                       label="Cargo"
                       value={cargo}
                       onChange={(e) => setCargo(e.target.value)}
                       fullWidth
                       variant="outlined"
                       size="small"
-                    />
+                    >
+                      <MenuItem value="AUX DOC DE PRIMERA">AUX DOC DE PRIMERA</MenuItem>
+                      <MenuItem value="AUX DOCENTE SEGUNDA">AUX DOCENTE SEGUNDA</MenuItem>
+                      <MenuItem value="Categoria 01 Dto.366">Categoria 01 Dto.366</MenuItem>
+                      <MenuItem value="Categoria 02 Dto.366">Categoria 02 Dto.366</MenuItem>
+                      <MenuItem value="Categoria 03 Dto.366">Categoria 03 Dto.366</MenuItem>
+                      <MenuItem value="Categoria 04 Dto.366">Categoria 04 Dto.366</MenuItem>
+                      <MenuItem value="Categoria 05 Dto.366">Categoria 05 Dto.366</MenuItem>
+                      <MenuItem value="Categoria 06 Dto.366">Categoria 06 Dto.366</MenuItem>
+                      <MenuItem value="Categoria 07 Dto.366">Categoria 07 Dto.366</MenuItem>
+                      <MenuItem value="DECANO FACULTAD">DECANO FACULTAD</MenuItem>
+                      <MenuItem value="JEFE TRABAJOS PRACT.">JEFE TRABAJOS PRACT.</MenuItem>
+                      <MenuItem value="PROFESOR ADJUNTO">PROFESOR ADJUNTO</MenuItem>
+                      <MenuItem value="PROFESOR ASOCIADO">PROFESOR ASOCIADO</MenuItem>
+                      <MenuItem value="PROFESOR TITULAR">PROFESOR TITULAR</MenuItem>
+                      <MenuItem value="SECRETARIO FACULTAD">SECRETARIO FACULTAD</MenuItem>
+                      <MenuItem value="VICE DECANO">VICE DECANO</MenuItem>
+                    </TextField>
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <TextField
@@ -320,7 +338,7 @@ const EditarDocenteAsignatura: React.FC = () => {
 
               {/* Sección de Fechas */}
               <Grid item xs={12}>
-                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                <Typography variant="h6" className="text-gray-700 font-semibold mb-3 mt-6">
                   Período de Asignación
                 </Typography>
                 <Grid container spacing={2}>
@@ -369,11 +387,6 @@ const EditarDocenteAsignatura: React.FC = () => {
                     className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
                     Guardar Cambios
                   </button>
-                  <button
-                    onClick={() => setConfirmarEliminacion(true)}
-                    className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                    Eliminar Asignación
-                  </button>
                 </div>
               </Grid>
             </Grid>
@@ -385,14 +398,6 @@ const EditarDocenteAsignatura: React.FC = () => {
           onClose={handleCloseModal}
           title={modalTitle}
           content={modalMessage}
-        />
-        <ModalConfirmacion
-          open={confirmarEliminacion}
-          onClose={() => setConfirmarEliminacion(false)}
-          onConfirm={() => {
-            setConfirmarEliminacion(false);
-            eliminarPersona();
-          }}
         />
       </Container>
     </DashboardMenu>
