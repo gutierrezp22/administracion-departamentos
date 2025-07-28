@@ -211,7 +211,7 @@ const CrearAsignatura = () => {
             <Grid container spacing={2}>
               {/* Sección de Selección */}
               <Grid item xs={12}>
-                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                <Typography variant="h6" className="text-gray-700 font-semibold mb-6">
                   Selección Requerida
                 </Typography>
                 <button
@@ -236,7 +236,7 @@ const CrearAsignatura = () => {
 
               {/* Sección de Información Básica */}
               <Grid item xs={12}>
-                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                <Typography variant="h6" className="text-gray-700 font-semibold mb-6">
                   Información Básica
                 </Typography>
                 <Grid container spacing={2}>
@@ -348,7 +348,7 @@ const CrearAsignatura = () => {
 
               {/* Sección de Información Adicional */}
               <Grid item xs={12}>
-                <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
+                <Typography variant="h6" className="text-gray-700 font-semibold mb-6">
                   Información Adicional
                 </Typography>
                 <Grid container spacing={2}>

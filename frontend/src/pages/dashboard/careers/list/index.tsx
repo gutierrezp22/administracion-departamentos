@@ -696,6 +696,9 @@ const ListaCarreras = () => {
                     Estado
                   </TableCell>
                   <TableCell>
+                    Asignaturas
+                  </TableCell>
+                  <TableCell>
                     Acciones
                   </TableCell>
                 </TableRow>
@@ -718,13 +721,15 @@ const ListaCarreras = () => {
                       {carrera.estado === "1" ? "Activo" : "Inactivo"}
                     </TableCell>
                     <TableCell>
+                      <button
+                        onClick={() => verAsignaturasCarrera(carrera)}
+                        className="p-2 text-green-600 hover:text-green-800 rounded-full hover:bg-green-100 transition-colors duration-200"
+                        title="Ver Asignaturas">
+                        <SubjectIcon />
+                      </button>
+                    </TableCell>
+                    <TableCell>
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => verAsignaturasCarrera(carrera)}
-                          className="p-2 text-green-600 hover:text-green-800 rounded-full hover:bg-green-100 transition-colors duration-200"
-                          title="Ver Asignaturas">
-                          <SubjectIcon />
-                        </button>
                         <button
                           onClick={() =>
                             router.push(

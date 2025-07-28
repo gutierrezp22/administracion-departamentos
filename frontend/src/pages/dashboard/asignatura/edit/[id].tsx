@@ -122,7 +122,7 @@ const EditarAsignatura: React.FC = () => {
               <Grid item xs={12}>
                 <Typography
                   variant="h6"
-                  className="text-gray-700 font-semibold mb-3">
+                  className="text-gray-700 font-semibold mb-6">
                   Información Básica
                 </Typography>
                 <Grid container spacing={2}>
@@ -236,7 +236,7 @@ const EditarAsignatura: React.FC = () => {
               <Grid item xs={12}>
                 <Typography
                   variant="h6"
-                  className="text-gray-700 font-semibold mb-3">
+                  className="text-gray-700 font-semibold mb-6">
                   Información Adicional
                 </Typography>
                 <Grid container spacing={2}>
