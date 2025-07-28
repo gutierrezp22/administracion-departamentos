@@ -101,12 +101,6 @@ const ListaAsignaturaCarrera = () => {
     setModalMessage("");
   };
 
-  useEffect(() => {
-    if (idCarrera) {
-      fetchData();
-    }
-  }, [idCarrera, fetchData]);
-
   const fetchData = useCallback(async () => {
     try {
       const [areasRes, asignaturasRes, deptosRes, asignaturasCarreraRes] =
@@ -131,6 +125,12 @@ const ListaAsignaturaCarrera = () => {
       console.error("Error fetching data:", error);
     }
   }, [idCarrera]);
+
+  useEffect(() => {
+    if (idCarrera) {
+      fetchData();
+    }
+  }, [idCarrera, fetchData]);
 
   const descargarExcel = async () => {
     try {
