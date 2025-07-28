@@ -3,7 +3,6 @@ import * as React from "react";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Link from "next/link";
 import Swal from "sweetalert2";
 import { FiLock, FiMail } from "react-icons/fi"; // Using Feather icons from react-icons
 import "../../app/globals.css"; // Importamos los estilos globales de Tailwind
