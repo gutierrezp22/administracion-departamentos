@@ -22,6 +22,7 @@ import {
   MenuItem,
   FormControl,
 } from "@mui/material";
+import ResponsiveTable from "@/components/ResponsiveTable";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
@@ -984,7 +985,7 @@ const CrearDocenteAsignatura: React.FC = () => {
             Seleccionar Docente
           </DialogTitle>
           <DialogContent className="p-4">
-            <Grid container spacing={2} className="mb-4 mt-4">
+            <Grid container spacing={2} className="mb-6 mt-6">
               <Grid item xs={12} sm={8}>
                 <TextField
                   label="Buscar por DNI o Nombre"
@@ -1014,62 +1015,47 @@ const CrearDocenteAsignatura: React.FC = () => {
               </Grid>
             </Grid>
 
-            <TableContainer
-              component={Paper}
-              className="shadow-lg rounded-lg overflow-hidden"
-              style={{ maxHeight: "400px", overflow: "auto" }}>
-              <Table size="small">
-                <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
-                  <TableRow>
-                    <TableCell className="text-white font-semibold py-2">
-                      DNI
+            <ResponsiveTable>
+              <TableHead>
+                <TableRow>
+                  <TableCell>DNI</TableCell>
+                  <TableCell>Nombre</TableCell>
+                  <TableCell>Apellido</TableCell>
+                  <TableCell>Legajo</TableCell>
+                  <TableCell>Seleccionar</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {personas.map((docente) => (
+                  <TableRow
+                    key={docente.id}
+                    className="hover:bg-blue-50 transition-colors duration-200">
+                    <TableCell className="font-medium py-2">
+                      {docente.persona_detalle?.dni || "N/A"}
                     </TableCell>
-                    <TableCell className="text-white font-semibold py-2">
-                      Nombre
+                    <TableCell className="font-medium py-2">
+                      {docente.persona_detalle?.nombre || "N/A"}
                     </TableCell>
-                    <TableCell className="text-white font-semibold py-2">
-                      Apellido
+                    <TableCell className="font-medium py-2">
+                      {docente.persona_detalle?.apellido || "N/A"}
                     </TableCell>
-                    <TableCell className="text-white font-semibold py-2">
-                      Legajo
+                    <TableCell className="font-medium py-2">
+                      {docente.persona_detalle?.legajo || "N/A"}
                     </TableCell>
-                    <TableCell className="text-white font-semibold py-2">
-                      Seleccionar
+                    <TableCell className="py-2">
+                      <button
+                        onClick={() => {
+                          setPersona(docente);
+                          handleClosePersona();
+                        }}
+                        className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-1 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium text-sm">
+                        Seleccionar
+                      </button>
                     </TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {personas.map((docente) => (
-                    <TableRow
-                      key={docente.id}
-                      className="hover:bg-blue-50 transition-colors duration-200">
-                      <TableCell className="font-medium py-2">
-                        {docente.persona_detalle?.dni || "N/A"}
-                      </TableCell>
-                      <TableCell className="font-medium py-2">
-                        {docente.persona_detalle?.nombre || "N/A"}
-                      </TableCell>
-                      <TableCell className="font-medium py-2">
-                        {docente.persona_detalle?.apellido || "N/A"}
-                      </TableCell>
-                      <TableCell className="font-medium py-2">
-                        {docente.persona_detalle?.legajo || "N/A"}
-                      </TableCell>
-                      <TableCell className="py-2">
-                        <button
-                          onClick={() => {
-                            setPersona(docente);
-                            handleClosePersona();
-                          }}
-                          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-1 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium text-sm">
-                          Seleccionar
-                        </button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                ))}
+              </TableBody>
+            </ResponsiveTable>
 
             <div className="flex justify-between items-center mt-4">
               <button
@@ -1128,7 +1114,7 @@ const CrearDocenteAsignatura: React.FC = () => {
             Seleccionar Resolución
           </DialogTitle>
           <DialogContent className="p-4">
-            <Grid container spacing={2} className="mb-4 mt-4">
+            <Grid container spacing={2} className="mb-6 mt-6">
               <Grid item xs={12} sm={8}>
                 <TextField
                   label="Buscar por Nro Expediente o Resolución"
@@ -1158,70 +1144,55 @@ const CrearDocenteAsignatura: React.FC = () => {
               </Grid>
             </Grid>
 
-            <TableContainer
-              component={Paper}
-              className="shadow-lg rounded-lg overflow-hidden"
-              style={{ maxHeight: "400px", overflow: "auto" }}>
-              <Table size="small">
-                <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
-                  <TableRow>
-                    <TableCell className="text-white font-semibold py-2">
-                      Nro Expediente
+            <ResponsiveTable>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Nro Expediente</TableCell>
+                  <TableCell>Nro Resolución</TableCell>
+                  <TableCell>Tipo</TableCell>
+                  <TableCell>Fecha</TableCell>
+                  <TableCell>Seleccionar</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {resoluciones.map((resol) => (
+                  <TableRow
+                    key={resol.id}
+                    className="hover:bg-blue-50 transition-colors duration-200">
+                    <TableCell className="font-medium py-2">
+                      {resol.nexpediente || "N/A"}
                     </TableCell>
-                    <TableCell className="text-white font-semibold py-2">
-                      Nro Resolución
+                    <TableCell className="font-medium py-2">
+                      {resol.nresolucion || "N/A"}
                     </TableCell>
-                    <TableCell className="text-white font-semibold py-2">
-                      Tipo
+                    <TableCell className="font-medium py-2">
+                      {resol.tipo || "N/A"}
                     </TableCell>
-                    <TableCell className="text-white font-semibold py-2">
-                      Fecha
+                    <TableCell className="font-medium py-2">
+                      {resol.fecha 
+                        ? (dayjs(resol.fecha).isValid() 
+                            ? dayjs(resol.fecha).format("DD/MM/YYYY") 
+                            : "Fecha inválida")
+                        : (resol.fecha_creacion 
+                            ? (dayjs(resol.fecha_creacion).isValid() 
+                                ? dayjs(resol.fecha_creacion).format("DD/MM/YYYY") 
+                                : "Fecha inválida")
+                            : "N/A")}
                     </TableCell>
-                    <TableCell className="text-white font-semibold py-2">
-                      Seleccionar
+                    <TableCell className="py-2">
+                      <button
+                        onClick={() => {
+                          setResolucion(resol);
+                          handleCloseResolucion();
+                        }}
+                        className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-1 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium text-sm">
+                        Seleccionar
+                      </button>
                     </TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {resoluciones.map((resol) => (
-                    <TableRow
-                      key={resol.id}
-                      className="hover:bg-blue-50 transition-colors duration-200">
-                      <TableCell className="font-medium py-2">
-                        {resol.nexpediente || "N/A"}
-                      </TableCell>
-                      <TableCell className="font-medium py-2">
-                        {resol.nresolucion || "N/A"}
-                      </TableCell>
-                      <TableCell className="font-medium py-2">
-                        {resol.tipo || "N/A"}
-                      </TableCell>
-                      <TableCell className="font-medium py-2">
-                        {resol.fecha 
-                          ? (dayjs(resol.fecha).isValid() 
-                              ? dayjs(resol.fecha).format("DD/MM/YYYY") 
-                              : "Fecha inválida")
-                          : (resol.fecha_creacion 
-                              ? (dayjs(resol.fecha_creacion).isValid() 
-                                  ? dayjs(resol.fecha_creacion).format("DD/MM/YYYY") 
-                                  : "Fecha inválida")
-                              : "N/A")}
-                      </TableCell>
-                      <TableCell className="py-2">
-                        <button
-                          onClick={() => {
-                            setResolucion(resol);
-                            handleCloseResolucion();
-                          }}
-                          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-1 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium text-sm">
-                          Seleccionar
-                        </button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                ))}
+              </TableBody>
+            </ResponsiveTable>
 
             <div className="flex justify-between items-center mt-4">
               <button
