@@ -22,6 +22,7 @@ import {
   InputLabel,
   Select,
 } from "@mui/material";
+import ResponsiveTable from "@/components/ResponsiveTable";
 import BasicModal from "@/utils/modal";
 import { useRouter } from "next/router";
 import DashboardMenu from "../../../../dashboard";
@@ -496,7 +497,7 @@ const CrearDocente = () => {
               Seleccionar Persona
             </DialogTitle>
             <DialogContent className="p-4">
-              <Grid container spacing={2} className="mb-4 mt-4">
+              <Grid container spacing={2} className="mb-6 mt-6">
                 <Grid item xs={12} sm={6}>
                   <TextField
                     label="Nombre"
@@ -559,65 +560,50 @@ const CrearDocente = () => {
                 </Grid>
               </Grid>
 
-              <TableContainer
-                component={Paper}
-                className="shadow-lg rounded-lg overflow-hidden"
-                style={{ maxHeight: "400px", overflow: "auto" }}>
-                <Table size="small">
-                  <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
-                    <TableRow>
-                      <TableCell className="text-white font-semibold py-2">
-                        DNI
+              <ResponsiveTable>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>DNI</TableCell>
+                    <TableCell>Apellido</TableCell>
+                    <TableCell>Nombre</TableCell>
+                    <TableCell>Legajo</TableCell>
+                    <TableCell>Seleccionar</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {personas.map((p) => (
+                    <TableRow
+                      key={p.id}
+                      className="hover:bg-blue-50 transition-colors duration-200">
+                      <TableCell className="font-medium py-2">
+                        {p.dni}
                       </TableCell>
-                      <TableCell className="text-white font-semibold py-2">
-                        Apellido
+                      <TableCell className="font-medium py-2">
+                        {p.apellido}
                       </TableCell>
-                      <TableCell className="text-white font-semibold py-2">
-                        Nombre
+                      <TableCell className="font-medium py-2">
+                        {p.nombre}
                       </TableCell>
-                      <TableCell className="text-white font-semibold py-2">
-                        Legajo
+                      <TableCell className="font-medium py-2">
+                        {p.legajo}
                       </TableCell>
-                      <TableCell className="text-white font-semibold py-2">
-                        Seleccionar
+                      <TableCell className="py-2">
+                        <button
+                          onClick={() => {
+                            setPersona(p);
+                            SetApellido(p.apellido);
+                            SetDni(p.dni);
+                            setNombre(p.nombre);
+                            handleClose();
+                          }}
+                          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-1 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium text-sm">
+                          Seleccionar
+                        </button>
                       </TableCell>
                     </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {personas.map((p) => (
-                      <TableRow
-                        key={p.id}
-                        className="hover:bg-blue-50 transition-colors duration-200">
-                        <TableCell className="font-medium py-2">
-                          {p.dni}
-                        </TableCell>
-                        <TableCell className="font-medium py-2">
-                          {p.apellido}
-                        </TableCell>
-                        <TableCell className="font-medium py-2">
-                          {p.nombre}
-                        </TableCell>
-                        <TableCell className="font-medium py-2">
-                          {p.legajo}
-                        </TableCell>
-                        <TableCell className="py-2">
-                          <button
-                            onClick={() => {
-                              setPersona(p);
-                              SetApellido(p.apellido);
-                              SetDni(p.dni);
-                              setNombre(p.nombre);
-                              handleClose();
-                            }}
-                            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-1 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium text-sm">
-                            Seleccionar
-                          </button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                  ))}
+                </TableBody>
+              </ResponsiveTable>
 
               <div className="flex justify-between items-center mt-4">
                 <button
