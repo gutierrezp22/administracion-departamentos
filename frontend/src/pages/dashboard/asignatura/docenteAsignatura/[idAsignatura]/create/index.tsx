@@ -247,18 +247,39 @@ const CrearDocenteAsignatura: React.FC = () => {
   };
 
   // Función para filtrar resoluciones desde el servidor
-  const filtrarResoluciones = () => {
-    let url = `/facet/resolucion/?`;
-    const params = new URLSearchParams();
-
-    if (filtroNroResolucion.trim()) {
-      // Buscar en expediente y resolución
-      params.append("nexpediente__icontains", filtroNroResolucion);
-      params.append("nresolucion__icontains", filtroNroResolucion);
+  const filtrarResoluciones = async () => {
+    if (!filtroNroResolucion.trim()) {
+      // Si no hay filtro, cargar todas las resoluciones
+      fetchDataResoluciones(`/facet/resolucion/`);
+      return;
     }
 
-    url += params.toString();
-    fetchDataResoluciones(url);
+    try {
+      // Primero buscar por número de expediente
+      let url = `/facet/resolucion/?nexpediente__icontains=${encodeURIComponent(filtroNroResolucion)}`;
+      let response = await API.get(url);
+      
+      // Si no encuentra resultados, buscar por número de resolución
+      if (response.data.results.length === 0) {
+        url = `/facet/resolucion/?nresolucion__icontains=${encodeURIComponent(filtroNroResolucion)}`;
+        response = await API.get(url);
+      }
+      
+      // Actualizar el estado con los resultados
+      setResoluciones(response.data.results);
+      setNextUrlResoluciones(response.data.next ? normalizeUrl(response.data.next) : null);
+      setPrevUrlResoluciones(response.data.previous ? normalizeUrl(response.data.previous) : null);
+      setTotalItemsResoluciones(response.data.count);
+      
+      // Calcular página actual
+      const urlParams = new URLSearchParams(url.split('?')[1] || '');
+      const offset = urlParams.get("offset") || "0";
+      setCurrentPageResoluciones(Math.floor(Number(offset) / pageSizeResoluciones) + 1);
+    } catch (error) {
+      console.error("Error filtering resoluciones:", error);
+      // En caso de error, cargar todas las resoluciones
+      fetchDataResoluciones(`/facet/resolucion/`);
+    }
   };
 
   const [filtroNroResolucion, setFiltroNroResolucion] = useState("");
@@ -308,9 +329,9 @@ const CrearDocenteAsignatura: React.FC = () => {
   };
 
   const crearDocenteAsignatura = async () => {
-    if (!persona || !asignatura || !resolucion) {
+    if (!persona || !asignatura || !resolucion || !dedicacion || !condicion || !cargo) {
       alert(
-        "Por favor, selecciona un docente, una asignatura y una resolución."
+        "Por favor, selecciona un docente, una asignatura, una resolución, dedicación, condición y cargo."
       );
       return;
     }
@@ -555,6 +576,7 @@ const CrearDocenteAsignatura: React.FC = () => {
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <TextField
+                      select
                       label="Dedicación"
                       value={dedicacion}
                       onChange={(e) => setDedicacion(e.target.value)}
@@ -600,11 +622,20 @@ const CrearDocenteAsignatura: React.FC = () => {
                           fontSize: "0.875rem",
                           padding: "8px 12px",
                         },
+                        "& .MuiSelect-icon": {
+                          color: "#6b7280",
+                        },
                       }}
-                    />
+                    >
+                      <MenuItem value="EXCL">EXCL</MenuItem>
+                      <MenuItem value="SIMP">SIMP</MenuItem>
+                      <MenuItem value="SEMI">SEMI</MenuItem>
+                      <MenuItem value="35HS">35HS</MenuItem>
+                    </TextField>
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <TextField
+                      select
                       label="Condición"
                       value={condicion}
                       onChange={(e) => setCondicion(e.target.value)}
@@ -650,11 +681,22 @@ const CrearDocenteAsignatura: React.FC = () => {
                           fontSize: "0.875rem",
                           padding: "8px 12px",
                         },
+                        "& .MuiSelect-icon": {
+                          color: "#6b7280",
+                        },
                       }}
-                    />
+                    >
+                      <MenuItem value="Regular">Regular</MenuItem>
+                      <MenuItem value="Interino">Interino</MenuItem>
+                      <MenuItem value="Transitorio">Transitorio</MenuItem>
+                      <MenuItem value="Licencia sin goce de sueldo">Licencia sin goce de sueldo</MenuItem>
+                      <MenuItem value="Renuncia">Renuncia</MenuItem>
+                      <MenuItem value="Licencia con goce de sueldo">Licencia con goce de sueldo</MenuItem>
+                    </TextField>
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <TextField
+                      select
                       label="Cargo"
                       value={cargo}
                       onChange={(e) => setCargo(e.target.value)}
@@ -700,8 +742,28 @@ const CrearDocenteAsignatura: React.FC = () => {
                           fontSize: "0.875rem",
                           padding: "8px 12px",
                         },
+                        "& .MuiSelect-icon": {
+                          color: "#6b7280",
+                        },
                       }}
-                    />
+                    >
+                      <MenuItem value="AUX DOC DE PRIMERA">AUX DOC DE PRIMERA</MenuItem>
+                      <MenuItem value="AUX DOCENTE SEGUNDA">AUX DOCENTE SEGUNDA</MenuItem>
+                      <MenuItem value="Categoria 01 Dto.366">Categoria 01 Dto.366</MenuItem>
+                      <MenuItem value="Categoria 02 Dto.366">Categoria 02 Dto.366</MenuItem>
+                      <MenuItem value="Categoria 03 Dto.366">Categoria 03 Dto.366</MenuItem>
+                      <MenuItem value="Categoria 04 Dto.366">Categoria 04 Dto.366</MenuItem>
+                      <MenuItem value="Categoria 05 Dto.366">Categoria 05 Dto.366</MenuItem>
+                      <MenuItem value="Categoria 06 Dto.366">Categoria 06 Dto.366</MenuItem>
+                      <MenuItem value="Categoria 07 Dto.366">Categoria 07 Dto.366</MenuItem>
+                      <MenuItem value="DECANO FACULTAD">DECANO FACULTAD</MenuItem>
+                      <MenuItem value="JEFE TRABAJOS PRACT.">JEFE TRABAJOS PRACT.</MenuItem>
+                      <MenuItem value="PROFESOR ADJUNTO">PROFESOR ADJUNTO</MenuItem>
+                      <MenuItem value="PROFESOR ASOCIADO">PROFESOR ASOCIADO</MenuItem>
+                      <MenuItem value="PROFESOR TITULAR">PROFESOR TITULAR</MenuItem>
+                      <MenuItem value="SECRETARIO FACULTAD">SECRETARIO FACULTAD</MenuItem>
+                      <MenuItem value="VICE DECANO">VICE DECANO</MenuItem>
+                    </TextField>
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <TextField

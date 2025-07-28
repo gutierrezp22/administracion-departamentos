@@ -3,6 +3,7 @@ import * as React from "react";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Link from "next/link";
 import Swal from "sweetalert2";
 import { FiLock, FiMail } from "react-icons/fi"; // Using Feather icons from react-icons
 import "../../app/globals.css"; // Importamos los estilos globales de Tailwind
@@ -164,15 +165,14 @@ export default function LoginPage() {
 							</label>
 						</div>
 
-						<div className="text-sm">
-							<Link
-								href="/login/forgot-password"
-								className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200"
-							>
-								¿Olvidó su contraseña?
-							</Link>
-						</div>
-					</div>
+            <div className="text-sm">
+              <Link
+                href="/login/forgot-password"
+                className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200">
+                ¿Olvidó su contraseña?
+              </Link>
+            </div>
+          </div>
 
 					<div>
 						<button

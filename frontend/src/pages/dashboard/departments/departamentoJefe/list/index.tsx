@@ -97,7 +97,7 @@ const ListaJefesDepartamentos = () => {
 
   useEffect(() => {
     fetchData(currentUrl);
-  }, [currentUrl]);
+  }, [currentUrl, fetchData]);
 
   const fetchData = async (url: string) => {
     try {

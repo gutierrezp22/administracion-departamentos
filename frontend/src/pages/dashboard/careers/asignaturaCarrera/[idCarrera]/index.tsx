@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import "./styles.css";
 import {
   Typography,
@@ -105,9 +105,9 @@ const ListaAsignaturaCarrera = () => {
     if (idCarrera) {
       fetchData();
     }
-  }, [idCarrera]);
+  }, [idCarrera, fetchData]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const [areasRes, asignaturasRes, deptosRes, asignaturasCarreraRes] =
         await Promise.all([
@@ -130,7 +130,7 @@ const ListaAsignaturaCarrera = () => {
     } catch (error) {
       console.error("Error fetching data:", error);
     }
-  };
+  }, [idCarrera]);
 
   const descargarExcel = async () => {
     try {

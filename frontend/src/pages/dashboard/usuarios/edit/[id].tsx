@@ -66,7 +66,7 @@ const EditarUsuario = () => {
       fetchRoles();
       fetchUsuario();
     }
-  }, [id]);
+  }, [id, fetchUsuario]);
 
   const fetchRoles = async () => {
     try {

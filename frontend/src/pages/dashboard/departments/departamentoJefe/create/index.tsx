@@ -179,15 +179,15 @@ const CrearDepartamentoJefe = () => {
 
   useEffect(() => {
     if (openResolucion) fetchResoluciones(currentUrl);
-  }, [openResolucion, currentUrl]);
+  }, [openResolucion, currentUrl, fetchResoluciones]);
 
   useEffect(() => {
     if (openJefe) fetchJefes(currentUrlJefes);
-  }, [openJefe, currentUrlJefes]);
+  }, [openJefe, currentUrlJefes, fetchJefes]);
 
   useEffect(() => {
     if (openDepartamento) fetchDepartamentos(currentUrlDepartamentos);
-  }, [openDepartamento, currentUrlDepartamentos]);
+  }, [openDepartamento, currentUrlDepartamentos, fetchDepartamentos]);
 
   const fetchResoluciones = async (url: string) => {
     try {
@@ -215,7 +215,53 @@ const CrearDepartamentoJefe = () => {
     }
   };
 
-  const filtrarResoluciones = () => {
+  const filtrarResoluciones = async () => {
+    // Si solo se especifica uno de los filtros de número, buscar en ambos campos
+    if ((filtroNroExpediente && !filtroNroResolucion) || (!filtroNroExpediente && filtroNroResolucion)) {
+      const busqueda = filtroNroExpediente || filtroNroResolucion;
+      
+      try {
+        // Primero buscar por número de expediente
+        let url = `/facet/resolucion/?nexpediente__icontains=${encodeURIComponent(busqueda)}`;
+        let response = await API.get(url);
+        
+        // Si no encuentra resultados, buscar por número de resolución
+        if (response.data.results.length === 0) {
+          url = `/facet/resolucion/?nresolucion__icontains=${encodeURIComponent(busqueda)}`;
+          response = await API.get(url);
+        }
+        
+        // Aplicar filtros adicionales si existen
+        if (filtroTipo || filtroFecha) {
+          const params = new URLSearchParams();
+          if (response.data.results.length > 0) {
+            // Si encontramos resultados, aplicar filtros adicionales
+            if (filtroTipo) params.append("tipo", filtroTipo);
+            if (filtroFecha) params.append("fecha__date", formatFechaParaBackend(filtroFecha) || "");
+            
+            // Combinar con el filtro que funcionó
+            if (url.includes('nexpediente__icontains')) {
+              params.append("nexpediente__icontains", busqueda);
+            } else {
+              params.append("nresolucion__icontains", busqueda);
+            }
+            
+            url = `/facet/resolucion/?${params.toString()}`;
+            response = await API.get(url);
+          }
+        }
+        
+        setResoluciones(response.data.results);
+        setNextUrl(response.data.next ? normalizeUrl(response.data.next) : null);
+        setPrevUrl(response.data.previous ? normalizeUrl(response.data.previous) : null);
+        setTotalItems(response.data.count);
+        return;
+      } catch (error) {
+        console.error("Error filtering resoluciones:", error);
+      }
+    }
+    
+    // Filtrado tradicional cuando se usan ambos campos o ninguno
     let url = `/facet/resolucion/?`;
     const params = new URLSearchParams();
 

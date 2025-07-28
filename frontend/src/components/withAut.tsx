@@ -11,7 +11,7 @@ const withAuth = (WrappedComponent: React.ComponentType) => {
       if (!token) {
         router.replace("/login"); // Redirige al login si no está autenticado
       }
-    }, []);
+    }, [router]);
 
     return <WrappedComponent {...props} />;
   };
