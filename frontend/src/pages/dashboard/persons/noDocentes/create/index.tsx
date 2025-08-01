@@ -491,7 +491,7 @@ const CrearNoDocente = () => {
               Seleccionar Persona
             </DialogTitle>
             <DialogContent className="p-4">
-              <Grid container spacing={2} className="mb-6 mt-6">
+              <Grid container spacing={2} className="mb-6 mt-8">
                 <Grid item xs={12} sm={6}>
                   <TextField
                     label="Nombre"
