@@ -101,7 +101,6 @@ const ListaCarreras = () => {
   const [filtroEstado, setFiltroEstado] = useState<string>("1");
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
-  const [currentUrl, setCurrentUrl] = useState<string>(`/facet/carrera/`);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -127,16 +126,48 @@ const ListaCarreras = () => {
   const router = useRouter();
 
   useEffect(() => {
-    fetchData(currentUrl);
-  }, [currentUrl]);
+    fetchData("/facet/carrera/");
+  }, []);
+
+  // Función para normalizar URLs de paginación
+  const normalizeUrl = (url: string) => {
+    if (url.startsWith("http")) {
+      const urlObj = new URL(url);
+      return urlObj.pathname + urlObj.search;
+    }
+    return url.replace(/^\/+/, "/");
+  };
 
   const fetchData = async (url: string) => {
     try {
-      const response = await API.get(url);
+      // Normalizar la URL de entrada si es absoluta
+      let apiUrl = url;
+      if (url.startsWith("http")) {
+        const urlObj = new URL(url);
+        apiUrl = urlObj.pathname + urlObj.search;
+      }
+
+      const response = await API.get(apiUrl);
       setCarreras(response.data.results);
-      setNextUrl(response.data.next);
-      setPrevUrl(response.data.previous);
+
+      // Normalizar las URLs de paginación que vienen del backend
+      const normalizedNext = response.data.next
+        ? normalizeUrl(response.data.next)
+        : null;
+      const normalizedPrev = response.data.previous
+        ? normalizeUrl(response.data.previous)
+        : null;
+
+      setNextUrl(normalizedNext);
+      setPrevUrl(normalizedPrev);
       setTotalItems(response.data.count);
+
+      // Calcular la página actual basándose en los parámetros de la URL
+      const urlParams = new URLSearchParams(apiUrl.split("?")[1] || "");
+      const offset = parseInt(urlParams.get("offset") || "0");
+      const limit = parseInt(urlParams.get("limit") || "10");
+      const calculatedPage = Math.floor(offset / limit) + 1;
+      setCurrentPage(calculatedPage);
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -163,10 +194,8 @@ const ListaCarreras = () => {
     } else if (filtroEstado !== "" && filtroEstado !== "todos") {
       params.append("estado", filtroEstado);
     }
-    params.append("page", "1");
     url += params.toString();
-    setCurrentPage(1);
-    setCurrentUrl(url);
+    fetchData(url);
   };
 
   const limpiarFiltros = () => {
@@ -174,32 +203,7 @@ const ListaCarreras = () => {
     setFiltroTipo("");
     setFiltroPlanEstudio("");
     setFiltroEstado("1");
-  };
-
-  const handlePageChange = (newPage: number) => {
-    let url = `/facet/carrera/?`;
-    const params = new URLSearchParams();
-
-    if (filtroNombre !== "") {
-      params.append("nombre__icontains", filtroNombre);
-    }
-    if (filtroTipo !== "") {
-      params.append("tipo", filtroTipo);
-    }
-    if (filtroPlanEstudio !== "") {
-      params.append("planestudio__icontains", filtroPlanEstudio);
-    }
-    if (filtroEstado === "todos") {
-      params.append("show_all", "true");
-    } else if (filtroEstado !== "" && filtroEstado !== "todos") {
-      params.append("estado", filtroEstado);
-    }
-
-    params.append("page", newPage.toString());
-    url += params.toString();
-
-    setCurrentPage(newPage);
-    setCurrentUrl(url);
+    fetchData("/facet/carrera/");
   };
 
   const descargarExcel = async () => {
@@ -275,10 +279,81 @@ const ListaCarreras = () => {
       if (result.isConfirmed) {
         await API.delete(`/facet/carrera/${id}/`);
         Swal.fire("Eliminado!", "La carrera ha sido eliminada.", "success");
-        fetchData(currentUrl);
+        // Recargar la página actual manteniendo los filtros
+        filtrarCarreras();
       }
     } catch (error) {
       Swal.fire("Error!", "No se pudo eliminar la carrera.", "error");
+    }
+  };
+
+  // Función para cargar todas las asignaturas de una carrera (con paginación)
+  const cargarTodasAsignaturasCarrera = async (
+    carreraId: number
+  ): Promise<AsignaturaCarrera[]> => {
+    try {
+      let todasAsignaturasCarrera: AsignaturaCarrera[] = [];
+      let url:
+        | string
+        | null = `/facet/asignatura-carrera/?carrera=${carreraId}`;
+
+      // Cargar todas las páginas
+      while (url) {
+        const response: any = await API.get(url);
+        const { results, next }: { results?: any[]; next?: string } =
+          response.data;
+        if (results) {
+          todasAsignaturasCarrera = [...todasAsignaturasCarrera, ...results];
+        }
+
+        // Normalizar la URL del siguiente enlace
+        url = next ? normalizeUrl(next) : null;
+      }
+
+      console.log(
+        `Total asignaturas cargadas para carrera ${carreraId}:`,
+        todasAsignaturasCarrera.length
+      );
+      return await cargarAsignaturasCompletas(todasAsignaturasCarrera);
+    } catch (error) {
+      console.error(
+        "Error al cargar todas las asignaturas de la carrera:",
+        error
+      );
+      return [];
+    }
+  };
+
+  // Función para cargar todas las asignaturas disponibles (con paginación)
+  const cargarTodasAsignaturasDisponibles = async (): Promise<Asignatura[]> => {
+    try {
+      let todasAsignaturas: Asignatura[] = [];
+      let url: string | null = `/facet/asignatura/?estado=1`;
+
+      // Cargar todas las páginas
+      while (url) {
+        const response: any = await API.get(url);
+        const { results, next }: { results?: any[]; next?: string } =
+          response.data;
+        if (results) {
+          todasAsignaturas = [...todasAsignaturas, ...results];
+        }
+
+        // Normalizar la URL del siguiente enlace
+        url = next ? normalizeUrl(next) : null;
+      }
+
+      console.log(
+        `Total asignaturas disponibles cargadas:`,
+        todasAsignaturas.length
+      );
+      return todasAsignaturas;
+    } catch (error) {
+      console.error(
+        "Error al cargar todas las asignaturas disponibles:",
+        error
+      );
+      return [];
     }
   };
 
@@ -337,36 +412,16 @@ const ListaCarreras = () => {
       setFiltroAsignaturas("");
       setAsignaturaParaAgregar(null);
 
-      // Cargar asignaturas de la carrera con parámetros más específicos
-      const responseAsignaturas = await API.get(`/facet/asignatura-carrera/`, {
-        params: {
-          carrera: carrera.id,
-        },
-      });
-
-      console.log(
-        "Asignaturas de la carrera - Respuesta completa:",
-        responseAsignaturas.data
+      // Cargar TODAS las asignaturas de la carrera (con paginación)
+      const todasAsignaturasCarrera = await cargarTodasAsignaturasCarrera(
+        carrera.id
       );
-      console.log(
-        "Asignaturas de la carrera - Results:",
-        responseAsignaturas.data.results
-      );
+      setAsignaturasCarrera(todasAsignaturasCarrera);
 
-      const asignaturasConDatos = await cargarAsignaturasCompletas(
-        responseAsignaturas.data.results || []
-      );
-      setAsignaturasCarrera(asignaturasConDatos);
-
-      // Cargar todas las asignaturas disponibles
-      const responseTodasAsignaturas = await API.get(`/facet/asignatura/`, {
-        params: {
-          estado: "1", // Solo activas
-        },
-      });
-
-      console.log("Todas las asignaturas:", responseTodasAsignaturas.data);
-      setTodasAsignaturas(responseTodasAsignaturas.data.results || []);
+      // Cargar TODAS las asignaturas disponibles (con paginación)
+      const todasAsignaturasDisponibles =
+        await cargarTodasAsignaturasDisponibles();
+      setTodasAsignaturas(todasAsignaturasDisponibles);
     } catch (error) {
       console.error("Error al cargar asignaturas:", error);
       Swal.fire({
@@ -391,14 +446,10 @@ const ListaCarreras = () => {
     try {
       setModalAgregarAsignaturaVisible(true);
 
-      // Cargar todas las asignaturas disponibles
-      const responseTodasAsignaturas = await API.get(`/facet/asignatura/`, {
-        params: {
-          estado: "1",
-        },
-      });
-
-      setTodasAsignaturas(responseTodasAsignaturas.data.results || []);
+      // Cargar TODAS las asignaturas disponibles (con paginación)
+      const todasAsignaturasDisponibles =
+        await cargarTodasAsignaturasDisponibles();
+      setTodasAsignaturas(todasAsignaturasDisponibles);
 
       // Limpiar filtros
       setFiltroNombreAsignatura("");
@@ -520,15 +571,9 @@ const ListaCarreras = () => {
       // Cerrar modal de agregar
       setModalAgregarAsignaturaVisible(false);
 
-      // Recargar las asignaturas de la carrera
-      const response = await API.get(`/facet/asignatura-carrera/`, {
-        params: {
-          carrera: carreraSeleccionada.id,
-        },
-      });
-
-      const asignaturasActualizadas = await cargarAsignaturasCompletas(
-        response.data.results || []
+      // Recargar TODAS las asignaturas de la carrera
+      const asignaturasActualizadas = await cargarTodasAsignaturasCarrera(
+        carreraSeleccionada.id
       );
       setAsignaturasCarrera(asignaturasActualizadas);
     } catch (error) {
@@ -592,16 +637,10 @@ const ListaCarreras = () => {
           },
         });
 
-        // Recargar las asignaturas de la carrera
+        // Recargar TODAS las asignaturas de la carrera
         if (carreraSeleccionada) {
-          const response = await API.get(`/facet/asignatura-carrera/`, {
-            params: {
-              carrera: carreraSeleccionada.id,
-            },
-          });
-
-          const asignaturasActualizadas = await cargarAsignaturasCompletas(
-            response.data.results || []
+          const asignaturasActualizadas = await cargarTodasAsignaturasCarrera(
+            carreraSeleccionada.id
           );
           setAsignaturasCarrera(asignaturasActualizadas);
         }
@@ -683,24 +722,12 @@ const ListaCarreras = () => {
             <ResponsiveTable>
               <TableHead>
                 <TableRow>
-                  <TableCell>
-                    Nombre
-                  </TableCell>
-                  <TableCell>
-                    Tipo
-                  </TableCell>
-                  <TableCell>
-                    Plan de Estudio
-                  </TableCell>
-                  <TableCell>
-                    Estado
-                  </TableCell>
-                  <TableCell>
-                    Asignaturas
-                  </TableCell>
-                  <TableCell>
-                    Acciones
-                  </TableCell>
+                  <TableCell>Nombre</TableCell>
+                  <TableCell>Tipo</TableCell>
+                  <TableCell>Plan de Estudio</TableCell>
+                  <TableCell>Estado</TableCell>
+                  <TableCell>Asignaturas</TableCell>
+                  <TableCell>Acciones</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -732,9 +759,7 @@ const ListaCarreras = () => {
                       <div className="flex gap-2">
                         <button
                           onClick={() =>
-                            router.push(
-                              `/dashboard/careers/edit/${carrera.id}`
-                            )
+                            router.push(`/dashboard/careers/edit/${carrera.id}`)
                           }
                           className="p-2 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-100 transition-colors duration-200"
                           title="Editar">
@@ -755,12 +780,12 @@ const ListaCarreras = () => {
 
             <div className="flex justify-between items-center mt-6">
               <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
+                onClick={() => prevUrl && fetchData(prevUrl)}
+                disabled={!prevUrl}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                  currentPage > 1
-                    ? "bg-blue-500 text-white hover:bg-blue-600"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  !prevUrl
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-blue-500 text-white hover:bg-blue-600"
                 }`}>
                 Anterior
               </button>
@@ -768,12 +793,12 @@ const ListaCarreras = () => {
                 Página {currentPage} de {totalPages}
               </span>
               <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage >= totalPages}
+                onClick={() => nextUrl && fetchData(nextUrl)}
+                disabled={!nextUrl}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                  currentPage < totalPages
-                    ? "bg-blue-500 text-white hover:bg-blue-600"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  !nextUrl
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-blue-500 text-white hover:bg-blue-600"
                 }`}>
                 Siguiente
               </button>
@@ -991,9 +1016,9 @@ const ListaCarreras = () => {
                     setFiltroCodigoAsignatura("");
                     setFiltroModuloAsignatura("");
                     setFiltroTipoAsignatura("");
-                    // Recargar todas las asignaturas
-                    API.get(`/facet/asignatura/?estado=1`).then((response) => {
-                      setTodasAsignaturas(response.data.results || []);
+                    // Recargar TODAS las asignaturas
+                    cargarTodasAsignaturasDisponibles().then((asignaturas) => {
+                      setTodasAsignaturas(asignaturas);
                     });
                   }}
                   className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">

@@ -331,8 +331,10 @@ const CrearDocenteAsignatura: React.FC = () => {
 
   const crearDocenteAsignatura = async () => {
     if (!persona || !asignatura || !resolucion || !dedicacion || !condicion || !cargo) {
-      alert(
-        "Por favor, selecciona un docente, una asignatura, una resolución, dedicación, condición y cargo."
+      handleOpenModal(
+        "Error",
+        "Por favor, selecciona un docente, una asignatura, una resolución, dedicación, condición y cargo.",
+        () => {}
       );
       return;
     }

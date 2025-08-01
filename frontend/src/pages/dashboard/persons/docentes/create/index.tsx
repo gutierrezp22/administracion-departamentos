@@ -55,7 +55,7 @@ const CrearDocente = () => {
   const [openPersona, setOpenPersona] = useState(false);
   const [nombre, setNombre] = useState("");
   const [observaciones, setObservaciones] = useState("");
-  const [estado, setEstado] = useState<number>(0);
+  const [estado, setEstado] = useState<number>(1);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
