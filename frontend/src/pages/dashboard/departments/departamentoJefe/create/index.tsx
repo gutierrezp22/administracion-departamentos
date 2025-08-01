@@ -880,6 +880,7 @@ const CrearDepartamentoJefe = () => {
 									label="Nro Expediente"
 									value={filtroNroExpediente}
 									onChange={(e) => setFiltroNroExpediente(e.target.value)}
+									onKeyDown={(e) => e.key === "Enter" && filtrarResoluciones()}
 									fullWidth
 									variant="outlined"
 									size="small"
@@ -890,6 +891,7 @@ const CrearDepartamentoJefe = () => {
 									label="Nro Resolución"
 									value={filtroNroResolucion}
 									onChange={(e) => setFiltroNroResolucion(e.target.value)}
+									onKeyDown={(e) => e.key === "Enter" && filtrarResoluciones()}
 									fullWidth
 									variant="outlined"
 									size="small"
@@ -1078,6 +1080,7 @@ const CrearDepartamentoJefe = () => {
 									label="Nombre"
 									value={filtroNombre}
 									onChange={(e) => setFiltroNombre(e.target.value)}
+									onKeyDown={(e) => e.key === "Enter" && filtrarJefes()}
 									fullWidth
 									variant="outlined"
 									size="small"
@@ -1088,6 +1091,7 @@ const CrearDepartamentoJefe = () => {
 									label="DNI"
 									value={filtroDni}
 									onChange={(e) => setFiltroDni(e.target.value)}
+									onKeyDown={(e) => e.key === "Enter" && filtrarJefes()}
 									fullWidth
 									variant="outlined"
 									size="small"
@@ -1230,6 +1234,7 @@ const CrearDepartamentoJefe = () => {
 									label="Nombre del Departamento"
 									value={filtroDepartamento}
 									onChange={(e) => setFiltroDepartamento(e.target.value)}
+									onKeyDown={(e) => e.key === "Enter" && filtrarDepartamentos()}
 									fullWidth
 									variant="outlined"
 									size="small"

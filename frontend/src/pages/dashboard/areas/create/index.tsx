@@ -369,6 +369,7 @@ const CrearArea = () => {
                   label="Buscar por Nombre"
                   value={filtroDepartamentos}
                   onChange={(e) => setFiltroDepartamentos(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && filtrarDepartamentos()}
                   fullWidth
                   variant="outlined"
                   size="small"

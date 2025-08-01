@@ -55,7 +55,7 @@ const CrearDocente = () => {
   const [openPersona, setOpenPersona] = useState(false);
   const [nombre, setNombre] = useState("");
   const [observaciones, setObservaciones] = useState("");
-  const [estado, setEstado] = useState<number>(0);
+  const [estado, setEstado] = useState<number>(1);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
@@ -497,12 +497,13 @@ const CrearDocente = () => {
               Seleccionar Persona
             </DialogTitle>
             <DialogContent className="p-4">
-              <Grid container spacing={2} className="mb-6 mt-6">
+              <Grid container spacing={2} className="mb-6 mt-8">
                 <Grid item xs={12} sm={6}>
                   <TextField
                     label="Nombre"
                     value={filtroNombre}
                     onChange={(e) => setFiltroNombre(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && filtrarPersonas()}
                     fullWidth
                     variant="outlined"
                     size="small"
@@ -513,6 +514,7 @@ const CrearDocente = () => {
                     label="Apellido"
                     value={filtroApellido}
                     onChange={(e) => setFiltroApellido(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && filtrarPersonas()}
                     fullWidth
                     variant="outlined"
                     size="small"
@@ -523,6 +525,7 @@ const CrearDocente = () => {
                     label="DNI"
                     value={filtroDni}
                     onChange={(e) => setFiltroDni(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && filtrarPersonas()}
                     fullWidth
                     variant="outlined"
                     size="small"
@@ -533,6 +536,7 @@ const CrearDocente = () => {
                     label="Legajo"
                     value={filtroLegajo}
                     onChange={(e) => setFiltroLegajo(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && filtrarPersonas()}
                     fullWidth
                     variant="outlined"
                     size="small"

@@ -596,6 +596,7 @@ const CrearAsignatura = () => {
                   label="Buscar por Nombre"
                   value={filtroAreas}
                   onChange={(e) => setFiltroAreas(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && filtrarAreas()}
                   fullWidth
                   variant="outlined"
                   size="small"

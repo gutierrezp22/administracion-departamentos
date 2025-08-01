@@ -286,6 +286,7 @@ const ListaAsignaturaCarrera = () => {
                 fullWidth
                 value={filtroCodigo}
                 onChange={(e) => setFiltroCodigo(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && filtrarAsignaturas()}
                 placeholder="Buscar por código"
                 size="small"
               />
@@ -298,6 +299,7 @@ const ListaAsignaturaCarrera = () => {
                 fullWidth
                 value={filtroNombre}
                 onChange={(e) => setFiltroNombre(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && filtrarAsignaturas()}
                 placeholder="Buscar por nombre"
                 size="small"
               />
@@ -325,6 +327,7 @@ const ListaAsignaturaCarrera = () => {
                 fullWidth
                 value={filtroModulo}
                 onChange={(e) => setFiltroModulo(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && filtrarAsignaturas()}
                 placeholder="Buscar por módulo"
                 size="small"
               />

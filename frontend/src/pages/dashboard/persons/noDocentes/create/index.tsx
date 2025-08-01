@@ -491,12 +491,13 @@ const CrearNoDocente = () => {
               Seleccionar Persona
             </DialogTitle>
             <DialogContent className="p-4">
-              <Grid container spacing={2} className="mb-6 mt-6">
+              <Grid container spacing={2} className="mb-6 mt-8">
                 <Grid item xs={12} sm={6}>
                   <TextField
                     label="Nombre"
                     value={filtroNombre}
                     onChange={(e) => setFiltroNombre(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && filtrarPersonas()}
                     fullWidth
                     variant="outlined"
                     size="small"
@@ -507,6 +508,7 @@ const CrearNoDocente = () => {
                     label="Apellido"
                     value={filtroApellido}
                     onChange={(e) => setFiltroApellido(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && filtrarPersonas()}
                     fullWidth
                     variant="outlined"
                     size="small"
@@ -517,6 +519,7 @@ const CrearNoDocente = () => {
                     label="DNI"
                     value={filtroDni}
                     onChange={(e) => setFiltroDni(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && filtrarPersonas()}
                     fullWidth
                     variant="outlined"
                     size="small"
@@ -527,6 +530,7 @@ const CrearNoDocente = () => {
                     label="Legajo"
                     value={filtroLegajo}
                     onChange={(e) => setFiltroLegajo(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && filtrarPersonas()}
                     fullWidth
                     variant="outlined"
                     size="small"
