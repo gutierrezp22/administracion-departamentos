@@ -12,6 +12,7 @@ interface FilterInputProps {
   placeholder?: string;
   type?: "text" | "date";
   className?: string;
+  onEnterPress?: () => void;
 }
 
 export const FilterInput: React.FC<FilterInputProps> = ({
@@ -21,7 +22,15 @@ export const FilterInput: React.FC<FilterInputProps> = ({
   placeholder,
   type = "text",
   className = "",
+  onEnterPress,
 }) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && onEnterPress) {
+      e.preventDefault();
+      onEnterPress();
+    }
+  };
+
   return (
     <div className={`flex flex-col space-y-2 ${className}`}>
       <label className="text-sm font-medium text-gray-700">{label}</label>
@@ -30,6 +39,7 @@ export const FilterInput: React.FC<FilterInputProps> = ({
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 text-sm text-gray-800 bg-white placeholder-gray-500"
         />
@@ -105,6 +115,16 @@ export const FilterContainer: React.FC<FilterContainerProps> = ({
   onClear,
   showClearButton = false,
 }) => {
+  // Clonar los children y pasarles la función onEnterPress
+  const childrenWithEnterPress = React.Children.map(children, (child) => {
+    if (React.isValidElement(child) && child.type === FilterInput) {
+      return React.cloneElement(child as React.ReactElement<FilterInputProps>, {
+        onEnterPress: onApply,
+      });
+    }
+    return child;
+  });
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
       <div className="flex items-center justify-between mb-4">
@@ -123,7 +143,7 @@ export const FilterContainer: React.FC<FilterContainerProps> = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-4">
-        {children}
+        {childrenWithEnterPress}
       </div>
 
       <div className="flex justify-end">

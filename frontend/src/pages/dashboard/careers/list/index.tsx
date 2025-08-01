@@ -964,6 +964,7 @@ const ListaCarreras = () => {
                 label="Código"
                 value={filtroCodigoAsignatura}
                 onChange={(e) => setFiltroCodigoAsignatura(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && filtrarAsignaturasDisponibles()}
                 fullWidth
                 variant="outlined"
                 size="small"
@@ -975,6 +976,7 @@ const ListaCarreras = () => {
                 label="Nombre"
                 value={filtroNombreAsignatura}
                 onChange={(e) => setFiltroNombreAsignatura(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && filtrarAsignaturasDisponibles()}
                 fullWidth
                 variant="outlined"
                 size="small"
@@ -986,6 +988,7 @@ const ListaCarreras = () => {
                 label="Módulo"
                 value={filtroModuloAsignatura}
                 onChange={(e) => setFiltroModuloAsignatura(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && filtrarAsignaturasDisponibles()}
                 fullWidth
                 variant="outlined"
                 size="small"
@@ -997,6 +1000,7 @@ const ListaCarreras = () => {
                 label="Tipo"
                 value={filtroTipoAsignatura}
                 onChange={(e) => setFiltroTipoAsignatura(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && filtrarAsignaturasDisponibles()}
                 fullWidth
                 variant="outlined"
                 size="small"

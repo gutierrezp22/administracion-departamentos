@@ -514,6 +514,7 @@ const CrearJefe = () => {
                     label="Nombre"
                     value={filtroNombre}
                     onChange={(e) => setFiltroNombre(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && filtrarPersonas()}
                     fullWidth
                     variant="outlined"
                     size="small"
@@ -524,6 +525,7 @@ const CrearJefe = () => {
                     label="Apellido"
                     value={filtroApellido}
                     onChange={(e) => setFiltroApellido(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && filtrarPersonas()}
                     fullWidth
                     variant="outlined"
                     size="small"
@@ -534,6 +536,7 @@ const CrearJefe = () => {
                     label="DNI"
                     value={filtroDni}
                     onChange={(e) => setFiltroDni(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && filtrarPersonas()}
                     fullWidth
                     variant="outlined"
                     size="small"
@@ -544,6 +547,7 @@ const CrearJefe = () => {
                     label="Legajo"
                     value={filtroLegajo}
                     onChange={(e) => setFiltroLegajo(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && filtrarPersonas()}
                     fullWidth
                     variant="outlined"
                     size="small"

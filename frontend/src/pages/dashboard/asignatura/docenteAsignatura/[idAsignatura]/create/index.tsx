@@ -993,6 +993,7 @@ const CrearDocenteAsignatura: React.FC = () => {
                   label="Buscar por DNI o Nombre"
                   value={filtroDni}
                   onChange={(e) => setFiltroDni(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && filtrarDocentes()}
                   fullWidth
                   variant="outlined"
                   size="small"
@@ -1122,6 +1123,7 @@ const CrearDocenteAsignatura: React.FC = () => {
                   label="Buscar por Nro Expediente o Resolución"
                   value={filtroNroResolucion}
                   onChange={(e) => setFiltroNroResolucion(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && filtrarResoluciones()}
                   fullWidth
                   variant="outlined"
                   size="small"
