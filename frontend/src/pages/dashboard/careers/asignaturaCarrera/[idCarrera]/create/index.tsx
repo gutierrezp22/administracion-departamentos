@@ -207,7 +207,6 @@ const CrearAsignaturaCarrera = () => {
                       label="Buscar por Código o Nombre"
                       value={filtroAsignaturas}
                       onChange={(e) => setFiltroAsignaturas(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && filtrarAsignaturas()}
                       fullWidth
                       margin="normal"
                       variant="outlined"
