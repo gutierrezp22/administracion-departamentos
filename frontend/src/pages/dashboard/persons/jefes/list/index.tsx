@@ -204,10 +204,18 @@ const ListaJefes = () => {
 
   const verJefe = async (id: number) => {
     try {
-      const response = await API.get(`/facet/jefe/${id}/`);
-      setViewJefe(response.data);
+      // Try with the same endpoint structure as the list
+      const response = await API.get(`/facet/jefe/list_jefes_persona/?id=${id}`);
+      if (response.data.results && response.data.results.length > 0) {
+        setViewJefe(response.data.results[0]);
+      } else {
+        // Fallback to individual endpoint if needed
+        const fallbackResponse = await API.get(`/facet/jefe/${id}/`);
+        setViewJefe(fallbackResponse.data);
+      }
       setModalViewVisible(true);
     } catch (error) {
+      console.error("Error fetching jefe details:", error);
       Swal.fire(
         "Error!",
         "No se pudo obtener los datos del jefe.",
@@ -441,7 +449,7 @@ const ListaJefes = () => {
                         DNI
                       </label>
                       <p className="text-gray-900 font-medium">
-                        {viewJefe.persona?.dni || "No especificado"}
+                        {viewJefe.persona.dni || "No especificado"}
                       </p>
                     </div>
 
@@ -450,7 +458,7 @@ const ListaJefes = () => {
                         Legajo
                       </label>
                       <p className="text-gray-900 font-medium">
-                        {viewJefe.persona?.legajo || "No especificado"}
+                        {viewJefe.persona.legajo || "No especificado"}
                       </p>
                     </div>
 
@@ -459,7 +467,7 @@ const ListaJefes = () => {
                         Nombres
                       </label>
                       <p className="text-gray-900 font-medium">
-                        {viewJefe.persona?.nombre || "No especificado"}
+                        {viewJefe.persona.nombre || "No especificado"}
                       </p>
                     </div>
 
@@ -468,7 +476,7 @@ const ListaJefes = () => {
                         Apellido
                       </label>
                       <p className="text-gray-900 font-medium">
-                        {viewJefe.persona?.apellido || "No especificado"}
+                        {viewJefe.persona.apellido || "No especificado"}
                       </p>
                     </div>
                   </div>
@@ -486,7 +494,7 @@ const ListaJefes = () => {
                         Teléfono
                       </label>
                       <p className="text-gray-900 font-medium">
-                        {viewJefe.persona?.telefono || "No especificado"}
+                        {viewJefe.persona.telefono || "No especificado"}
                       </p>
                     </div>
 
@@ -495,7 +503,7 @@ const ListaJefes = () => {
                         Email
                       </label>
                       <p className="text-gray-900 font-medium">
-                        {viewJefe.persona?.email || "No especificado"}
+                        {viewJefe.persona.email || "No especificado"}
                       </p>
                     </div>
 
@@ -504,7 +512,7 @@ const ListaJefes = () => {
                         Interno
                       </label>
                       <p className="text-gray-900 font-medium">
-                        {viewJefe.persona?.interno || "No especificado"}
+                        {viewJefe.persona.interno || "No especificado"}
                       </p>
                     </div>
 
