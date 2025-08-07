@@ -25,6 +25,7 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import Swal from "sweetalert2";
@@ -77,6 +78,8 @@ const ListaJefes = () => {
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [viewJefe, setViewJefe] = useState<Jefe | null>(null);
+  const [modalViewVisible, setModalViewVisible] = useState(false);
 
   const router = useRouter();
 
@@ -196,6 +199,20 @@ const ListaJefes = () => {
         title: "Error al descargar",
         text: "Se produjo un error al exportar los datos.",
       });
+    }
+  };
+
+  const verJefe = async (id: number) => {
+    try {
+      const response = await API.get(`/facet/jefe/${id}/`);
+      setViewJefe(response.data);
+      setModalViewVisible(true);
+    } catch (error) {
+      Swal.fire(
+        "Error!",
+        "No se pudo obtener los datos del jefe.",
+        "error"
+      );
     }
   };
 
@@ -325,17 +342,25 @@ const ListaJefes = () => {
                   <TableCell>
                     <div className="flex gap-2">
                       <button
+                        onClick={() => verJefe(jefe.id)}
+                        className="p-2 text-green-600 hover:text-green-800 rounded-lg hover:bg-green-100 transition-colors duration-200"
+                        title="Ver detalles">
+                        <VisibilityIcon />
+                      </button>
+                      <button
                         onClick={() =>
                           router.push(
                             `/dashboard/persons/jefes/edit/${jefe.id}`
                           )
                         }
-                        className="p-2 text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-100 transition-colors duration-200">
+                        className="p-2 text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-100 transition-colors duration-200"
+                        title="Editar">
                         <EditIcon />
                       </button>
                       <button
                         onClick={() => eliminarJefe(jefe.id)}
-                        className="p-2 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-100 transition-colors duration-200">
+                        className="p-2 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-100 transition-colors duration-200"
+                        title="Eliminar">
                         <DeleteIcon />
                       </button>
                     </div>
@@ -378,6 +403,164 @@ const ListaJefes = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal de vista de jefe */}
+      {modalViewVisible && viewJefe && (
+        <div
+          className="fixed inset-0 flex items-center justify-center z-[10000]"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
+        >
+          <div
+            className="fixed inset-0 bg-black opacity-50"
+            onClick={() => setModalViewVisible(false)}
+          ></div>
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto z-[10001] relative">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-xl font-bold text-gray-900">
+                Detalles del Jefe
+              </h3>
+            </div>
+
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Información Personal */}
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold text-gray-700 border-b pb-2">
+                    Información Personal
+                  </h4>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        DNI
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {viewJefe.persona?.dni || "No especificado"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Legajo
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {viewJefe.persona?.legajo || "No especificado"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Nombres
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {viewJefe.persona?.nombre || "No especificado"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Apellido
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {viewJefe.persona?.apellido || "No especificado"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Información de Contacto y Observaciones */}
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold text-gray-700 border-b pb-2">
+                    Información de Contacto
+                  </h4>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Teléfono
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {viewJefe.persona?.telefono || "No especificado"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Email
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {viewJefe.persona?.email || "No especificado"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Interno
+                      </label>
+                      <p className="text-gray-900 font-medium">
+                        {viewJefe.persona?.interno || "No especificado"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Estado
+                      </label>
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          viewJefe.estado === "1"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {viewJefe.estado === "1" ? "Activo" : "Inactivo"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Observaciones - Sección completa */}
+              {viewJefe.observaciones && (
+                <div className="mt-6">
+                  <h4 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">
+                    Observaciones
+                  </h4>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-gray-900 whitespace-pre-wrap">
+                      {viewJefe.observaciones}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                onClick={() => setModalViewVisible(false)}
+                className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors duration-200"
+              >
+                Cerrar
+              </button>
+              <button
+                onClick={() => {
+                  setModalViewVisible(false);
+                  router.push(`/dashboard/persons/jefes/edit/${viewJefe.id}`);
+                }}
+                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors duration-200"
+              >
+                Editar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardMenu>
   );
 };
