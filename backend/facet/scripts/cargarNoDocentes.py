@@ -22,9 +22,6 @@ try:
 
     for index, row in data.iterrows():
         caracter = str(row['caracter']).strip().upper()
-        if not caracter.startswith("ND"):
-            continue
-
         legajo = str(row['nrolegajoaux'])
         cuil = str(row['cuil'])
         apellido = str(row['apellido']).strip().upper()
@@ -36,19 +33,21 @@ try:
         fecha_creacion = datetime.now()
         fecha_modificacion = datetime.now()
 
+        # Procesar TODAS las personas (no solo ND)
         # Verificar si la persona ya existe
         cursor.execute("SELECT id FROM departamentos_persona WHERE dni = %s", (dni,))
         result = cursor.fetchone()
 
         if result:
             persona_id = result[0]
-            # Actualizar estado a 1 por si tenía otro valor
+            # Actualizar todos los datos de la persona
             cursor.execute("""
                 UPDATE departamentos_persona 
-                SET estado = %s, fecha_modificacion = %s 
+                SET apellido = %s, nombre = %s, legajo = %s, fecha_nacimiento = %s, 
+                    estado = %s, fecha_modificacion = %s 
                 WHERE id = %s
-            """, (estado, fecha_modificacion, persona_id))
-            print(f"✔ Persona actualizada (estado = 1) - DNI {dni}, ID: {persona_id}")
+            """, (apellido, nombre, legajo, fecha_nacimiento, estado, fecha_modificacion, persona_id))
+            print(f"✔ Persona actualizada con todos los datos - DNI {dni}, Carácter: {caracter}, ID: {persona_id}")
         else:
             cursor.execute("""
                 INSERT INTO departamentos_persona
@@ -56,27 +55,31 @@ try:
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
             """, (dni, apellido, nombre, estado, legajo, fecha_nacimiento, fecha_creacion, fecha_modificacion))
             persona_id = cursor.fetchone()[0]
-            print(f"🆕 Persona creada con estado = 1 (DNI {dni}) ID: {persona_id}")
+            print(f"🆕 Persona creada - DNI {dni}, Carácter: {caracter}, ID: {persona_id}")
 
-        # Verificar si NoDocente ya existe
-        cursor.execute("SELECT COUNT(*) FROM departamentos_nodocente WHERE persona_id = %s", (persona_id,))
-        existe_nodocente = cursor.fetchone()[0]
+        # Solo crear/actualizar NoDocente si el carácter es ND
+        if caracter.startswith("ND"):
+            # Verificar si NoDocente ya existe
+            cursor.execute("SELECT COUNT(*) FROM departamentos_nodocente WHERE persona_id = %s", (persona_id,))
+            existe_nodocente = cursor.fetchone()[0]
 
-        if not existe_nodocente:
-            cursor.execute("""
-                INSERT INTO departamentos_nodocente
-                (persona_id, observaciones, estado, fecha_creacion, fecha_modificacion)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (persona_id, observaciones, estado, fecha_creacion, fecha_modificacion))
-            print(f"➡ NoDocente creado con estado = 1 para persona ID {persona_id}")
+            if not existe_nodocente:
+                cursor.execute("""
+                    INSERT INTO departamentos_nodocente
+                    (persona_id, observaciones, estado, fecha_creacion, fecha_modificacion)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (persona_id, observaciones, estado, fecha_creacion, fecha_modificacion))
+                print(f"➡ NoDocente creado con estado = 1 para persona ID {persona_id}")
+            else:
+                # Actualizar el estado si ya existe
+                cursor.execute("""
+                    UPDATE departamentos_nodocente 
+                    SET estado = %s, fecha_modificacion = %s, observaciones = %s
+                    WHERE persona_id = %s
+                """, (estado, fecha_modificacion, observaciones, persona_id))
+                print(f"♻ NoDocente ya existía — estado actualizado a 1 (persona ID {persona_id})")
         else:
-            # Actualizar el estado si ya existe
-            cursor.execute("""
-                UPDATE departamentos_nodocente 
-                SET estado = %s, fecha_modificacion = %s 
-                WHERE persona_id = %s
-            """, (estado, fecha_modificacion, persona_id))
-            print(f"♻ NoDocente ya existía — estado actualizado a 1 (persona ID {persona_id})")
+            print(f"👥 Persona procesada pero no es NoDocente (carácter: {caracter})")
 
     conn.commit()
     print("✅ Proceso finalizado correctamente con actualizaciones.")
