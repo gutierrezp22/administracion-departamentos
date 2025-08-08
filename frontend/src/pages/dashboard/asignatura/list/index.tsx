@@ -97,6 +97,14 @@ const ListaAsignaturas = () => {
       setNextUrl(response.data.next ? normalizeUrl(response.data.next) : null);
       setPrevUrl(response.data.previous ? normalizeUrl(response.data.previous) : null);
       setTotalItems(response.data.count);
+      
+      // Extract current page from URL
+      const urlParams = new URLSearchParams(url.split('?')[1] || '');
+      const pageParam = urlParams.get('page');
+      if (pageParam) {
+        setCurrentPage(parseInt(pageParam, 10));
+      }
+      
       // Pequeño delay para asegurar que los estilos se cargan
       setTimeout(() => setIsLoading(false), 500);
     } catch (error) {
@@ -433,10 +441,10 @@ const ListaAsignaturas = () => {
 
           <div className="flex justify-between items-center mt-6">
             <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
+              onClick={() => prevUrl && setCurrentUrl(prevUrl)}
+              disabled={!prevUrl}
               className={`px-4 py-2 rounded-lg font-medium ${
-                currentPage > 1
+                prevUrl
                   ? "bg-blue-500 text-white hover:bg-blue-600"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               } transition-colors duration-200`}>
@@ -446,10 +454,10 @@ const ListaAsignaturas = () => {
               Página {currentPage} de {totalPages}
             </span>
             <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage >= totalPages}
+              onClick={() => nextUrl && setCurrentUrl(nextUrl)}
+              disabled={!nextUrl}
               className={`px-4 py-2 rounded-lg font-medium ${
-                currentPage < totalPages
+                nextUrl
                   ? "bg-blue-500 text-white hover:bg-blue-600"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               } transition-colors duration-200`}>

@@ -105,7 +105,7 @@ const ListaDepartamentos = () => {
 				setIsLoading(false);
 			}
 		},
-		[normalizeUrl]
+		[]
 	);
 
 	useEffect(() => {
