@@ -42,7 +42,12 @@ import ResponsiveTable from "../../../../../components/ResponsiveTable";
 
 // Función para normalizar URLs de paginación
 const normalizeUrl = (url: string) => {
-  return url.replace(window.location.origin, "").replace(/^\/+/, "/");
+  if (url.startsWith('http')) {
+    // Extract path and query from full URL
+    const urlObj = new URL(url);
+    return urlObj.pathname + urlObj.search;
+  }
+  return url.replace(/^\/+/, "/");
 };
 
 const ListaJefes = () => {

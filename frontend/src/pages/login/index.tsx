@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Swal from "sweetalert2";
-import { FiLock, FiMail } from "react-icons/fi"; // Using Feather icons from react-icons
+import { FiLock, FiMail, FiEye, FiEyeOff } from "react-icons/fi"; // Using Feather icons from react-icons
 import "../../app/globals.css"; // Importamos los estilos globales de Tailwind
 import API from "@/api/axiosConfig";
 
@@ -14,6 +14,7 @@ export default function LoginPage() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [showPassword, setShowPassword] = useState(false);
 
 	// Usar useRef para acceder a los valores más recientes en los efectos
 	const rememberMeRef = useRef(rememberMe);
@@ -59,6 +60,15 @@ export default function LoginPage() {
 				icon: "error",
 				title: "Error de autenticación",
 				text: "Correo electrónico o contraseña incorrectos.",
+				confirmButtonColor: "#3b82f6", // Blue-500 para mantener consistencia con el sistema
+				color: "#1f2937", // Gray-800 para el texto
+				background: "#ffffff", // Fondo blanco
+				customClass: {
+					popup: "rounded-lg shadow-lg",
+					title: "text-gray-800 font-semibold",
+					htmlContainer: "text-gray-600",
+					confirmButton: "rounded-lg px-6 py-2 font-medium transition-colors duration-200 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+				}
 			});
 		} finally {
 			setIsLoading(false);
@@ -134,14 +144,26 @@ export default function LoginPage() {
 								<input
 									id="password"
 									name="password"
-									type="password"
+									type={showPassword ? "text" : "password"}
 									value={password}
 									onChange={(e) => setPassword(e.target.value)}
 									autoComplete="current-password"
 									required
-									className="appearance-none block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200"
+									className="appearance-none block w-full px-3 py-3 pl-10 pr-12 border border-gray-300 placeholder-gray-400 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200"
 									placeholder="••••••••"
 								/>
+								<button
+									type="button"
+									onClick={() => setShowPassword(!showPassword)}
+									className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none focus:text-blue-500 transition-colors duration-200"
+									aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+								>
+									{showPassword ? (
+										<FiEyeOff className="h-5 w-5" aria-hidden="true" />
+									) : (
+										<FiEye className="h-5 w-5" aria-hidden="true" />
+									)}
+								</button>
 							</div>
 						</div>
 					</div>

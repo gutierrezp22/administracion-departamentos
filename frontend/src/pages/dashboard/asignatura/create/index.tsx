@@ -189,9 +189,60 @@ const CrearAsignatura = () => {
       );
     } catch (error: any) {
       console.error("Error al crear asignatura:", error);
-      const errorMessage =
-        error.response?.data?.message || "No se pudo realizar la acción.";
-      handleOpenModal("Error", errorMessage, () => {});
+      
+      let errorMessage = "No se pudo crear la asignatura.";
+      
+      if (error.response?.data) {
+        const errorData = error.response.data;
+        
+        // Si hay un mensaje de error general
+        if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+        // Si hay errores específicos de campos
+        else if (errorData.errors || (typeof errorData === 'object' && !errorData.message)) {
+          const fieldErrors = errorData.errors || errorData;
+          const errorMessages = [];
+          
+          // Mapear nombres de campos a nombres más amigables
+          const fieldNames = {
+            'area': 'Área',
+            'departamento': 'Departamento', 
+            'codigo': 'Código',
+            'nombre': 'Nombre',
+            'modulo': 'Módulo',
+            'programa': 'Programa',
+            'tipo': 'Tipo',
+            'estado': 'Estado'
+          };
+          
+          for (const [field, messages] of Object.entries(fieldErrors)) {
+            const fieldName = fieldNames[field as keyof typeof fieldNames] || field;
+            const fieldMessages = Array.isArray(messages) ? messages : [messages];
+            
+            for (const msg of fieldMessages) {
+              errorMessages.push(`${fieldName}: ${msg}`);
+            }
+          }
+          
+          if (errorMessages.length > 0) {
+            errorMessage = errorMessages.join('\n');
+          }
+        }
+        // Si hay un error de detalle no específico
+        else if (errorData.detail) {
+          errorMessage = errorData.detail;
+        }
+        // Si hay un error de non_field_errors
+        else if (errorData.non_field_errors) {
+          const nonFieldErrors = Array.isArray(errorData.non_field_errors) 
+            ? errorData.non_field_errors 
+            : [errorData.non_field_errors];
+          errorMessage = nonFieldErrors.join('\n');
+        }
+      }
+      
+      handleOpenModal("Error de Validación", errorMessage, () => {});
     }
   };
 
