@@ -25,7 +25,7 @@ const CrearCarrera = () => {
   const [tipo, setTipo] = useState("");
   const [planEstudio, setPlanEstudio] = useState("");
   const [sitio, setsitio] = useState("");
-  const [estado, setEstado] = useState("");
+  const [estado, setEstado] = useState("1"); // Valor por defecto: Activo
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
@@ -56,11 +56,30 @@ const CrearCarrera = () => {
   };
 
   const crearNuevaCarrera = async () => {
+    // Validar campos requeridos
+    if (!nombre.trim()) {
+      handleOpenModal(
+        "Error",
+        "El nombre de la carrera es obligatorio.",
+        () => {}
+      );
+      return;
+    }
+
+    if (!tipo) {
+      handleOpenModal(
+        "Error",
+        "Debe seleccionar un tipo de carrera.",
+        () => {}
+      );
+      return;
+    }
+
     let nuevaCarrera = {
-      nombre: nombre,
+      nombre: nombre.trim(),
       tipo: tipo,
-      planestudio: planEstudio,
-      sitio: sitio,
+      planestudio: planEstudio.trim() || null,
+      sitio: sitio.trim() || null,
       estado: estado,
     };
 
@@ -71,8 +90,59 @@ const CrearCarrera = () => {
         "Se creó la carrera con éxito.",
         handleConfirmModal
       );
-    } catch (error) {
-      handleOpenModal("Error", "NO se pudo realizar la acción.", () => {});
+    } catch (error: any) {
+      console.error("Error al crear carrera:", error);
+      
+      let errorMessage = "No se pudo crear la carrera.";
+      
+      if (error.response?.data) {
+        const errorData = error.response.data;
+        
+        // Si hay un mensaje de error general
+        if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+        // Si hay errores específicos de campos
+        else if (errorData.errors || (typeof errorData === 'object' && !errorData.message)) {
+          const fieldErrors = errorData.errors || errorData;
+          const errorMessages = [];
+          
+          // Mapear nombres de campos a nombres más amigables
+          const fieldNames = {
+            'nombre': 'Nombre',
+            'tipo': 'Tipo',
+            'planestudio': 'Plan de Estudio',
+            'sitio': 'Sitio',
+            'estado': 'Estado'
+          };
+          
+          for (const [field, messages] of Object.entries(fieldErrors)) {
+            const fieldName = fieldNames[field as keyof typeof fieldNames] || field;
+            const fieldMessages = Array.isArray(messages) ? messages : [messages];
+            
+            for (const msg of fieldMessages) {
+              errorMessages.push(`${fieldName}: ${msg}`);
+            }
+          }
+          
+          if (errorMessages.length > 0) {
+            errorMessage = errorMessages.join('\n');
+          }
+        }
+        // Si hay un error de detalle no específico
+        else if (errorData.detail) {
+          errorMessage = errorData.detail;
+        }
+        // Si hay un error de non_field_errors
+        else if (errorData.non_field_errors) {
+          const nonFieldErrors = Array.isArray(errorData.non_field_errors) 
+            ? errorData.non_field_errors 
+            : [errorData.non_field_errors];
+          errorMessage = nonFieldErrors.join('\n');
+        }
+      }
+      
+      handleOpenModal("Error de Validación", errorMessage, () => {});
     }
   };
 

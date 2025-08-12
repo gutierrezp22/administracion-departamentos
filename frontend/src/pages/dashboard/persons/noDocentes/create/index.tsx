@@ -28,6 +28,7 @@ import { useRouter } from "next/router";
 import DashboardMenu from "../../../../dashboard";
 import withAuth from "../../../../../components/withAut";
 import API from "@/api/axiosConfig";
+import { FilterContainer, FilterInput } from "@/components/Filters";
 
 const CrearNoDocente = () => {
   const router = useRouter();
@@ -491,72 +492,42 @@ const CrearNoDocente = () => {
               Seleccionar Persona
             </DialogTitle>
             <DialogContent className="p-4">
-              <Grid container spacing={2} className="mb-6 mt-8">
-                <Grid item xs={12} sm={6}>
-                  <TextField
+              <div className="mt-4">
+                <FilterContainer 
+                  onApply={filtrarPersonas}
+                  onClear={() => {
+                    setFiltroNombre("");
+                    setFiltroApellido("");
+                    setFiltroDni("");
+                    setFiltroLegajo("");
+                    fetchPersonas("/facet/persona/");
+                  }}>
+                  <FilterInput
                     label="Nombre"
                     value={filtroNombre}
-                    onChange={(e) => setFiltroNombre(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && filtrarPersonas()}
-                    fullWidth
-                    variant="outlined"
-                    size="small"
+                    onChange={setFiltroNombre}
+                    placeholder="Buscar por nombre"
                   />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
+                  <FilterInput
                     label="Apellido"
                     value={filtroApellido}
-                    onChange={(e) => setFiltroApellido(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && filtrarPersonas()}
-                    fullWidth
-                    variant="outlined"
-                    size="small"
+                    onChange={setFiltroApellido}
+                    placeholder="Buscar por apellido"
                   />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
+                  <FilterInput
                     label="DNI"
                     value={filtroDni}
-                    onChange={(e) => setFiltroDni(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && filtrarPersonas()}
-                    fullWidth
-                    variant="outlined"
-                    size="small"
+                    onChange={setFiltroDni}
+                    placeholder="Buscar por DNI"
                   />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
+                  <FilterInput
                     label="Legajo"
                     value={filtroLegajo}
-                    onChange={(e) => setFiltroLegajo(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && filtrarPersonas()}
-                    fullWidth
-                    variant="outlined"
-                    size="small"
+                    onChange={setFiltroLegajo}
+                    placeholder="Buscar por legajo"
                   />
-                </Grid>
-                <Grid item xs={12}>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={filtrarPersonas}
-                      className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                      Filtrar
-                    </button>
-                    <button
-                      onClick={() => {
-                        setFiltroNombre("");
-                        setFiltroApellido("");
-                        setFiltroDni("");
-                        setFiltroLegajo("");
-                        fetchPersonas("/facet/persona/");
-                      }}
-                      className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                      Limpiar
-                    </button>
-                  </div>
-                </Grid>
-              </Grid>
+                </FilterContainer>
+              </div>
 
               <ResponsiveTable>
                 <TableHead>

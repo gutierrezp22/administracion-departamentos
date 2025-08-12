@@ -50,7 +50,12 @@ import {
 
 // Función para normalizar URLs de paginación
 const normalizeUrl = (url: string) => {
-  return url.replace(window.location.origin, "").replace(/^\/+/, "/");
+  if (url.startsWith('http')) {
+    // Extract path and query from full URL
+    const urlObj = new URL(url);
+    return urlObj.pathname + urlObj.search;
+  }
+  return url.replace(/^\/+/, "/");
 };
 
 dayjs.extend(utc);
@@ -103,12 +108,22 @@ const ListaResoluciones = () => {
       );
       setTotalItems(response.data.count);
       
-      // Extract current page from URL
+      // Extract current page from URL (handle both 'page' and 'offset' parameters)
       const urlParams = new URLSearchParams(url.split('?')[1] || '');
       const pageParam = urlParams.get('page');
+      const offsetParam = urlParams.get('offset');
+      const limitParam = urlParams.get('limit');
+      
+      let currentPageFromUrl = 1;
       if (pageParam) {
-        setCurrentPage(parseInt(pageParam, 10));
+        currentPageFromUrl = parseInt(pageParam, 10);
+      } else if (offsetParam && limitParam) {
+        const offset = parseInt(offsetParam, 10);
+        const limit = parseInt(limitParam, 10);
+        currentPageFromUrl = Math.floor(offset / limit) + 1;
       }
+      
+      setCurrentPage(currentPageFromUrl);
       
       // Pequeño delay para asegurar que los estilos se cargan
       setTimeout(() => setIsLoading(false), 500);
