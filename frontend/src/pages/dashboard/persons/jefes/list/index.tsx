@@ -1,24 +1,11 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
-import axios from "axios";
 import API from "@/api/axiosConfig";
 import {
-  Container,
-  Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
-  Typography,
-  Paper,
-  TextField,
-  Button,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormControl,
-  Grid,
   Chip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -32,23 +19,16 @@ import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 import DashboardMenu from "../../..";
 import withAuth from "../../../../../components/withAut";
-import { API_BASE_URL } from "../../../../../utils/config";
 import {
   FilterContainer,
   FilterInput,
   EstadoFilter,
 } from "../../../../../components/Filters";
 import ResponsiveTable from "../../../../../components/ResponsiveTable";
-
-// Función para normalizar URLs de paginación
-const normalizeUrl = (url: string) => {
-  if (url.startsWith('http')) {
-    // Extract path and query from full URL
-    const urlObj = new URL(url);
-    return urlObj.pathname + urlObj.search;
-  }
-  return url.replace(/^\/+/, "/");
-};
+import Pagination from "../../../../../components/Pagination";
+import DetailModal, { StatusBadge } from "../../../../../components/DetailModal";
+import LoadingOverlay from "../../../../../components/LoadingOverlay";
+import { normalizeUrl } from "../../../../../hooks/useSearch";
 
 const ListaJefes = () => {
   interface Jefe {
@@ -258,14 +238,7 @@ const ListaJefes = () => {
   if (isLoading) {
     return (
       <DashboardMenu>
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
-            <p className="text-gray-700 text-lg font-medium">
-              Cargando jefes...
-            </p>
-          </div>
-        </div>
+        <LoadingOverlay message="Cargando jefes..." />
       </DashboardMenu>
     );
   }
@@ -383,196 +356,54 @@ const ListaJefes = () => {
             </TableBody>
           </ResponsiveTable>
 
-          <div className="flex justify-between items-center mt-6">
-            <button
-              onClick={() => {
-                prevUrl && setCurrentUrl(prevUrl);
-                setCurrentPage(currentPage - 1);
-              }}
-              disabled={!prevUrl}
-              className={`px-4 py-2 rounded-lg font-medium ${
-                prevUrl
-                  ? "bg-blue-500 text-white hover:bg-blue-600"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              } transition-colors duration-200`}>
-              Anterior
-            </button>
-            <span className="text-gray-600">
-              Página {currentPage} de {totalPages}
-            </span>
-            <button
-              onClick={() => {
-                nextUrl && setCurrentUrl(nextUrl);
-                setCurrentPage(currentPage + 1);
-              }}
-              disabled={!nextUrl}
-              className={`px-4 py-2 rounded-lg font-medium ${
-                nextUrl
-                  ? "bg-blue-500 text-white hover:bg-blue-600"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              } transition-colors duration-200`}>
-              Siguiente
-            </button>
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPrevious={() => {
+              prevUrl && setCurrentUrl(prevUrl);
+              setCurrentPage(currentPage - 1);
+            }}
+            onNext={() => {
+              nextUrl && setCurrentUrl(nextUrl);
+              setCurrentPage(currentPage + 1);
+            }}
+            hasPrevious={!!prevUrl}
+            hasNext={!!nextUrl}
+          />
         </div>
       </div>
 
       {/* Modal de vista de jefe */}
-      {modalViewVisible && viewJefe && (
-        <div
-          className="fixed inset-0 flex items-center justify-center z-[10000]"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+      {viewJefe && (
+        <DetailModal
+          open={modalViewVisible}
+          onClose={() => setModalViewVisible(false)}
+          onEdit={() => {
+            setModalViewVisible(false);
+            router.push(`/dashboard/persons/jefes/edit/${viewJefe.id}`);
           }}
-        >
-          <div
-            className="fixed inset-0 bg-black opacity-50"
-            onClick={() => setModalViewVisible(false)}
-          ></div>
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto z-[10001] relative">
-            <div className="p-6 border-b border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900">
-                Detalles del Jefe
-              </h3>
-            </div>
-
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Información Personal */}
-                <div className="space-y-4">
-                  <h4 className="text-lg font-semibold text-gray-700 border-b pb-2">
-                    Información Personal
-                  </h4>
-
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        DNI
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {viewJefe.persona.dni || "No especificado"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Legajo
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {viewJefe.persona.legajo || "No especificado"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Nombres
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {viewJefe.persona.nombre || "No especificado"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Apellido
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {viewJefe.persona.apellido || "No especificado"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Información de Contacto y Observaciones */}
-                <div className="space-y-4">
-                  <h4 className="text-lg font-semibold text-gray-700 border-b pb-2">
-                    Información de Contacto
-                  </h4>
-
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Teléfono
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {viewJefe.persona.telefono || "No especificado"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Email
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {viewJefe.persona.email || "No especificado"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Interno
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {viewJefe.persona.interno || "No especificado"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Estado
-                      </label>
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          viewJefe.estado === "1"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {viewJefe.estado === "1" ? "Activo" : "Inactivo"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Observaciones - Sección completa */}
-              {viewJefe.observaciones && (
-                <div className="mt-6">
-                  <h4 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">
-                    Observaciones
-                  </h4>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-gray-900 whitespace-pre-wrap">
-                      {viewJefe.observaciones}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="p-6 border-t border-gray-200 flex justify-end space-x-3">
-              <button
-                onClick={() => setModalViewVisible(false)}
-                className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors duration-200"
-              >
-                Cerrar
-              </button>
-              <button
-                onClick={() => {
-                  setModalViewVisible(false);
-                  router.push(`/dashboard/persons/jefes/edit/${viewJefe.id}`);
-                }}
-                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors duration-200"
-              >
-                Editar
-              </button>
-            </div>
-          </div>
-        </div>
+          title="Detalles del Jefe"
+          sections={[
+            {
+              title: "Informacion Personal",
+              fields: [
+                { label: "DNI", value: viewJefe.persona.dni },
+                { label: "Legajo", value: viewJefe.persona.legajo },
+                { label: "Nombres", value: viewJefe.persona.nombre },
+                { label: "Apellido", value: viewJefe.persona.apellido },
+              ],
+            },
+            {
+              title: "Informacion de Contacto",
+              fields: [
+                { label: "Telefono", value: viewJefe.persona.telefono },
+                { label: "Email", value: viewJefe.persona.email },
+                { label: "Interno", value: viewJefe.persona.interno },
+                { label: "Estado", value: <StatusBadge estado={viewJefe.estado} /> },
+              ],
+            },
+          ]}
+        />
       )}
     </DashboardMenu>
   );
