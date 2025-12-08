@@ -1,24 +1,11 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
-import axios from "axios";
 import API from "@/api/axiosConfig";
 import {
-  Container,
-  Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
-  Typography,
-  Paper,
-  TextField,
-  Button,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormControl,
-  Grid,
 } from "@mui/material";
 import ResponsiveTable from "../../../../components/ResponsiveTable";
 import AddIcon from "@mui/icons-material/Add";
@@ -32,23 +19,15 @@ import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut";
-import { API_BASE_URL } from "../../../../utils/config";
 import {
   FilterContainer,
   FilterInput,
   FilterSelect,
   EstadoFilter,
 } from "../../../../components/Filters";
-
-// Función para normalizar URLs de paginación
-const normalizeUrl = (url: string) => {
-  if (url.startsWith('http')) {
-    // Extract path and query from full URL
-    const urlObj = new URL(url);
-    return urlObj.pathname + urlObj.search;
-  }
-  return url.replace(/^\/+/, "/");
-};
+import Pagination from "../../../../components/Pagination";
+import LoadingOverlay from "../../../../components/LoadingOverlay";
+import { normalizeUrl } from "../../../../hooks/useSearch";
 
 const ListaAsignaturas = () => {
   interface Asignatura {
@@ -231,14 +210,7 @@ const ListaAsignaturas = () => {
   if (isLoading) {
     return (
       <DashboardMenu>
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
-            <p className="text-gray-700 text-lg font-medium">
-              Cargando asignaturas...
-            </p>
-          </div>
-        </div>
+        <LoadingOverlay message="Cargando asignaturas..." />
       </DashboardMenu>
     );
   }
@@ -454,31 +426,14 @@ const ListaAsignaturas = () => {
               </TableBody>
           </ResponsiveTable>
 
-          <div className="flex justify-between items-center mt-6">
-            <button
-              onClick={() => prevUrl && setCurrentUrl(prevUrl)}
-              disabled={!prevUrl}
-              className={`px-4 py-2 rounded-lg font-medium ${
-                prevUrl
-                  ? "bg-blue-500 text-white hover:bg-blue-600"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              } transition-colors duration-200`}>
-              Anterior
-            </button>
-            <span className="text-gray-600">
-              Página {currentPage} de {totalPages}
-            </span>
-            <button
-              onClick={() => nextUrl && setCurrentUrl(nextUrl)}
-              disabled={!nextUrl}
-              className={`px-4 py-2 rounded-lg font-medium ${
-                nextUrl
-                  ? "bg-blue-500 text-white hover:bg-blue-600"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              } transition-colors duration-200`}>
-              Siguiente
-            </button>
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPrevious={() => prevUrl && setCurrentUrl(prevUrl)}
+            onNext={() => nextUrl && setCurrentUrl(nextUrl)}
+            hasPrevious={!!prevUrl}
+            hasNext={!!nextUrl}
+          />
         </div>
       </div>
     </DashboardMenu>
