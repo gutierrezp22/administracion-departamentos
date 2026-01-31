@@ -6,6 +6,8 @@
   --foreground-rgb: 255, 255, 255;
   --background-start-rgb: 255, 255, 255;
   --background-end-rgb: 255, 255, 255;
+  --font-primary: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -24,4 +26,97 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+  font-family: var(--font-primary);
+}
+
+/* ==========================================
+   ESTILOS GLOBALES PARA TABLAS - TIPOGRAFÍA MODERNA
+   ========================================== */
+
+/* Tablas de Material-UI - Estilos globales */
+.MuiTable-root {
+  font-family: var(--font-primary) !important;
+}
+
+/* Celdas del encabezado */
+.MuiTableHead-root .MuiTableCell-root {
+  font-family: var(--font-primary) !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  letter-spacing: 0.025em !important;
+  text-transform: uppercase !important;
+  line-height: 1.5 !important;
+}
+
+/* Celdas del cuerpo */
+.MuiTableBody-root .MuiTableCell-root {
+  font-family: var(--font-primary) !important;
+  font-weight: 400 !important;
+  font-size: 0.9375rem !important;
+  line-height: 1.6 !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* Filas del cuerpo - mejor legibilidad */
+.MuiTableBody-root .MuiTableRow-root {
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+/* Hover en filas */
+.MuiTableBody-root .MuiTableRow-root:hover .MuiTableCell-root {
+  font-weight: 500 !important;
+}
+
+/* Componentes ResponsiveTable */
+[class*="ResponsiveTable"] table {
+  font-family: var(--font-primary) !important;
+}
+
+[class*="ResponsiveTable"] th {
+  font-family: var(--font-primary) !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  letter-spacing: 0.025em !important;
+}
+
+[class*="ResponsiveTable"] td {
+  font-family: var(--font-primary) !important;
+  font-size: 0.9375rem !important;
+  line-height: 1.6 !important;
+}
+
+/* Tablas con clase modern-table */
+.modern-table {
+  font-family: var(--font-primary);
+}
+
+.modern-table th {
+  font-weight: 600;
+  font-size: 0.875rem;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+.modern-table td {
+  font-weight: 400;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+/* Números en tablas (legibilidad mejorada) */
+.MuiTableCell-root {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Texto en botones de tablas */
+.MuiTableCell-root button {
+  font-family: var(--font-primary) !important;
+  font-weight: 500 !important;
+  font-size: 0.875rem !important;
+}
+
+/* Paginación */
+.MuiTablePagination-root {
+  font-family: var(--font-primary) !important;
+  font-size: 0.875rem !important;
 }

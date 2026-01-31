@@ -35,6 +35,11 @@ import BasicModal from "@/utils/modal";
 import withAuth from "../../../../../../components/withAut"; // Importa el HOC
 import API from "@/api/axiosConfig";
 import { formatFechaParaBackend } from "@/utils/dateHelpers";
+import {
+  MagnifyingGlassIcon,
+  XMarkIcon,
+  FunnelIcon,
+} from "@heroicons/react/24/outline";
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -249,33 +254,63 @@ const CrearDocenteAsignatura: React.FC = () => {
 
   // Función para filtrar resoluciones desde el servidor
   const filtrarResoluciones = async () => {
-    if (!filtroNroResolucion.trim()) {
-      // Si no hay filtro, cargar todas las resoluciones
+    // Si no hay filtros, cargar todas las resoluciones
+    if (!filtroNroResolucion.trim() && !filtroTipo && !filtroFechaDesde && !filtroFechaHasta && !filtroFechaExacta) {
       fetchDataResoluciones(`/facet/resolucion/`);
       return;
     }
 
     try {
-      // Primero buscar por número de expediente
-      let url = `/facet/resolucion/?nexpediente__icontains=${encodeURIComponent(filtroNroResolucion)}`;
-      let response = await API.get(url);
+      const params = new URLSearchParams();
       
-      // Si no encuentra resultados, buscar por número de resolución
-      if (response.data.results.length === 0) {
-        url = `/facet/resolucion/?nresolucion__icontains=${encodeURIComponent(filtroNroResolucion)}`;
-        response = await API.get(url);
+      // Agregar filtros de fecha
+      if (filtroFechaExacta) {
+        params.append("fecha", formatFechaParaBackend(filtroFechaExacta) || "");
+      } else {
+        if (filtroFechaDesde) {
+          params.append("fecha__gte", formatFechaParaBackend(filtroFechaDesde) || "");
+        }
+        if (filtroFechaHasta) {
+          params.append("fecha__lte", formatFechaParaBackend(filtroFechaHasta) || "");
+        }
       }
       
-      // Actualizar el estado con los resultados
-      setResoluciones(response.data.results);
-      setNextUrlResoluciones(response.data.next ? normalizeUrl(response.data.next) : null);
-      setPrevUrlResoluciones(response.data.previous ? normalizeUrl(response.data.previous) : null);
-      setTotalItemsResoluciones(response.data.count);
+      // Agregar filtro de tipo
+      if (filtroTipo) {
+        params.append("tipo", filtroTipo);
+      }
       
-      // Calcular página actual
-      const urlParams = new URLSearchParams(url.split('?')[1] || '');
-      const offset = urlParams.get("offset") || "0";
-      setCurrentPageResoluciones(Math.floor(Number(offset) / pageSizeResoluciones) + 1);
+      // Si hay filtro de número, buscar por expediente o resolución
+      if (filtroNroResolucion.trim()) {
+        // Primero buscar por número de expediente
+        let searchParams = new URLSearchParams(params);
+        searchParams.append("nexpediente__icontains", filtroNroResolucion);
+        let url = `/facet/resolucion/?${searchParams.toString()}`;
+        let response = await API.get(url);
+        
+        // Si no encuentra resultados, buscar por número de resolución
+        if (response.data.results.length === 0) {
+          searchParams = new URLSearchParams(params);
+          searchParams.append("nresolucion__icontains", filtroNroResolucion);
+          url = `/facet/resolucion/?${searchParams.toString()}`;
+          response = await API.get(url);
+        }
+        
+        // Actualizar el estado con los resultados
+        setResoluciones(response.data.results);
+        setNextUrlResoluciones(response.data.next ? normalizeUrl(response.data.next) : null);
+        setPrevUrlResoluciones(response.data.previous ? normalizeUrl(response.data.previous) : null);
+        setTotalItemsResoluciones(response.data.count);
+        
+        // Calcular página actual
+        const urlParams = new URLSearchParams(url.split('?')[1] || '');
+        const offset = urlParams.get("offset") || "0";
+        setCurrentPageResoluciones(Math.floor(Number(offset) / pageSizeResoluciones) + 1);
+      } else {
+        // Si no hay filtro de número, solo aplicar filtros de fecha y tipo
+        const url = `/facet/resolucion/?${params.toString()}`;
+        fetchDataResoluciones(url);
+      }
     } catch (error) {
       console.error("Error filtering resoluciones:", error);
       // En caso de error, cargar todas las resoluciones
@@ -285,7 +320,9 @@ const CrearDocenteAsignatura: React.FC = () => {
 
   const [filtroNroResolucion, setFiltroNroResolucion] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("");
-  const [filtroFecha, setFiltroFecha] = useState<dayjs.Dayjs | null>(null);
+  const [filtroFechaDesde, setFiltroFechaDesde] = useState<dayjs.Dayjs | null>(null);
+  const [filtroFechaHasta, setFiltroFechaHasta] = useState<dayjs.Dayjs | null>(null);
+  const [filtroFechaExacta, setFiltroFechaExacta] = useState<dayjs.Dayjs | null>(null);
   const [nombreDepto, setNombreDepto] = useState("");
   const [observaciones, setObservaciones] = useState("");
   const [estado, setEstado] = useState("");
@@ -987,36 +1024,60 @@ const CrearDocenteAsignatura: React.FC = () => {
             Seleccionar Docente
           </DialogTitle>
           <DialogContent className="p-4">
-            <Grid container spacing={2} className="mb-6 mt-6">
-              <Grid item xs={12} sm={8}>
-                <TextField
-                  label="Buscar por DNI o Nombre"
-                  value={filtroDni}
-                  onChange={(e) => setFiltroDni(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && filtrarDocentes()}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <div className="flex gap-2">
-                  <button
-                    onClick={filtrarDocentes}
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                    Filtrar
-                  </button>
-                  <button
-                    onClick={() => {
-                      setFiltroDni("");
-                      fetchDataPersonas(`/facet/docente/`);
-                    }}
-                    className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                    Limpiar
-                  </button>
+            {/* Filtros Compactos - Docente */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200/60 p-4 mb-5 mt-2">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-blue-100 rounded-lg">
+                    <FunnelIcon className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <span className="text-sm font-bold text-gray-800">Filtros de Búsqueda</span>
                 </div>
-              </Grid>
-            </Grid>
+                <button
+                  onClick={() => {
+                    setFiltroDni("");
+                    fetchDataPersonas(`/facet/docente/`);
+                  }}
+                  className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-500 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-red-50"
+                >
+                  <XMarkIcon className="h-3.5 w-3.5" />
+                  <span>Limpiar</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                <div className="relative sm:col-span-2">
+                  <input
+                    type="text"
+                    value={filtroDni}
+                    onChange={(e) => setFiltroDni(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && filtrarDocentes()}
+                    placeholder="Buscar por DNI o Nombre"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg
+                      focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+                      hover:border-blue-400 hover:bg-white
+                      transition-all duration-200
+                      text-sm text-gray-700 placeholder-gray-400
+                      shadow-sm pr-9"
+                  />
+                  <MagnifyingGlassIcon className="absolute right-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2 border-t border-gray-100">
+                <button
+                  onClick={filtrarDocentes}
+                  className="flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-blue-600 
+                    hover:from-blue-600 hover:to-blue-700 
+                    text-white px-4 py-2 rounded-lg shadow-md shadow-blue-500/20
+                    transition-all duration-200 text-sm font-semibold
+                    hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5"
+                >
+                  <MagnifyingGlassIcon className="h-4 w-4" />
+                  <span>Buscar</span>
+                </button>
+              </div>
+            </div>
 
             <ResponsiveTable>
               <TableHead>
@@ -1117,36 +1178,142 @@ const CrearDocenteAsignatura: React.FC = () => {
             Seleccionar Resolución
           </DialogTitle>
           <DialogContent className="p-4">
-            <Grid container spacing={2} className="mb-6 mt-6">
-              <Grid item xs={12} sm={8}>
-                <TextField
-                  label="Buscar por Nro Expediente o Resolución"
-                  value={filtroNroResolucion}
-                  onChange={(e) => setFiltroNroResolucion(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && filtrarResoluciones()}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <div className="flex gap-2">
-                  <button
-                    onClick={filtrarResoluciones}
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                    Filtrar
-                  </button>
-                  <button
-                    onClick={() => {
-                      setFiltroNroResolucion("");
-                      fetchDataResoluciones(`/facet/resolucion/`);
-                    }}
-                    className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                    Limpiar
-                  </button>
+            {/* Filtros Compactos - Resolución */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200/60 p-4 mb-5 mt-2">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-blue-100 rounded-lg">
+                    <FunnelIcon className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <span className="text-sm font-bold text-gray-800">Filtros de Búsqueda</span>
                 </div>
-              </Grid>
-            </Grid>
+                <button
+                  onClick={() => {
+                    setFiltroNroResolucion("");
+                    setFiltroTipo("");
+                    setFiltroFechaDesde(null);
+                    setFiltroFechaHasta(null);
+                    setFiltroFechaExacta(null);
+                    fetchDataResoluciones(`/facet/resolucion/`);
+                  }}
+                  className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-500 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-red-50"
+                >
+                  <XMarkIcon className="h-3.5 w-3.5" />
+                  <span>Limpiar</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                <div className="relative sm:col-span-2">
+                  <input
+                    type="text"
+                    value={filtroNroResolucion}
+                    onChange={(e) => setFiltroNroResolucion(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && filtrarResoluciones()}
+                    placeholder="Buscar por Nro Expediente o Resolución"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg
+                      focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+                      hover:border-blue-400 hover:bg-white
+                      transition-all duration-200
+                      text-sm text-gray-700 placeholder-gray-400
+                      shadow-sm pr-9"
+                  />
+                  <MagnifyingGlassIcon className="absolute right-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
+                <div className="relative">
+                  <select
+                    value={filtroTipo}
+                    onChange={(e) => setFiltroTipo(e.target.value)}
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg
+                      focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+                      hover:border-blue-400 hover:bg-white
+                      transition-all duration-200
+                      text-sm text-gray-700
+                      shadow-sm appearance-none cursor-pointer
+                      pr-10"
+                  >
+                    <option value="">Todos los tipos</option>
+                    <option value="Rector">Rector</option>
+                    <option value="Decano">Decano</option>
+                    <option value="Consejo_Superior">Consejo Superior</option>
+                    <option value="Consejo_Directivo">Consejo Directivo</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="relative">
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Fecha Exacta"
+                      value={filtroFechaExacta}
+                      onChange={(date) => setFiltroFechaExacta(date)}
+                      format="DD/MM/YYYY"
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          variant: "outlined",
+                          size: "small",
+                          className: "bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500",
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </div>
+                <div className="relative">
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Fecha Desde"
+                      value={filtroFechaDesde}
+                      onChange={(date) => setFiltroFechaDesde(date)}
+                      format="DD/MM/YYYY"
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          variant: "outlined",
+                          size: "small",
+                          className: "bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500",
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </div>
+                <div className="relative">
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Fecha Hasta"
+                      value={filtroFechaHasta}
+                      onChange={(date) => setFiltroFechaHasta(date)}
+                      format="DD/MM/YYYY"
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          variant: "outlined",
+                          size: "small",
+                          className: "bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500",
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2 border-t border-gray-100">
+                <button
+                  onClick={filtrarResoluciones}
+                  className="flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-blue-600 
+                    hover:from-blue-600 hover:to-blue-700 
+                    text-white px-4 py-2 rounded-lg shadow-md shadow-blue-500/20
+                    transition-all duration-200 text-sm font-semibold
+                    hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5"
+                >
+                  <MagnifyingGlassIcon className="h-4 w-4" />
+                  <span>Buscar</span>
+                </button>
+              </div>
+            </div>
 
             <ResponsiveTable>
               <TableHead>

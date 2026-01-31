@@ -1,35 +1,20 @@
 import React, { useState, useEffect, useCallback } from "react";
-import axios from "axios";
 import {
-	Container,
-	Table,
 	TableBody,
 	TableCell,
-	TableContainer,
 	TableHead,
 	TableRow,
-	Typography,
-	Paper,
-	TextField,
-	Button,
-	Grid,
-	Select,
-	MenuItem,
-	InputLabel,
-	FormControl,
 } from "@mui/material";
 import ResponsiveTable from "../../../../components/ResponsiveTable";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
-import ViewComfyIcon from "@mui/icons-material/ViewComfy";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import PeopleIcon from "@mui/icons-material/People";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import { useRouter } from "next/router"; // Importa useRouter de Next.js
+import { useRouter } from "next/router";
 import DashboardMenu from "../..";
-import withAuth from "../../../../components/withAut"; // Importa el HOC
-
+import withAuth from "../../../../components/withAut";
 import {
 	FilterContainer,
 	FilterInput,
@@ -38,6 +23,9 @@ import {
 import Swal from "sweetalert2";
 import DeleteIcon from "@mui/icons-material/Delete";
 import API from "@/api/axiosConfig";
+import Pagination from "../../../../components/Pagination";
+import LoadingOverlay from "../../../../components/LoadingOverlay";
+import { normalizeUrl } from "../../../../hooks/useSearch";
 
 interface Departamento {
 	id: number;
@@ -63,14 +51,6 @@ const ListaDepartamentos = () => {
 	const [pageSize] = useState<number>(10);
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 
-	// Función para normalizar URLs y evitar duplicación de /api/api/ en producción
-	const normalizeUrl = (url: string) => {
-		if (url.startsWith("http")) {
-			const urlObj = new URL(url);
-			return urlObj.pathname + urlObj.search;
-		}
-		return url.replace(/^\/+/, "/");
-	};
 
 	const fetchData = useCallback(
 		async (url: string) => {
@@ -247,14 +227,7 @@ const ListaDepartamentos = () => {
 	if (isLoading) {
 		return (
 			<DashboardMenu>
-				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-					<div className="bg-white rounded-lg p-8 flex flex-col items-center">
-						<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
-						<p className="text-gray-700 text-lg font-medium">
-							Cargando departamentos...
-						</p>
-					</div>
-				</div>
+				<LoadingOverlay message="Cargando departamentos..." />
 			</DashboardMenu>
 		);
 	}
@@ -367,33 +340,14 @@ const ListaDepartamentos = () => {
 						</TableBody>
 					</ResponsiveTable>
 
-					<div className="flex justify-between items-center mt-6">
-						<button
-							onClick={() => handlePageChange(currentPage - 1)}
-							disabled={currentPage === 1}
-							className={`px-4 py-2 rounded-lg font-medium ${
-								currentPage > 1
-									? "bg-blue-500 text-white hover:bg-blue-600"
-									: "bg-gray-300 text-gray-500 cursor-not-allowed"
-							} transition-colors duration-200`}
-						>
-							Anterior
-						</button>
-						<span className="text-gray-600">
-							Página {currentPage} de {totalPages}
-						</span>
-						<button
-							onClick={() => handlePageChange(currentPage + 1)}
-							disabled={currentPage >= totalPages}
-							className={`px-4 py-2 rounded-lg font-medium ${
-								currentPage < totalPages
-									? "bg-blue-500 text-white hover:bg-blue-600"
-									: "bg-gray-300 text-gray-500 cursor-not-allowed"
-							} transition-colors duration-200`}
-						>
-							Siguiente
-						</button>
-					</div>
+					<Pagination
+						currentPage={currentPage}
+						totalPages={totalPages}
+						onPrevious={() => handlePageChange(currentPage - 1)}
+						onNext={() => handlePageChange(currentPage + 1)}
+						hasPrevious={currentPage > 1}
+						hasNext={currentPage < totalPages}
+					/>
 				</div>
 			</div>
 		</DashboardMenu>

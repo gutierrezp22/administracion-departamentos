@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
-import axios from "axios";
 import API from "@/api/axiosConfig";
 import {
-  Container,
   Table,
   TableBody,
   TableCell,
@@ -13,11 +11,6 @@ import {
   Typography,
   Paper,
   TextField,
-  Button,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormControl,
   Grid,
   Dialog,
   DialogTitle,
@@ -37,13 +30,14 @@ import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut";
-import { API_BASE_URL } from "../../../../utils/config";
 import {
   FilterContainer,
   FilterInput,
   FilterSelect,
   EstadoFilter,
 } from "../../../../components/Filters";
+import Pagination from "../../../../components/Pagination";
+import { normalizeUrl } from "../../../../hooks/useSearch";
 
 // Agregar estilos CSS para forzar el z-index de SweetAlert
 const sweetAlertStyles = `
@@ -129,14 +123,6 @@ const ListaCarreras = () => {
     fetchData("/facet/carrera/");
   }, []);
 
-  // Función para normalizar URLs de paginación
-  const normalizeUrl = (url: string) => {
-    if (url.startsWith("http")) {
-      const urlObj = new URL(url);
-      return urlObj.pathname + urlObj.search;
-    }
-    return url.replace(/^\/+/, "/");
-  };
 
   const fetchData = async (url: string) => {
     try {
@@ -778,31 +764,14 @@ const ListaCarreras = () => {
               </TableBody>
             </ResponsiveTable>
 
-            <div className="flex justify-between items-center mt-6">
-              <button
-                onClick={() => prevUrl && fetchData(prevUrl)}
-                disabled={!prevUrl}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                  !prevUrl
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-blue-500 text-white hover:bg-blue-600"
-                }`}>
-                Anterior
-              </button>
-              <span className="text-gray-600 font-medium">
-                Página {currentPage} de {totalPages}
-              </span>
-              <button
-                onClick={() => nextUrl && fetchData(nextUrl)}
-                disabled={!nextUrl}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                  !nextUrl
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-blue-500 text-white hover:bg-blue-600"
-                }`}>
-                Siguiente
-              </button>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPrevious={() => prevUrl && fetchData(prevUrl)}
+              onNext={() => nextUrl && fetchData(nextUrl)}
+              hasPrevious={!!prevUrl}
+              hasNext={!!nextUrl}
+            />
           </div>
         </div>
       </div>
