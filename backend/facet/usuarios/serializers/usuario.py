@@ -67,6 +67,13 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data["refresh"] = str(refresh)
         data["access"] = str(refresh.access_token)
         data["rol"] = self.user.rol.descripcion if self.user.rol else None
+        
+        # Agregar información del usuario
+        data["user"] = {
+            "email": self.user.email,
+            "nombre": f"{self.user.nombre} {self.user.apellido}" if self.user.nombre and self.user.apellido else self.user.email,
+            "rol": self.user.rol.descripcion if self.user.rol else None,
+        }
 
         if SIMPLE_JWT["UPDATE_LAST_LOGIN"]:
             update_last_login(None, self.user)

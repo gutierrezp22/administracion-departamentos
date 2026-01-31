@@ -112,7 +112,9 @@ const EditarDocenteAsignatura: React.FC = () => {
   const [condicion, setCondicion] = useState("");
   const [cargo, setCargo] = useState("");
   const [filtroNroResolucion, setFiltroNroResolucion] = useState("");
-  const [filtroFecha, setFiltroFecha] = useState<Dayjs | null>(null);
+  const [filtroFechaDesde, setFiltroFechaDesde] = useState<Dayjs | null>(null);
+  const [filtroFechaHasta, setFiltroFechaHasta] = useState<Dayjs | null>(null);
+  const [filtroFechaExacta, setFiltroFechaExacta] = useState<Dayjs | null>(null);
 
   // Cargar datos iniciales de la asignación
   useEffect(() => {

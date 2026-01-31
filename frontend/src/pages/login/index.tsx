@@ -44,6 +44,23 @@ export default function LoginPage() {
 			// Guardar tokens en sessionStorage para que se eliminen al cerrar el navegador
 			sessionStorage.setItem("access_token", response.data.access);
 			sessionStorage.setItem("refresh_token", response.data.refresh);
+			
+			// Guardar información del usuario en sessionStorage
+			console.log("Respuesta del login:", response.data);
+			
+			if (response.data.user) {
+				console.log("Datos del usuario recibidos:", response.data.user);
+				sessionStorage.setItem("user_email", response.data.user.email || email);
+				sessionStorage.setItem("user_name", response.data.user.nombre || response.data.user.email || email);
+				sessionStorage.setItem("user_rol", response.data.user.rol || "");
+			} else {
+				console.log("No se recibió información del usuario en la respuesta");
+				// Si no viene información del usuario, al menos guardamos el email
+				sessionStorage.setItem("user_email", email);
+				sessionStorage.setItem("user_name", email);
+			}
+			
+			console.log("Guardado en sessionStorage - user_name:", sessionStorage.getItem("user_name"));
 
 			// Si el usuario marcó "Recuérdame", guardar el email en localStorage
 			if (rememberMe) {

@@ -119,7 +119,9 @@ const CrearDepartamentoJefe = () => {
 	const [filtroNroExpediente, setFiltroNroExpediente] = useState("");
 	const [filtroNroResolucion, setFiltroNroResolucion] = useState("");
 	const [filtroTipo, setFiltroTipo] = useState("");
-	const [filtroFecha, setFiltroFecha] = useState<dayjs.Dayjs | null>(null);
+	const [filtroFechaDesde, setFiltroFechaDesde] = useState<dayjs.Dayjs | null>(null);
+	const [filtroFechaHasta, setFiltroFechaHasta] = useState<dayjs.Dayjs | null>(null);
+	const [filtroFechaExacta, setFiltroFechaExacta] = useState<dayjs.Dayjs | null>(null);
 	const [nextUrl, setNextUrl] = useState<string | null>(null);
 	const [prevUrl, setPrevUrl] = useState<string | null>(null);
 	const [currentUrl, setCurrentUrl] = useState<string>(`/facet/resolucion/`);
@@ -315,16 +317,25 @@ const CrearDepartamentoJefe = () => {
 				}
 
 				// Aplicar filtros adicionales si existen
-				if (filtroTipo || filtroFecha) {
+				if (filtroTipo || filtroFechaDesde || filtroFechaHasta || filtroFechaExacta) {
 					const params = new URLSearchParams();
 					if (response.data.results.length > 0) {
 						// Si encontramos resultados, aplicar filtros adicionales
 						if (filtroTipo) params.append("tipo", filtroTipo);
-						if (filtroFecha)
-							params.append(
-								"fecha__date",
-								formatFechaParaBackend(filtroFecha) || ""
-							);
+						if (filtroFechaExacta) {
+							params.append("fecha", formatFechaParaBackend(filtroFechaExacta) || "");
+						} else {
+							if (filtroFechaDesde)
+								params.append(
+									"fecha__gte",
+									formatFechaParaBackend(filtroFechaDesde) || ""
+								);
+							if (filtroFechaHasta)
+								params.append(
+									"fecha__lte",
+									formatFechaParaBackend(filtroFechaHasta) || ""
+								);
+						}
 
 						// Combinar con el filtro que funcionó
 						if (url.includes("nexpediente__icontains")) {
@@ -360,9 +371,15 @@ const CrearDepartamentoJefe = () => {
 			params.append("nexpediente__icontains", filtroNroExpediente);
 		if (filtroNroResolucion)
 			params.append("nresolucion__icontains", filtroNroResolucion);
-		if (filtroTipo) params.append("tipo", filtroTipo);
-		if (filtroFecha)
-			params.append("fecha__date", formatFechaParaBackend(filtroFecha) || "");
+	if (filtroTipo) params.append("tipo", filtroTipo);
+	if (filtroFechaExacta) {
+		params.append("fecha", formatFechaParaBackend(filtroFechaExacta) || "");
+	} else {
+		if (filtroFechaDesde)
+			params.append("fecha__gte", formatFechaParaBackend(filtroFechaDesde) || "");
+		if (filtroFechaHasta)
+			params.append("fecha__lte", formatFechaParaBackend(filtroFechaHasta) || "");
+	}
 
 		url += params.toString();
 		setCurrentUrl(normalizeUrl(url));
@@ -891,13 +908,15 @@ const CrearDepartamentoJefe = () => {
 								<span className="text-sm font-bold text-gray-800">Filtros de Búsqueda</span>
 							</div>
 							<button
-								onClick={() => {
-									setFiltroNroExpediente("");
-									setFiltroNroResolucion("");
-									setFiltroTipo("");
-									setFiltroFecha(null);
-									setCurrentUrl("/facet/resolucion/");
-								}}
+							onClick={() => {
+								setFiltroNroExpediente("");
+								setFiltroNroResolucion("");
+								setFiltroTipo("");
+								setFiltroFechaDesde(null);
+								setFiltroFechaHasta(null);
+								setFiltroFechaExacta(null);
+								setCurrentUrl("/facet/resolucion/");
+							}}
 								className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-500 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-red-50"
 							>
 								<XMarkIcon className="h-3.5 w-3.5" />
@@ -961,26 +980,62 @@ const CrearDepartamentoJefe = () => {
 										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
 									</svg>
 								</div>
-							</div>
-							<div className="relative">
-								<LocalizationProvider dateAdapter={AdapterDayjs}>
-									<DatePicker
-										label=""
-										value={filtroFecha}
-										onChange={(date) => setFiltroFecha(date)}
-										format="DD/MM/YYYY"
-										slotProps={{
-											textField: {
-												fullWidth: true,
-												variant: "outlined",
-												size: "small",
-												className: "bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500",
-											},
-										}}
-									/>
-								</LocalizationProvider>
-							</div>
 						</div>
+						<div className="relative">
+							<LocalizationProvider dateAdapter={AdapterDayjs}>
+								<DatePicker
+									label="Fecha Exacta"
+									value={filtroFechaExacta}
+									onChange={(date) => setFiltroFechaExacta(date)}
+									format="DD/MM/YYYY"
+									slotProps={{
+										textField: {
+											fullWidth: true,
+											variant: "outlined",
+											size: "small",
+											className: "bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500",
+										},
+									}}
+								/>
+							</LocalizationProvider>
+						</div>
+						<div className="relative">
+							<LocalizationProvider dateAdapter={AdapterDayjs}>
+								<DatePicker
+									label="Fecha Desde"
+									value={filtroFechaDesde}
+									onChange={(date) => setFiltroFechaDesde(date)}
+									format="DD/MM/YYYY"
+									slotProps={{
+										textField: {
+											fullWidth: true,
+											variant: "outlined",
+											size: "small",
+											className: "bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500",
+										},
+									}}
+								/>
+							</LocalizationProvider>
+						</div>
+						<div className="relative">
+							<LocalizationProvider dateAdapter={AdapterDayjs}>
+								<DatePicker
+									label="Fecha Hasta"
+									value={filtroFechaHasta}
+									onChange={(date) => setFiltroFechaHasta(date)}
+									format="DD/MM/YYYY"
+									slotProps={{
+										textField: {
+											fullWidth: true,
+											variant: "outlined",
+											size: "small",
+											className: "bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500",
+										},
+									}}
+								/>
+							</LocalizationProvider>
+						</div>
+					</div>
 
 						<div className="flex justify-end pt-2 border-t border-gray-100">
 							<button

@@ -24,6 +24,7 @@ const ResponsiveTable: React.FC<ResponsiveTableProps> = ({ children, className =
         sx={{
           maxHeight: '70vh',
           overflow: 'auto',
+          fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif',
           '&::-webkit-scrollbar': {
             width: '8px',
             height: '8px',
@@ -39,9 +40,14 @@ const ResponsiveTable: React.FC<ResponsiveTableProps> = ({ children, className =
               backgroundColor: '#a8a8a8',
             },
           },
+          '& .MuiTable-root': {
+            fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif',
+          },
           '& .MuiTableCell-root': {
             whiteSpace: 'nowrap',
             minWidth: '120px',
+            fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif',
+            fontVariantNumeric: 'tabular-nums',
           },
           '& .MuiTableHead-root .MuiTableCell-root': {
             position: 'sticky',
@@ -50,10 +56,25 @@ const ResponsiveTable: React.FC<ResponsiveTableProps> = ({ children, className =
             backgroundColor: '#3b82f6',
             color: '#fff',
             fontWeight: 600,
+            fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif',
+            fontSize: '0.875rem',
+            letterSpacing: '0.025em',
+            textTransform: 'uppercase',
+            lineHeight: 1.5,
+          },
+          '& .MuiTableBody-root .MuiTableCell-root': {
+            fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif',
+            fontWeight: 400,
+            fontSize: '0.9375rem',
+            lineHeight: 1.6,
+            letterSpacing: '0.01em',
+          },
+          '& .MuiTableBody-root .MuiTableRow-root:hover .MuiTableCell-root': {
+            fontWeight: 500,
           },
         }}
       >
-        <Table stickyHeader>
+        <Table stickyHeader className="modern-table">
           {children}
         </Table>
       </TableContainer>

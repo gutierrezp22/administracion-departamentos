@@ -78,7 +78,9 @@ const ListaResoluciones = () => {
   const [filtroNExpediente, setFiltroNExpediente] = useState("");
   const [filtroNResolucion, setFiltroNResolucion] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("");
-  const [filtroFecha, setFiltroFecha] = useState("");
+  const [filtroFechaDesde, setFiltroFechaDesde] = useState("");
+  const [filtroFechaHasta, setFiltroFechaHasta] = useState("");
+  const [filtroFechaExacta, setFiltroFechaExacta] = useState("");
   const [filtroEstado, setFiltroEstado] = useState<string>("1");
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
@@ -150,8 +152,14 @@ const ListaResoluciones = () => {
     if (filtroTipo !== "") {
       params.append("tipo", filtroTipo);
     }
-    if (filtroFecha !== "") {
-      params.append("fecha__date", filtroFecha);
+    if (filtroFechaExacta !== "") {
+      params.append("fecha", filtroFechaExacta);
+    }
+    if (filtroFechaDesde !== "") {
+      params.append("fecha__gte", filtroFechaDesde);
+    }
+    if (filtroFechaHasta !== "") {
+      params.append("fecha__lte", filtroFechaHasta);
     }
     if (filtroEstado === "todos") {
       params.append("show_all", "true");
@@ -169,7 +177,9 @@ const ListaResoluciones = () => {
     setFiltroNExpediente("");
     setFiltroNResolucion("");
     setFiltroTipo("");
-    setFiltroFecha("");
+    setFiltroFechaExacta("");
+    setFiltroFechaDesde("");
+    setFiltroFechaHasta("");
     setFiltroEstado("1");
   };
 
@@ -186,8 +196,14 @@ const ListaResoluciones = () => {
     if (filtroTipo !== "") {
       params.append("tipo", filtroTipo);
     }
-    if (filtroFecha !== "") {
-      params.append("fecha__date", filtroFecha);
+    if (filtroFechaExacta !== "") {
+      params.append("fecha", filtroFechaExacta);
+    }
+    if (filtroFechaDesde !== "") {
+      params.append("fecha__gte", filtroFechaDesde);
+    }
+    if (filtroFechaHasta !== "") {
+      params.append("fecha__lte", filtroFechaHasta);
     }
     if (filtroEstado === "todos") {
       params.append("show_all", "true");
@@ -220,7 +236,9 @@ const ListaResoluciones = () => {
       if (filtroTipo !== "") params.append("tipo", filtroTipo);
       if (filtroNResolucion !== "")
         params.append("nresolucion__icontains", filtroNResolucion);
-      if (filtroFecha !== "") params.append("fecha__date", filtroFecha);
+      if (filtroFechaExacta !== "") params.append("fecha", filtroFechaExacta);
+      if (filtroFechaDesde !== "") params.append("fecha__gte", filtroFechaDesde);
+      if (filtroFechaHasta !== "") params.append("fecha__lte", filtroFechaHasta);
       url += params.toString();
 
       // Obtiene todos los datos para el Excel
@@ -396,10 +414,25 @@ const ListaResoluciones = () => {
               placeholder="Seleccionar tipo"
             />
             <FilterInput
-              label="Fecha"
-              value={filtroFecha}
-              onChange={setFiltroFecha}
+              label="Fecha Exacta"
+              value={filtroFechaExacta}
+              onChange={setFiltroFechaExacta}
               type="date"
+              placeholder="Buscar fecha específica"
+            />
+            <FilterInput
+              label="Fecha Desde"
+              value={filtroFechaDesde}
+              onChange={setFiltroFechaDesde}
+              type="date"
+              placeholder="Fecha inicial"
+            />
+            <FilterInput
+              label="Fecha Hasta"
+              value={filtroFechaHasta}
+              onChange={setFiltroFechaHasta}
+              type="date"
+              placeholder="Fecha final"
             />
             <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
           </FilterContainer>

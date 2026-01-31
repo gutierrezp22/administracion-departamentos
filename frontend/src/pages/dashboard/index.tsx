@@ -6,6 +6,7 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
+import LockIcon from "@mui/icons-material/Lock";
 import HomeIcon from "@mui/icons-material/Home";
 import ArticleIcon from "@mui/icons-material/Article";
 import PeopleIcon from "@mui/icons-material/People";
@@ -49,6 +50,8 @@ const CustomMenuItem: React.FC<CustomMenuItemProps> = ({
 const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
   const [open, setOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [userName, setUserName] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string>("");
   const router = useRouter();
 
   // Initialize sidebar state from localStorage when component mounts
@@ -57,6 +60,16 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
     const savedState = localStorage.getItem("sidebarOpen");
     // Set the initial state based on saved value (or false if no saved value)
     setOpen(savedState === "true");
+    
+    // Cargar información del usuario desde sessionStorage
+    const storedUserName = sessionStorage.getItem("user_name");
+    const storedUserEmail = sessionStorage.getItem("user_email");
+    if (storedUserName) {
+      setUserName(storedUserName);
+    }
+    if (storedUserEmail) {
+      setUserEmail(storedUserEmail);
+    }
   }, []);
 
   const handleMenuOpen = () => {
@@ -70,7 +83,15 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
   const handleLogout = () => {
     sessionStorage.removeItem("access_token");
     sessionStorage.removeItem("refresh_token");
+    sessionStorage.removeItem("user_email");
+    sessionStorage.removeItem("user_name");
+    sessionStorage.removeItem("user_rol");
     router.push("/login");
+  };
+
+  const handleChangePassword = () => {
+    setUserMenuOpen(false);
+    router.push("/dashboard/change-password");
   };
 
   const toggleDrawer = () => {
@@ -158,7 +179,7 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
         {/* Navbar */}
         <header className="bg-white shadow-md z-10">
           <div className="flex items-center justify-between px-6 py-4">
-            <div className="flex items-center">
+            <div className="flex items-center gap-4">
               <Image
                 src="/logoFACET.png"
                 alt="Logo FACET"
@@ -167,21 +188,46 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
                 className="h-12 w-auto"
                 unoptimized={true}
               />
+              <div className="hidden md:flex flex-col justify-center">
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl px-4 py-2 shadow-sm border border-blue-100">
+                  <p className="text-sm font-bold text-blue-800 tracking-wide">
+                    {userName && userName !== "Usuario" ? userName : (userEmail || "Usuario")}
+                  </p>
+                  {userEmail && userEmail !== userName && (
+                    <p className="text-xs text-blue-600 font-medium opacity-80">{userEmail}</p>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="relative">
               <button
                 onClick={handleMenuOpen}
-                className="p-2 text-blue-500 rounded-full hover:bg-gray-100 transition-colors duration-200">
+                className="p-2 text-blue-500 rounded-full hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 hover:scale-110">
                 <AccountCircleIcon className="w-8 h-8" />
               </button>
 
               {userMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200">
+                  {userName && (
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="text-sm font-semibold text-gray-800 truncate">{userName}</p>
+                      {userEmail && (
+                        <p className="text-xs text-gray-500 truncate">{userEmail}</p>
+                      )}
+                    </div>
+                  )}
+                  <button
+                    onClick={handleChangePassword}
+                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200">
+                    <LockIcon className="mr-2 text-gray-500" />
+                    Cambiar contraseña
+                  </button>
+                  <div className="border-t border-gray-100 my-1"></div>
                   <button
                     onClick={handleLogout}
-                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    <LogoutIcon className="mr-2 text-gray-500" />
+                    className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200">
+                    <LogoutIcon className="mr-2 text-red-500" />
                     Cerrar sesión
                   </button>
                 </div>
