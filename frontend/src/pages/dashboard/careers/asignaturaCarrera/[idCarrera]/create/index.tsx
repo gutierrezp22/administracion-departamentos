@@ -31,6 +31,11 @@ import timezone from "dayjs/plugin/timezone";
 import DashboardMenu from "../../../..";
 import withAuth from "../../../../../../components/withAut";
 import API from "@/api/axiosConfig";
+import {
+  MagnifyingGlassIcon,
+  XMarkIcon,
+  FunnelIcon,
+} from "@heroicons/react/24/outline";
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -203,16 +208,44 @@ const CrearAsignaturaCarrera = () => {
                     Seleccionar Asignatura
                   </DialogTitle>
                   <DialogContent className="p-4">
-                    <TextField
-                      label="Buscar por Código o Nombre"
-                      value={filtroAsignaturas}
-                      onChange={(e) => setFiltroAsignaturas(e.target.value)}
-                      fullWidth
-                      margin="normal"
-                      variant="outlined"
-                      size="small"
-                    />
-                    <TableContainer component={Paper} className="mt-4" style={{ maxHeight: '400px', overflow: 'auto' }}>
+                    {/* Filtros Compactos - Asignatura */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200/60 p-4 mb-5 mt-2">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 bg-blue-100 rounded-lg">
+                            <FunnelIcon className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <span className="text-sm font-bold text-gray-800">Filtros de Búsqueda</span>
+                        </div>
+                        <button
+                          onClick={() => setFiltroAsignaturas("")}
+                          className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-500 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-red-50"
+                        >
+                          <XMarkIcon className="h-3.5 w-3.5" />
+                          <span>Limpiar</span>
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-3 mb-3">
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={filtroAsignaturas}
+                            onChange={(e) => setFiltroAsignaturas(e.target.value)}
+                            placeholder="Buscar por Código o Nombre"
+                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg
+                              focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+                              hover:border-blue-400 hover:bg-white
+                              transition-all duration-200
+                              text-sm text-gray-700 placeholder-gray-400
+                              shadow-sm pr-9"
+                          />
+                          <MagnifyingGlassIcon className="absolute right-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <TableContainer component={Paper} style={{ maxHeight: '400px', overflow: 'auto' }}>
                       <Table size="small">
                         <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
                           <TableRow>

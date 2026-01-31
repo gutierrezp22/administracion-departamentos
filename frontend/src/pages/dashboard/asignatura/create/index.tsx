@@ -30,6 +30,11 @@ import { useRouter } from "next/router";
 import DashboardMenu from "../../../dashboard";
 import withAuth from "../../../../components/withAut"; // Importa el HOC
 import API from "@/api/axiosConfig";
+import {
+  MagnifyingGlassIcon,
+  XMarkIcon,
+  FunnelIcon,
+} from "@heroicons/react/24/outline";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -640,76 +645,60 @@ const CrearAsignatura = () => {
             Seleccionar Área
           </DialogTitle>
           <DialogContent className="p-4">
-            {/* Filtro */}
-            <Grid container spacing={2} className="mb-4 mt-4">
-              <Grid item xs={12} sm={8}>
-                <TextField
-                  label="Buscar por Nombre"
-                  value={filtroAreas}
-                  onChange={(e) => setFiltroAreas(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && filtrarAreas()}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  className="modern-input"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "8px",
-                      backgroundColor: "#ffffff",
-                      border: "1px solid #d1d5db",
-                      transition: "all 0.2s ease",
-                      "&:hover": {
-                        borderColor: "#3b82f6",
-                        backgroundColor: "#ffffff",
-                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
-                      },
-                      "&.Mui-focused": {
-                        borderColor: "#3b82f6",
-                        backgroundColor: "#ffffff",
-                        boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
-                      },
-                    },
-                    "& .MuiInputLabel-root": {
-                      color: "#6b7280",
-                      fontWeight: "500",
-                      backgroundColor: "#ffffff",
-                      padding: "0 4px",
-                      "&.Mui-focused": {
-                        color: "#3b82f6",
-                        fontWeight: "600",
-                        backgroundColor: "#ffffff",
-                      },
-                      "&.MuiFormLabel-filled": {
-                        backgroundColor: "#ffffff",
-                      },
-                    },
-                    "& .MuiInputBase-input": {
-                      color: "#1f2937",
-                      fontWeight: "500",
-                      fontSize: "0.875rem",
-                      padding: "8px 12px",
-                    },
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <div className="flex gap-2">
-                  <button
-                    onClick={filtrarAreas}
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                    Filtrar
-                  </button>
-                  <button
-                    onClick={() => {
-                      setFiltroAreas("");
-                      setCurrentUrlAreas("/facet/area/");
-                    }}
-                    className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                    Limpiar
-                  </button>
+            {/* Filtros Compactos - Área */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200/60 p-4 mb-5 mt-2">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-blue-100 rounded-lg">
+                    <FunnelIcon className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <span className="text-sm font-bold text-gray-800">Filtros de Búsqueda</span>
                 </div>
-              </Grid>
-            </Grid>
+                <button
+                  onClick={() => {
+                    setFiltroAreas("");
+                    setCurrentUrlAreas("/facet/area/");
+                  }}
+                  className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-500 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-red-50"
+                >
+                  <XMarkIcon className="h-3.5 w-3.5" />
+                  <span>Limpiar</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                <div className="relative sm:col-span-2">
+                  <input
+                    type="text"
+                    value={filtroAreas}
+                    onChange={(e) => setFiltroAreas(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && filtrarAreas()}
+                    placeholder="Buscar por Nombre"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg
+                      focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+                      hover:border-blue-400 hover:bg-white
+                      transition-all duration-200
+                      text-sm text-gray-700 placeholder-gray-400
+                      shadow-sm pr-9"
+                  />
+                  <MagnifyingGlassIcon className="absolute right-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2 border-t border-gray-100">
+                <button
+                  onClick={filtrarAreas}
+                  className="flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-blue-600 
+                    hover:from-blue-600 hover:to-blue-700 
+                    text-white px-4 py-2 rounded-lg shadow-md shadow-blue-500/20
+                    transition-all duration-200 text-sm font-semibold
+                    hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5"
+                >
+                  <MagnifyingGlassIcon className="h-4 w-4" />
+                  <span>Buscar</span>
+                </button>
+              </div>
+            </div>
 
             {/* Tabla de Áreas */}
             <TableContainer

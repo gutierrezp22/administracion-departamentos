@@ -35,9 +35,29 @@ import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 import DashboardMenu from "@/pages/dashboard";
 import withAuth from "../../../../../components/withAut";
+import {
+	MagnifyingGlassIcon,
+	XMarkIcon,
+	FunnelIcon,
+} from "@heroicons/react/24/outline";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+
+// Función helper para normalizar URLs - fuera del componente para evitar recreaciones
+const normalizeUrl = (url: string) => {
+	// Si la URL es absoluta (comienza con http/https), extraer solo la parte de la ruta
+	if (url.startsWith("http")) {
+		const urlObj = new URL(url);
+		let normalizedUrl = urlObj.pathname + urlObj.search;
+		// Remover /api/ si está presente en la URL normalizada
+		normalizedUrl = normalizedUrl.replace(/^\/api/, "");
+		return normalizedUrl;
+	}
+	// Si es relativa, asegurar que comience con / y remover /api/ si está presente
+	const normalizedUrl = url.replace(/^\/+/, "/").replace(/^\/api/, "");
+	return normalizedUrl;
+};
 
 const CrearDepartamentoJefe = () => {
 	const router = useRouter();
@@ -109,6 +129,7 @@ const CrearDepartamentoJefe = () => {
 	const [openResolucion, setOpenResolucion] = useState(false);
 	const [selectedResolucion, setSelectedResolucion] =
 		useState<Resolucion | null>(null);
+	const [loadingResoluciones, setLoadingResoluciones] = useState(false);
 
 	const [jefes, setJefes] = useState<Jefe[]>([]);
 	const [filtroNombre, setFiltroNombre] = useState("");
@@ -140,23 +161,6 @@ const CrearDepartamentoJefe = () => {
 		useState<number>(1);
 	const pageSizeDepartamentos = 10;
 
-	// Función helper para normalizar URLs
-	const normalizeUrl = (url: string) => {
-		// Si la URL es absoluta (comienza con http/https), extraer solo la parte de la ruta
-		if (url.startsWith("http")) {
-			const urlObj = new URL(url);
-			let normalizedUrl = urlObj.pathname + urlObj.search;
-			// Remover /api/ si está presente en la URL normalizada
-			normalizedUrl = normalizedUrl.replace(/^\/api/, "");
-			console.log("Normalized URL:", normalizedUrl);
-			return normalizedUrl;
-		}
-		// Si es relativa, asegurar que comience con / y remover /api/ si está presente
-		const normalizedUrl = url.replace(/^\/+/, "/").replace(/^\/api/, "");
-		console.log("Normalized URL:", normalizedUrl);
-		return normalizedUrl;
-	};
-
 	const handleOpenModal = (
 		title: string,
 		message: string,
@@ -179,6 +183,7 @@ const CrearDepartamentoJefe = () => {
 
 	const fetchResoluciones = useCallback(
 		async (url: string) => {
+			setLoadingResoluciones(true);
 			try {
 				console.log("Fetching resoluciones from URL:", url);
 				const response = await API.get(url);
@@ -203,9 +208,11 @@ const CrearDepartamentoJefe = () => {
 				setNextUrl(null);
 				setPrevUrl(null);
 				setTotalItems(0);
+			} finally {
+				setLoadingResoluciones(false);
 			}
 		},
-		[normalizeUrl, pageSize]
+		[pageSize]
 	);
 
 	const fetchJefes = useCallback(
@@ -236,7 +243,7 @@ const CrearDepartamentoJefe = () => {
 				setTotalItemsJefes(0);
 			}
 		},
-		[normalizeUrl, pageSizeJefes]
+		[pageSizeJefes]
 	);
 
 	const fetchDepartamentos = useCallback(
@@ -269,7 +276,7 @@ const CrearDepartamentoJefe = () => {
 				setTotalItemsDepartamentos(0);
 			}
 		},
-		[normalizeUrl, pageSizeDepartamentos]
+		[pageSizeDepartamentos]
 	);
 
 	useEffect(() => {
@@ -873,54 +880,92 @@ const CrearDepartamentoJefe = () => {
 					<DialogTitle className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold">
 						Seleccionar Resolución
 					</DialogTitle>
-					<DialogContent className="p-4">
-						<Grid container spacing={2} className="mb-4 mt-4">
-							<Grid item xs={12} sm={6} md={3}>
-								<TextField
-									label="Nro Expediente"
+				<DialogContent className="p-4">
+					{/* Filtros Compactos - Resolución */}
+					<div className="bg-white rounded-xl shadow-sm border border-gray-200/60 p-4 mb-5 mt-2">
+						<div className="flex items-center justify-between mb-3">
+							<div className="flex items-center gap-2">
+								<div className="p-1.5 bg-blue-100 rounded-lg">
+									<FunnelIcon className="h-4 w-4 text-blue-600" />
+								</div>
+								<span className="text-sm font-bold text-gray-800">Filtros de Búsqueda</span>
+							</div>
+							<button
+								onClick={() => {
+									setFiltroNroExpediente("");
+									setFiltroNroResolucion("");
+									setFiltroTipo("");
+									setFiltroFecha(null);
+									setCurrentUrl("/facet/resolucion/");
+								}}
+								className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-500 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-red-50"
+							>
+								<XMarkIcon className="h-3.5 w-3.5" />
+								<span>Limpiar</span>
+							</button>
+						</div>
+
+						<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-3">
+							<div className="relative">
+								<input
+									type="text"
 									value={filtroNroExpediente}
 									onChange={(e) => setFiltroNroExpediente(e.target.value)}
 									onKeyDown={(e) => e.key === "Enter" && filtrarResoluciones()}
-									fullWidth
-									variant="outlined"
-									size="small"
+									placeholder="Nro Expediente"
+									className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg
+										focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+										hover:border-blue-400 hover:bg-white
+										transition-all duration-200
+										text-sm text-gray-700 placeholder-gray-400
+										shadow-sm pr-9"
 								/>
-							</Grid>
-							<Grid item xs={12} sm={6} md={3}>
-								<TextField
-									label="Nro Resolución"
+								<MagnifyingGlassIcon className="absolute right-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+							</div>
+							<div className="relative">
+								<input
+									type="text"
 									value={filtroNroResolucion}
 									onChange={(e) => setFiltroNroResolucion(e.target.value)}
 									onKeyDown={(e) => e.key === "Enter" && filtrarResoluciones()}
-									fullWidth
-									variant="outlined"
-									size="small"
+									placeholder="Nro Resolución"
+									className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg
+										focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+										hover:border-blue-400 hover:bg-white
+										transition-all duration-200
+										text-sm text-gray-700 placeholder-gray-400
+										shadow-sm pr-9"
 								/>
-							</Grid>
-							<Grid item xs={12} sm={6} md={3}>
-								<FormControl fullWidth size="small">
-									<InputLabel>Tipo</InputLabel>
-									<Select
-										value={filtroTipo}
-										onChange={(e) => setFiltroTipo(e.target.value)}
-										label="Tipo"
-									>
-										<MenuItem value="">Todos</MenuItem>
-										<MenuItem value="Rector">Rector</MenuItem>
-										<MenuItem value="Decano">Decano</MenuItem>
-										<MenuItem value="Consejo_Superior">
-											Consejo Superior
-										</MenuItem>
-										<MenuItem value="Consejo_Directivo">
-											Consejo Directivo
-										</MenuItem>
-									</Select>
-								</FormControl>
-							</Grid>
-							<Grid item xs={12} sm={6} md={3}>
+								<MagnifyingGlassIcon className="absolute right-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+							</div>
+							<div className="relative">
+								<select
+									value={filtroTipo}
+									onChange={(e) => setFiltroTipo(e.target.value)}
+									className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg
+										focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+										hover:border-blue-400 hover:bg-white
+										transition-all duration-200
+										text-sm text-gray-700
+										shadow-sm appearance-none cursor-pointer
+										pr-10"
+								>
+									<option value="">Todos</option>
+									<option value="Rector">Rector</option>
+									<option value="Decano">Decano</option>
+									<option value="Consejo_Superior">Consejo Superior</option>
+									<option value="Consejo_Directivo">Consejo Directivo</option>
+								</select>
+								<div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+									<svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+									</svg>
+								</div>
+							</div>
+							<div className="relative">
 								<LocalizationProvider dateAdapter={AdapterDayjs}>
 									<DatePicker
-										label="Fecha"
+										label=""
 										value={filtroFecha}
 										onChange={(date) => setFiltroFecha(date)}
 										format="DD/MM/YYYY"
@@ -929,131 +974,229 @@ const CrearDepartamentoJefe = () => {
 												fullWidth: true,
 												variant: "outlined",
 												size: "small",
+												className: "bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500",
 											},
 										}}
 									/>
 								</LocalizationProvider>
-							</Grid>
-							<Grid item xs={12}>
-								<div className="flex gap-2">
-									<button
-										onClick={filtrarResoluciones}
-										className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium"
-									>
-										Filtrar
-									</button>
-									<button
-										onClick={() => {
-											setFiltroNroExpediente("");
-											setFiltroNroResolucion("");
-											setFiltroTipo("");
-											setFiltroFecha(null);
-											setCurrentUrl("/facet/resolucion/");
-										}}
-										className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium"
-									>
-										Limpiar
-									</button>
-								</div>
-							</Grid>
-						</Grid>
+							</div>
+						</div>
 
-						<TableContainer
-							component={Paper}
-							className="shadow-lg rounded-lg overflow-hidden"
-							style={{ maxHeight: "400px", overflow: "auto" }}
-						>
-							<Table size="small">
-								<TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
-									<TableRow>
-										<TableCell className="text-white font-semibold py-2">
-											Nro Expediente
-										</TableCell>
-										<TableCell className="text-white font-semibold py-2">
-											Nro Resolución
-										</TableCell>
-										<TableCell className="text-white font-semibold py-2">
-											Tipo
-										</TableCell>
-										<TableCell className="text-white font-semibold py-2">
-											Fecha
-										</TableCell>
-										<TableCell className="text-white font-semibold py-2">
-											Seleccionar
-										</TableCell>
-									</TableRow>
-								</TableHead>
-								<TableBody>
-									{resoluciones.map((resolucion) => (
-										<TableRow
-											key={resolucion.id}
-											className="hover:bg-blue-50 transition-colors duration-200"
-										>
-											<TableCell className="font-medium py-2">
-												{resolucion.nexpediente}
-											</TableCell>
-											<TableCell className="font-medium py-2">
-												{resolucion.nresolucion}
-											</TableCell>
-											<TableCell className="font-medium py-2">
-												{resolucion.tipo}
-											</TableCell>
-											<TableCell className="font-medium py-2">
-												{resolucion.fecha}
-											</TableCell>
-											<TableCell className="py-2">
-												<button
-													onClick={() => {
-														setSelectedResolucion(resolucion);
-														setOpenResolucion(false);
-													}}
-													className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-1 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium text-sm"
-												>
-													Seleccionar
-												</button>
-											</TableCell>
-										</TableRow>
-									))}
-								</TableBody>
-							</Table>
-						</TableContainer>
-
-						<div className="flex justify-between items-center mt-4">
+						<div className="flex justify-end pt-2 border-t border-gray-100">
 							<button
-								onClick={() => prevUrl && setCurrentUrl(normalizeUrl(prevUrl))}
-								disabled={!prevUrl}
-								className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm ${
-									!prevUrl
-										? "bg-gray-300 text-gray-500 cursor-not-allowed"
-										: "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
-								}`}
+								onClick={filtrarResoluciones}
+								className="flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-blue-600 
+									hover:from-blue-600 hover:to-blue-700 
+									text-white px-4 py-2 rounded-lg shadow-md shadow-blue-500/20
+									transition-all duration-200 text-sm font-semibold
+									hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5"
 							>
-								Anterior
-							</button>
-							<Typography className="font-medium text-gray-700 text-sm">
-								Página {currentPage} de {Math.ceil(totalItems / pageSize)}
-							</Typography>
-							<button
-								onClick={() => nextUrl && setCurrentUrl(normalizeUrl(nextUrl))}
-								disabled={!nextUrl}
-								className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm ${
-									!nextUrl
-										? "bg-gray-300 text-gray-500 cursor-not-allowed"
-										: "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
-								}`}
-							>
-								Siguiente
+								<MagnifyingGlassIcon className="h-4 w-4" />
+								<span>Buscar</span>
 							</button>
 						</div>
-					</DialogContent>
-					<DialogActions className="p-4">
-						<button
-							onClick={() => setOpenResolucion(false)}
-							className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-all duration-200 font-medium"
-						>
-							Cerrar
-						</button>
-					</DialogActions>
+					</div>
+
+				{loadingResoluciones ? (
+						<div className="flex flex-col justify-center items-center py-12">
+							<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+							<Typography className="mt-4 text-gray-600 font-medium">
+								Cargando resoluciones...
+							</Typography>
+						</div>
+					) : (
+						<>
+							<TableContainer
+								component={Paper}
+								className="shadow-lg rounded-lg overflow-hidden"
+								style={{ maxHeight: "400px", overflow: "auto" }}
+							>
+								<Table size="small">
+									<TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
+										<TableRow>
+											<TableCell className="text-white font-semibold py-2">
+												Nro Expediente
+											</TableCell>
+											<TableCell className="text-white font-semibold py-2">
+												Nro Resolución
+											</TableCell>
+											<TableCell className="text-white font-semibold py-2">
+												Tipo
+											</TableCell>
+											<TableCell className="text-white font-semibold py-2">
+												Fecha
+											</TableCell>
+											<TableCell className="text-white font-semibold py-2 text-center">
+												Acción
+											</TableCell>
+										</TableRow>
+									</TableHead>
+									<TableBody>
+										{resoluciones.length > 0 ? (
+											resoluciones.map((resolucion) => (
+												<TableRow
+													key={resolucion.id}
+													className="hover:bg-blue-50 transition-colors duration-200"
+												>
+													<TableCell className="font-medium py-2">
+														{resolucion.nexpediente}
+													</TableCell>
+													<TableCell className="font-medium py-2">
+														{resolucion.nresolucion}
+													</TableCell>
+													<TableCell className="font-medium py-2">
+														{resolucion.tipo}
+													</TableCell>
+													<TableCell className="font-medium py-2">
+														{resolucion.fecha}
+													</TableCell>
+													<TableCell className="py-2 text-center">
+														<button
+															onClick={() => {
+																setSelectedResolucion(resolucion);
+																setOpenResolucion(false);
+															}}
+															className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-1 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium text-sm"
+														>
+															Seleccionar
+														</button>
+													</TableCell>
+												</TableRow>
+											))
+										) : (
+											<TableRow>
+												<TableCell colSpan={5} className="text-center py-8">
+													<div className="flex flex-col items-center justify-center">
+														<div className="bg-gray-100 rounded-full p-4 mb-3">
+															<svg
+																className="w-8 h-8 text-gray-400"
+																fill="none"
+																stroke="currentColor"
+																viewBox="0 0 24 24"
+															>
+																<path
+																	strokeLinecap="round"
+																	strokeLinejoin="round"
+																	strokeWidth={2}
+																	d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+																/>
+															</svg>
+														</div>
+														<p className="text-gray-500 font-medium">
+															No se encontraron resoluciones
+														</p>
+														<p className="text-gray-400 text-sm mt-1">
+															Intenta con otros filtros
+														</p>
+													</div>
+												</TableCell>
+											</TableRow>
+										)}
+									</TableBody>
+								</Table>
+							</TableContainer>
+
+							<div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-4">
+								<div className="flex items-center gap-2">
+									<button
+										onClick={() => prevUrl && setCurrentUrl(normalizeUrl(prevUrl))}
+										disabled={!prevUrl || loadingResoluciones}
+										className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm ${
+											!prevUrl
+												? "bg-gray-300 text-gray-500 cursor-not-allowed"
+												: "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
+										}`}
+									>
+										← Anterior
+									</button>
+								</div>
+
+								<div className="flex items-center gap-3">
+									<Typography className="font-medium text-gray-600 text-sm">
+										Página
+									</Typography>
+									<div className="flex items-center gap-2">
+										<input
+											type="number"
+											min={1}
+											max={Math.ceil(totalItems / pageSize)}
+											value={currentPage}
+											onChange={(e) => {
+												const page = parseInt(e.target.value);
+												if (
+													page >= 1 &&
+													page <= Math.ceil(totalItems / pageSize)
+												) {
+													const offset = (page - 1) * pageSize;
+													const baseUrl = currentUrl.split("?")[0];
+													const params = new URLSearchParams(
+														currentUrl.split("?")[1] || ""
+													);
+													params.set("offset", offset.toString());
+													params.set("limit", pageSize.toString());
+													setCurrentUrl(`${baseUrl}?${params.toString()}`);
+												}
+											}}
+											className="w-16 px-2 py-1 text-center border border-gray-300 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+											disabled={loadingResoluciones}
+										/>
+										<Typography className="font-medium text-gray-600 text-sm">
+											de {Math.ceil(totalItems / pageSize)}
+										</Typography>
+									</div>
+								</div>
+
+								<div className="flex items-center gap-2">
+									<button
+										onClick={() => nextUrl && setCurrentUrl(normalizeUrl(nextUrl))}
+										disabled={!nextUrl || loadingResoluciones}
+										className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm ${
+											!nextUrl
+												? "bg-gray-300 text-gray-500 cursor-not-allowed"
+												: "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
+										}`}
+									>
+										Siguiente →
+									</button>
+								</div>
+							</div>
+
+							<div className="flex justify-center mt-2">
+								<Typography className="text-gray-500 text-xs">
+									Mostrando {resoluciones.length} de {totalItems} resoluciones
+								</Typography>
+							</div>
+						</>
+					)}
+				</DialogContent>
+				<DialogActions className="p-4 bg-gray-50">
+					<div className="flex justify-between items-center w-full">
+						{selectedResolucion && (
+							<div className="text-left">
+								<Typography className="text-sm text-gray-600">
+									<span className="font-semibold text-blue-600">Seleccionada:</span>{" "}
+									Res. N° {selectedResolucion.nresolucion} - Exp. {selectedResolucion.nexpediente}
+								</Typography>
+							</div>
+						)}
+						<div className="flex gap-2">
+							<button
+								onClick={() => setOpenResolucion(false)}
+								className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-all duration-200 font-medium bg-white shadow-sm"
+							>
+								Cerrar
+							</button>
+							{selectedResolucion && (
+								<button
+									onClick={() => setOpenResolucion(false)}
+									className="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white transition-all duration-200 font-medium shadow-md"
+								>
+									Confirmar Selección
+								</button>
+							)}
+						</div>
+					</div>
+				</DialogActions>
 				</Dialog>
 
 				{/* Dialog para Seleccionar Jefe */}
@@ -1073,53 +1216,80 @@ const CrearDepartamentoJefe = () => {
 					<DialogTitle className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold">
 						Seleccionar Jefe
 					</DialogTitle>
-					<DialogContent className="p-4">
-						<Grid container spacing={2} className="mb-4 mt-4">
-							<Grid item xs={12} sm={6}>
-								<TextField
-									label="Nombre"
+			<DialogContent className="p-4">
+					{/* Filtros Compactos - Jefe */}
+					<div className="bg-white rounded-xl shadow-sm border border-gray-200/60 p-4 mb-5 mt-2">
+						<div className="flex items-center justify-between mb-3">
+							<div className="flex items-center gap-2">
+								<div className="p-1.5 bg-blue-100 rounded-lg">
+									<FunnelIcon className="h-4 w-4 text-blue-600" />
+								</div>
+								<span className="text-sm font-bold text-gray-800">Filtros de Búsqueda</span>
+							</div>
+							<button
+								onClick={() => {
+									setFiltroNombre("");
+									setFiltroDni("");
+									setCurrentUrlJefes("/facet/jefe/list_jefes_persona/");
+								}}
+								className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-500 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-red-50"
+							>
+								<XMarkIcon className="h-3.5 w-3.5" />
+								<span>Limpiar</span>
+							</button>
+						</div>
+
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+							<div className="relative">
+								<input
+									type="text"
 									value={filtroNombre}
 									onChange={(e) => setFiltroNombre(e.target.value)}
 									onKeyDown={(e) => e.key === "Enter" && filtrarJefes()}
-									fullWidth
-									variant="outlined"
-									size="small"
+									placeholder="Nombre"
+									className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg
+										focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+										hover:border-blue-400 hover:bg-white
+										transition-all duration-200
+										text-sm text-gray-700 placeholder-gray-400
+										shadow-sm pr-9"
 								/>
-							</Grid>
-							<Grid item xs={12} sm={6}>
-								<TextField
-									label="DNI"
+								<MagnifyingGlassIcon className="absolute right-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+							</div>
+							<div className="relative">
+								<input
+									type="text"
 									value={filtroDni}
 									onChange={(e) => setFiltroDni(e.target.value)}
 									onKeyDown={(e) => e.key === "Enter" && filtrarJefes()}
-									fullWidth
-									variant="outlined"
-									size="small"
+									placeholder="DNI"
+									className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg
+										focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+										hover:border-blue-400 hover:bg-white
+										transition-all duration-200
+										text-sm text-gray-700 placeholder-gray-400
+										shadow-sm pr-9"
 								/>
-							</Grid>
-							<Grid item xs={12}>
-								<div className="flex gap-2">
-									<button
-										onClick={filtrarJefes}
-										className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium"
-									>
-										Filtrar
-									</button>
-									<button
-										onClick={() => {
-											setFiltroNombre("");
-											setFiltroDni("");
-											setCurrentUrlJefes("/facet/jefe/list_jefes_persona/");
-										}}
-										className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium"
-									>
-										Limpiar
-									</button>
-								</div>
-							</Grid>
-						</Grid>
+								<MagnifyingGlassIcon className="absolute right-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+							</div>
+						</div>
 
-						<TableContainer
+						<div className="flex justify-end pt-2 border-t border-gray-100">
+							<button
+								onClick={filtrarJefes}
+								className="flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-blue-600 
+									hover:from-blue-600 hover:to-blue-700 
+									text-white px-4 py-2 rounded-lg shadow-md shadow-blue-500/20
+									transition-all duration-200 text-sm font-semibold
+									hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5"
+							>
+								<MagnifyingGlassIcon className="h-4 w-4" />
+								<span>Buscar</span>
+							</button>
+						</div>
+					</div>
+
+					<TableContainer
 							component={Paper}
 							className="shadow-lg rounded-lg overflow-hidden"
 							style={{ maxHeight: "400px", overflow: "auto" }}
@@ -1227,41 +1397,63 @@ const CrearDepartamentoJefe = () => {
 					<DialogTitle className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold">
 						Seleccionar Departamento
 					</DialogTitle>
-					<DialogContent className="p-4">
-						<Grid container spacing={2} className="mb-4 mt-4">
-							<Grid item xs={12}>
-								<TextField
-									label="Nombre del Departamento"
+			<DialogContent className="p-4">
+					{/* Filtros Compactos - Departamento */}
+					<div className="bg-white rounded-xl shadow-sm border border-gray-200/60 p-4 mb-5 mt-2">
+						<div className="flex items-center justify-between mb-3">
+							<div className="flex items-center gap-2">
+								<div className="p-1.5 bg-blue-100 rounded-lg">
+									<FunnelIcon className="h-4 w-4 text-blue-600" />
+								</div>
+								<span className="text-sm font-bold text-gray-800">Filtros de Búsqueda</span>
+							</div>
+							<button
+								onClick={() => {
+									setFiltroDepartamento("");
+									setCurrentUrlDepartamentos("/facet/departamento/");
+								}}
+								className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-500 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-red-50"
+							>
+								<XMarkIcon className="h-3.5 w-3.5" />
+								<span>Limpiar</span>
+							</button>
+						</div>
+
+						<div className="grid grid-cols-1 gap-3 mb-3">
+							<div className="relative">
+								<input
+									type="text"
 									value={filtroDepartamento}
 									onChange={(e) => setFiltroDepartamento(e.target.value)}
 									onKeyDown={(e) => e.key === "Enter" && filtrarDepartamentos()}
-									fullWidth
-									variant="outlined"
-									size="small"
+									placeholder="Nombre del Departamento"
+									className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg
+										focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+										hover:border-blue-400 hover:bg-white
+										transition-all duration-200
+										text-sm text-gray-700 placeholder-gray-400
+										shadow-sm pr-9"
 								/>
-							</Grid>
-							<Grid item xs={12}>
-								<div className="flex gap-2">
-									<button
-										onClick={filtrarDepartamentos}
-										className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium"
-									>
-										Filtrar
-									</button>
-									<button
-										onClick={() => {
-											setFiltroDepartamento("");
-											setCurrentUrlDepartamentos("/facet/departamento/");
-										}}
-										className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium"
-									>
-										Limpiar
-									</button>
-								</div>
-							</Grid>
-						</Grid>
+								<MagnifyingGlassIcon className="absolute right-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+							</div>
+						</div>
 
-						<TableContainer
+						<div className="flex justify-end pt-2 border-t border-gray-100">
+							<button
+								onClick={filtrarDepartamentos}
+								className="flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-blue-600 
+									hover:from-blue-600 hover:to-blue-700 
+									text-white px-4 py-2 rounded-lg shadow-md shadow-blue-500/20
+									transition-all duration-200 text-sm font-semibold
+									hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5"
+							>
+								<MagnifyingGlassIcon className="h-4 w-4" />
+								<span>Buscar</span>
+							</button>
+						</div>
+					</div>
+
+					<TableContainer
 							component={Paper}
 							className="shadow-lg rounded-lg overflow-hidden"
 							style={{ maxHeight: "400px", overflow: "auto" }}

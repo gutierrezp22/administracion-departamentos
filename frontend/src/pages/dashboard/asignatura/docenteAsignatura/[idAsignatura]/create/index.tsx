@@ -35,6 +35,11 @@ import BasicModal from "@/utils/modal";
 import withAuth from "../../../../../../components/withAut"; // Importa el HOC
 import API from "@/api/axiosConfig";
 import { formatFechaParaBackend } from "@/utils/dateHelpers";
+import {
+  MagnifyingGlassIcon,
+  XMarkIcon,
+  FunnelIcon,
+} from "@heroicons/react/24/outline";
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -987,36 +992,60 @@ const CrearDocenteAsignatura: React.FC = () => {
             Seleccionar Docente
           </DialogTitle>
           <DialogContent className="p-4">
-            <Grid container spacing={2} className="mb-6 mt-6">
-              <Grid item xs={12} sm={8}>
-                <TextField
-                  label="Buscar por DNI o Nombre"
-                  value={filtroDni}
-                  onChange={(e) => setFiltroDni(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && filtrarDocentes()}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <div className="flex gap-2">
-                  <button
-                    onClick={filtrarDocentes}
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                    Filtrar
-                  </button>
-                  <button
-                    onClick={() => {
-                      setFiltroDni("");
-                      fetchDataPersonas(`/facet/docente/`);
-                    }}
-                    className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                    Limpiar
-                  </button>
+            {/* Filtros Compactos - Docente */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200/60 p-4 mb-5 mt-2">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-blue-100 rounded-lg">
+                    <FunnelIcon className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <span className="text-sm font-bold text-gray-800">Filtros de Búsqueda</span>
                 </div>
-              </Grid>
-            </Grid>
+                <button
+                  onClick={() => {
+                    setFiltroDni("");
+                    fetchDataPersonas(`/facet/docente/`);
+                  }}
+                  className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-500 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-red-50"
+                >
+                  <XMarkIcon className="h-3.5 w-3.5" />
+                  <span>Limpiar</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                <div className="relative sm:col-span-2">
+                  <input
+                    type="text"
+                    value={filtroDni}
+                    onChange={(e) => setFiltroDni(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && filtrarDocentes()}
+                    placeholder="Buscar por DNI o Nombre"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg
+                      focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+                      hover:border-blue-400 hover:bg-white
+                      transition-all duration-200
+                      text-sm text-gray-700 placeholder-gray-400
+                      shadow-sm pr-9"
+                  />
+                  <MagnifyingGlassIcon className="absolute right-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2 border-t border-gray-100">
+                <button
+                  onClick={filtrarDocentes}
+                  className="flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-blue-600 
+                    hover:from-blue-600 hover:to-blue-700 
+                    text-white px-4 py-2 rounded-lg shadow-md shadow-blue-500/20
+                    transition-all duration-200 text-sm font-semibold
+                    hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5"
+                >
+                  <MagnifyingGlassIcon className="h-4 w-4" />
+                  <span>Buscar</span>
+                </button>
+              </div>
+            </div>
 
             <ResponsiveTable>
               <TableHead>
@@ -1117,36 +1146,60 @@ const CrearDocenteAsignatura: React.FC = () => {
             Seleccionar Resolución
           </DialogTitle>
           <DialogContent className="p-4">
-            <Grid container spacing={2} className="mb-6 mt-6">
-              <Grid item xs={12} sm={8}>
-                <TextField
-                  label="Buscar por Nro Expediente o Resolución"
-                  value={filtroNroResolucion}
-                  onChange={(e) => setFiltroNroResolucion(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && filtrarResoluciones()}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <div className="flex gap-2">
-                  <button
-                    onClick={filtrarResoluciones}
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                    Filtrar
-                  </button>
-                  <button
-                    onClick={() => {
-                      setFiltroNroResolucion("");
-                      fetchDataResoluciones(`/facet/resolucion/`);
-                    }}
-                    className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                    Limpiar
-                  </button>
+            {/* Filtros Compactos - Resolución */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200/60 p-4 mb-5 mt-2">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-blue-100 rounded-lg">
+                    <FunnelIcon className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <span className="text-sm font-bold text-gray-800">Filtros de Búsqueda</span>
                 </div>
-              </Grid>
-            </Grid>
+                <button
+                  onClick={() => {
+                    setFiltroNroResolucion("");
+                    fetchDataResoluciones(`/facet/resolucion/`);
+                  }}
+                  className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-500 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-red-50"
+                >
+                  <XMarkIcon className="h-3.5 w-3.5" />
+                  <span>Limpiar</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                <div className="relative sm:col-span-2">
+                  <input
+                    type="text"
+                    value={filtroNroResolucion}
+                    onChange={(e) => setFiltroNroResolucion(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && filtrarResoluciones()}
+                    placeholder="Buscar por Nro Expediente o Resolución"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg
+                      focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+                      hover:border-blue-400 hover:bg-white
+                      transition-all duration-200
+                      text-sm text-gray-700 placeholder-gray-400
+                      shadow-sm pr-9"
+                  />
+                  <MagnifyingGlassIcon className="absolute right-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2 border-t border-gray-100">
+                <button
+                  onClick={filtrarResoluciones}
+                  className="flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-blue-600 
+                    hover:from-blue-600 hover:to-blue-700 
+                    text-white px-4 py-2 rounded-lg shadow-md shadow-blue-500/20
+                    transition-all duration-200 text-sm font-semibold
+                    hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5"
+                >
+                  <MagnifyingGlassIcon className="h-4 w-4" />
+                  <span>Buscar</span>
+                </button>
+              </div>
+            </div>
 
             <ResponsiveTable>
               <TableHead>

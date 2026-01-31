@@ -23,6 +23,11 @@ import BasicModal from "@/utils/modal";
 import { useRouter } from "next/router";
 import DashboardMenu from "../../../dashboard";
 import withAuth from "../../../../components/withAut"; // Importa el HOC
+import {
+  MagnifyingGlassIcon,
+  XMarkIcon,
+  FunnelIcon,
+} from "@heroicons/react/24/outline";
 
 const CrearArea = () => {
   const router = useRouter();
@@ -362,37 +367,60 @@ const CrearArea = () => {
             Seleccionar Departamento
           </DialogTitle>
           <DialogContent className="p-4">
-            {/* Filtro */}
-            <Grid container spacing={2} className="mb-4 mt-4">
-              <Grid item xs={12} sm={8}>
-                <TextField
-                  label="Buscar por Nombre"
-                  value={filtroDepartamentos}
-                  onChange={(e) => setFiltroDepartamentos(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && filtrarDepartamentos()}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                />
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <div className="flex gap-2">
-                  <button
-                    onClick={filtrarDepartamentos}
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                    Filtrar
-                  </button>
-                  <button
-                    onClick={() => {
-                      setFiltroDepartamentos("");
-                      setCurrentUrl("/facet/departamento/");
-                    }}
-                    className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                    Limpiar
-                  </button>
+            {/* Filtros Compactos - Departamento */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200/60 p-4 mb-5 mt-2">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-blue-100 rounded-lg">
+                    <FunnelIcon className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <span className="text-sm font-bold text-gray-800">Filtros de Búsqueda</span>
                 </div>
-              </Grid>
-            </Grid>
+                <button
+                  onClick={() => {
+                    setFiltroDepartamentos("");
+                    setCurrentUrl("/facet/departamento/");
+                  }}
+                  className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-500 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-red-50"
+                >
+                  <XMarkIcon className="h-3.5 w-3.5" />
+                  <span>Limpiar</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                <div className="relative sm:col-span-2">
+                  <input
+                    type="text"
+                    value={filtroDepartamentos}
+                    onChange={(e) => setFiltroDepartamentos(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && filtrarDepartamentos()}
+                    placeholder="Buscar por Nombre"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg
+                      focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+                      hover:border-blue-400 hover:bg-white
+                      transition-all duration-200
+                      text-sm text-gray-700 placeholder-gray-400
+                      shadow-sm pr-9"
+                  />
+                  <MagnifyingGlassIcon className="absolute right-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2 border-t border-gray-100">
+                <button
+                  onClick={filtrarDepartamentos}
+                  className="flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-blue-600 
+                    hover:from-blue-600 hover:to-blue-700 
+                    text-white px-4 py-2 rounded-lg shadow-md shadow-blue-500/20
+                    transition-all duration-200 text-sm font-semibold
+                    hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5"
+                >
+                  <MagnifyingGlassIcon className="h-4 w-4" />
+                  <span>Buscar</span>
+                </button>
+              </div>
+            </div>
 
             {/* Tabla de Departamentos */}
             <TableContainer
