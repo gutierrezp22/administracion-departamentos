@@ -27,8 +27,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import PeopleIcon from "@mui/icons-material/People";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import { exportToExcel } from "@/utils/exportToExcel";
 import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 import DashboardMenu from "../..";
@@ -185,9 +184,10 @@ const ListaPersonas = () => {
         url = next;
       }
 
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(
-        allPersonas.map((persona) => ({
+      await exportToExcel({
+        fileName: "personas.xlsx",
+        sheetName: "Personas",
+        rows: allPersonas.map((persona) => ({
           Nombre: persona.nombre,
           Apellido: persona.apellido,
           DNI: persona.dni,
@@ -198,18 +198,8 @@ const ListaPersonas = () => {
           Título: obtenerNombreTitulo(persona.titulo),
           "Fecha de Nacimiento": formatearFecha(persona.fecha_nacimiento),
           Estado: persona.estado === "1" ? "Activo" : "Inactivo",
-        }))
-      );
-
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Personas");
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "array",
+        })),
       });
-      const excelBlob = new Blob([excelBuffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      saveAs(excelBlob, "personas.xlsx");
       
       // Simular un pequeño delay para mostrar el modal antes de cerrar
       setTimeout(() => {
@@ -686,3 +676,5 @@ const ListaPersonas = () => {
 };
 
 export default withAuth(ListaPersonas);
+
+

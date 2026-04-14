@@ -24,8 +24,7 @@ import {
 } from "@mui/material";
 import ResponsiveTable from "../../../../../components/ResponsiveTable";
 import AddIcon from "@mui/icons-material/Add";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import { exportToExcel } from "@/utils/exportToExcel";
 import { useRouter } from "next/router";
 import DashboardMenu from "../../..";
 import dayjs from "dayjs";
@@ -493,9 +492,7 @@ const ListaDocenteAsignatura: React.FC = () => {
         })
       );
 
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(
-        docentesCompletos.map((docente) => {
+      const rows = docentesCompletos.map((docente) => {
           try {
             return {
               Nombre: docente.docente?.persona?.nombre || "N/A",
@@ -532,23 +529,17 @@ const ListaDocenteAsignatura: React.FC = () => {
               Notificado: "Error",
             };
           }
-        })
-      );
-
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Docentes Asignatura");
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "array",
-      });
-      const excelBlob = new Blob([excelBuffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
+        });
 
       const fileName = mostrarVencimientos
         ? `docentes-proximos-vencer-${asignaturaNombre || idAsignatura}.xlsx`
         : `docentes-asignatura-${asignaturaNombre || idAsignatura}.xlsx`;
 
-      saveAs(excelBlob, fileName);
+      await exportToExcel({
+        fileName,
+        sheetName: "Docentes Asignatura",
+        rows,
+      });
 
       // Simular un pequeño delay para mostrar el modal antes de cerrar
       setTimeout(() => {
@@ -1105,3 +1096,5 @@ const ListaDocenteAsignatura: React.FC = () => {
 };
 
 export default withAuth(ListaDocenteAsignatura);
+
+

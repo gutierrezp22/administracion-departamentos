@@ -13,8 +13,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import PeopleIcon from "@mui/icons-material/People";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import { exportToExcel } from "@/utils/exportToExcel";
 import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 import DashboardMenu from "../..";
@@ -241,9 +240,10 @@ const ListaAsignaturas = () => {
         url = next;
       }
 
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(
-        allAsignaturas.map((asignatura) => ({
+      await exportToExcel({
+        fileName: "asignaturas.xlsx",
+        sheetName: "Asignaturas",
+        rows: allAsignaturas.map((asignatura) => ({
           Código: asignatura.codigo,
           Nombre: asignatura.nombre,
           Módulo: asignatura.modulo,
@@ -252,18 +252,8 @@ const ListaAsignaturas = () => {
           Área: asignatura.area_detalle?.nombre || "N/A",
           Departamento: asignatura.departamento_detalle?.nombre || "N/A",
           Estado: asignatura.estado === "1" ? "Activo" : "Inactivo",
-        }))
-      );
-
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Asignaturas");
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "array",
+        })),
       });
-      const excelBlob = new Blob([excelBuffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      saveAs(excelBlob, "asignaturas.xlsx");
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -441,3 +431,5 @@ const ListaAsignaturas = () => {
 };
 
 export default withAuth(ListaAsignaturas);
+
+

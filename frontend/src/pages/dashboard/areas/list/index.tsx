@@ -25,8 +25,6 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
 import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 import DashboardMenu from "../..";
@@ -37,6 +35,7 @@ import {
   FilterInput,
   EstadoFilter,
 } from "../../../../components/Filters";
+import { exportToExcel } from "@/utils/exportToExcel";
 
 // Función para normalizar URLs de paginación
 const normalizeUrl = (url: string) => {
@@ -160,24 +159,15 @@ const ListaAreas = () => {
         url = next;
       }
 
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(
-        allAreas.map((area) => ({
+      await exportToExcel({
+        fileName: "areas.xlsx",
+        sheetName: "Areas",
+        rows: allAreas.map((area) => ({
           Nombre: area.nombre,
           Departamento: area.departamento_detalle?.nombre || "N/A",
           Estado: area.estado === "1" ? "Activo" : "Inactivo",
-        }))
-      );
-
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Areas");
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "array",
+        })),
       });
-      const excelBlob = new Blob([excelBuffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      saveAs(excelBlob, "areas.xlsx");
     } catch (error) {
       Swal.fire({
         icon: "error",

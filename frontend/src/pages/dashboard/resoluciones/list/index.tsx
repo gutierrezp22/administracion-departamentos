@@ -34,8 +34,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import Tooltip from "@mui/material/Tooltip";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import { exportToExcel } from "@/utils/exportToExcel";
 import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 import DashboardMenu from "../..";
@@ -250,9 +249,10 @@ const ListaResoluciones = () => {
       }
 
       // Crea el archivo Excel con las columnas de la grilla!
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(
-        allResoluciones.map((resolucion) => ({
+      await exportToExcel({
+        fileName: "resoluciones.xlsx",
+        sheetName: "Resoluciones",
+        rows: allResoluciones.map((resolucion) => ({
           "Nro Expediente": resolucion.nexpediente,
           "Nro Resolución": resolucion.nresolucion,
           Tipo:
@@ -277,18 +277,8 @@ const ListaResoluciones = () => {
           Estado: resolucion.estado,
           Adjunto: resolucion.adjunto,
           Observaciones: resolucion.observaciones,
-        }))
-      );
-
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Resoluciones");
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "array",
+        })),
       });
-      const excelBlob = new Blob([excelBuffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      saveAs(excelBlob, "resoluciones.xlsx");
       
       // Simular un pequeño delay para mostrar el modal antes de cerrar
       setTimeout(() => {
@@ -772,3 +762,5 @@ const ListaResoluciones = () => {
 };
 
 export default withAuth(ListaResoluciones);
+
+

@@ -24,8 +24,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import SubjectIcon from "@mui/icons-material/Subject";
 import RemoveIcon from "@mui/icons-material/Remove";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
 import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 import DashboardMenu from "../..";
@@ -38,6 +36,7 @@ import {
 } from "../../../../components/Filters";
 import Pagination from "../../../../components/Pagination";
 import { normalizeUrl } from "../../../../hooks/useSearch";
+import { exportToExcel } from "@/utils/exportToExcel";
 
 // Agregar estilos CSS para forzar el z-index de SweetAlert
 const sweetAlertStyles = `
@@ -221,25 +220,16 @@ const ListaCarreras = () => {
         url = next;
       }
 
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(
-        allCarreras.map((carrera) => ({
+      await exportToExcel({
+        fileName: "carreras.xlsx",
+        sheetName: "Carreras",
+        rows: allCarreras.map((carrera) => ({
           Nombre: carrera.nombre,
           Tipo: carrera.tipo,
           "Plan de Estudio": carrera.planestudio,
           Estado: carrera.estado === "1" ? "Activo" : "Inactivo",
-        }))
-      );
-
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Carreras");
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "array",
+        })),
       });
-      const excelBlob = new Blob([excelBuffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      saveAs(excelBlob, "carreras.xlsx");
     } catch (error) {
       Swal.fire({
         icon: "error",

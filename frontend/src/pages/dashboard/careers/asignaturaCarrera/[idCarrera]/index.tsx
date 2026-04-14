@@ -20,8 +20,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import { exportToExcel } from "@/utils/exportToExcel";
 import DashboardMenu from "../../../../dashboard";
 import { useRouter } from "next/router";
 import BasicModal from "@/utils/modal";
@@ -154,9 +153,10 @@ const ListaAsignaturaCarrera = () => {
       }
 
       // Generar el archivo Excel
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(
-        allAsignaturasCarrera.map((asignaturaCarrera) => {
+      await exportToExcel({
+        fileName: "asignaturas_carrera.xlsx",
+        sheetName: "Asignaturas de Carrera",
+        rows: allAsignaturasCarrera.map((asignaturaCarrera) => {
           const asignatura = asignaturas.find(
             (asig) => asig.idasignatura === asignaturaCarrera.idasignatura
           );
@@ -174,22 +174,8 @@ const ListaAsignaturaCarrera = () => {
             Departamento: departamento?.nombre || "",
             Área: area?.nombre || "",
           };
-        })
-      );
-
-      XLSX.utils.book_append_sheet(
-        workbook,
-        worksheet,
-        "Asignaturas de Carrera"
-      );
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "array",
+        }),
       });
-      const excelBlob = new Blob([excelBuffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      saveAs(excelBlob, "asignaturas_carrera.xlsx");
     } catch (error) {
       console.error("Error downloading Excel:", error);
     }
@@ -475,3 +461,5 @@ const ListaAsignaturaCarrera = () => {
 };
 
 export default withAuth(ListaAsignaturaCarrera);
+
+
