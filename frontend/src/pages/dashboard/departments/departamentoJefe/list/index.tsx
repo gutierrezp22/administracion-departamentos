@@ -25,8 +25,7 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import { exportToExcel } from "@/utils/exportToExcel";
 import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 import DashboardMenu from "../../..";
@@ -225,9 +224,10 @@ const ListaJefesDepartamentos = () => {
 				url = next;
 			}
 
-			const workbook = XLSX.utils.book_new();
-			const worksheet = XLSX.utils.json_to_sheet(
-				allJefesDepartamentos.map((jefeDepartamento) => ({
+			await exportToExcel({
+        fileName: "jefes_departamentos.xlsx",
+        sheetName: "JefesDepartamentos",
+        rows: allJefesDepartamentos.map((jefeDepartamento) => ({
 					Nombre: jefeDepartamento.jefe.persona.nombre,
 					Apellido: jefeDepartamento.jefe.persona.apellido,
 					DNI: jefeDepartamento.jefe.persona.dni,
@@ -241,18 +241,8 @@ const ListaJefesDepartamentos = () => {
 						jefeDepartamento.fecha_de_fin
 					).toLocaleDateString(),
 					Estado: jefeDepartamento.estado === "1" ? "Activo" : "Inactivo",
-				}))
-			);
-
-			XLSX.utils.book_append_sheet(workbook, worksheet, "JefesDepartamentos");
-			const excelBuffer = XLSX.write(workbook, {
-				bookType: "xlsx",
-				type: "array",
-			});
-			const excelBlob = new Blob([excelBuffer], {
-				type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-			});
-			saveAs(excelBlob, "jefes_departamentos.xlsx");
+				})),
+      });
 		} catch (error) {
 			Swal.fire({
 				icon: "error",
@@ -493,3 +483,5 @@ const ListaJefesDepartamentos = () => {
 };
 
 export default withAuth(ListaJefesDepartamentos);
+
+

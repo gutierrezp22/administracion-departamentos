@@ -28,8 +28,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import Tooltip from "@mui/material/Tooltip";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import { exportToExcel } from "@/utils/exportToExcel";
 import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 import DashboardMenu from "../..";
@@ -305,9 +304,10 @@ const ListaUsuarios = () => {
         url = next;
       }
 
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(
-        allUsuarios.map((usuario) => ({
+      await exportToExcel({
+        fileName: "usuarios.xlsx",
+        sheetName: "Usuarios",
+        rows: allUsuarios.map((usuario) => ({
           Email: usuario.email,
           Nombre: usuario.nombre,
           Apellido: usuario.apellido,
@@ -322,18 +322,8 @@ const ListaUsuarios = () => {
             ? new Date(usuario.last_login).toLocaleDateString()
             : "Nunca",
           "Cambió Contraseña": usuario.has_changed_password ? "Sí" : "No",
-        }))
-      );
-
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Usuarios");
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "array",
+        })),
       });
-      const excelBlob = new Blob([excelBuffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      saveAs(excelBlob, "usuarios.xlsx");
       
       // Simular un pequeño delay para mostrar el modal antes de cerrar
       setTimeout(() => {
@@ -777,3 +767,5 @@ const ListaUsuarios = () => {
 };
 
 export default withAuth(ListaUsuarios);
+
+

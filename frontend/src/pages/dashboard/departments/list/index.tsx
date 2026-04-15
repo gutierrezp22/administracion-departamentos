@@ -10,8 +10,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import PeopleIcon from "@mui/icons-material/People";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
 import { useRouter } from "next/router";
 import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut";
@@ -26,6 +24,7 @@ import API from "@/api/axiosConfig";
 import Pagination from "../../../../components/Pagination";
 import LoadingOverlay from "../../../../components/LoadingOverlay";
 import { normalizeUrl } from "../../../../hooks/useSearch";
+import { exportToExcel } from "@/utils/exportToExcel";
 
 interface Departamento {
 	id: number;
@@ -180,17 +179,11 @@ const ListaDepartamentos = () => {
 				url = next ? normalizeUrl(next) : "";
 			}
 
-			const workbook = XLSX.utils.book_new();
-			const worksheet = XLSX.utils.json_to_sheet(allDepartamentos);
-			XLSX.utils.book_append_sheet(workbook, worksheet, "Departamentos");
-			const excelBuffer = XLSX.write(workbook, {
-				bookType: "xlsx",
-				type: "array",
+			await exportToExcel({
+				fileName: "departamentos.xlsx",
+				sheetName: "Departamentos",
+				rows: allDepartamentos,
 			});
-			const excelBlob = new Blob([excelBuffer], {
-				type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-			});
-			saveAs(excelBlob, "departamentos.xlsx");
 		} catch (error) {
 			console.error("Error downloading Excel:", error);
 		}

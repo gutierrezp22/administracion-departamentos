@@ -26,8 +26,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import { exportToExcel } from "@/utils/exportToExcel";
 import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 import DashboardMenu from "../../..";
@@ -165,9 +164,10 @@ const ListaNoDocentes = () => {
 				url = next;
 			}
 
-			const workbook = XLSX.utils.book_new();
-			const worksheet = XLSX.utils.json_to_sheet(
-				allNoDocentes.map((noDocente) => ({
+			await exportToExcel({
+        fileName: "no_docentes.xlsx",
+        sheetName: "NoDocentes",
+        rows: allNoDocentes.map((noDocente) => ({
 					Nombre: noDocente.persona_detalle?.nombre || "N/A",
 					Apellido: noDocente.persona_detalle?.apellido || "N/A",
 					DNI: noDocente.persona_detalle?.dni || "N/A",
@@ -175,18 +175,8 @@ const ListaNoDocentes = () => {
 					Teléfono: noDocente.persona_detalle?.telefono || "N/A",
 					Email: noDocente.persona_detalle?.email || "N/A",
 					Estado: noDocente.estado === "1" ? "Activo" : "Inactivo",
-				}))
-			);
-
-			XLSX.utils.book_append_sheet(workbook, worksheet, "NoDocentes");
-			const excelBuffer = XLSX.write(workbook, {
-				bookType: "xlsx",
-				type: "array",
-			});
-			const excelBlob = new Blob([excelBuffer], {
-				type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-			});
-			saveAs(excelBlob, "no_docentes.xlsx");
+				})),
+      });
 		} catch (error) {
 			Swal.fire({
 				icon: "error",
@@ -556,3 +546,5 @@ const ListaNoDocentes = () => {
 };
 
 export default withAuth(ListaNoDocentes);
+
+
