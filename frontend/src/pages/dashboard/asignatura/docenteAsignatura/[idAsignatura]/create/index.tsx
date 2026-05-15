@@ -1,26 +1,15 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
 import {
-  Container,
-  Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
   Typography,
-  Paper,
-  TextField,
-  Button,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  Grid,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormControl,
 } from "@mui/material";
 import ResponsiveTable from "@/components/ResponsiveTable";
 import dayjs from "dayjs";
@@ -32,9 +21,17 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import DashboardMenu from "../../../../../dashboard";
 import { useRouter } from "next/router";
 import BasicModal from "@/utils/modal";
-import withAuth from "../../../../../../components/withAut"; // Importa el HOC
+import withAuth from "../../../../../../components/withAut";
 import API from "@/api/axiosConfig";
 import { formatFechaParaBackend } from "@/utils/dateHelpers";
+import {
+  FormContainer,
+  FormSection,
+  FormField,
+  FormActions,
+  FormButton,
+  SelectorButton,
+} from "@/components/Form";
 import {
   MagnifyingGlassIcon,
   XMarkIcon,
@@ -48,7 +45,8 @@ dayjs.extend(timezone);
 // Helper para traducir nombres de campos a nombres amigables
 const getFieldDisplayName = (fieldName: string): string => {
   const fieldNames: { [key: string]: string } = {
-    'cargo': 'Cargo',
+    'cargo': 'Nº de Cargo',
+    'tipo_cargo': 'Cargo',
     'condicion': 'Condición',
     'dedicacion': 'Dedicación',
     'observaciones': 'Observaciones',
@@ -330,7 +328,7 @@ const CrearDocenteAsignatura: React.FC = () => {
   const [fechaFin, setFechaFin] = useState<string>("");
   const [dedicacion, setDedicacion] = useState("");
   const [condicion, setCondicion] = useState("");
-  const [cargo, setCargo] = useState("");
+  const [tipoCargo, setTipoCargo] = useState("");
 
   const [resoluciones, setResoluciones] = useState<Resolucion[]>([]);
   const [resolucion, setResolucion] = useState<Resolucion | null>(null);
@@ -367,7 +365,7 @@ const CrearDocenteAsignatura: React.FC = () => {
   };
 
   const crearDocenteAsignatura = async () => {
-    if (!persona || !asignatura || !resolucion || !dedicacion || !condicion || !cargo) {
+    if (!persona || !asignatura || !resolucion || !dedicacion || !condicion || !tipoCargo) {
       handleOpenModal(
         "Error",
         "Por favor, selecciona un docente, una asignatura, una resolución, dedicación, condición y cargo.",
@@ -386,7 +384,7 @@ const CrearDocenteAsignatura: React.FC = () => {
       fecha_de_vencimiento: formatFechaParaBackend(fechaFin),
       dedicacion: dedicacion,
       condicion: condicion,
-      cargo: cargo,
+      tipo_cargo: tipoCargo,
     };
 
     try {
@@ -428,584 +426,116 @@ const CrearDocenteAsignatura: React.FC = () => {
 
   return (
     <DashboardMenu>
-      <Container maxWidth="lg">
-        <div className="bg-white rounded-lg shadow-lg">
-          <div className="p-6 border-b border-gray-200">
-            <h1 className="text-2xl font-bold text-gray-800">
-              Agregar Docente en Asignatura
-            </h1>
-          </div>
+      <FormContainer title="Agregar Docente en Asignatura">
+        <FormSection title="Selecciones Requeridas">
+          <SelectorButton
+            label="Seleccionar Docente"
+            onClick={handleOpenPersona}
+            selectedLabel="Docente"
+            selectedValue={
+              persona?.persona_detalle
+                ? `${persona.persona_detalle.nombre} ${persona.persona_detalle.apellido}`
+                : undefined
+            }
+          />
+          <SelectorButton
+            label="Seleccionar Resolución"
+            onClick={handleOpenResolucion}
+            selectedLabel="Resolución"
+            selectedValue={resolucion?.nresolucion}
+          />
+        </FormSection>
 
-          <div className="p-4">
-            <Grid container spacing={2}>
-              {/* Sección de Selecciones */}
-              <Grid item xs={12}>
-                <Typography
-                  variant="h6"
-                  className="text-gray-700 font-semibold mb-3">
-                  Selecciones Requeridas
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} md={6}>
-                    <button
-                      onClick={handleOpenPersona}
-                      className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                      Seleccionar Docente
-                    </button>
-                    {persona && (
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mt-2 shadow-sm">
-                        <p className="text-sm font-medium text-gray-800">
-                          <span className="font-bold text-blue-700">
-                            Docente:
-                          </span>{" "}
-                          <span className="text-gray-900">
-                            {persona.persona_detalle
-                              ? `${persona.persona_detalle.nombre} ${persona.persona_detalle.apellido}`
-                              : "N/A"}
-                          </span>
-                        </p>
-                      </div>
-                    )}
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <button
-                      onClick={handleOpenResolucion}
-                      className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                      Seleccionar Resolución
-                    </button>
-                    {resolucion && (
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mt-2 shadow-sm">
-                        <p className="text-sm font-medium text-gray-800">
-                          <span className="font-bold text-blue-700">
-                            Resolución:
-                          </span>{" "}
-                          <span className="text-gray-900">
-                            {resolucion.nresolucion}
-                          </span>
-                        </p>
-                      </div>
-                    )}
-                  </Grid>
-                </Grid>
-              </Grid>
+        <FormSection title="Información de la Asignatura">
+          <FormField label="Asignatura" value={asignatura} disabled />
+        </FormSection>
 
-              {/* Separador visual */}
-              <Grid item xs={12}>
-                <div className="border-t border-gray-200 my-4"></div>
-              </Grid>
+        <FormSection title="Información Adicional">
+          <FormField
+            label="Observaciones"
+            value={observaciones}
+            onChange={(e) => setObservaciones(e.target.value)}
+          />
+          <FormField
+            label="Dedicación"
+            value={dedicacion}
+            onChange={(e) => setDedicacion(e.target.value)}
+            options={[
+              { value: "EXCL", label: "EXCL" },
+              { value: "SIMP", label: "SIMP" },
+              { value: "SEMI", label: "SEMI" },
+              { value: "35HS", label: "35HS" },
+            ]}
+          />
+          <FormField
+            label="Condición"
+            value={condicion}
+            onChange={(e) => setCondicion(e.target.value)}
+            options={[
+              { value: "Regular", label: "Regular" },
+              { value: "Interino", label: "Interino" },
+              { value: "Transitorio", label: "Transitorio" },
+              { value: "Licencia sin goce de sueldo", label: "Licencia sin goce de sueldo" },
+              { value: "Renuncia", label: "Renuncia" },
+              { value: "Licencia con goce de sueldo", label: "Licencia con goce de sueldo" },
+            ]}
+          />
+          <FormField
+            label="Cargo"
+            value={tipoCargo}
+            onChange={(e) => setTipoCargo(e.target.value)}
+            options={[
+              { value: "AUX DOC DE PRIMERA", label: "AUX DOC DE PRIMERA" },
+              { value: "AUX DOCENTE SEGUNDA", label: "AUX DOCENTE SEGUNDA" },
+              { value: "Categoria 01 Dto.366", label: "Categoria 01 Dto.366" },
+              { value: "Categoria 02 Dto.366", label: "Categoria 02 Dto.366" },
+              { value: "Categoria 03 Dto.366", label: "Categoria 03 Dto.366" },
+              { value: "Categoria 04 Dto.366", label: "Categoria 04 Dto.366" },
+              { value: "Categoria 05 Dto.366", label: "Categoria 05 Dto.366" },
+              { value: "Categoria 06 Dto.366", label: "Categoria 06 Dto.366" },
+              { value: "Categoria 07 Dto.366", label: "Categoria 07 Dto.366" },
+              { value: "DECANO FACULTAD", label: "DECANO FACULTAD" },
+              { value: "JEFE TRABAJOS PRACT.", label: "JEFE TRABAJOS PRACT." },
+              { value: "PROFESOR ADJUNTO", label: "PROFESOR ADJUNTO" },
+              { value: "PROFESOR ASOCIADO", label: "PROFESOR ASOCIADO" },
+              { value: "PROFESOR TITULAR", label: "PROFESOR TITULAR" },
+              { value: "SECRETARIO FACULTAD", label: "SECRETARIO FACULTAD" },
+              { value: "VICE DECANO", label: "VICE DECANO" },
+            ]}
+          />
+          <FormField
+            label="Estado"
+            value={estado}
+            onChange={(e) => setEstado(e.target.value)}
+            options={[
+              { value: "1", label: "Activo" },
+              { value: "0", label: "Inactivo" },
+            ]}
+          />
+        </FormSection>
 
-              {/* Sección de Información de la Asignatura */}
-              <Grid item xs={12}>
-                <Typography
-                  variant="h6"
-                  className="text-gray-700 font-semibold mb-3">
-                  Información de la Asignatura
-                </Typography>
-                <TextField
-                  label="Asignatura"
-                  value={asignatura}
-                  fullWidth
-                  disabled
-                  variant="outlined"
-                  size="small"
-                  className="modern-input"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "8px",
-                      backgroundColor: "#ffffff",
-                      border: 1,
-                      borderColor: "#d1d5db",
-                      transition: "all 0.2s ease",
-                      "&:hover": {
-                        borderColor: "#3b82f6",
-                        backgroundColor: "#ffffff",
-                        boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
-                      },
-                      "&.Mui-focused": {
-                        borderColor: "#3b82f6",
-                        backgroundColor: "#ffffff",
-                        boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
-                      },
-                    },
-                    "& .MuiInputLabel-root": {
-                      color: "#6b7280",
-                      fontWeight: "500",
-                      backgroundColor: "#ffffff",
-                      padding: "0 4px",
-                      "&.Mui-focused": {
-                        color: "#3b82f6",
-                        fontWeight: "600",
-                        backgroundColor: "#ffffff",
-                      },
-                    },
-                    "& .MuiFormLabel-filled": {
-                      backgroundColor: "#ffffff",
-                    },
-                    "& .MuiInputBase-input": {
-                      color: "#1f2937",
-                      fontWeight: "500",
-                      fontSize: "0.875rem",
-                      padding: "8px 12px",
-                    },
-                  }}
-                />
-              </Grid>
+        <FormSection title="Período de Asignación">
+          <FormField
+            label="Fecha Inicio"
+            type="date"
+            value={fechaInicio}
+            onChange={(e) => setFechaInicio(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+          />
+          <FormField
+            label="Fecha Fin"
+            type="date"
+            value={fechaFin}
+            onChange={(e) => setFechaFin(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+          />
+        </FormSection>
 
-              {/* Separador visual */}
-              <Grid item xs={12}>
-                <div className="border-t border-gray-200 my-4"></div>
-              </Grid>
-
-              {/* Sección de Información Adicional */}
-              <Grid item xs={12}>
-                <Typography
-                  variant="h6"
-                  className="text-gray-700 font-semibold mb-3">
-                  Información Adicional
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      label="Observaciones"
-                      value={observaciones}
-                      onChange={(e) => setObservaciones(e.target.value)}
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      className="modern-input"
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
-                          backgroundColor: "#ffffff",
-                          border: 1,
-                          borderColor: "#d1d5db",
-                          transition: "all 0.2s ease",
-                          "&:hover": {
-                            borderColor: "#3b82f6",
-                            backgroundColor: "#ffffff",
-                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
-                          },
-                          "&.Mui-focused": {
-                            borderColor: "#3b82f6",
-                            backgroundColor: "#ffffff",
-                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
-                          },
-                        },
-                        "& .MuiInputLabel-root": {
-                          color: "#6b7280",
-                          fontWeight: "500",
-                          backgroundColor: "#ffffff",
-                          padding: "0 4px",
-                          "&.Mui-focused": {
-                            color: "#3b82f6",
-                            fontWeight: "600",
-                            backgroundColor: "#ffffff",
-                          },
-                        },
-                        "& .MuiFormLabel-filled": {
-                          backgroundColor: "#ffffff",
-                        },
-                        "& .MuiInputBase-input": {
-                          color: "#1f2937",
-                          fontWeight: "500",
-                          fontSize: "0.875rem",
-                          padding: "8px 12px",
-                        },
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      select
-                      label="Dedicación"
-                      value={dedicacion}
-                      onChange={(e) => setDedicacion(e.target.value)}
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      className="modern-input"
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
-                          backgroundColor: "#ffffff",
-                          border: 1,
-                          borderColor: "#d1d5db",
-                          transition: "all 0.2s ease",
-                          "&:hover": {
-                            borderColor: "#3b82f6",
-                            backgroundColor: "#ffffff",
-                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
-                          },
-                          "&.Mui-focused": {
-                            borderColor: "#3b82f6",
-                            backgroundColor: "#ffffff",
-                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
-                          },
-                        },
-                        "& .MuiInputLabel-root": {
-                          color: "#6b7280",
-                          fontWeight: "500",
-                          backgroundColor: "#ffffff",
-                          padding: "0 4px",
-                          "&.Mui-focused": {
-                            color: "#3b82f6",
-                            fontWeight: "600",
-                            backgroundColor: "#ffffff",
-                          },
-                        },
-                        "& .MuiFormLabel-filled": {
-                          backgroundColor: "#ffffff",
-                        },
-                        "& .MuiInputBase-input": {
-                          color: "#1f2937",
-                          fontWeight: "500",
-                          fontSize: "0.875rem",
-                          padding: "8px 12px",
-                        },
-                        "& .MuiSelect-icon": {
-                          color: "#6b7280",
-                        },
-                      }}
-                    >
-                      <MenuItem value="EXCL">EXCL</MenuItem>
-                      <MenuItem value="SIMP">SIMP</MenuItem>
-                      <MenuItem value="SEMI">SEMI</MenuItem>
-                      <MenuItem value="35HS">35HS</MenuItem>
-                    </TextField>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      select
-                      label="Condición"
-                      value={condicion}
-                      onChange={(e) => setCondicion(e.target.value)}
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      className="modern-input"
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
-                          backgroundColor: "#ffffff",
-                          border: 1,
-                          borderColor: "#d1d5db",
-                          transition: "all 0.2s ease",
-                          "&:hover": {
-                            borderColor: "#3b82f6",
-                            backgroundColor: "#ffffff",
-                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
-                          },
-                          "&.Mui-focused": {
-                            borderColor: "#3b82f6",
-                            backgroundColor: "#ffffff",
-                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
-                          },
-                        },
-                        "& .MuiInputLabel-root": {
-                          color: "#6b7280",
-                          fontWeight: "500",
-                          backgroundColor: "#ffffff",
-                          padding: "0 4px",
-                          "&.Mui-focused": {
-                            color: "#3b82f6",
-                            fontWeight: "600",
-                            backgroundColor: "#ffffff",
-                          },
-                        },
-                        "& .MuiFormLabel-filled": {
-                          backgroundColor: "#ffffff",
-                        },
-                        "& .MuiInputBase-input": {
-                          color: "#1f2937",
-                          fontWeight: "500",
-                          fontSize: "0.875rem",
-                          padding: "8px 12px",
-                        },
-                        "& .MuiSelect-icon": {
-                          color: "#6b7280",
-                        },
-                      }}
-                    >
-                      <MenuItem value="Regular">Regular</MenuItem>
-                      <MenuItem value="Interino">Interino</MenuItem>
-                      <MenuItem value="Transitorio">Transitorio</MenuItem>
-                      <MenuItem value="Licencia sin goce de sueldo">Licencia sin goce de sueldo</MenuItem>
-                      <MenuItem value="Renuncia">Renuncia</MenuItem>
-                      <MenuItem value="Licencia con goce de sueldo">Licencia con goce de sueldo</MenuItem>
-                    </TextField>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      select
-                      label="Cargo"
-                      value={cargo}
-                      onChange={(e) => setCargo(e.target.value)}
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      className="modern-input"
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
-                          backgroundColor: "#ffffff",
-                          border: 1,
-                          borderColor: "#d1d5db",
-                          transition: "all 0.2s ease",
-                          "&:hover": {
-                            borderColor: "#3b82f6",
-                            backgroundColor: "#ffffff",
-                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
-                          },
-                          "&.Mui-focused": {
-                            borderColor: "#3b82f6",
-                            backgroundColor: "#ffffff",
-                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
-                          },
-                        },
-                        "& .MuiInputLabel-root": {
-                          color: "#6b7280",
-                          fontWeight: "500",
-                          backgroundColor: "#ffffff",
-                          padding: "0 4px",
-                          "&.Mui-focused": {
-                            color: "#3b82f6",
-                            fontWeight: "600",
-                            backgroundColor: "#ffffff",
-                          },
-                        },
-                        "& .MuiFormLabel-filled": {
-                          backgroundColor: "#ffffff",
-                        },
-                        "& .MuiInputBase-input": {
-                          color: "#1f2937",
-                          fontWeight: "500",
-                          fontSize: "0.875rem",
-                          padding: "8px 12px",
-                        },
-                        "& .MuiSelect-icon": {
-                          color: "#6b7280",
-                        },
-                      }}
-                    >
-                      <MenuItem value="AUX DOC DE PRIMERA">AUX DOC DE PRIMERA</MenuItem>
-                      <MenuItem value="AUX DOCENTE SEGUNDA">AUX DOCENTE SEGUNDA</MenuItem>
-                      <MenuItem value="Categoria 01 Dto.366">Categoria 01 Dto.366</MenuItem>
-                      <MenuItem value="Categoria 02 Dto.366">Categoria 02 Dto.366</MenuItem>
-                      <MenuItem value="Categoria 03 Dto.366">Categoria 03 Dto.366</MenuItem>
-                      <MenuItem value="Categoria 04 Dto.366">Categoria 04 Dto.366</MenuItem>
-                      <MenuItem value="Categoria 05 Dto.366">Categoria 05 Dto.366</MenuItem>
-                      <MenuItem value="Categoria 06 Dto.366">Categoria 06 Dto.366</MenuItem>
-                      <MenuItem value="Categoria 07 Dto.366">Categoria 07 Dto.366</MenuItem>
-                      <MenuItem value="DECANO FACULTAD">DECANO FACULTAD</MenuItem>
-                      <MenuItem value="JEFE TRABAJOS PRACT.">JEFE TRABAJOS PRACT.</MenuItem>
-                      <MenuItem value="PROFESOR ADJUNTO">PROFESOR ADJUNTO</MenuItem>
-                      <MenuItem value="PROFESOR ASOCIADO">PROFESOR ASOCIADO</MenuItem>
-                      <MenuItem value="PROFESOR TITULAR">PROFESOR TITULAR</MenuItem>
-                      <MenuItem value="SECRETARIO FACULTAD">SECRETARIO FACULTAD</MenuItem>
-                      <MenuItem value="VICE DECANO">VICE DECANO</MenuItem>
-                    </TextField>
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      select
-                      label="Estado"
-                      value={estado}
-                      onChange={(e) => setEstado(e.target.value)}
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      className="modern-input"
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
-                          backgroundColor: "#ffffff",
-                          border: 1,
-                          borderColor: "#d1d5db",
-                          transition: "all 0.2s ease",
-                          "&:hover": {
-                            borderColor: "#3b82f6",
-                            backgroundColor: "#ffffff",
-                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
-                          },
-                          "&.Mui-focused": {
-                            borderColor: "#3b82f6",
-                            backgroundColor: "#ffffff",
-                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
-                          },
-                        },
-                        "& .MuiInputLabel-root": {
-                          color: "#6b7280",
-                          fontWeight: "500",
-                          backgroundColor: "#ffffff",
-                          padding: "0 4px",
-                          "&.Mui-focused": {
-                            color: "#3b82f6",
-                            fontWeight: "600",
-                            backgroundColor: "#ffffff",
-                          },
-                        },
-                        "& .MuiFormLabel-filled": {
-                          backgroundColor: "#ffffff",
-                        },
-                        "& .MuiInputBase-input": {
-                          color: "#1f2937",
-                          fontWeight: "500",
-                          fontSize: "0.875rem",
-                          padding: "8px 12px",
-                        },
-                        "& .MuiSelect-icon": {
-                          color: "#6b7280",
-                          transition: "color 0.2s ease",
-                        },
-                        "&:hover .MuiSelect-icon": {
-                          color: "#32",
-                        },
-                      }}
-                    >
-                      <MenuItem value="1">Activo</MenuItem>
-                      <MenuItem value="0">Inactivo</MenuItem>
-                    </TextField>
-                  </Grid>
-                </Grid>
-              </Grid>
-
-              {/* Separador visual */}
-              <Grid item xs={12}>
-                <div className="border-t border-gray-200 my-4"></div>
-              </Grid>
-
-              {/* Sección de Fechas */}
-              <Grid item xs={12}>
-                <Typography
-                  variant="h6"
-                  className="text-gray-700 font-semibold mb-3">
-                  Período de Asignación
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      label="Fecha Inicio"
-                      type="date"
-                      value={fechaInicio}
-                      onChange={(e) => setFechaInicio(e.target.value)}
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      className="modern-input"
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
-                          backgroundColor: "#ffffff",
-                          border: 1,
-                          borderColor: "#d1d5db",
-                          transition: "all 0.2s ease",
-                          "&:hover": {
-                            borderColor: "#3b82f6",
-                            backgroundColor: "#ffffff",
-                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
-                          },
-                          "&.Mui-focused": {
-                            borderColor: "#3b82f6",
-                            backgroundColor: "#ffffff",
-                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
-                          },
-                        },
-                        "& .MuiInputLabel-root": {
-                          color: "#6b7280",
-                          fontWeight: "500",
-                          backgroundColor: "#ffffff",
-                          padding: "0 4px",
-                          "&.Mui-focused": {
-                            color: "#3b82f6",
-                            fontWeight: "600",
-                            backgroundColor: "#ffffff",
-                          },
-                        },
-                        "& .MuiFormLabel-filled": {
-                          backgroundColor: "#ffffff",
-                        },
-                        "& .MuiInputBase-input": {
-                          color: "#1f2937",
-                          fontWeight: "500",
-                          fontSize: "0.875rem",
-                          padding: "8px 12px",
-                        },
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      label="Fecha Fin"
-                      type="date"
-                      value={fechaFin}
-                      onChange={(e) => setFechaFin(e.target.value)}
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      className="modern-input"
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
-                          backgroundColor: "#ffffff",
-                          border: 1,
-                          borderColor: "#d1d5db",
-                          transition: "all 0.2s ease",
-                          "&:hover": {
-                            borderColor: "#3b82f6",
-                            backgroundColor: "#ffffff",
-                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
-                          },
-                          "&.Mui-focused": {
-                            borderColor: "#3b82f6",
-                            backgroundColor: "#ffffff",
-                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.1)",
-                          },
-                        },
-                        "& .MuiInputLabel-root": {
-                          color: "#6b7280",
-                          fontWeight: "500",
-                          backgroundColor: "#ffffff",
-                          padding: "0 4px",
-                          "&.Mui-focused": {
-                            color: "#3b82f6",
-                            fontWeight: "600",
-                            backgroundColor: "#ffffff",
-                          },
-                        },
-                        "& .MuiFormLabel-filled": {
-                          backgroundColor: "#ffffff",
-                        },
-                        "& .MuiInputBase-input": {
-                          color: "#1f2937",
-                          fontWeight: "500",
-                          fontSize: "0.875rem",
-                          padding: "8px 12px",
-                        },
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-              </Grid>
-
-              {/* Botón de acción principal */}
-              <Grid item xs={12}>
-                <div className="flex justify-center mt-6">
-                  <button
-                    onClick={crearDocenteAsignatura}
-                    className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 font-semibold">
-                    Crear Asignación
-                  </button>
-                </div>
-              </Grid>
-            </Grid>
-          </div>
-        </div>
+        <FormActions>
+          <FormButton variant="success" onClick={crearDocenteAsignatura}>
+            Crear Asignación
+          </FormButton>
+        </FormActions>
 
         {/* Dialog para Seleccionar Docente */}
         <Dialog
@@ -1414,7 +944,7 @@ const CrearDocenteAsignatura: React.FC = () => {
           content={modalMessage}
           onConfirm={fn}
         />
-      </Container>
+      </FormContainer>
     </DashboardMenu>
   );
 };

@@ -1,26 +1,21 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
-import {
-  Container,
-  Grid,
-  Paper,
-  Typography,
-  TextField,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormControl,
-} from "@mui/material";
 import dayjs, { Dayjs } from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import BasicModal from "@/utils/modal";
-import ModalConfirmacion from "@/utils/modalConfirmacion";
 import { useRouter } from "next/router";
 import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut";
 import API from "@/api/axiosConfig";
 import { parseFechaDDMMYYYY, formatFechaParaBackend } from "@/utils/dateHelpers";
+import {
+  FormContainer,
+  FormSection,
+  FormField,
+  FormDatePicker,
+  FormActions,
+  FormButton,
+} from "@/components/Form";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -33,7 +28,7 @@ const EditarResolucion = () => {
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
   const [confirmarEliminacion, setConfirmarEliminacion] = useState(false);
-  const [redirectAfterClose, setRedirectAfterClose] = useState(false); // Controla la redirección
+  const [redirectAfterClose, setRedirectAfterClose] = useState(false);
 
   const [nroExpediente, setNroExpediente] = useState("");
   const [nroResolucion, setNroResolucion] = useState("");
@@ -48,14 +43,11 @@ const EditarResolucion = () => {
       if (idResolucion) {
         try {
           const response = await API.get(`/facet/resolucion/${idResolucion}/`);
-
           setNroExpediente(response.data.nexpediente);
           setNroResolucion(response.data.nresolucion);
           setTipo(response.data.tipo);
           setAdjunto(response.data.adjunto);
-
           setFecha(parseFechaDDMMYYYY(response.data.fecha));
-
           setObservaciones(response.data.observaciones);
           setEstado(String(response.data.estado));
         } catch (error) {
@@ -63,7 +55,6 @@ const EditarResolucion = () => {
         }
       }
     };
-
     fetchData();
   }, [idResolucion]);
 
@@ -80,7 +71,7 @@ const EditarResolucion = () => {
 
     try {
       await API.put(`/facet/resolucion/${idResolucion}/`, resolucionEditada);
-      setRedirectAfterClose(true); // Activa la redirección después de cerrar el modal
+      setRedirectAfterClose(true);
       handleOpenModal("Éxito", "La acción se realizó con éxito.");
     } catch (error) {
       handleOpenModal("Error", "NO se pudo realizar la acción.");
@@ -98,18 +89,15 @@ const EditarResolucion = () => {
     setModalMessage("");
     if (redirectAfterClose) {
       router.push("/dashboard/resoluciones/");
-      setRedirectAfterClose(false); // Restablece la bandera
+      setRedirectAfterClose(false);
     }
   };
 
   const eliminarResolucion = async () => {
     try {
       await API.delete(`/facet/resolucion/${idResolucion}/`);
-      setRedirectAfterClose(true); // Activa la redirección después de cerrar el modal
-      handleOpenModal(
-        "Resolución Eliminada",
-        "La acción se realizó con éxito."
-      );
+      setRedirectAfterClose(true);
+      handleOpenModal("Resolución Eliminada", "La acción se realizó con éxito.");
     } catch (error) {
       handleOpenModal("Error", "NO se pudo realizar la acción.");
     }
@@ -117,7 +105,6 @@ const EditarResolucion = () => {
 
   const renderModalConfirmacion = () => {
     if (!confirmarEliminacion) return null;
-
     return (
       <div
         className="fixed inset-0 flex items-center justify-center z-50"
@@ -155,7 +142,6 @@ const EditarResolucion = () => {
 
   const renderBasicModal = () => {
     if (!modalVisible) return null;
-
     return (
       <div
         className="fixed inset-0 flex items-center justify-center z-50"
@@ -186,383 +172,60 @@ const EditarResolucion = () => {
   return (
     <>
       <DashboardMenu>
-        <Container maxWidth="lg">
-          <Paper elevation={3} className="bg-white shadow-lg rounded-lg">
-            {/* Título separado */}
-            <div className="p-4 border-b border-gray-200">
-              <Typography variant="h5" className="text-gray-800 font-semibold">
-                Editar Resolución
-              </Typography>
-            </div>
+        <FormContainer title="Editar Resolución">
+          <FormSection title="Información Principal">
+            <FormField
+              label="Nro Expediente"
+              value={nroExpediente}
+              onChange={(e) => setNroExpediente(e.target.value)}
+            />
+            <FormField
+              label="Nro Resolución"
+              value={nroResolucion}
+              onChange={(e) => setNroResolucion(e.target.value)}
+            />
+            <FormField
+              label="Tipo"
+              value={tipo}
+              onChange={(e) => setTipo(e.target.value)}
+              options={[
+                { value: "Rector", label: "Rector" },
+                { value: "Decano", label: "Decano" },
+                { value: "Consejo_Superior", label: "Consejo Superior" },
+                { value: "Consejo_Directivo", label: "Consejo Directivo" },
+              ]}
+            />
+            <FormField
+              label="Estado"
+              value={estado}
+              onChange={(e) => setEstado(e.target.value)}
+              options={[
+                { value: "1", label: "Activo" },
+                { value: "0", label: "Inactivo" },
+              ]}
+            />
+            <FormDatePicker label="Fecha" value={fecha} onChange={setFecha} />
+          </FormSection>
 
-            {/* Contenido del formulario */}
-            <div className="p-4">
-              <Grid container spacing={2}>
-                {/* Sección: Información Principal */}
-                <Grid item xs={12}>
-                  <Typography
-                    variant="h6"
-                    className="text-gray-700 font-semibold mb-3">
-                    Información Principal
-                  </Typography>
-                </Grid>
+          <FormSection title="Documento y Observaciones">
+            <FormField
+              label="Link Documento Adjunto"
+              value={adjunto}
+              onChange={(e) => setAdjunto(e.target.value)}
+            />
+            <FormField
+              label="Observaciones"
+              value={observaciones}
+              onChange={(e) => setObservaciones(e.target.value)}
+              multiline
+              rows={2}
+            />
+          </FormSection>
 
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    label="Nro Expediente"
-                    value={nroExpediente}
-                    onChange={(e) => setNroExpediente(e.target.value)}
-                    fullWidth
-                    variant="outlined"
-                    size="small"
-                    className="modern-input"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "8px",
-                        backgroundColor: "#ffffff",
-                        border: "1px solid #d1d5db",
-                        transition: "all 0.2s ease",
-                        "&:hover": {
-                          borderColor: "#3b82f6",
-                          backgroundColor: "#ffffff",
-                          boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
-                        },
-                        "&.Mui-focused": {
-                          borderColor: "#3b82f6",
-                          backgroundColor: "#ffffff",
-                          boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
-                        },
-                      },
-                      "& .MuiInputLabel-root": {
-                        color: "#6b7280",
-                        fontWeight: "500",
-                        backgroundColor: "#ffffff",
-                        padding: "0 4px",
-                        "&.Mui-focused": {
-                          color: "#3b82f6",
-                          fontWeight: "600",
-                          backgroundColor: "#ffffff",
-                        },
-                        "&.MuiFormLabel-filled": {
-                          backgroundColor: "#ffffff",
-                        },
-                      },
-                      "& .MuiInputBase-input": {
-                        color: "#1f2937",
-                        fontWeight: "500",
-                        fontSize: "0.875rem",
-                        padding: "8px 12px",
-                      },
-                    }}
-                  />
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    label="Nro Resolución"
-                    value={nroResolucion}
-                    onChange={(e) => setNroResolucion(e.target.value)}
-                    fullWidth
-                    variant="outlined"
-                    size="small"
-                    className="modern-input"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "8px",
-                        backgroundColor: "#ffffff",
-                        border: "1px solid #d1d5db",
-                        transition: "all 0.2s ease",
-                        "&:hover": {
-                          borderColor: "#3b82f6",
-                          backgroundColor: "#ffffff",
-                          boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
-                        },
-                        "&.Mui-focused": {
-                          borderColor: "#3b82f6",
-                          backgroundColor: "#ffffff",
-                          boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
-                        },
-                      },
-                      "& .MuiInputLabel-root": {
-                        color: "#6b7280",
-                        fontWeight: "500",
-                        backgroundColor: "#ffffff",
-                        padding: "0 4px",
-                        "&.Mui-focused": {
-                          color: "#3b82f6",
-                          fontWeight: "600",
-                          backgroundColor: "#ffffff",
-                        },
-                        "&.MuiFormLabel-filled": {
-                          backgroundColor: "#ffffff",
-                        },
-                      },
-                      "& .MuiInputBase-input": {
-                        color: "#1f2937",
-                        fontWeight: "500",
-                        fontSize: "0.875rem",
-                        padding: "8px 12px",
-                      },
-                    }}
-                  />
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    select
-                    fullWidth
-                    label="Tipo"
-                    value={tipo}
-                    onChange={(e) => setTipo(e.target.value)}
-                    variant="outlined"
-                    size="small"
-                    className="modern-input"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "8px",
-                        backgroundColor: "#ffffff",
-                        border: "1px solid #d1d5db",
-                        transition: "all 0.2s ease",
-                        "&:hover": {
-                          borderColor: "#3b82f6",
-                          backgroundColor: "#ffffff",
-                          boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
-                        },
-                        "&.Mui-focused": {
-                          borderColor: "#3b82f6",
-                          backgroundColor: "#ffffff",
-                          boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
-                        },
-                      },
-                      "& .MuiInputLabel-root": {
-                        color: "#6b7280",
-                        fontWeight: "500",
-                        backgroundColor: "#ffffff",
-                        padding: "0 4px",
-                        "&.Mui-focused": {
-                          color: "#3b82f6",
-                          fontWeight: "600",
-                          backgroundColor: "#ffffff",
-                        },
-                        "&.MuiFormLabel-filled": {
-                          backgroundColor: "#ffffff",
-                        },
-                      },
-                      "& .MuiInputBase-input": {
-                        color: "#1f2937",
-                        fontWeight: "500",
-                        fontSize: "0.875rem",
-                        padding: "8px 12px",
-                      },
-                      "& .MuiSelect-icon": {
-                        color: "#6b7280",
-                        transition: "color 0.2s ease",
-                      },
-                      "&:hover .MuiSelect-icon": {
-                        color: "#3b82f6",
-                      },
-                    }}>
-                    <MenuItem value="Rector">Rector</MenuItem>
-                    <MenuItem value="Decano">Decano</MenuItem>
-                    <MenuItem value="Consejo_Superior">
-                      Consejo Superior
-                    </MenuItem>
-                    <MenuItem value="Consejo_Directivo">
-                      Consejo Directivo
-                    </MenuItem>
-                  </TextField>
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    select
-                    fullWidth
-                    label="Estado"
-                    value={estado}
-                    onChange={(e) => setEstado(e.target.value)}
-                    variant="outlined"
-                    size="small"
-                    className="modern-input"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "8px",
-                        backgroundColor: "#ffffff",
-                        border: "1px solid #d1d5db",
-                        transition: "all 0.2s ease",
-                        "&:hover": {
-                          borderColor: "#3b82f6",
-                          backgroundColor: "#ffffff",
-                          boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
-                        },
-                        "&.Mui-focused": {
-                          borderColor: "#3b82f6",
-                          backgroundColor: "#ffffff",
-                          boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
-                        },
-                      },
-                      "& .MuiInputLabel-root": {
-                        color: "#6b7280",
-                        fontWeight: "500",
-                        backgroundColor: "#ffffff",
-                        padding: "0 4px",
-                        "&.Mui-focused": {
-                          color: "#3b82f6",
-                          fontWeight: "600",
-                          backgroundColor: "#ffffff",
-                        },
-                        "&.MuiFormLabel-filled": {
-                          backgroundColor: "#ffffff",
-                        },
-                      },
-                      "& .MuiInputBase-input": {
-                        color: "#1f2937",
-                        fontWeight: "500",
-                        fontSize: "0.875rem",
-                        padding: "8px 12px",
-                      },
-                      "& .MuiSelect-icon": {
-                        color: "#6b7280",
-                        transition: "color 0.2s ease",
-                      },
-                      "&:hover .MuiSelect-icon": {
-                        color: "#3b82f6",
-                      },
-                    }}>
-                    <MenuItem value="1">Activo</MenuItem>
-                    <MenuItem value="0">Inactivo</MenuItem>
-                  </TextField>
-                </Grid>
-
-                {/* Separador visual */}
-                <Grid item xs={12}>
-                  <div className="border-t border-gray-200 my-4"></div>
-                </Grid>
-
-                {/* Sección: Documento y Observaciones */}
-                <Grid item xs={12}>
-                  <Typography
-                    variant="h6"
-                    className="text-gray-700 font-semibold mb-3">
-                    Documento y Observaciones
-                  </Typography>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <TextField
-                    label="Link Documento Adjunto"
-                    value={adjunto}
-                    onChange={(e) => setAdjunto(e.target.value)}
-                    fullWidth
-                    variant="outlined"
-                    size="small"
-                    className="modern-input"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "8px",
-                        backgroundColor: "#ffffff",
-                        border: "1px solid #d1d5db",
-                        transition: "all 0.2s ease",
-                        "&:hover": {
-                          borderColor: "#3b82f6",
-                          backgroundColor: "#ffffff",
-                          boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
-                        },
-                        "&.Mui-focused": {
-                          borderColor: "#3b82f6",
-                          backgroundColor: "#ffffff",
-                          boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
-                        },
-                      },
-                      "& .MuiInputLabel-root": {
-                        color: "#6b7280",
-                        fontWeight: "500",
-                        backgroundColor: "#ffffff",
-                        padding: "0 4px",
-                        "&.Mui-focused": {
-                          color: "#3b82f6",
-                          fontWeight: "600",
-                          backgroundColor: "#ffffff",
-                        },
-                        "&.MuiFormLabel-filled": {
-                          backgroundColor: "#ffffff",
-                        },
-                      },
-                      "& .MuiInputBase-input": {
-                        color: "#1f2937",
-                        fontWeight: "500",
-                        fontSize: "0.875rem",
-                        padding: "8px 12px",
-                      },
-                    }}
-                  />
-                </Grid>
-
-                <Grid item xs={12}>
-                  <TextField
-                    label="Observaciones"
-                    value={observaciones}
-                    onChange={(e) => setObservaciones(e.target.value)}
-                    fullWidth
-                    variant="outlined"
-                    size="small"
-                    multiline
-                    rows={2}
-                    className="modern-input"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "8px",
-                        backgroundColor: "#ffffff",
-                        border: "1px solid #d1d5db",
-                        transition: "all 0.2s ease",
-                        "&:hover": {
-                          borderColor: "#3b82f6",
-                          backgroundColor: "#ffffff",
-                          boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
-                        },
-                        "&.Mui-focused": {
-                          borderColor: "#3b82f6",
-                          backgroundColor: "#ffffff",
-                          boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
-                        },
-                      },
-                      "& .MuiInputLabel-root": {
-                        color: "#6b7280",
-                        fontWeight: "500",
-                        backgroundColor: "#ffffff",
-                        padding: "0 4px",
-                        "&.Mui-focused": {
-                          color: "#3b82f6",
-                          fontWeight: "600",
-                          backgroundColor: "#ffffff",
-                        },
-                        "&.MuiFormLabel-filled": {
-                          backgroundColor: "#ffffff",
-                        },
-                      },
-                      "& .MuiInputBase-input": {
-                        color: "#1f2937",
-                        fontWeight: "500",
-                        fontSize: "0.875rem",
-                        padding: "8px 12px",
-                      },
-                    }}
-                  />
-                </Grid>
-
-                {/* Botones de acción centrados */}
-                <Grid item xs={12}>
-                  <div className="flex justify-center mt-6">
-                    <button
-                      onClick={edicionResolucion}
-                      className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                      Guardar Cambios
-                    </button>
-                  </div>
-                </Grid>
-              </Grid>
-            </div>
-          </Paper>
-        </Container>
+          <FormActions>
+            <FormButton onClick={edicionResolucion}>Guardar Cambios</FormButton>
+          </FormActions>
+        </FormContainer>
       </DashboardMenu>
 
       {renderModalConfirmacion()}

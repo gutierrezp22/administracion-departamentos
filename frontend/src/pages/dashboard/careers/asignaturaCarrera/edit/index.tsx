@@ -1,35 +1,28 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
-import axios from "axios";
-import {
-  Container,
-  Paper,
-  TextField,
-  Button,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormControl,
-  Grid,
-  Typography,
-} from "@mui/material";
 import BasicModal from "@/utils/modal";
 import ModalConfirmacion from "@/utils/modalConfirmacion";
-import { useRouter } from "next/router"; // Importa useRouter de Next.js
+import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import DashboardMenu from "../../../../dashboard";
 import withAuth from "../../../../../components/withAut";
 import API from "@/api/axiosConfig";
+import {
+  FormContainer,
+  FormSection,
+  FormField,
+  FormActions,
+  FormButton,
+} from "@/components/Form";
 
-// Habilita los plugins
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const EditarAsignaturaCarrera: React.FC = () => {
   const router = useRouter();
-  const { idAsignatura } = router.query; // Obtener idAsignatura de la URL
+  const { idAsignatura } = router.query;
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
@@ -45,7 +38,7 @@ const EditarAsignaturaCarrera: React.FC = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setModalMessage("");
-    router.push("/dashboard/asignaturas/"); // Navega a la página de asignaturas
+    router.push("/dashboard/asignaturas/");
   };
 
   type TipoAsignatura = "Electiva" | "Obligatoria";
@@ -74,16 +67,14 @@ const EditarAsignaturaCarrera: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!idAsignatura) return; // Asegúrate de que idAsignatura esté disponible
+      if (!idAsignatura) return;
       try {
         const response = await API.get(`/facet/asignatura/${idAsignatura}`);
-        const data = response.data;
-        setAsignatura(data);
+        setAsignatura(response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
-
     fetchData();
   }, [idAsignatura]);
 
@@ -124,10 +115,7 @@ const EditarAsignaturaCarrera: React.FC = () => {
   const eliminarAsignatura = async () => {
     try {
       await API.delete(`/facet/asignatura/${idAsignatura}/`);
-      handleOpenModal(
-        "Asignatura Eliminada",
-        "La acción se realizó con éxito."
-      );
+      handleOpenModal("Asignatura Eliminada", "La acción se realizó con éxito.");
     } catch (error) {
       console.error("Error al hacer la solicitud DELETE:", error);
       handleOpenModal("Error", "NO se pudo realizar la acción.");
@@ -136,106 +124,56 @@ const EditarAsignaturaCarrera: React.FC = () => {
 
   return (
     <DashboardMenu>
-      <div className="p-4">
-        <div className="bg-white rounded-lg shadow-lg">
-          <div className="p-4 border-b border-gray-200">
-            <h1 className="text-2xl font-bold text-gray-800">
-              Editar Asignatura
-            </h1>
-          </div>
+      <FormContainer title="Editar Asignatura">
+        <FormSection title="Información de la Asignatura">
+          <FormField
+            label="Nombre"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value.toUpperCase())}
+          />
+          <FormField
+            label="Código"
+            value={codigo}
+            onChange={(e) => setCodigo(e.target.value.toUpperCase())}
+          />
+          <FormField
+            label="Módulo"
+            value={modulo}
+            onChange={(e) => setModulo(e.target.value.toUpperCase())}
+          />
+          <FormField
+            label="Link Programa Adjunto"
+            value={programa}
+            onChange={(e) => setPrograma(e.target.value)}
+          />
+          <FormField
+            label="Tipo"
+            value={tipo}
+            onChange={(e) => setTipo(e.target.value as TipoAsignatura)}
+            options={[
+              { value: "Electiva", label: "Electiva" },
+              { value: "Obligatoria", label: "Obligatoria" },
+            ]}
+          />
+          <FormField
+            label="Estado"
+            value={estado}
+            onChange={(e) => setEstado(e.target.value)}
+            options={[
+              { value: 1, label: "Activo" },
+              { value: 0, label: "Inactivo" },
+            ]}
+          />
+        </FormSection>
 
-          <div className="p-4">
-            <Typography
-              variant="h6"
-              className="text-gray-700 font-semibold mb-3">
-              Información de la Asignatura
-            </Typography>
-
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Nombre"
-                  value={nombre}
-                  onChange={(e) => setNombre(e.target.value.toUpperCase())}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Código"
-                  value={codigo}
-                  onChange={(e) => setCodigo(e.target.value.toUpperCase())}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Módulo"
-                  value={modulo}
-                  onChange={(e) => setModulo(e.target.value.toUpperCase())}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Link Programa Adjunto"
-                  value={programa}
-                  onChange={(e) => setPrograma(e.target.value)}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth variant="outlined" size="small">
-                  <InputLabel id="tipo-label">Tipo</InputLabel>
-                  <Select
-                    labelId="tipo-label"
-                    id="tipo-select"
-                    value={tipo}
-                    onChange={(e) => setTipo(e.target.value as TipoAsignatura)}
-                    label="Tipo">
-                    <MenuItem value="Electiva">Electiva</MenuItem>
-                    <MenuItem value="Obligatoria">Obligatoria</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth variant="outlined" size="small">
-                  <InputLabel id="estado-label">Estado</InputLabel>
-                  <Select
-                    labelId="estado-label"
-                    id="estado-select"
-                    value={estado}
-                    onChange={(e) => setEstado(e.target.value)}
-                    label="Estado">
-                    <MenuItem value={1}>Activo</MenuItem>
-                    <MenuItem value={0}>Inactivo</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
-
-            <div className="flex justify-center gap-4 mt-6">
-              <button
-                onClick={edicionAsignatura}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                Guardar Cambios
-              </button>
-              <button
-                onClick={() => setConfirmarEliminacion(true)}
-                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                Eliminar Asignatura
-              </button>
-            </div>
-          </div>
-        </div>
+        <FormActions>
+          <FormButton onClick={edicionAsignatura}>Guardar Cambios</FormButton>
+          <button
+            onClick={() => setConfirmarEliminacion(true)}
+            className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-2.5 rounded-lg shadow-md transition-all duration-200 transform hover:scale-[1.02] font-semibold text-sm">
+            Eliminar Asignatura
+          </button>
+        </FormActions>
 
         <BasicModal
           open={modalVisible}
@@ -251,7 +189,7 @@ const EditarAsignaturaCarrera: React.FC = () => {
             eliminarAsignatura();
           }}
         />
-      </div>
+      </FormContainer>
     </DashboardMenu>
   );
 };

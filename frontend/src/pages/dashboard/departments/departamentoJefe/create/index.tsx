@@ -3,16 +3,8 @@ import "./styles.css";
 import API from "@/api/axiosConfig";
 import { formatFechaParaBackend } from "@/utils/dateHelpers";
 import {
-	Container,
 	Paper,
 	Typography,
-	TextField,
-	Button,
-	InputLabel,
-	Select,
-	MenuItem,
-	FormControl,
-	Grid,
 	Dialog,
 	DialogTitle,
 	DialogContent,
@@ -31,10 +23,18 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import BasicModal from "@/utils/modal";
-import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 import DashboardMenu from "@/pages/dashboard";
 import withAuth from "../../../../../components/withAut";
+import {
+	FormContainer,
+	FormSection,
+	FormField,
+	FormDatePicker,
+	FormActions,
+	FormButton,
+	SelectorButton,
+} from "@/components/Form";
 import {
 	MagnifyingGlassIcon,
 	XMarkIcon,
@@ -515,370 +515,71 @@ const CrearDepartamentoJefe = () => {
 
 	return (
 		<DashboardMenu>
-			<Container maxWidth="lg">
-				<div className="bg-white rounded-lg shadow-lg">
-					<div className="p-6 border-b border-gray-200">
-						<h1 className="text-2xl font-bold text-gray-800">
-							Agregar Jefe Departamento
-						</h1>
-					</div>
+			<FormContainer title="Agregar Jefe Departamento">
+				<FormSection title="Selecciones Requeridas">
+					<SelectorButton
+						label="Seleccionar Resolución"
+						onClick={() => setOpenResolucion(true)}
+						selectedLabel="Nro Resolución"
+						selectedValue={
+							selectedResolucion
+								? `${selectedResolucion.nresolucion} (Exp. ${selectedResolucion.nexpediente})`
+								: undefined
+						}
+					/>
+					<SelectorButton
+						label="Seleccionar Jefe"
+						onClick={() => setOpenJefe(true)}
+						selectedLabel="Jefe"
+						selectedValue={
+							jefe ? `${jefe.persona.nombre} ${jefe.persona.apellido}` : undefined
+						}
+					/>
+					<SelectorButton
+						label="Seleccionar Departamento"
+						onClick={() => setOpenDepartamento(true)}
+						selectedLabel="Departamento"
+						selectedValue={departamento?.nombre}
+					/>
+				</FormSection>
 
-					<div className="p-4">
-						<Grid container spacing={2}>
-							{/* Sección de Selecciones */}
-							<Grid item xs={12}>
-								<Typography
-									variant="h6"
-									className="text-gray-700 font-semibold mb-3"
-								>
-									Selecciones Requeridas
-								</Typography>
-								<Grid container spacing={2}>
-									<Grid item xs={12} md={4}>
-										<button
-											onClick={() => setOpenResolucion(true)}
-											className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium"
-										>
-											Seleccionar Resolución
-										</button>
-										{/* Mostrar la resolución seleccionada */}
-										{selectedResolucion && (
-											<div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mt-2 shadow-sm">
-												<p className="text-sm font-medium text-gray-800">
-													<span className="font-bold text-blue-700">
-														Nro Resolución:
-													</span>{" "}
-													<span className="text-gray-900">
-														{selectedResolucion.nresolucion}
-													</span>
-												</p>
-												<p className="text-sm font-medium text-gray-800">
-													<span className="font-bold text-blue-700">
-														Nro Expediente:
-													</span>{" "}
-													<span className="text-gray-900">
-														{selectedResolucion.nexpediente}
-													</span>
-												</p>
-											</div>
-										)}
-									</Grid>
-									<Grid item xs={12} md={4}>
-										<button
-											onClick={() => setOpenJefe(true)}
-											className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium"
-										>
-											Seleccionar Jefe
-										</button>
-										{jefe && (
-											<div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mt-2 shadow-sm">
-												<p className="text-sm font-medium text-gray-800">
-													<span className="font-bold text-blue-700">
-														Nombre Jefe:
-													</span>{" "}
-													<span className="text-gray-900">{`${jefe.persona.nombre} ${jefe.persona.apellido}`}</span>
-												</p>
-											</div>
-										)}
-									</Grid>
-									<Grid item xs={12} md={4}>
-										<button
-											onClick={() => setOpenDepartamento(true)}
-											className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium"
-										>
-											Seleccionar Departamento
-										</button>
-										{departamento && (
-											<div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mt-2 shadow-sm">
-												<p className="text-sm font-medium text-gray-800">
-													<span className="font-bold text-blue-700">
-														Departamento:
-													</span>{" "}
-													<span className="text-gray-900">
-														{departamento.nombre}
-													</span>
-												</p>
-											</div>
-										)}
-									</Grid>
-								</Grid>
-							</Grid>
+				<FormSection title="Información Adicional">
+					<FormField
+						label="Observaciones"
+						value={observaciones}
+						onChange={(e) => setObservaciones(e.target.value)}
+						multiline
+						rows={2}
+					/>
+					<FormField
+						label="Estado"
+						value={estado}
+						onChange={(e) => setEstado(e.target.value)}
+						options={[
+							{ value: "1", label: "Activo" },
+							{ value: "0", label: "Inactivo" },
+						]}
+					/>
+				</FormSection>
 
-							{/* Separador visual */}
-							<Grid item xs={12}>
-								<div className="border-t border-gray-200 my-4"></div>
-							</Grid>
+				<FormSection title="Período de Gestión">
+					<FormDatePicker
+						label="Fecha de Inicio"
+						value={fechaInicio}
+						onChange={setFechaInicio}
+					/>
+					<FormDatePicker
+						label="Fecha de Fin"
+						value={fechaFin}
+						onChange={setFechaFin}
+					/>
+				</FormSection>
 
-							{/* Sección de Información Adicional */}
-							<Grid item xs={12}>
-								<Typography
-									variant="h6"
-									className="text-gray-700 font-semibold mb-3"
-								>
-									Información Adicional
-								</Typography>
-								<Grid container spacing={2}>
-									<Grid item xs={12} md={6}>
-										<TextField
-											label="Observaciones"
-											value={observaciones}
-											onChange={(e) => setObservaciones(e.target.value)}
-											fullWidth
-											variant="outlined"
-											multiline
-											rows={2}
-											size="small"
-											className="modern-input"
-											sx={{
-												"& .MuiOutlinedInput-root": {
-													borderRadius: "8px",
-													backgroundColor: "#ffffff",
-													border: "1px solid #d1d5db",
-													transition: "all 0.2s ease",
-													"&:hover": {
-														borderColor: "#3b82f6",
-														backgroundColor: "#ffffff",
-														boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
-													},
-													"&.Mui-focused": {
-														borderColor: "#3b82f6",
-														backgroundColor: "#ffffff",
-														boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
-													},
-												},
-												"& .MuiInputLabel-root": {
-													color: "#6b7280",
-													fontWeight: "500",
-													backgroundColor: "#ffffff",
-													padding: "0 4px",
-													"&.Mui-focused": {
-														color: "#3b82f6",
-														fontWeight: "600",
-														backgroundColor: "#ffffff",
-													},
-													"&.MuiFormLabel-filled": {
-														backgroundColor: "#ffffff",
-													},
-												},
-												"& .MuiInputBase-input": {
-													color: "#1f2937",
-													fontWeight: "500",
-													fontSize: "0.875rem",
-													padding: "8px 12px",
-												},
-											}}
-										/>
-									</Grid>
-									<Grid item xs={12} md={6}>
-										<TextField
-											select
-											fullWidth
-											label="Estado"
-											value={estado}
-											onChange={(e) => setEstado(e.target.value)}
-											variant="outlined"
-											size="small"
-											className="modern-input"
-											sx={{
-												"& .MuiOutlinedInput-root": {
-													borderRadius: "8px",
-													backgroundColor: "#ffffff",
-													border: "1px solid #d1d5db",
-													transition: "all 0.2s ease",
-													"&:hover": {
-														borderColor: "#3b82f6",
-														backgroundColor: "#ffffff",
-														boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
-													},
-													"&.Mui-focused": {
-														borderColor: "#3b82f6",
-														backgroundColor: "#ffffff",
-														boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
-													},
-												},
-												"& .MuiInputLabel-root": {
-													color: "#6b7280",
-													fontWeight: "500",
-													backgroundColor: "#ffffff",
-													padding: "0 4px",
-													"&.Mui-focused": {
-														color: "#3b82f6",
-														fontWeight: "600",
-														backgroundColor: "#ffffff",
-													},
-													"&.MuiFormLabel-filled": {
-														backgroundColor: "#ffffff",
-													},
-												},
-												"& .MuiInputBase-input": {
-													color: "#1f2937",
-													fontWeight: "500",
-													fontSize: "0.875rem",
-													padding: "8px 12px",
-												},
-												"& .MuiSelect-icon": {
-													color: "#6b7280",
-													transition: "color 0.2s ease",
-												},
-												"&:hover .MuiSelect-icon": {
-													color: "#3b82f6",
-												},
-											}}
-										>
-											<MenuItem value="1">Activo</MenuItem>
-											<MenuItem value="0">Inactivo</MenuItem>
-										</TextField>
-									</Grid>
-								</Grid>
-							</Grid>
-
-							{/* Separador visual */}
-							<Grid item xs={12}>
-								<div className="border-t border-gray-200 my-4"></div>
-							</Grid>
-
-							{/* Sección de Fechas */}
-							<Grid item xs={12}>
-								<Typography
-									variant="h6"
-									className="text-gray-700 font-semibold mb-3"
-								>
-									Período de Gestión
-								</Typography>
-								<Grid container spacing={2}>
-									<Grid item xs={12} md={6}>
-										<LocalizationProvider dateAdapter={AdapterDayjs}>
-											<DatePicker
-												label="Fecha de Inicio"
-												value={fechaInicio}
-												onChange={(date) => setFechaInicio(date)}
-												format="DD/MM/YYYY"
-												slotProps={{
-													textField: {
-														fullWidth: true,
-														variant: "outlined",
-														size: "small",
-														className: "modern-input",
-														sx: {
-															"& .MuiOutlinedInput-root": {
-																borderRadius: "8px",
-																backgroundColor: "#ffffff",
-																border: "1px solid #d1d5db",
-																transition: "all 0.2s ease",
-																"&:hover": {
-																	borderColor: "#3b82f6",
-																	backgroundColor: "#ffffff",
-																	boxShadow:
-																		"0 0 0 3px rgba(59, 130, 246, 0.1)",
-																},
-																"&.Mui-focused": {
-																	borderColor: "#3b82f6",
-																	backgroundColor: "#ffffff",
-																	boxShadow:
-																		"0 0 0 3px rgba(59, 130, 246, 0.1)",
-																},
-															},
-															"& .MuiInputLabel-root": {
-																color: "#6b7280",
-																fontWeight: "500",
-																backgroundColor: "#ffffff",
-																padding: "0 4px",
-																"&.Mui-focused": {
-																	color: "#3b82f6",
-																	fontWeight: "600",
-																	backgroundColor: "#ffffff",
-																},
-																"&.MuiFormLabel-filled": {
-																	backgroundColor: "#ffffff",
-																},
-															},
-															"& .MuiInputBase-input": {
-																color: "#1f2937",
-																fontWeight: "500",
-																fontSize: "0.875rem",
-																padding: "8px 12px",
-															},
-														},
-													},
-												}}
-											/>
-										</LocalizationProvider>
-									</Grid>
-									<Grid item xs={12} md={6}>
-										<LocalizationProvider dateAdapter={AdapterDayjs}>
-											<DatePicker
-												label="Fecha de Fin"
-												value={fechaFin}
-												onChange={(date) => setFechaFin(date)}
-												format="DD/MM/YYYY"
-												slotProps={{
-													textField: {
-														fullWidth: true,
-														variant: "outlined",
-														size: "small",
-														className: "modern-input",
-														sx: {
-															"& .MuiOutlinedInput-root": {
-																borderRadius: "8px",
-																backgroundColor: "#ffffff",
-																border: "1px solid #d1d5db",
-																transition: "all 0.2s ease",
-																"&:hover": {
-																	borderColor: "#3b82f6",
-																	backgroundColor: "#ffffff",
-																	boxShadow:
-																		"0 0 0 3px rgba(59, 130, 246, 0.1)",
-																},
-																"&.Mui-focused": {
-																	borderColor: "#3b82f6",
-																	backgroundColor: "#ffffff",
-																	boxShadow:
-																		"0 0 0 3px rgba(59, 130, 246, 0.1)",
-																},
-															},
-															"& .MuiInputLabel-root": {
-																color: "#6b7280",
-																fontWeight: "500",
-																backgroundColor: "#ffffff",
-																padding: "0 4px",
-																"&.Mui-focused": {
-																	color: "#3b82f6",
-																	fontWeight: "600",
-																	backgroundColor: "#ffffff",
-																},
-																"&.MuiFormLabel-filled": {
-																	backgroundColor: "#ffffff",
-																},
-															},
-															"& .MuiInputBase-input": {
-																color: "#1f2937",
-																fontWeight: "500",
-																fontSize: "0.875rem",
-																padding: "8px 12px",
-															},
-														},
-													},
-												}}
-											/>
-										</LocalizationProvider>
-									</Grid>
-								</Grid>
-							</Grid>
-
-							{/* Botón de acción principal */}
-							<Grid item xs={12}>
-								<div className="flex justify-center mt-6">
-									<button
-										onClick={crearNuevoJefeDepartamento}
-										className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 font-semibold"
-									>
-										Crear Jefe Departamento
-									</button>
-								</div>
-							</Grid>
-						</Grid>
-					</div>
-				</div>
+				<FormActions>
+					<FormButton variant="success" onClick={crearNuevoJefeDepartamento}>
+						Crear Jefe Departamento
+					</FormButton>
+				</FormActions>
 
 				{/* Dialog para Seleccionar Resolución */}
 				<Dialog
@@ -1602,7 +1303,7 @@ const CrearDepartamentoJefe = () => {
 					content={modalMessage}
 					onConfirm={fn}
 				/>
-			</Container>
+			</FormContainer>
 		</DashboardMenu>
 	);
 };

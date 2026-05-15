@@ -16,6 +16,11 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = {
         'estado': ['exact'],
+        'tipo_cargo': ['exact'],
+        'condicion': ['exact'],
+        'dedicacion': ['exact'],
+        'cargo': ['exact'],
+        'cargo__numero_de_cargo': ['exact'],
         'docente__persona__legajo': ['icontains'],
         'docente__persona__apellido': ['icontains'],
         'docente__persona__nombre': ['icontains'],
@@ -44,7 +49,7 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
         Permite obtener todos los objetos (incluyendo inactivos) si se especifica el parámetro 'show_all'
         o si se filtra explícitamente por estado
         """
-        queryset = AsignaturaDocente.objects.select_related('docente__persona', 'asignatura', 'resolucion').all()
+        queryset = AsignaturaDocente.objects.select_related('docente__persona', 'asignatura', 'resolucion', 'cargo').all()
         
         # Si se especifica show_all, mostrar todos
         if self.request.query_params.get('show_all', False):
@@ -64,7 +69,7 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
         incluyendo fecha de inicio y fecha de vencimiento.
         """
         queryset = AsignaturaDocente.objects.select_related(
-            'docente__persona', 'asignatura', 'resolucion'
+            'docente__persona', 'asignatura', 'resolucion', 'cargo'
         ).filter(asignatura__id=request.query_params.get('asignatura'))
 
         # Aplicar filtro de estado si no se especifica show_all
@@ -75,7 +80,8 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
             {
                 'id': asignatura_docente.id,
                 'condicion': asignatura_docente.condicion,
-                'cargo': asignatura_docente.cargo,
+                'tipo_cargo': asignatura_docente.tipo_cargo,
+                'cargo': asignatura_docente.cargo.numero_de_cargo if asignatura_docente.cargo else None,
                 'dedicacion': asignatura_docente.dedicacion,
                 'estado': asignatura_docente.estado,
                 'fecha_de_inicio': asignatura_docente.fecha_de_inicio,
@@ -106,7 +112,7 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
         dias_limite = int(request.query_params.get('dias', 30))  # Permite ajustar el límite con un parámetro opcional
         fecha_limite = now() + timedelta(days=dias_limite)
 
-        queryset = AsignaturaDocente.objects.select_related('docente__persona').filter(
+        queryset = AsignaturaDocente.objects.select_related('docente__persona', 'cargo').filter(
             fecha_de_vencimiento__lte=fecha_limite,
             fecha_de_vencimiento__gte=now()
         )
@@ -119,7 +125,8 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
             {
                 'id': asignatura_docente.id,
                 'condicion': asignatura_docente.condicion,
-                'cargo': asignatura_docente.cargo,
+                'tipo_cargo': asignatura_docente.tipo_cargo,
+                'cargo': asignatura_docente.cargo.numero_de_cargo if asignatura_docente.cargo else None,
                 'dedicacion': asignatura_docente.dedicacion,
                 'fecha_de_inicio': asignatura_docente.fecha_de_inicio,  # Agregar este campo
                 'fecha_de_vencimiento': asignatura_docente.fecha_de_vencimiento,

@@ -2,11 +2,8 @@ import { useEffect, useState } from "react";
 import "./styles.css";
 import API from "@/api/axiosConfig";
 import {
-  Container,
-  Grid,
   Paper,
   Typography,
-  TextField,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -17,12 +14,19 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  MenuItem,
 } from "@mui/material";
 import BasicModal from "@/utils/modal";
 import { useRouter } from "next/router";
 import DashboardMenu from "../../../dashboard";
-import withAuth from "../../../../components/withAut"; // Importa el HOC
+import withAuth from "../../../../components/withAut";
+import {
+  FormContainer,
+  FormSection,
+  FormField,
+  FormActions,
+  FormButton,
+  SelectorButton,
+} from "@/components/Form";
 import {
   MagnifyingGlassIcon,
   XMarkIcon,
@@ -44,7 +48,7 @@ const CrearArea = () => {
     useState<Departamento | null>(null);
   const [openDepartamentoModal, setOpenDepartamentoModal] = useState(false);
   const [nombre, setNombre] = useState("");
-  const [estado, setEstado] = useState("1"); // Valor por defecto: Activo
+  const [estado, setEstado] = useState("1");
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
@@ -58,13 +62,12 @@ const CrearArea = () => {
   const [currentUrl, setCurrentUrl] = useState<string>(`/facet/departamento/`);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const pageSize = 10; // Número de elementos por página
+  const pageSize = 10;
 
   function capitalizeFirstLetter(string: string) {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   }
 
-  // Función helper para normalizar URLs
   const normalizeUrl = (url: string) => {
     return url.replace(window.location.origin, "").replace(/^\/+/, "/");
   };
@@ -105,16 +108,11 @@ const CrearArea = () => {
 
   const fetchDepartamentos = async (url: string) => {
     try {
-      console.log("Fetching departamentos from URL:", url);
       const response = await API.get(url);
-
-      setDepartamentos(response.data.results); // Lista de departamentos paginados
-      setNextUrl(response.data.next); // URL para la página siguiente
-      setPrevUrl(response.data.previous); // URL para la página anterior
-      setTotalItems(response.data.count); // Total de elementos en la base de datos
-
-      // Calcular la página actual usando offset
-      // Construir URL completa solo si es necesario
+      setDepartamentos(response.data.results);
+      setNextUrl(response.data.next);
+      setPrevUrl(response.data.previous);
+      setTotalItems(response.data.count);
       const fullUrl = url.startsWith("http")
         ? url
         : `${window.location.origin}${url}`;
@@ -126,41 +124,34 @@ const CrearArea = () => {
       setNextUrl(null);
       setPrevUrl(null);
       setTotalItems(0);
-      // No mostrar modal de error aquí, solo loguear
     }
   };
 
   const filtrarDepartamentos = () => {
     let url = `/facet/departamento/?`;
     const params = new URLSearchParams();
-
     if (filtroDepartamentos)
       params.append("nombre__icontains", filtroDepartamentos);
-
     url += params.toString();
-    setCurrentUrl(normalizeUrl(url)); // Actualiza la URL, lo que dispara el useEffect
+    setCurrentUrl(normalizeUrl(url));
   };
 
   const crearNuevaArea = async () => {
-    // Validar campos requeridos
     if (!departamentoSeleccionado) {
       handleOpenModal("Error", "Debe seleccionar un departamento.", () => {});
       return;
     }
-
     if (!nombre.trim()) {
       handleOpenModal("Error", "El nombre del área es obligatorio.", () => {});
       return;
     }
-
     const nuevaArea = {
       departamento: departamentoSeleccionado.id,
       nombre: nombre.trim(),
       estado: estado,
     };
-
     try {
-      const response = await API.post(`/facet/area/`, nuevaArea);
+      await API.post(`/facet/area/`, nuevaArea);
       handleOpenModal(
         "Éxito",
         "Se creó el área con éxito.",
@@ -174,182 +165,40 @@ const CrearArea = () => {
     }
   };
 
-
   return (
     <DashboardMenu>
-      <Container maxWidth="lg">
-        <div className="bg-white rounded-lg shadow-lg">
-          <div className="p-6 border-b border-gray-200">
-            <h1 className="text-2xl font-bold text-gray-800">Crear Área</h1>
-          </div>
+      <FormContainer title="Crear Área">
+        <FormSection title="Departamento">
+          <SelectorButton
+            label="Seleccionar Departamento"
+            onClick={handleOpenDepartamentoModal}
+            selectedLabel="Departamento"
+            selectedValue={departamentoSeleccionado?.nombre}
+          />
+        </FormSection>
 
-          <div className="p-4">
-            <Grid container spacing={2}>
-              {/* Sección de Selección */}
-              <Grid item xs={12}>
-                <Typography
-                  variant="h6"
-                  className="text-gray-700 font-semibold mb-3">
-                  Selección Requerida
-                </Typography>
-                <button
-                  onClick={handleOpenDepartamentoModal}
-                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium">
-                  Seleccionar Departamento
-                </button>
-                {departamentoSeleccionado && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mt-2 shadow-sm">
-                    <p className="text-sm font-medium text-gray-800">
-                      <span className="font-bold text-blue-700">
-                        Departamento:
-                      </span>{" "}
-                      <span className="text-gray-900">
-                        {departamentoSeleccionado.nombre}
-                      </span>
-                    </p>
-                  </div>
-                )}
-              </Grid>
+        <FormSection title="Información del Área">
+          <FormField
+            label="Nombre del Área"
+            value={nombre}
+            onChange={(e) => setNombre(capitalizeFirstLetter(e.target.value))}
+          />
+          <FormField
+            label="Estado"
+            value={estado}
+            onChange={(e) => setEstado(e.target.value)}
+            options={[
+              { value: 1, label: "Activo" },
+              { value: 0, label: "Inactivo" },
+            ]}
+          />
+        </FormSection>
 
-              {/* Separador visual */}
-              <Grid item xs={12}>
-                <div className="border-t border-gray-200 my-4"></div>
-              </Grid>
-
-              {/* Sección de Información del Área */}
-              <Grid item xs={12}>
-                <Typography
-                  variant="h6"
-                  className="text-gray-700 font-semibold mb-3">
-                  Información del Área
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      label="Nombre del Área"
-                      value={nombre}
-                      onChange={(e) =>
-                        setNombre(capitalizeFirstLetter(e.target.value))
-                      }
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      className="modern-input"
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
-                          backgroundColor: "#ffffff",
-                          border: "1px solid #d1d5db",
-                          transition: "all 0.2s ease",
-                          "&:hover": {
-                            borderColor: "#3b82f6",
-                            backgroundColor: "#ffffff",
-                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.5)",
-                          },
-                          "&.Mui-focused": {
-                            borderColor: "#3b82f6",
-                            backgroundColor: "#ffffff",
-                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.5)",
-                          },
-                        },
-                        "& .MuiInputLabel-root": {
-                          color: "#6b7280",
-                          fontWeight: "500",
-                          backgroundColor: "#ffffff",
-                          padding: "0 4px",
-                          "&.Mui-focused": {
-                            color: "#3b82f6",
-                            fontWeight: "600",
-                            backgroundColor: "#ffffff",
-                          },
-                          "&.MuiFormLabel-filled": {
-                            backgroundColor: "#ffffff",
-                          },
-                        },
-                        "& .MuiInputBase-input": {
-                          color: "#1f2937",
-                          fontWeight: "500",
-                          fontSize: "0.875rem",
-                          padding: "8px 12px",
-                        },
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      select
-                      label="Estado"
-                      value={estado}
-                      onChange={(e) => setEstado(e.target.value)}
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      className="modern-input"
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
-                          backgroundColor: "#ffffff",
-                          border: "1px solid #d1d5db",
-                          transition: "all 0.2s ease",
-                          "&:hover": {
-                            borderColor: "#3b82f6",
-                            backgroundColor: "#ffffff",
-                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.5)",
-                          },
-                          "&.Mui-focused": {
-                            borderColor: "#3b82f6",
-                            backgroundColor: "#ffffff",
-                            boxShadow: "0 0 3px rgba(59, 130, 246, 0.5)",
-                          },
-                        },
-                        "& .MuiInputLabel-root": {
-                          color: "#6b7280",
-                          fontWeight: "500",
-                          backgroundColor: "#ffffff",
-                          padding: "0 4px",
-                          "&.Mui-focused": {
-                            color: "#3b82f6",
-                            fontWeight: "600",
-                            backgroundColor: "#ffffff",
-                          },
-                          "&.MuiFormLabel-filled": {
-                            backgroundColor: "#ffffff",
-                          },
-                        },
-                        "& .MuiInputBase-input": {
-                          color: "#1f2937",
-                          fontWeight: "500",
-                          fontSize: "0.875rem",
-                          padding: "8px 12px",
-                        },
-                        "& .MuiSelect-icon": {
-                          color: "#6b7280",
-                          transition: "color 0.2s ease",
-                        },
-                        "&:hover .MuiSelect-icon": {
-                          color: "#3b82f6",
-                        },
-                      }}>
-                      <MenuItem value={1}>Activo</MenuItem>
-                      <MenuItem value={0}>Inactivo</MenuItem>
-                    </TextField>
-                  </Grid>
-                </Grid>
-              </Grid>
-
-              {/* Botón de acción principal */}
-              <Grid item xs={12}>
-                <div className="flex justify-center mt-6">
-                  <button
-                    onClick={crearNuevaArea}
-                    className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105 font-semibold">
-                    Crear Área
-                  </button>
-                </div>
-              </Grid>
-            </Grid>
-          </div>
-        </div>
+        <FormActions>
+          <FormButton variant="success" onClick={crearNuevaArea}>
+            Crear Área
+          </FormButton>
+        </FormActions>
 
         <Dialog
           open={openDepartamentoModal}
@@ -367,7 +216,6 @@ const CrearArea = () => {
             Seleccionar Departamento
           </DialogTitle>
           <DialogContent className="p-4">
-            {/* Filtros Compactos - Departamento */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200/60 p-4 mb-5 mt-2">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -397,7 +245,7 @@ const CrearArea = () => {
                     onKeyDown={(e) => e.key === "Enter" && filtrarDepartamentos()}
                     placeholder="Buscar por Nombre"
                     className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg
-                      focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+                      focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
                       hover:border-blue-400 hover:bg-white
                       transition-all duration-200
                       text-sm text-gray-700 placeholder-gray-400
@@ -410,8 +258,8 @@ const CrearArea = () => {
               <div className="flex justify-end pt-2 border-t border-gray-100">
                 <button
                   onClick={filtrarDepartamentos}
-                  className="flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-blue-600 
-                    hover:from-blue-600 hover:to-blue-700 
+                  className="flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-blue-600
+                    hover:from-blue-600 hover:to-blue-700
                     text-white px-4 py-2 rounded-lg shadow-md shadow-blue-500/20
                     transition-all duration-200 text-sm font-semibold
                     hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5"
@@ -422,7 +270,6 @@ const CrearArea = () => {
               </div>
             </div>
 
-            {/* Tabla de Departamentos */}
             <TableContainer
               component={Paper}
               className="shadow-lg rounded-lg overflow-hidden"
@@ -430,18 +277,10 @@ const CrearArea = () => {
               <Table size="small">
                 <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
                   <TableRow>
-                    <TableCell className="text-white font-semibold py-2">
-                      Nombre
-                    </TableCell>
-                    <TableCell className="text-white font-semibold py-2">
-                      Teléfono
-                    </TableCell>
-                    <TableCell className="text-white font-semibold py-2">
-                      Estado
-                    </TableCell>
-                    <TableCell className="text-white font-semibold py-2">
-                      Seleccionar
-                    </TableCell>
+                    <TableCell className="text-white font-semibold py-2">Nombre</TableCell>
+                    <TableCell className="text-white font-semibold py-2">Teléfono</TableCell>
+                    <TableCell className="text-white font-semibold py-2">Estado</TableCell>
+                    <TableCell className="text-white font-semibold py-2">Seleccionar</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -449,12 +288,8 @@ const CrearArea = () => {
                     <TableRow
                       key={departamento.id}
                       className="hover:bg-blue-50 transition-colors duration-200">
-                      <TableCell className="font-medium py-2">
-                        {departamento.nombre}
-                      </TableCell>
-                      <TableCell className="font-medium py-2">
-                        {departamento.telefono}
-                      </TableCell>
+                      <TableCell className="font-medium py-2">{departamento.nombre}</TableCell>
+                      <TableCell className="font-medium py-2">{departamento.telefono}</TableCell>
                       <TableCell className="font-medium py-2">
                         {departamento.estado == 1 ? "Activo" : "Inactivo"}
                       </TableCell>
@@ -478,7 +313,6 @@ const CrearArea = () => {
               </Table>
             </TableContainer>
 
-            {/* Paginación */}
             <div className="flex justify-between items-center mt-4">
               <button
                 onClick={() => prevUrl && setCurrentUrl(normalizeUrl(prevUrl))}
@@ -521,7 +355,7 @@ const CrearArea = () => {
           content={modalMessage}
           onConfirm={fn}
         />
-      </Container>
+      </FormContainer>
     </DashboardMenu>
   );
 };
