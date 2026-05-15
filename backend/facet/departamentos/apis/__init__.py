@@ -14,6 +14,10 @@ from .asignaturaDocente import AsignaturaDocenteViewSet
 from .directorCarrera import DirectorCarreraViewSet
 from .tipoTitulo import TipoTituloViewSet
 from .notificacion import NotificacionViewSet
+from .tipoCargo import TipoCargoViewSet
+from .cargo import CargoViewSet
+from .cargoHistorial import CargoHistorialViewSet
+from .operacionCargo import OperacionCargoViewSet
 from rest_framework.pagination import PageNumberPagination
 
 class StandardResultsSetPagination(PageNumberPagination):

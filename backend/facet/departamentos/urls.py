@@ -23,6 +23,10 @@ router.register(r'jefe-departamento', JefeDepartamentoViewSet)
 router.register(r'nodocente', NoDocenteViewSet)
 router.register(r'tipo-titulo', TipoTituloViewSet)
 router.register(r'notificacion', NotificacionViewSet)
+router.register(r'tipo-cargo', TipoCargoViewSet)
+router.register(r'cargo', CargoViewSet)
+router.register(r'cargo-historial', CargoHistorialViewSet)
+router.register(r'operacion-cargo', OperacionCargoViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -1,16 +1,7 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
 import {
-  Container,
   Paper,
-  Typography,
-  TextField,
-  Button,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormControl,
-  Grid,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -23,8 +14,7 @@ import {
   TableRow,
 } from "@mui/material";
 import BasicModal from "@/utils/modal";
-import ModalConfirmacion from "@/utils/modalConfirmacion";
-import { useRouter } from "next/router"; // Importa useRouter de Next.js
+import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
@@ -32,36 +22,27 @@ import DashboardMenu from "../../../..";
 import withAuth from "../../../../../../components/withAut";
 import API from "@/api/axiosConfig";
 import {
+  FormContainer,
+  FormSection,
+  FormField,
+  FormActions,
+  FormButton,
+  SelectorButton,
+} from "@/components/Form";
+import {
   MagnifyingGlassIcon,
   XMarkIcon,
   FunnelIcon,
 } from "@heroicons/react/24/outline";
 
-// Habilita los plugins
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const CrearAsignaturaCarrera = () => {
   const router = useRouter();
-  const { idCarrera } = router.query; // Obtener idCarrera de la URL
-
-  interface Area {
-    id: number;
-    departamento: number;
-    nombre: string;
-    estado: 0 | 1;
-  }
-
-  interface Departamento {
-    id: number;
-    nombre: string;
-    telefono: string;
-    estado: 0 | 1;
-    interno: string;
-  }
+  const { idCarrera } = router.query;
 
   type TipoAsignatura = "Electiva" | "Obligatoria";
-  type TipoCarrera = "Pregrado" | "Grado" | "Posgrado";
 
   interface Asignatura {
     id: number;
@@ -75,26 +56,11 @@ const CrearAsignaturaCarrera = () => {
     estado: 0 | 1;
   }
 
-  interface Carrera {
-    id: number;
-    nombre: string;
-    tipo: TipoCarrera;
-    planestudio: string;
-    sitio: string;
-    estado: 0 | 1;
-  }
-
   const [asignaturas, setAsignaturas] = useState<Asignatura[]>([]);
-  const [areas, setAreas] = useState<Area[]>([]);
-  const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [idasignatura, setIdasignatura] = useState<number>();
-  const [iddepartamento, setIddepartamento] = useState<number>(0);
   const [nombre, setNombre] = useState("");
   const [codigo, setCodigo] = useState("");
   const [estado, setEstado] = useState("");
-  const [tipo, setTipo] = useState("");
-  const [modulo, setModulo] = useState("");
-  const [programa, setPrograma] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
@@ -102,13 +68,8 @@ const CrearAsignaturaCarrera = () => {
   const [openAsignatura, setOpenAsignatura] = useState(false);
   const [filtroAsignaturas, setFiltroAsignaturas] = useState("");
 
-  const handleOpenAsignatura = () => {
-    setOpenAsignatura(true);
-  };
-
-  const handleClose = () => {
-    setOpenAsignatura(false);
-  };
+  const handleOpenAsignatura = () => setOpenAsignatura(true);
+  const handleClose = () => setOpenAsignatura(false);
 
   const handleOpenModal = (
     title: string,
@@ -139,7 +100,6 @@ const CrearAsignaturaCarrera = () => {
         console.error("Error fetching data:", error);
       }
     };
-
     fetchData();
   }, []);
 
@@ -163,10 +123,7 @@ const CrearAsignaturaCarrera = () => {
     };
 
     try {
-      const response = await API.post(
-        `/facet/asignatura-carrera/`,
-        nuevaAsignaturaEnCarrera
-      );
+      await API.post(`/facet/asignatura-carrera/`, nuevaAsignaturaEnCarrera);
       handleOpenModal(
         "Éxito",
         "Se creó la asignatura en carrera con éxito.",
@@ -179,180 +136,142 @@ const CrearAsignaturaCarrera = () => {
 
   return (
     <DashboardMenu>
-      <div className="p-4">
-        <div className="bg-white rounded-lg shadow-lg">
-          <div className="p-4 border-b border-gray-200">
-            <h1 className="text-2xl font-bold text-gray-800">Agregar Asignatura en Carrera</h1>
-          </div>
-          
-          <div className="p-4">
-            <Typography variant="h6" className="text-gray-700 font-semibold mb-3">
-              Selección de Asignatura
-            </Typography>
-            
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <button
-                  onClick={handleOpenAsignatura}
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105 font-medium w-full">
-                  Seleccionar Asignatura
-                </button>
+      <FormContainer title="Agregar Asignatura en Carrera">
+        <FormSection title="Selección de Asignatura">
+          <SelectorButton
+            label="Seleccionar Asignatura"
+            onClick={handleOpenAsignatura}
+            selectedLabel="Asignatura"
+            selectedValue={idasignatura ? `${codigo} - ${nombre}` : undefined}
+          />
+        </FormSection>
 
-                <Dialog
-                  open={openAsignatura}
-                  onClose={handleClose}
-                  maxWidth="md"
-                  fullWidth
-                  PaperProps={{ style: { borderRadius: '12px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' } }}>
-                  <DialogTitle className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold">
-                    Seleccionar Asignatura
-                  </DialogTitle>
-                  <DialogContent className="p-4">
-                    {/* Filtros Compactos - Asignatura */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200/60 p-4 mb-5 mt-2">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <div className="p-1.5 bg-blue-100 rounded-lg">
-                            <FunnelIcon className="h-4 w-4 text-blue-600" />
-                          </div>
-                          <span className="text-sm font-bold text-gray-800">Filtros de Búsqueda</span>
-                        </div>
-                        <button
-                          onClick={() => setFiltroAsignaturas("")}
-                          className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-500 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-red-50"
-                        >
-                          <XMarkIcon className="h-3.5 w-3.5" />
-                          <span>Limpiar</span>
-                        </button>
-                      </div>
+        <FormSection title="Estado">
+          <FormField
+            label="Estado"
+            value={estado}
+            onChange={(e) => setEstado(e.target.value)}
+            options={[
+              { value: 1, label: "Activo" },
+              { value: 0, label: "Inactivo" },
+            ]}
+          />
+        </FormSection>
 
-                      <div className="grid grid-cols-1 gap-3 mb-3">
-                        <div className="relative">
-                          <input
-                            type="text"
-                            value={filtroAsignaturas}
-                            onChange={(e) => setFiltroAsignaturas(e.target.value)}
-                            placeholder="Buscar por Código o Nombre"
-                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg
-                              focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
-                              hover:border-blue-400 hover:bg-white
-                              transition-all duration-200
-                              text-sm text-gray-700 placeholder-gray-400
-                              shadow-sm pr-9"
-                          />
-                          <MagnifyingGlassIcon className="absolute right-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                        </div>
-                      </div>
-                    </div>
+        <FormActions>
+          <FormButton
+            variant="success"
+            onClick={crearNuevaAsignaturaEnCarrera}
+            disabled={!idasignatura || !estado}
+          >
+            Crear Asignatura en Carrera
+          </FormButton>
+        </FormActions>
 
-                    <TableContainer component={Paper} style={{ maxHeight: '400px', overflow: 'auto' }}>
-                      <Table size="small">
-                        <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
-                          <TableRow>
-                            <TableCell className="text-white font-semibold">
-                              Código
-                            </TableCell>
-                            <TableCell className="text-white font-semibold">
-                              Nombre
-                            </TableCell>
-                            <TableCell className="text-white font-semibold">
-                              Seleccionar
-                            </TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {handleFilterAsignaturas(filtroAsignaturas).map(
-                            (asignatura) => (
-                              <TableRow
-                                key={asignatura.id}
-                                className="hover:bg-blue-50 transition-colors duration-200">
-                                <TableCell className="font-medium">{asignatura.codigo}</TableCell>
-                                <TableCell className="font-medium">{asignatura.nombre}</TableCell>
-                                <TableCell>
-                                  <button
-                                    onClick={() => {
-                                      setIdasignatura(asignatura.id);
-                                      setNombre(asignatura.nombre);
-                                      setCodigo(asignatura.codigo);
-                                      setOpenAsignatura(false);
-                                    }}
-                                    className={`px-3 py-1 text-sm rounded-md transition-colors duration-200 border ${
-                                      asignatura.id === idasignatura
-                                        ? "bg-green-500 text-white border-green-500 hover:bg-green-600"
-                                        : "border-gray-300 hover:bg-gray-100"
-                                    }`}>
-                                    Seleccionar
-                                  </button>
-                                </TableCell>
-                              </TableRow>
-                            )
-                          )}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  </DialogContent>
-                  <DialogActions className="p-4">
-                    <button
-                      onClick={handleClose}
-                      className="px-3 py-1 text-sm rounded-md border border-gray-300 hover:bg-gray-100">
-                      Cerrar
-                    </button>
-                    <button
-                      onClick={handleConfirmSelection}
-                      className="ml-2 px-3 py-1 text-sm rounded-md bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white">
-                      Confirmar Selección
-                    </button>
-                  </DialogActions>
-                </Dialog>
-              </Grid>
-
-              {idasignatura && (
-                <Grid item xs={12} className="mt-3">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 shadow-sm">
-                    <p className="text-sm font-medium text-gray-800">
-                      <span className="font-bold text-blue-700">Asignatura seleccionada:</span>
-                    </p>
-                    <p className="mt-1 text-gray-900">
-                      <strong>Código:</strong> {codigo}
-                    </p>
-                    <p className="text-gray-900">
-                      <strong>Nombre:</strong> {nombre}
-                    </p>
+        <Dialog
+          open={openAsignatura}
+          onClose={handleClose}
+          maxWidth="md"
+          fullWidth
+          PaperProps={{
+            style: {
+              borderRadius: "12px",
+              boxShadow:
+                "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+            },
+          }}>
+          <DialogTitle className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold">
+            Seleccionar Asignatura
+          </DialogTitle>
+          <DialogContent className="p-4">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200/60 p-4 mb-5 mt-2">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-blue-100 rounded-lg">
+                    <FunnelIcon className="h-4 w-4 text-blue-600" />
                   </div>
-                </Grid>
-              )}
+                  <span className="text-sm font-bold text-gray-800">Filtros de Búsqueda</span>
+                </div>
+                <button
+                  onClick={() => setFiltroAsignaturas("")}
+                  className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-500 transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-red-50"
+                >
+                  <XMarkIcon className="h-3.5 w-3.5" />
+                  <span>Limpiar</span>
+                </button>
+              </div>
 
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth variant="outlined" size="small">
-                  <InputLabel id="estado-label">Estado</InputLabel>
-                  <Select
-                    labelId="estado-label"
-                    id="estado-select"
-                    value={estado}
-                    onChange={(e) => setEstado(e.target.value)}
-                    label="Estado">
-                    <MenuItem value={1}>Activo</MenuItem>
-                    <MenuItem value={0}>Inactivo</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
-            
-            <div className="flex justify-center mt-6">
-              <button
-                onClick={crearNuevaAsignaturaEnCarrera}
-                disabled={!idasignatura || !estado}
-                className={`px-6 py-3 rounded-lg transition-all duration-200 transform font-medium ${
-                  !idasignatura || !estado
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md hover:scale-105"
-                }`}>
-                Crear Asignatura en Carrera
-              </button>
+              <div className="grid grid-cols-1 gap-3 mb-3">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={filtroAsignaturas}
+                    onChange={(e) => setFiltroAsignaturas(e.target.value)}
+                    placeholder="Buscar por Código o Nombre"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg
+                      focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
+                      hover:border-blue-400 hover:bg-white
+                      transition-all duration-200
+                      text-sm text-gray-700 placeholder-gray-400
+                      shadow-sm pr-9"
+                  />
+                  <MagnifyingGlassIcon className="absolute right-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        
+
+            <TableContainer component={Paper} style={{ maxHeight: "400px", overflow: "auto" }}>
+              <Table size="small">
+                <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
+                  <TableRow>
+                    <TableCell className="text-white font-semibold">Código</TableCell>
+                    <TableCell className="text-white font-semibold">Nombre</TableCell>
+                    <TableCell className="text-white font-semibold">Seleccionar</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {handleFilterAsignaturas(filtroAsignaturas).map((asignatura) => (
+                    <TableRow
+                      key={asignatura.id}
+                      className="hover:bg-blue-50 transition-colors duration-200">
+                      <TableCell className="font-medium">{asignatura.codigo}</TableCell>
+                      <TableCell className="font-medium">{asignatura.nombre}</TableCell>
+                      <TableCell>
+                        <button
+                          onClick={() => {
+                            setIdasignatura(asignatura.id);
+                            setNombre(asignatura.nombre);
+                            setCodigo(asignatura.codigo);
+                            setOpenAsignatura(false);
+                          }}
+                          className={`px-3 py-1 text-sm rounded-md transition-colors duration-200 border ${
+                            asignatura.id === idasignatura
+                              ? "bg-green-500 text-white border-green-500 hover:bg-green-600"
+                              : "border-gray-300 hover:bg-gray-100"
+                          }`}>
+                          Seleccionar
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </DialogContent>
+          <DialogActions className="p-4">
+            <button
+              onClick={handleClose}
+              className="px-3 py-1 text-sm rounded-md border border-gray-300 hover:bg-gray-100">
+              Cerrar
+            </button>
+            <button
+              onClick={handleConfirmSelection}
+              className="ml-2 px-3 py-1 text-sm rounded-md bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white">
+              Confirmar Selección
+            </button>
+          </DialogActions>
+        </Dialog>
+
         <BasicModal
           open={modalVisible}
           onClose={handleCloseModal}
@@ -360,7 +279,7 @@ const CrearAsignaturaCarrera = () => {
           content={modalMessage}
           onConfirm={fn}
         />
-      </div>
+      </FormContainer>
     </DashboardMenu>
   );
 };

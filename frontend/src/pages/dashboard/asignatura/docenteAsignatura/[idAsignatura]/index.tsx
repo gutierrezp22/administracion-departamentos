@@ -62,13 +62,23 @@ const ListaDocenteAsignatura: React.FC = () => {
     | "Licencia sin goce de sueldo"
     | "Renuncia"
     | "Licencia con goce de sueldo";
-  type Cargo =
-    | "Titular"
-    | "Asociado"
-    | "Adjunto"
-    | "Jtp"
-    | "Adg"
-    | "Ayudante_estudiantil";
+  type TipoCargo =
+    | "AUX DOC DE PRIMERA"
+    | "AUX DOCENTE SEGUNDA"
+    | "Categoria 01 Dto.366"
+    | "Categoria 02 Dto.366"
+    | "Categoria 03 Dto.366"
+    | "Categoria 04 Dto.366"
+    | "Categoria 05 Dto.366"
+    | "Categoria 06 Dto.366"
+    | "Categoria 07 Dto.366"
+    | "DECANO FACULTAD"
+    | "JEFE TRABAJOS PRACT."
+    | "PROFESOR ADJUNTO"
+    | "PROFESOR ASOCIADO"
+    | "PROFESOR TITULAR"
+    | "SECRETARIO FACULTAD"
+    | "VICE DECANO";
   type Dedicacion = "Media" | "Simple" | "Exclusiva";
 
   interface Persona {
@@ -104,7 +114,8 @@ const ListaDocenteAsignatura: React.FC = () => {
     docente: Docente;
     resolucion?: Resolucion;
     condicion: Condicion;
-    cargo: Cargo;
+    tipo_cargo: TipoCargo;
+    cargo: number | null;
     dedicacion: Dedicacion;
     estado: 0 | 1;
     fecha_de_inicio: string;
@@ -119,7 +130,7 @@ const ListaDocenteAsignatura: React.FC = () => {
   const [filtroApellido, setFiltroApellido] = useState("");
   const [filtroDni, setFiltroDni] = useState("");
   const [filtroCondicion, setFiltroCondicion] = useState<Condicion | "">("");
-  const [filtroCargo, setFiltroCargo] = useState<Cargo | "">("");
+  const [filtroTipoCargo, setFiltroTipoCargo] = useState<TipoCargo | "">("");
   const [filtroDedicacion, setFiltroDedicacion] = useState<Dedicacion | "">("");
   const [filtroEstado, setFiltroEstado] = useState<string>("1");
   const [currentUrl, setCurrentUrl] = useState<string | null>(null);
@@ -231,7 +242,7 @@ const ListaDocenteAsignatura: React.FC = () => {
       );
     if (filtroDni.trim())
       params.append("docente__persona__dni__icontains", filtroDni.trim());
-    if (filtroCargo) params.append("cargo", filtroCargo);
+    if (filtroTipoCargo) params.append("tipo_cargo", filtroTipoCargo);
     if (filtroDedicacion) params.append("dedicacion", filtroDedicacion);
     if (filtroCondicion) params.append("condicion", filtroCondicion);
 
@@ -255,7 +266,7 @@ const ListaDocenteAsignatura: React.FC = () => {
     setFiltroApellido("");
     setFiltroDni("");
     setFiltroCondicion("");
-    setFiltroCargo("");
+    setFiltroTipoCargo("");
     setFiltroDedicacion("");
     setFiltroEstado("1");
 
@@ -283,7 +294,7 @@ const ListaDocenteAsignatura: React.FC = () => {
       );
     if (filtroDni.trim())
       params.append("docente__persona__dni__icontains", filtroDni.trim());
-    if (filtroCargo) params.append("cargo", filtroCargo);
+    if (filtroTipoCargo) params.append("tipo_cargo", filtroTipoCargo);
     if (filtroDedicacion) params.append("dedicacion", filtroDedicacion);
     if (filtroCondicion) params.append("condicion", filtroCondicion);
 
@@ -436,7 +447,7 @@ const ListaDocenteAsignatura: React.FC = () => {
         );
       if (filtroDni.trim())
         params.append("docente__persona__dni__icontains", filtroDni.trim());
-      if (filtroCargo) params.append("cargo", filtroCargo);
+      if (filtroTipoCargo) params.append("tipo_cargo", filtroTipoCargo);
       if (filtroDedicacion) params.append("dedicacion", filtroDedicacion);
       if (filtroCondicion) params.append("condicion", filtroCondicion);
 
@@ -500,7 +511,8 @@ const ListaDocenteAsignatura: React.FC = () => {
               DNI: docente.docente?.persona?.dni || "N/A",
               Email: docente.docente?.persona?.email || "N/A",
               Condición: docente.condicion || "N/A",
-              Cargo: docente.cargo || "N/A",
+              Cargo: docente.tipo_cargo || "N/A",
+              "Nº Cargo": docente.cargo ?? "N/A",
               Dedicación: docente.dedicacion || "N/A",
               "Nro Resolución": docente.resolucion?.nresolucion || "N/A",
               "Fecha de Inicio": docente.fecha_de_inicio
@@ -521,6 +533,7 @@ const ListaDocenteAsignatura: React.FC = () => {
               Email: "Error",
               Condición: "Error",
               Cargo: "Error",
+              "Nº Cargo": "Error",
               Dedicación: "Error",
               "Nro Resolución": "Error",
               "Fecha de Inicio": "Error",
@@ -651,18 +664,25 @@ const ListaDocenteAsignatura: React.FC = () => {
             />
             <FilterSelect
               label="Cargo"
-              value={filtroCargo}
-              onChange={(value) => setFiltroCargo(value as Cargo | "")}
+              value={filtroTipoCargo}
+              onChange={(value) => setFiltroTipoCargo(value as TipoCargo | "")}
               options={[
-                { value: "Titular", label: "Titular" },
-                { value: "Asociado", label: "Asociado" },
-                { value: "Adjunto", label: "Adjunto" },
-                { value: "Jtp", label: "JTP" },
-                { value: "Adg", label: "ADG" },
-                {
-                  value: "Ayudante_estudiantil",
-                  label: "Ayudante Estudiantil",
-                },
+                { value: "AUX DOC DE PRIMERA", label: "AUX DOC DE PRIMERA" },
+                { value: "AUX DOCENTE SEGUNDA", label: "AUX DOCENTE SEGUNDA" },
+                { value: "Categoria 01 Dto.366", label: "Categoria 01 Dto.366" },
+                { value: "Categoria 02 Dto.366", label: "Categoria 02 Dto.366" },
+                { value: "Categoria 03 Dto.366", label: "Categoria 03 Dto.366" },
+                { value: "Categoria 04 Dto.366", label: "Categoria 04 Dto.366" },
+                { value: "Categoria 05 Dto.366", label: "Categoria 05 Dto.366" },
+                { value: "Categoria 06 Dto.366", label: "Categoria 06 Dto.366" },
+                { value: "Categoria 07 Dto.366", label: "Categoria 07 Dto.366" },
+                { value: "DECANO FACULTAD", label: "DECANO FACULTAD" },
+                { value: "JEFE TRABAJOS PRACT.", label: "JEFE TRABAJOS PRACT." },
+                { value: "PROFESOR ADJUNTO", label: "PROFESOR ADJUNTO" },
+                { value: "PROFESOR ASOCIADO", label: "PROFESOR ASOCIADO" },
+                { value: "PROFESOR TITULAR", label: "PROFESOR TITULAR" },
+                { value: "SECRETARIO FACULTAD", label: "SECRETARIO FACULTAD" },
+                { value: "VICE DECANO", label: "VICE DECANO" },
               ]}
               placeholder="Seleccionar cargo"
             />
@@ -712,7 +732,8 @@ const ListaDocenteAsignatura: React.FC = () => {
                       {docente.condicion}
                     </TableCell>
                     <TableCell className="text-gray-800">
-                      {docente.cargo}
+                      {docente.tipo_cargo}
+                      {docente.cargo ? ` (Nº ${docente.cargo})` : ""}
                     </TableCell>
                     <TableCell className="text-gray-800">
                       {docente.dedicacion}
@@ -936,7 +957,10 @@ const ListaDocenteAsignatura: React.FC = () => {
                         Cargo
                       </label>
                       <p className="text-gray-900 font-medium">
-                        {docenteSeleccionado.cargo || "No especificado"}
+                        {docenteSeleccionado.tipo_cargo || "No especificado"}
+                        {docenteSeleccionado.cargo
+                          ? ` (Nº ${docenteSeleccionado.cargo})`
+                          : ""}
                       </p>
                     </div>
 

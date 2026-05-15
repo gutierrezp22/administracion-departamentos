@@ -19,7 +19,7 @@ class AsignaturaDocente(BaseModel):
         ('Licencia con goce de sueldo', 'Licencia con goce de sueldo'),
     ]
 
-    CARGO_CHOICES = [
+    TIPO_CARGO_CHOICES = [
         ('AUX DOC DE PRIMERA', 'AUX DOC DE PRIMERA'),
         ('AUX DOCENTE SEGUNDA', 'AUX DOCENTE SEGUNDA'),
         ('Categoria 01 Dto.366', 'Categoria 01 Dto.366'),
@@ -39,7 +39,10 @@ class AsignaturaDocente(BaseModel):
     ]
 
     condicion = models.CharField(max_length=50, choices=CONDICION_CHOICES)
-    cargo = models.CharField(max_length=50, choices=CARGO_CHOICES)
+    tipo_cargo = models.CharField(max_length=50, choices=TIPO_CARGO_CHOICES)
+    cargo = models.ForeignKey(
+        'Cargo', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='asignaciones')
     dedicacion = models.CharField(max_length=20, choices=DEDICACION_CHOICES)
     fecha_de_inicio = models.DateTimeField(blank=True, null=True)
     fecha_de_vencimiento = models.DateTimeField(blank=True, null=True)
