@@ -38,6 +38,8 @@ import {
 	EstadoFilter,
 } from "../../../../../components/Filters";
 import ResponsiveTable from "../../../../../components/ResponsiveTable";
+import ActionMenu from "../../../../../components/ActionMenu";
+import LoadingOverlay from "@/components/LoadingOverlay";
 
 // Función para normalizar URLs de paginación
 const normalizeUrl = (url: string) => {
@@ -225,22 +227,6 @@ const ListaNoDocentes = () => {
 
 	const totalPages = Math.ceil(totalItems / pageSize);
 
-	// Modal de loading
-	if (isLoading) {
-		return (
-			<DashboardMenu>
-				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-					<div className="bg-white rounded-lg p-8 flex flex-col items-center">
-						<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
-						<p className="text-gray-700 text-lg font-medium">
-							Cargando no docentes...
-						</p>
-					</div>
-				</div>
-			</DashboardMenu>
-		);
-	}
-
 	return (
 		<DashboardMenu>
 			<div className="bg-white rounded-lg shadow-lg">
@@ -254,13 +240,13 @@ const ListaNoDocentes = () => {
 							onClick={() =>
 								router.push("/dashboard/persons/noDocentes/create")
 							}
-							className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+							className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2.5 rounded-xl shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200 font-semibold text-sm"
 						>
 							<AddIcon /> Agregar No Docente
 						</button>
 						<button
 							onClick={descargarExcel}
-							className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+							className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2.5 rounded-xl shadow-md shadow-green-500/20 hover:shadow-lg hover:shadow-green-500/30 transition-all duration-200 font-semibold text-sm"
 						>
 							<FileDownloadIcon /> Descargar Excel
 						</button>
@@ -294,7 +280,11 @@ const ListaNoDocentes = () => {
 						<EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
 					</FilterContainer>
 
-					<ResponsiveTable>
+					<div className="relative">
+
+					  {isLoading && <LoadingOverlay variant="overlay" message="Cargando..." />}
+
+					  <ResponsiveTable dense>
 						<TableHead>
 							<TableRow>
 								<TableCell>Nombre</TableCell>
@@ -337,39 +327,44 @@ const ListaNoDocentes = () => {
 											size="small"
 										/>
 									</TableCell>
-									<TableCell>
-										<div className="flex gap-2">
-											<button
-												onClick={() => verNoDocente(noDocente.id)}
-												className="p-2 text-green-600 hover:text-green-800 rounded-lg hover:bg-green-100 transition-colors duration-200"
-												title="Ver detalles"
-											>
-												<VisibilityIcon />
-											</button>
-											<button
-												onClick={() =>
-													router.push(
-														`/dashboard/persons/noDocentes/edit/${noDocente.id}`
-													)
-												}
-												className="p-2 text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-100 transition-colors duration-200"
-												title="Editar"
-											>
-												<EditIcon />
-											</button>
-											<button
-												onClick={() => eliminarNoDocente(noDocente.id)}
-												className="p-2 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-100 transition-colors duration-200"
-												title="Eliminar"
-											>
-												<DeleteIcon />
-											</button>
-										</div>
-									</TableCell>
+										<TableCell>
+											<ActionMenu
+												items={[
+													{
+														items: [
+															{
+																label: "Ver detalles",
+																icon: <VisibilityIcon fontSize="small" />,
+																onClick: () => verNoDocente(noDocente.id),
+															},
+															{
+																label: "Editar",
+																icon: <EditIcon fontSize="small" />,
+																onClick: () =>
+																	router.push(
+																		`/dashboard/persons/noDocentes/edit/${noDocente.id}`
+																	),
+															},
+														],
+													},
+													{
+														items: [
+															{
+																label: "Eliminar",
+																icon: <DeleteIcon fontSize="small" />,
+																onClick: () => eliminarNoDocente(noDocente.id),
+																danger: true,
+															},
+														],
+													},
+												]}
+											/>
+										</TableCell>
 								</TableRow>
 							))}
 						</TableBody>
 					</ResponsiveTable>
+            </div>
 
 					<div className="flex justify-between items-center mt-6">
 						<button

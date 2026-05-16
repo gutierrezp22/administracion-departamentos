@@ -10,7 +10,10 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 
-from ..models import Cargo, TipoCargo, OperacionCargo, CargoHistorial
+from ..models import (
+    Cargo, TipoCargo, OperacionCargo, CargoHistorial,
+    Departamento, Asignatura, Resolucion,
+)
 from ..serializers import (
     CargoSerializer,
     CargoHistorialDetailSerializer,
@@ -104,15 +107,57 @@ class CargoViewSet(viewsets.ModelViewSet):
         'tipo_cargo': ['exact'],
         'tipo_cargo__sigla': ['exact'],
         'tipo_cargo__dedicacion': ['exact'],
+        'tipo_cargo__descripcion': ['exact', 'icontains'],
+        'departamento': ['exact', 'isnull'],
+        'asignatura': ['exact', 'isnull'],
     }
     search_fields = ['numero_de_cargo', 'tipo_cargo__descripcion', 'tipo_cargo__sigla']
     ordering_fields = ['numero_de_cargo', 'fecha_creacion']
 
     def get_queryset(self):
-        queryset = Cargo.objects.select_related('tipo_cargo').all()
-        if self.request.query_params.get('show_all', False):
+        queryset = Cargo.objects.select_related(
+            'tipo_cargo', 'departamento', 'asignatura', 'resolucion_oficializacion',
+        ).prefetch_related(
+            'historial__docente__persona',
+            'historial__no_docente__persona',
+        ).all()
+
+        # Permisos por departamento: si el usuario tiene departamentos_administrados
+        # seteados y NO es admin/superuser, solo ve cargos de esos departamentos.
+        user = self.request.user
+        if user.is_authenticated and not user.is_superuser:
+            es_admin = (
+                getattr(user, 'rol', None)
+                and getattr(user.rol, 'descripcion', '') == 'ADMINISTRADOR'
+            )
+            if not es_admin:
+                deptos_ids = list(
+                    user.departamentos_administrados.values_list('id', flat=True)
+                )
+                if deptos_ids:
+                    queryset = queryset.filter(departamento_id__in=deptos_ids)
+        # Filtros por fechas del historial. Como historial es 1-N usamos
+        # distinct() para no duplicar el cargo si tiene varios períodos.
+        params = self.request.query_params
+        fecha_alta_desde = params.get('fecha_alta_desde')
+        fecha_alta_hasta = params.get('fecha_alta_hasta')
+        fecha_baja_desde = params.get('fecha_baja_desde')
+        fecha_baja_hasta = params.get('fecha_baja_hasta')
+
+        if fecha_alta_desde:
+            queryset = queryset.filter(historial__fecha_inicio__gte=fecha_alta_desde)
+        if fecha_alta_hasta:
+            queryset = queryset.filter(historial__fecha_inicio__lte=fecha_alta_hasta)
+        if fecha_baja_desde:
+            queryset = queryset.filter(historial__fecha_fin__gte=fecha_baja_desde)
+        if fecha_baja_hasta:
+            queryset = queryset.filter(historial__fecha_fin__lte=fecha_baja_hasta)
+        if any([fecha_alta_desde, fecha_alta_hasta, fecha_baja_desde, fecha_baja_hasta]):
+            queryset = queryset.distinct()
+
+        if params.get('show_all', False):
             return queryset
-        if 'estado' in self.request.query_params:
+        if 'estado' in params:
             return queryset
         return queryset.filter(estado='1')
 
@@ -401,3 +446,78 @@ class CargoViewSet(viewsets.ModelViewSet):
         return Response(
             OperacionCargoSerializer(op).data,
             status=status.HTTP_201_CREATED)
+
+    # ---------- vincular: asignar departamento / asignatura / resolución ----------
+
+    @action(detail=True, methods=['post'], url_path='vincular')
+    def vincular(self, request, pk=None):
+        """Vincula un cargo a un departamento (y opcionalmente asignatura y
+        resolución de oficialización).
+
+        Body:
+          - departamento: id (obligatorio)
+          - asignatura: id (opcional)
+          - resolucion_oficializacion: id (opcional)
+        """
+        cargo = self.get_object()
+
+        departamento_id = request.data.get('departamento')
+        if not departamento_id:
+            return Response(
+                {'detail': 'El departamento es obligatorio.'},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            departamento = Departamento.objects.get(id=departamento_id)
+        except Departamento.DoesNotExist:
+            return Response(
+                {'detail': 'Departamento no existe.'},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        asignatura_id = request.data.get('asignatura')
+        asignatura = None
+        if asignatura_id:
+            try:
+                asignatura = Asignatura.objects.get(id=asignatura_id)
+            except Asignatura.DoesNotExist:
+                return Response(
+                    {'detail': 'Asignatura no existe.'},
+                    status=status.HTTP_400_BAD_REQUEST)
+
+        resolucion_id = request.data.get('resolucion_oficializacion')
+        resolucion = None
+        if resolucion_id:
+            try:
+                resolucion = Resolucion.objects.get(id=resolucion_id)
+            except Resolucion.DoesNotExist:
+                return Response(
+                    {'detail': 'Resolución no existe.'},
+                    status=status.HTTP_400_BAD_REQUEST)
+
+        cargo.departamento = departamento
+        cargo.asignatura = asignatura
+        if resolucion is not None:
+            cargo.resolucion_oficializacion = resolucion
+        cargo.save()
+
+        return Response(CargoSerializer(cargo).data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'], url_path='desvincular')
+    def desvincular(self, request, pk=None):
+        """Quita el departamento / asignatura del cargo (lo deja huérfano)."""
+        cargo = self.get_object()
+        cargo.departamento = None
+        cargo.asignatura = None
+        cargo.save()
+        return Response(CargoSerializer(cargo).data, status=status.HTTP_200_OK)
+
+    # ---------- listado de cargos sin departamento ----------
+
+    @action(detail=False, methods=['get'], url_path='sin-vincular')
+    def sin_vincular(self, request):
+        """Devuelve cargos activos sin departamento asignado (paginado)."""
+        qs = self.get_queryset().filter(departamento__isnull=True, estado='1')
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            return self.get_paginated_response(self.get_serializer(page, many=True).data)
+        return Response(self.get_serializer(qs, many=True).data)

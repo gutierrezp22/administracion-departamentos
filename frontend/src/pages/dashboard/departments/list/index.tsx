@@ -6,6 +6,7 @@ import {
 	TableRow,
 } from "@mui/material";
 import ResponsiveTable from "../../../../components/ResponsiveTable";
+import ActionMenu from "../../../../components/ActionMenu";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
@@ -216,15 +217,6 @@ const ListaDepartamentos = () => {
 		}
 	};
 
-	// Modal de loading
-	if (isLoading) {
-		return (
-			<DashboardMenu>
-				<LoadingOverlay message="Cargando departamentos..." />
-			</DashboardMenu>
-		);
-	}
-
 	return (
 		<DashboardMenu>
 			<div className="bg-white rounded-lg shadow-lg">
@@ -236,7 +228,7 @@ const ListaDepartamentos = () => {
 					<div className="flex flex-wrap gap-4 mb-6">
 						<button
 							onClick={() => router.push("/dashboard/departments/create")}
-							className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+							className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2.5 rounded-xl shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200 font-semibold text-sm"
 						>
 							<AddIcon /> Agregar Departamento
 						</button>
@@ -250,7 +242,7 @@ const ListaDepartamentos = () => {
 						</button>
 						<button
 							onClick={descargarExcel}
-							className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+							className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2.5 rounded-xl shadow-md shadow-green-500/20 hover:shadow-lg hover:shadow-green-500/30 transition-all duration-200 font-semibold text-sm"
 						>
 							<FileDownloadIcon /> Descargar Excel
 						</button>
@@ -275,7 +267,9 @@ const ListaDepartamentos = () => {
 						<EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
 					</FilterContainer>
 
-					<ResponsiveTable>
+					<div className="relative">
+						{isLoading && <LoadingOverlay variant="overlay" message="Cargando..." />}
+						<ResponsiveTable dense>
 						<TableHead>
 							<TableRow>
 								<TableCell>Nombre</TableCell>
@@ -309,29 +303,28 @@ const ListaDepartamentos = () => {
 										{departamento.estado === "1" ? "Activo" : "Inactivo"}
 									</TableCell>
 									<TableCell>
-										<div className="flex gap-2">
-											<button
-												onClick={() =>
-													router.push(
-														`/dashboard/departments/edit/${departamento.id}`
-													)
-												}
-												className="p-2 text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-100 transition-colors duration-200"
-											>
-												<EditIcon />
-											</button>
-											<button
-												onClick={() => eliminarDepartamento(departamento.id)}
-												className="p-2 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-100 transition-colors duration-200"
-											>
-												<DeleteIcon />
-											</button>
-										</div>
+										<ActionMenu
+											items={[
+												{
+													label: "Editar",
+													icon: <EditIcon fontSize="small" />,
+													onClick: () =>
+														router.push(`/dashboard/departments/edit/${departamento.id}`),
+												},
+												{
+													label: "Eliminar",
+													icon: <DeleteIcon fontSize="small" />,
+													onClick: () => eliminarDepartamento(departamento.id),
+													danger: true,
+												},
+											]}
+										/>
 									</TableCell>
 								</TableRow>
 							))}
 						</TableBody>
 					</ResponsiveTable>
+				</div>
 
 					<Pagination
 						currentPage={currentPage}

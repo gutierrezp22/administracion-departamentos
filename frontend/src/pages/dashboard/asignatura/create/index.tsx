@@ -221,7 +221,7 @@ const CrearAsignatura = () => {
     <DashboardMenu>
       <FormContainer title="Crear Asignatura">
         <FormSection title="Área">
-          <SelectorButton
+          <SelectorButton required
             label="Seleccionar Área"
             onClick={handleOpenAreaModal}
             selectedLabel="Área"
@@ -354,11 +354,11 @@ const CrearAsignatura = () => {
               className="shadow-lg rounded-lg overflow-hidden"
               style={{ maxHeight: "400px", overflow: "auto" }}>
               <Table size="small">
-                <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
+                <TableHead className="bg-blue-100 sticky top-0 z-10">
                   <TableRow>
-                    <TableCell className="text-white font-semibold py-2">Nombre</TableCell>
-                    <TableCell className="text-white font-semibold py-2">Estado</TableCell>
-                    <TableCell className="text-white font-semibold py-2">Seleccionar</TableCell>
+                    <TableCell className="text-blue-800 font-bold py-2 uppercase text-xs tracking-wider">Nombre</TableCell>
+                    <TableCell className="text-blue-800 font-bold py-2 uppercase text-xs tracking-wider">Estado</TableCell>
+                    <TableCell className="text-blue-800 font-bold py-2 uppercase text-xs tracking-wider">Seleccionar</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>

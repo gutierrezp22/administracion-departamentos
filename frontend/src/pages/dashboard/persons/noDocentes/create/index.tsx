@@ -93,7 +93,7 @@ const CrearNoDocente = () => {
     <DashboardMenu>
       <FormContainer title="Agregar No Docente">
         <FormSection title="Selección de Persona">
-          <SelectorButton
+          <SelectorButton required
             label="Seleccionar Persona"
             onClick={() => setOpenPersona(true)}
             selectedLabel="Persona"

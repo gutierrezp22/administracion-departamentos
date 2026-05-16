@@ -9,9 +9,6 @@ import {
   TableCell,
   TableBody,
   Typography,
-  TableContainer,
-  Paper,
-  Table,
 } from "@mui/material";
 import {
   MagnifyingGlassIcon,
@@ -23,6 +20,8 @@ import {
 } from "@heroicons/react/24/outline";
 import API from "@/api/axiosConfig";
 import { normalizeUrl } from "@/hooks/useSearch";
+import ResponsiveTable from "@/components/ResponsiveTable";
+import LoadingOverlay from "@/components/LoadingOverlay";
 
 interface Column<T> {
   key: keyof T | string;
@@ -218,93 +217,74 @@ function SearchModal<T>({
           </div>
         </div>
 
-        {/* Loading State */}
-        {isLoading ? (
-          <div className="flex flex-col justify-center items-center py-12 bg-white rounded-xl shadow-sm border border-gray-200/60">
-            <div className="relative">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-100"></div>
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent absolute top-0 left-0"></div>
-            </div>
-            <Typography className="mt-4 text-gray-600 font-medium">
-              Cargando...
-            </Typography>
-          </div>
-        ) : (
-          <>
-            {/* Tabla de Resultados */}
-            <TableContainer
-              component={Paper}
-              className="shadow-sm rounded-xl overflow-hidden border border-gray-200/60"
-              style={{ maxHeight: "400px", overflow: "auto" }}
-            >
-              <Table size="small">
-                <TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
-                  <TableRow>
+        {/* Tabla de Resultados */}
+        <div className="relative">
+          {isLoading && <LoadingOverlay variant="overlay" message="Cargando..." />}
+          <ResponsiveTable dense>
+            <TableHead>
+              <TableRow>
+                {columns.map((col) => (
+                  <TableCell key={String(col.key)}>{col.label}</TableCell>
+                ))}
+                <TableCell style={{ width: "120px", textAlign: "center" }}>
+                  Acción
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.length > 0 ? (
+                data.map((item) => (
+                  <TableRow
+                    key={getItemId(item)}
+                    className="hover:bg-gray-50 transition-colors duration-200">
                     {columns.map((col) => (
-                      <TableCell 
-                        key={String(col.key)}
-                        className="text-white font-bold py-3 text-sm"
-                      >
-                        {col.label}
+                      <TableCell
+                        key={`${getItemId(item)}-${String(col.key)}`}>
+                        {col.render
+                          ? col.render(item)
+                          : getNestedValue(item, String(col.key)) ?? "N/A"}
                       </TableCell>
                     ))}
-                    <TableCell className="text-white font-bold py-3 text-sm text-center" style={{ width: "120px" }}>
-                      Acción
+                    <TableCell style={{ textAlign: "center" }}>
+                      <button
+                        onClick={() => handleSelect(item)}
+                        className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700
+                          text-white px-3 py-1.5 rounded-lg shadow-sm
+                          transition-all duration-200 font-medium text-xs
+                          hover:shadow-md">
+                        Seleccionar
+                      </button>
                     </TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {data.length > 0 ? (
-                    data.map((item) => (
-                      <TableRow
-                        key={getItemId(item)}
-                        className="hover:bg-blue-50/50 transition-colors duration-200 border-b border-gray-100 last:border-b-0"
-                      >
-                        {columns.map((col) => (
-                          <TableCell
-                            key={`${getItemId(item)}-${String(col.key)}`}
-                            className="py-3 text-sm text-gray-700"
-                          >
-                            {col.render
-                              ? col.render(item)
-                              : getNestedValue(item, String(col.key)) ?? "N/A"}
-                          </TableCell>
-                        ))}
-                        <TableCell className="py-3 text-center">
-                          <button
-                            onClick={() => handleSelect(item)}
-                            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
-                              text-white px-4 py-1.5 rounded-lg shadow-md 
-                              transition-all duration-200 font-medium text-sm
-                              hover:shadow-lg hover:-translate-y-0.5"
-                          >
-                            Seleccionar
-                          </button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={columns.length + 1} className="text-center py-12">
-                        <div className="flex flex-col items-center justify-center">
-                          <div className="bg-gray-100 rounded-full p-4 mb-3">
-                            <DocumentMagnifyingGlassIcon className="h-8 w-8 text-gray-400" />
-                          </div>
-                          <p className="text-gray-500 font-medium">
-                            No se encontraron resultados
-                          </p>
-                          <p className="text-gray-400 text-sm mt-1">
-                            Intenta con otros filtros
-                          </p>
+                ))
+              ) : (
+                !isLoading && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length + 1}
+                      className="text-center py-12">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="bg-gray-100 rounded-full p-4 mb-3">
+                          <DocumentMagnifyingGlassIcon className="h-8 w-8 text-gray-400" />
                         </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                        <p className="text-gray-500 font-medium">
+                          No se encontraron resultados
+                        </p>
+                        <p className="text-gray-400 text-sm mt-1">
+                          Intenta con otros filtros
+                        </p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
+              )}
+            </TableBody>
+          </ResponsiveTable>
+        </div>
 
-            {/* Paginación Mejorada */}
+        {/* Paginación + contador */}
+        {!isLoading && (
+          <>
             {data.length > 0 && (
               <div className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-4 bg-white rounded-xl shadow-sm border border-gray-200/60 p-3">
                 <div className="flex items-center gap-2">

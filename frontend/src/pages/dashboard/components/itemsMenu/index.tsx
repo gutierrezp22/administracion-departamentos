@@ -13,6 +13,7 @@ import ViewComfyIcon from '@mui/icons-material/ViewComfy';
 import HomeIcon from '@mui/icons-material/Home';
 import NoteAltIcon from '@mui/icons-material/NoteAlt';
 import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
+import WorkIcon from '@mui/icons-material/Work';
 import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 
 const ItemsMenu = () => {
@@ -65,6 +66,12 @@ const ItemsMenu = () => {
           <SchoolIcon />
         </ListItemIcon>
         <ListItemText primary="Carreras" />
+      </ListItemButton>
+      <ListItemButton onClick={() => handleNavigation('/dashboard/cargos/list')}>
+        <ListItemIcon>
+          <WorkIcon />
+        </ListItemIcon>
+        <ListItemText primary="Cargos" />
       </ListItemButton>
       <ListItemButton onClick={() => handleNavigation('/dashboard/notificaciones')}>
         <ListItemIcon>

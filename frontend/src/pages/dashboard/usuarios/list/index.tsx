@@ -21,6 +21,8 @@ import {
   Chip,
 } from "@mui/material";
 import ResponsiveTable from "../../../../components/ResponsiveTable";
+import ActionMenu from "../../../../components/ActionMenu";
+import LoadingOverlay from "@/components/LoadingOverlay";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -391,22 +393,6 @@ const ListaUsuarios = () => {
 
   const totalPages = Math.ceil(totalItems / pageSize);
 
-  // Modal de loading
-  if (isLoading) {
-    return (
-      <DashboardMenu>
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
-            <p className="text-gray-700 text-lg font-medium">
-              Cargando usuarios...
-            </p>
-          </div>
-        </div>
-      </DashboardMenu>
-    );
-  }
-
   return (
     <DashboardMenu>
       <div className="bg-white rounded-lg shadow-lg">
@@ -420,12 +406,12 @@ const ListaUsuarios = () => {
           <div className="flex flex-wrap gap-4 mb-6">
             <button
               onClick={() => router.push("/dashboard/usuarios/create")}
-              className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2.5 rounded-xl shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200 font-semibold text-sm">
               <AddIcon /> Agregar Usuario
             </button>
             <button
               onClick={descargarExcel}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+              className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2.5 rounded-xl shadow-md shadow-green-500/20 hover:shadow-lg hover:shadow-green-500/30 transition-all duration-200 font-semibold text-sm">
               <FileDownloadIcon /> Descargar Excel
             </button>
           </div>
@@ -475,8 +461,9 @@ const ListaUsuarios = () => {
             <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
           </FilterContainer>
 
-          <div className="mt-6">
-            <ResponsiveTable className="shadow-lg">
+          <div className="mt-6 relative">
+            {isLoading && <LoadingOverlay variant="overlay" message="Cargando..." />}
+            <ResponsiveTable dense className="shadow-lg">
               <TableHead>
                 <TableRow>
                   <TableCell>Email</TableCell>
@@ -512,48 +499,49 @@ const ListaUsuarios = () => {
                       />
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center justify-center gap-2">
-                        <Tooltip title="Ver detalles">
-                          <button
-                            onClick={() => verUsuario(usuario.id)}
-                            className="p-2 text-green-600 hover:text-green-800 rounded-lg hover:bg-green-100 transition-colors duration-200">
-                            <VisibilityIcon />
-                          </button>
-                        </Tooltip>
-                        <Tooltip title="Editar">
-                          <button
-                            onClick={() =>
-                              router.push(
-                                `/dashboard/usuarios/edit/${usuario.id}`
-                              )
-                            }
-                            className="p-2 text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-100 transition-colors duration-200">
-                            <EditIcon />
-                          </button>
-                        </Tooltip>
-                        {usuario.is_active ? (
-                          <Tooltip title="Desactivar">
-                            <button
-                              onClick={() => eliminarUsuario(usuario.id)}
-                              className="p-2 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-100 transition-colors duration-200">
-                              <DeleteIcon />
-                            </button>
-                          </Tooltip>
-                        ) : (
-                          <Tooltip title="Activar">
-                            <button
-                              onClick={() => activarUsuario(usuario.id)}
-                              className="p-2 text-green-600 hover:text-green-800 rounded-lg hover:bg-green-100 transition-colors duration-200">
-                              <PersonIcon />
-                            </button>
-                          </Tooltip>
-                        )}
-                      </div>
+                      <ActionMenu
+                        items={[
+                          {
+                            items: [
+                              {
+                                label: "Ver detalles",
+                                icon: <VisibilityIcon fontSize="small" />,
+                                onClick: () => verUsuario(usuario.id),
+                              },
+                              {
+                                label: "Editar",
+                                icon: <EditIcon fontSize="small" />,
+                                onClick: () =>
+                                  router.push(`/dashboard/usuarios/edit/${usuario.id}`),
+                              },
+                            ],
+                          },
+                          {
+                            items: usuario.is_active
+                              ? [
+                                  {
+                                    label: "Desactivar",
+                                    icon: <DeleteIcon fontSize="small" />,
+                                    onClick: () => eliminarUsuario(usuario.id),
+                                    danger: true,
+                                  },
+                                ]
+                              : [
+                                  {
+                                    label: "Activar",
+                                    icon: <PersonIcon fontSize="small" />,
+                                    onClick: () => activarUsuario(usuario.id),
+                                  },
+                                ],
+                          },
+                        ]}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </ResponsiveTable>
+          </div>
 
           <div className="flex justify-between items-center mt-6">
             <button
@@ -579,7 +567,6 @@ const ListaUsuarios = () => {
               } transition-colors duration-200`}>
               Siguiente
             </button>
-          </div>
           </div>
         </div>
       </div>

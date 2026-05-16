@@ -13,17 +13,29 @@ import {
 interface ResponsiveTableProps {
   children: React.ReactNode;
   className?: string;
+  /** Versión compacta: padding y fuente más chicos para más densidad de info */
+  dense?: boolean;
 }
 
-const ResponsiveTable: React.FC<ResponsiveTableProps> = ({ children, className = "" }) => {
+const ResponsiveTable: React.FC<ResponsiveTableProps> = ({ children, className = "", dense = false }) => {
+  const headerPadding = dense ? '6px 10px' : undefined;
+  const bodyPadding = dense ? '6px 10px' : undefined;
+  const headerFontSize = dense ? '0.75rem' : '0.875rem';
+  const bodyFontSize = dense ? '0.8125rem' : '0.9375rem';
+  const bodyLineHeight = dense ? 1.35 : 1.6;
+  const minWidth = dense ? '70px' : '120px';
+
   return (
-    <Box className={`bg-white rounded-lg border border-gray-200 overflow-hidden ${className}`}>
-      <TableContainer 
-        component={Paper} 
+    <Box
+      className={`rounded-2xl border border-gray-200/60 shadow-sm overflow-hidden bg-gradient-to-br from-white to-gray-50/50 ${className}`}
+    >
+      <TableContainer
+        component={Paper}
         elevation={0}
         sx={{
           maxHeight: '70vh',
           overflow: 'auto',
+          backgroundColor: 'transparent',
           fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif',
           '&::-webkit-scrollbar': {
             width: '8px',
@@ -45,36 +57,47 @@ const ResponsiveTable: React.FC<ResponsiveTableProps> = ({ children, className =
           },
           '& .MuiTableCell-root': {
             whiteSpace: 'nowrap',
-            minWidth: '120px',
+            minWidth: minWidth,
             fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif',
             fontVariantNumeric: 'tabular-nums',
+            borderBottom: '1px solid #f3f4f6',
+            ...(dense && { padding: bodyPadding }),
           },
+          // Header: bg azul claro, texto azul oscuro (mismo tono que el chip de Filtros)
           '& .MuiTableHead-root .MuiTableCell-root': {
             position: 'sticky',
             top: 0,
             zIndex: 1,
-            backgroundColor: '#3b82f6',
-            color: '#fff',
-            fontWeight: 600,
+            backgroundColor: '#dbeafe', // blue-100
+            color: '#1e40af',           // blue-800
+            fontWeight: 700,
             fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif',
-            fontSize: '0.875rem',
-            letterSpacing: '0.025em',
+            fontSize: headerFontSize,
+            letterSpacing: '0.04em',
             textTransform: 'uppercase',
             lineHeight: 1.5,
+            borderBottom: '1px solid #bfdbfe', // blue-200
+            ...(dense && { padding: headerPadding }),
           },
           '& .MuiTableBody-root .MuiTableCell-root': {
             fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif',
             fontWeight: 400,
-            fontSize: '0.9375rem',
-            lineHeight: 1.6,
+            color: '#1f2937',
+            fontSize: bodyFontSize,
+            lineHeight: bodyLineHeight,
             letterSpacing: '0.01em',
+            backgroundColor: '#ffffff',
           },
           '& .MuiTableBody-root .MuiTableRow-root:hover .MuiTableCell-root': {
+            backgroundColor: '#f9fafb', // gray-50
             fontWeight: 500,
+          },
+          '& .MuiTableBody-root .MuiTableRow-root:last-child .MuiTableCell-root': {
+            borderBottom: 'none',
           },
         }}
       >
-        <Table stickyHeader className="modern-table">
+        <Table stickyHeader className="modern-table" size={dense ? 'small' : 'medium'}>
           {children}
         </Table>
       </TableContainer>

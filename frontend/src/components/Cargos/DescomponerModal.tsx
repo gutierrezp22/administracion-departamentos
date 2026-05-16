@@ -9,6 +9,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import Swal from "sweetalert2";
+import { FilterSelect } from "@/components/Filters";
 
 interface Pieza {
   id: number;
@@ -87,12 +88,18 @@ const DescomponerModal: React.FC<Props> = ({ cargo, onClose, onSuccess }) => {
   };
 
   return (
-    <Dialog open onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+    <Dialog
+      open
+      onClose={onClose}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{ sx: { borderRadius: "1rem", overflow: "hidden" } }}
+    >
+      <DialogTitle className="bg-gradient-to-r from-orange-500 to-orange-600 text-white border-b border-orange-700/20 shadow-sm">
         Descomponer Cargo #{cargo.numero_de_cargo}
       </DialogTitle>
-      <DialogContent className="p-6">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 text-sm">
+      <DialogContent dividers className="p-6 bg-gray-50/30">
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5 text-sm">
           <p>
             <strong>Cargo origen:</strong>{" "}
             {cargo.tipo_cargo_detalle?.descripcion} ({cargo.tipo_cargo_detalle?.dedicacion}){" "}
@@ -104,20 +111,21 @@ const DescomponerModal: React.FC<Props> = ({ cargo, onClose, onSuccess }) => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3 mb-4">
-          <label className="text-sm font-medium text-gray-700">Máx. piezas:</label>
-          <select
-            value={maxPiezas}
-            onChange={(e) => {
-              const v = Number(e.target.value);
-              setMaxPiezas(v);
-              fetchCombinaciones(v);
+        <div className="mb-4 max-w-[200px]">
+          <FilterSelect
+            label="Máx. piezas"
+            value={String(maxPiezas)}
+            onChange={(v) => {
+              const n = Number(v) || 4;
+              setMaxPiezas(n);
+              fetchCombinaciones(n);
             }}
-            className="px-2 py-1 border border-gray-300 rounded text-sm">
-            {[2, 3, 4, 5, 6].map((n) => (
-              <option key={n} value={n}>{n}</option>
-            ))}
-          </select>
+            options={[2, 3, 4, 5, 6].map((n) => ({
+              value: String(n),
+              label: String(n),
+            }))}
+            placeholder="4"
+          />
         </div>
 
         {loading ? (

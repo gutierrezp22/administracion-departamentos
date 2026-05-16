@@ -1,12 +1,12 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 
-type ExcelRow = Record<string, string | number | boolean | null | undefined>;
+export type ExcelRow = Record<string, string | number | boolean | null | undefined>;
 
 interface ExportToExcelOptions {
   fileName: string;
   sheetName: string;
-  rows: ExcelRow[];
+  rows: readonly object[];
 }
 
 const EXCEL_MIME_TYPE =
@@ -33,8 +33,7 @@ export async function exportToExcel({
   });
 
   const buffer = await workbook.xlsx.writeBuffer();
-  const excelBuffer = buffer instanceof ArrayBuffer ? buffer : buffer.buffer;
-  const excelBlob = new Blob([excelBuffer], { type: EXCEL_MIME_TYPE });
+  const excelBlob = new Blob([buffer as ArrayBuffer], { type: EXCEL_MIME_TYPE });
 
   saveAs(excelBlob, fileName);
 }

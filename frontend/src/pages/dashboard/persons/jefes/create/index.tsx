@@ -104,7 +104,7 @@ const CrearJefe = () => {
     <DashboardMenu>
       <FormContainer title="Agregar Jefe">
         <FormSection title="Selección de Persona">
-          <SelectorButton
+          <SelectorButton required
             label="Seleccionar Persona"
             onClick={() => setOpenPersona(true)}
             selectedLabel="Persona"

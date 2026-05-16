@@ -21,6 +21,8 @@ import {
   Grid,
 } from "@mui/material";
 import ResponsiveTable from "../../../../components/ResponsiveTable";
+import ActionMenu from "../../../../components/ActionMenu";
+import LoadingOverlay from "@/components/LoadingOverlay";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -302,22 +304,6 @@ const ListaPersonas = () => {
 
   const totalPages = Math.ceil(totalItems / pageSize);
 
-  // Modal de loading
-  if (isLoading) {
-    return (
-      <DashboardMenu>
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
-            <p className="text-gray-700 text-lg font-medium">
-              Cargando personas...
-            </p>
-          </div>
-        </div>
-      </DashboardMenu>
-    );
-  }
-
   return (
     <DashboardMenu>
       <div className="bg-white rounded-lg shadow-lg">
@@ -329,7 +315,7 @@ const ListaPersonas = () => {
           <div className="flex flex-wrap gap-4 mb-6">
             <button
               onClick={() => router.push("/dashboard/persons/create")}
-              className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2.5 rounded-xl shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200 font-semibold text-sm">
               <AddIcon /> Agregar Persona
             </button>
             <button
@@ -349,7 +335,7 @@ const ListaPersonas = () => {
             </button>
             <button
               onClick={descargarExcel}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+              className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2.5 rounded-xl shadow-md shadow-green-500/20 hover:shadow-lg hover:shadow-green-500/30 transition-all duration-200 font-semibold text-sm">
               <FileDownloadIcon /> Descargar Excel
             </button>
           </div>
@@ -382,7 +368,11 @@ const ListaPersonas = () => {
             <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
           </FilterContainer>
 
-          <ResponsiveTable>
+          <div className="relative">
+
+            {isLoading && <LoadingOverlay variant="overlay" message="Cargando..." />}
+
+            <ResponsiveTable dense>
             <TableHead>
               <TableRow>
                 <TableCell>Nombre</TableCell>
@@ -432,33 +422,41 @@ const ListaPersonas = () => {
                     {persona.estado === "1" ? "Activo" : "Inactivo"}
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => verPersona(persona.id)}
-                        className="p-2 text-green-600 hover:text-green-800 rounded-lg hover:bg-green-100 transition-colors duration-200"
-                        title="Ver detalles">
-                        <VisibilityIcon />
-                      </button>
-                      <button
-                        onClick={() =>
-                          router.push(`/dashboard/persons/edit/${persona.id}`)
-                        }
-                        className="p-2 text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-100 transition-colors duration-200"
-                        title="Editar">
-                        <EditIcon />
-                      </button>
-                      <button
-                        onClick={() => eliminarPersona(persona.id)}
-                        className="p-2 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-100 transition-colors duration-200"
-                        title="Eliminar">
-                        <DeleteIcon />
-                      </button>
-                    </div>
+                    <ActionMenu
+                      items={[
+                        {
+                          items: [
+                            {
+                              label: "Ver detalles",
+                              icon: <VisibilityIcon fontSize="small" />,
+                              onClick: () => verPersona(persona.id),
+                            },
+                            {
+                              label: "Editar",
+                              icon: <EditIcon fontSize="small" />,
+                              onClick: () =>
+                                router.push(`/dashboard/persons/edit/${persona.id}`),
+                            },
+                          ],
+                        },
+                        {
+                          items: [
+                            {
+                              label: "Eliminar",
+                              icon: <DeleteIcon fontSize="small" />,
+                              onClick: () => eliminarPersona(persona.id),
+                              danger: true,
+                            },
+                          ],
+                        },
+                      ]}
+                    />
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </ResponsiveTable>
+            </div>
 
           <div className="flex justify-between items-center mt-6">
             <button

@@ -7,7 +7,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
 import MergeTypeIcon from "@mui/icons-material/MergeType";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
-import { CircularProgress } from "@mui/material";
+import LoadingOverlay from "@/components/LoadingOverlay";
 
 interface CargoMini {
   id: number;
@@ -84,9 +84,7 @@ const HistorialCargo = () => {
   if (loading) {
     return (
       <DashboardMenu>
-        <div className="flex justify-center items-center h-64">
-          <CircularProgress />
-        </div>
+        <LoadingOverlay message="Cargando historial..." />
       </DashboardMenu>
     );
   }
@@ -94,7 +92,11 @@ const HistorialCargo = () => {
   if (!data) {
     return (
       <DashboardMenu>
-        <div className="p-6 text-center text-gray-500">No se encontró el cargo.</div>
+        <div className="p-6">
+          <div className="bg-white rounded-lg shadow-lg p-8 text-center text-gray-500">
+            No se encontró el cargo.
+          </div>
+        </div>
       </DashboardMenu>
     );
   }
@@ -106,8 +108,8 @@ const HistorialCargo = () => {
       <div className="p-6 max-w-4xl mx-auto">
         <button
           onClick={() => router.push("/dashboard/cargos/list")}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4">
-          <ArrowBackIcon /> Volver al listado
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4 text-sm">
+          <ArrowBackIcon fontSize="small" /> Volver al listado
         </button>
 
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
