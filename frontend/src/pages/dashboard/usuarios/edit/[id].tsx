@@ -33,12 +33,18 @@ interface Usuario {
   has_changed_password: boolean;
 }
 
+interface DepartamentoOpt {
+  id: number;
+  nombre: string;
+}
+
 const EditarUsuario = () => {
   const router = useRouter();
   const { id } = router.query;
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [roles, setRoles] = useState<Rol[]>([]);
+  const [departamentos, setDepartamentos] = useState<DepartamentoOpt[]>([]);
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [formData, setFormData] = useState({
     email: "",
@@ -48,6 +54,7 @@ const EditarUsuario = () => {
     documento: "",
     rol: "",
     is_active: true,
+    departamentos_administrados: [] as number[],
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -62,6 +69,15 @@ const EditarUsuario = () => {
         title: "Error",
         text: "No se pudieron cargar los roles.",
       });
+    }
+  }, []);
+
+  const fetchDepartamentos = useCallback(async () => {
+    try {
+      const response = await API.get(`/facet/departamento/?page_size=100&estado=1`);
+      setDepartamentos(response.data.results || []);
+    } catch (error) {
+      console.error("Error al cargar departamentos:", error);
     }
   }, []);
 
@@ -81,6 +97,11 @@ const EditarUsuario = () => {
             ? userData.rol.toString()
             : "") || "",
         is_active: userData.is_active,
+        departamentos_administrados: Array.isArray(userData.departamentos_administrados)
+          ? userData.departamentos_administrados.map((d: number | { id: number }) =>
+              typeof d === "number" ? d : d.id
+            )
+          : [],
       });
     } catch (error) {
       console.error("Error al cargar usuario:", error);
@@ -100,8 +121,9 @@ const EditarUsuario = () => {
     if (id) {
       fetchRoles();
       fetchUsuario();
+      fetchDepartamentos();
     }
-  }, [id, fetchRoles, fetchUsuario]);
+  }, [id, fetchRoles, fetchUsuario, fetchDepartamentos]);
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -164,6 +186,7 @@ const EditarUsuario = () => {
         documento: parseInt(formData.documento),
         rol: parseInt(formData.rol),
         is_active: formData.is_active,
+        departamentos_administrados: formData.departamentos_administrados,
       };
 
       await API.put(`/facet/users/${id}/`, userData);
@@ -298,6 +321,50 @@ const EditarUsuario = () => {
             }
             label={formData.is_active ? "Usuario Activo" : "Usuario Inactivo"}
           />
+        </FormSection>
+
+        <FormSection title="Departamentos administrados">
+          <p className="text-xs text-gray-600 -mt-2 mb-2">
+            Si el usuario es jefe de uno o más departamentos, seleccionalos acá.
+            Solo verá los cargos de estos departamentos. Si está vacío y no es
+            administrador, no verá cargos.
+          </p>
+          <div className="flex flex-col gap-2 max-h-64 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-white">
+            {departamentos.length === 0 && (
+              <p className="text-sm text-gray-500 italic">
+                No hay departamentos disponibles.
+              </p>
+            )}
+            {departamentos.map((d) => {
+              const checked = formData.departamentos_administrados.includes(d.id);
+              return (
+                <label
+                  key={d.id}
+                  className="flex items-center gap-2 text-sm text-gray-800 cursor-pointer hover:bg-blue-50 px-2 py-1 rounded">
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) => {
+                      const set = new Set(formData.departamentos_administrados);
+                      if (e.target.checked) set.add(d.id);
+                      else set.delete(d.id);
+                      setFormData((prev) => ({
+                        ...prev,
+                        departamentos_administrados: Array.from(set),
+                      }));
+                    }}
+                    className="h-4 w-4 text-blue-600 rounded"
+                  />
+                  {d.nombre}
+                </label>
+              );
+            })}
+          </div>
+          {formData.departamentos_administrados.length > 0 && (
+            <p className="text-xs text-blue-700 mt-1">
+              {formData.departamentos_administrados.length} departamento(s) seleccionado(s).
+            </p>
+          )}
         </FormSection>
 
         <FormActions>

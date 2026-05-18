@@ -82,6 +82,14 @@ class User(AbstractUser):
         on_delete= models.CASCADE,
         null=True,
     )
+    departamentos_administrados = models.ManyToManyField(
+        'departamentos.Departamento',
+        blank=True,
+        related_name='jefes_administradores',
+        verbose_name='Departamentos administrados',
+        help_text='Departamentos cuyos cargos puede gestionar el usuario. '
+                  'Vacío = ve todos (típicamente para admins).',
+    )
     objects = UserManager()
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []

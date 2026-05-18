@@ -602,12 +602,12 @@ const ListaDocenteAsignatura: React.FC = () => {
                   `/dashboard/asignatura/docenteAsignatura/${idAsignatura}/create`
                 )
               }
-              className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2.5 rounded-xl shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200 font-semibold text-sm">
               <AddIcon /> Agregar Docente
             </button>
             <button
               onClick={descargarExcel}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+              className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2.5 rounded-xl shadow-md shadow-green-500/20 hover:shadow-lg hover:shadow-green-500/30 transition-all duration-200 font-semibold text-sm">
               <FileDownloadIcon /> Descargar Excel
             </button>
             <button
@@ -702,7 +702,7 @@ const ListaDocenteAsignatura: React.FC = () => {
             <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
           </FilterContainer>
 
-          <ResponsiveTable>
+          <ResponsiveTable dense>
             <TableHead>
               <TableRow>
                 <TableCell>Nombre</TableCell>

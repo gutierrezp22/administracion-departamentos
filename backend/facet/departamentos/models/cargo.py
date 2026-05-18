@@ -8,6 +8,18 @@ class Cargo(BaseModel):
         'TipoCargo', on_delete=models.PROTECT, null=True, blank=True,
         related_name='cargos',
         help_text='Tipo de cargo (incluye dedicación). Null si aún no se asignó.')
+    departamento = models.ForeignKey(
+        'Departamento', on_delete=models.PROTECT, null=True, blank=True,
+        related_name='cargos',
+        help_text='Departamento que gestiona el cargo. Null mientras está sin vincular.')
+    asignatura = models.ForeignKey(
+        'Asignatura', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='cargos',
+        help_text='Asignatura vinculada (solo para cargos docentes). Opcional.')
+    resolucion_oficializacion = models.ForeignKey(
+        'Resolucion', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='cargos_oficializados',
+        help_text='Resolución que oficializa la creación / asignación del cargo.')
     observaciones = models.TextField(blank=True, null=True)
     estado = models.CharField(max_length=1, default='1')
 

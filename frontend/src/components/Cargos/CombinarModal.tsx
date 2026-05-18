@@ -7,6 +7,7 @@ import {
   DialogActions,
 } from "@mui/material";
 import Swal from "sweetalert2";
+import { FilterSelect } from "@/components/Filters";
 
 interface TipoCargo {
   id: number;
@@ -82,13 +83,36 @@ const CombinarModal: React.FC<Props> = ({ cargos, onClose, onSuccess }) => {
     }
   };
 
+  // Opciones unificadas, con prefijo ✓ para las coincidentes (ordenadas primero)
+  const tipoDestinoOptions = useMemo(
+    () => [
+      ...tiposCoincidentes.map((t) => ({
+        value: String(t.id),
+        label: `✓ ${t.descripcion} — ${t.dedicacion} (${t.puntaje} pts)`,
+      })),
+      ...tipos
+        .filter((t) => Number(t.puntaje) !== sumaPuntajes)
+        .map((t) => ({
+          value: String(t.id),
+          label: `${t.descripcion} — ${t.dedicacion} (${t.puntaje} pts)`,
+        })),
+    ],
+    [tipos, tiposCoincidentes, sumaPuntajes]
+  );
+
   return (
-    <Dialog open onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+    <Dialog
+      open
+      onClose={onClose}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{ sx: { borderRadius: "1rem", overflow: "hidden" } }}
+    >
+      <DialogTitle className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-b border-purple-700/20 shadow-sm">
         Combinar Cargos
       </DialogTitle>
-      <DialogContent className="p-6">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 text-sm">
+      <DialogContent dividers className="p-6 bg-gray-50/30">
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5 text-sm">
           <p className="font-semibold mb-2">Cargos a combinar:</p>
           <ul className="list-disc list-inside space-y-0.5">
             {cargos.map((c) => (
@@ -104,41 +128,19 @@ const CombinarModal: React.FC<Props> = ({ cargos, onClose, onSuccess }) => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Tipo de cargo destino
-          </label>
-          <select
-            value={tipoDestino}
-            onChange={(e) =>
-              setTipoDestino(e.target.value === "" ? "" : Number(e.target.value))
-            }
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-            <option value="">Seleccionar...</option>
-            {tiposCoincidentes.length > 0 && (
-              <optgroup label={`Coinciden con la suma (${sumaPuntajes.toFixed(2)})`}>
-                {tiposCoincidentes.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    ✓ {t.descripcion} — {t.dedicacion} ({t.puntaje} pts)
-                  </option>
-                ))}
-              </optgroup>
-            )}
-            <optgroup label="Otros tipos con puntaje">
-              {tipos
-                .filter((t) => Number(t.puntaje) !== sumaPuntajes)
-                .map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.descripcion} — {t.dedicacion} ({t.puntaje} pts)
-                  </option>
-                ))}
-            </optgroup>
-          </select>
+          <FilterSelect
+            label={`Tipo de cargo destino (los que empiezan con ✓ coinciden con ${sumaPuntajes.toFixed(2)})`}
+            value={tipoDestino === "" ? "" : String(tipoDestino)}
+            onChange={(v) => setTipoDestino(v === "" ? "" : Number(v))}
+            options={tipoDestinoOptions}
+            placeholder="Seleccionar..."
+          />
           {tipoDestino && (() => {
             const t = tipos.find((x) => x.id === tipoDestino);
             if (!t) return null;
             const coincide = Number(t.puntaje) === sumaPuntajes;
             return (
-              <p className={`text-xs mt-1 ${coincide ? "text-green-700" : "text-red-700"}`}>
+              <p className={`text-xs mt-2 ${coincide ? "text-green-700" : "text-red-700"}`}>
                 {coincide
                   ? `✓ Puntaje coincide (${t.puntaje} = ${sumaPuntajes.toFixed(2)})`
                   : `✗ Puntaje no coincide (${t.puntaje} ≠ ${sumaPuntajes.toFixed(2)}). El backend rechazará la operación.`}
@@ -148,14 +150,14 @@ const CombinarModal: React.FC<Props> = ({ cargos, onClose, onSuccess }) => {
         </div>
 
         <div className="mb-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-semibold text-gray-700 mb-1.5">
             Observaciones (opcional)
           </label>
           <textarea
             value={observaciones}
             onChange={(e) => setObservaciones(e.target.value)}
             rows={2}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 hover:border-blue-400 hover:bg-white transition-all duration-200 text-sm text-gray-700 placeholder-gray-400 shadow-sm"
             placeholder="Motivo de la combinación..."
           />
         </div>

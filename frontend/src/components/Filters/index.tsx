@@ -1,11 +1,16 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
   XMarkIcon,
   CalendarIcon,
   ChevronDownIcon,
+  CheckIcon,
 } from "@heroicons/react/24/outline";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs, { Dayjs } from "dayjs";
 
 interface FilterInputProps {
   label: string;
@@ -28,10 +33,29 @@ export const FilterInput: React.FC<FilterInputProps> = ({
   onEnterPress,
   icon,
 }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && onEnterPress) {
       e.preventDefault();
       onEnterPress();
+    }
+  };
+
+  // Para tipo date: forzar apertura del datepicker al clickear cualquier parte del input.
+  const handleDateClick = () => {
+    const el = inputRef.current;
+    if (!el) return;
+    // showPicker() es la API moderna (Chrome 99+, Edge, Firefox). Si no existe, focus.
+    const anyEl = el as HTMLInputElement & { showPicker?: () => void };
+    if (typeof anyEl.showPicker === "function") {
+      try {
+        anyEl.showPicker();
+      } catch {
+        anyEl.focus();
+      }
+    } else {
+      anyEl.focus();
     }
   };
 
@@ -43,25 +67,117 @@ export const FilterInput: React.FC<FilterInputProps> = ({
       </label>
       <div className="relative group">
         <input
+          ref={inputRef}
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
+          onClick={type === "date" ? handleDateClick : undefined}
           placeholder={placeholder}
-          className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl 
-            focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+          className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl
+            focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
             hover:border-blue-400 hover:bg-white
             transition-all duration-200 ease-out
             text-sm text-gray-800 placeholder-gray-400
-            shadow-sm"
+            shadow-sm cursor-text"
         />
         {type === "text" && !icon && (
-          <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-200" />
+          <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-200 pointer-events-none" />
         )}
         {type === "date" && (
-          <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-200" />
+          <CalendarIcon
+            onClick={handleDateClick}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-200 cursor-pointer"
+          />
         )}
       </div>
+    </div>
+  );
+};
+
+interface FilterDatePickerProps {
+  label: string;
+  /** Valor en formato "YYYY-MM-DD" (para coincidir con FilterInput type="date"). */
+  value: string;
+  /** Recibe "YYYY-MM-DD" o cadena vacía al limpiar. */
+  onChange: (value: string) => void;
+  placeholder?: string;
+  className?: string;
+}
+
+/**
+ * Date picker consistente con los demás filtros, basado en MUI DatePicker.
+ * Reemplazo de <input type="date"> que evita el picker nativo del browser.
+ */
+export const FilterDatePicker: React.FC<FilterDatePickerProps> = ({
+  label,
+  value,
+  onChange,
+  placeholder = "dd/mm/aaaa",
+  className = "",
+}) => {
+  const dayjsValue: Dayjs | null = value ? dayjs(value) : null;
+
+  return (
+    <div className={`flex flex-col space-y-1.5 ${className}`}>
+      <label className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
+        {label}
+      </label>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <DatePicker
+          value={dayjsValue}
+          onChange={(d) => onChange(d && d.isValid() ? d.format("YYYY-MM-DD") : "")}
+          format="DD/MM/YYYY"
+          slotProps={{
+            textField: {
+              fullWidth: true,
+              size: "small",
+              placeholder,
+              sx: {
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "0.75rem",
+                  backgroundColor: "#f9fafb",
+                  border: "1px solid #e5e7eb",
+                  transition: "all 0.2s ease",
+                  paddingRight: "8px",
+                  fontFamily: "inherit",
+                  fontSize: "0.875rem",
+                  color: "#1f2937",
+                  "& fieldset": { border: "none" },
+                  "&:hover": {
+                    backgroundColor: "#ffffff",
+                    borderColor: "#60a5fa",
+                  },
+                  "&.Mui-focused": {
+                    backgroundColor: "#ffffff",
+                    borderColor: "#3b82f6",
+                    boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.2)",
+                  },
+                  "& input": {
+                    padding: "10px 12px",
+                  },
+                  "& .MuiSvgIcon-root": {
+                    fontSize: "1.125rem",
+                    color: "#9ca3af",
+                  },
+                },
+              },
+            },
+            popper: {
+              placement: "bottom-start",
+              modifiers: [
+                { name: "flip", enabled: false },
+                { name: "preventOverflow", enabled: false },
+                { name: "hide", enabled: false },
+                { name: "offset", options: { offset: [0, 4] } },
+              ],
+              sx: {
+                zIndex: 1500,
+              },
+            },
+          }}
+        />
+      </LocalizationProvider>
     </div>
   );
 };
@@ -85,34 +201,110 @@ export const FilterSelect: React.FC<FilterSelectProps> = ({
   className = "",
   icon,
 }) => {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEsc);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [open]);
+
+  const selected = options.find((o) => o.value === value);
+  const displayText = selected ? selected.label : placeholder;
+  const isPlaceholder = !selected;
+
   return (
     <div className={`flex flex-col space-y-1.5 ${className}`}>
       <label className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
         {icon && <span className="text-blue-500">{icon}</span>}
         {label}
       </label>
-      <div className="relative group">
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl
-            focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+      <div className="relative group" ref={containerRef}>
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className={`w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl
+            focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
             hover:border-blue-400 hover:bg-white
             transition-all duration-200 ease-out
-            text-sm text-gray-800
-            shadow-sm appearance-none cursor-pointer
-            pr-10"
+            text-sm text-left
+            shadow-sm cursor-pointer
+            pr-10
+            ${isPlaceholder ? "text-gray-400" : "text-gray-800"}
+            ${open ? "border-blue-500 ring-2 ring-blue-500/20 bg-white" : ""}`}
         >
-          <option value="" className="text-gray-400">{placeholder}</option>
-          {options.map((option) => (
-            <option key={option.value} value={option.value} className="text-gray-800">
-              {option.label}
-            </option>
-          ))}
-        </select>
+          {displayText}
+        </button>
         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-          <ChevronDownIcon className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors duration-200" />
+          <ChevronDownIcon
+            className={`h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-all duration-200 ${
+              open ? "rotate-180 text-blue-500" : ""
+            }`}
+          />
         </div>
+        {open && (
+          <ul
+            className="absolute left-0 right-0 top-full mt-1 z-30
+              bg-white border border-gray-200 rounded-xl shadow-lg
+              max-h-60 overflow-y-auto
+              py-1
+              animate-[fadeIn_0.15s_ease-out]"
+            role="listbox"
+          >
+            <li
+              role="option"
+              aria-selected={value === ""}
+              onClick={() => {
+                onChange("");
+                setOpen(false);
+              }}
+              className="px-3 py-2 text-sm text-gray-400 hover:bg-blue-50 hover:text-gray-700 cursor-pointer flex items-center gap-2"
+            >
+              <span className="w-4" />
+              {placeholder}
+            </li>
+            {options.map((option) => {
+              const isSelected = option.value === value;
+              return (
+                <li
+                  key={option.value}
+                  role="option"
+                  aria-selected={isSelected}
+                  onClick={() => {
+                    onChange(option.value);
+                    setOpen(false);
+                  }}
+                  className={`px-3 py-2 text-sm cursor-pointer flex items-center gap-2 transition-colors duration-150
+                    ${
+                      isSelected
+                        ? "bg-blue-50 text-blue-700 font-semibold"
+                        : "text-gray-800 hover:bg-gray-50"
+                    }`}
+                >
+                  {isSelected ? (
+                    <CheckIcon className="h-4 w-4 text-blue-600 shrink-0" />
+                  ) : (
+                    <span className="w-4" />
+                  )}
+                  <span className="truncate">{option.label}</span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
     </div>
   );
@@ -286,27 +478,101 @@ export const CompactFilterSelect: React.FC<CompactFilterSelectProps> = ({
   placeholder = "Todos",
   className = "",
 }) => {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEsc);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [open]);
+
+  const selected = options.find((o) => o.value === value);
+  const displayText = selected ? selected.label : placeholder;
+  const isPlaceholder = !selected;
+
   return (
-    <div className={`relative ${className}`}>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg
-          focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
+    <div className={`relative ${className}`} ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={`w-full px-3 py-2 bg-white border border-gray-200 rounded-lg
+          focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
           hover:border-blue-400
           transition-all duration-200
-          text-sm text-gray-700
-          shadow-sm appearance-none cursor-pointer
-          pr-8"
+          text-sm text-left
+          shadow-sm cursor-pointer
+          pr-8
+          ${isPlaceholder ? "text-gray-400" : "text-gray-700"}
+          ${open ? "border-blue-500 ring-2 ring-blue-500/20" : ""}`}
       >
-        <option value="">{placeholder}</option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDownIcon className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+        {displayText}
+      </button>
+      <ChevronDownIcon
+        className={`absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none transition-transform duration-200 ${
+          open ? "rotate-180 text-blue-500" : ""
+        }`}
+      />
+      {open && (
+        <ul
+          className="absolute left-0 right-0 top-full mt-1 z-30
+            bg-white border border-gray-200 rounded-lg shadow-lg
+            max-h-60 overflow-y-auto py-1"
+          role="listbox"
+        >
+          <li
+            role="option"
+            aria-selected={value === ""}
+            onClick={() => {
+              onChange("");
+              setOpen(false);
+            }}
+            className="px-3 py-2 text-sm text-gray-400 hover:bg-blue-50 hover:text-gray-700 cursor-pointer flex items-center gap-2"
+          >
+            <span className="w-4" />
+            {placeholder}
+          </li>
+          {options.map((option) => {
+            const isSelected = option.value === value;
+            return (
+              <li
+                key={option.value}
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => {
+                  onChange(option.value);
+                  setOpen(false);
+                }}
+                className={`px-3 py-2 text-sm cursor-pointer flex items-center gap-2 transition-colors duration-150
+                  ${
+                    isSelected
+                      ? "bg-blue-50 text-blue-700 font-semibold"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+              >
+                {isSelected ? (
+                  <CheckIcon className="h-4 w-4 text-blue-600 shrink-0" />
+                ) : (
+                  <span className="w-4" />
+                )}
+                <span className="truncate">{option.label}</span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 };

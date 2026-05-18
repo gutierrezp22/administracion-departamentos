@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "@mui/material";
 import ResponsiveTable from "../../../../../components/ResponsiveTable";
+import ActionMenu from "../../../../../components/ActionMenu";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -211,15 +212,6 @@ const ListaDocentes = () => {
 
   const totalPages = Math.ceil(totalItems / pageSize);
 
-  // Modal de loading
-  if (isLoading) {
-    return (
-      <DashboardMenu>
-        <LoadingOverlay message="Cargando docentes..." />
-      </DashboardMenu>
-    );
-  }
-
   return (
     <DashboardMenu>
       <div className="bg-white rounded-lg shadow-lg">
@@ -231,12 +223,12 @@ const ListaDocentes = () => {
           <div className="flex gap-4 mb-6">
             <button
               onClick={() => router.push("/dashboard/persons/docentes/create")}
-              className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2.5 rounded-xl shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200 font-semibold text-sm">
               <AddIcon /> Agregar Docente
             </button>
             <button
               onClick={descargarExcel}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+              className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2.5 rounded-xl shadow-md shadow-green-500/20 hover:shadow-lg hover:shadow-green-500/30 transition-all duration-200 font-semibold text-sm">
               <FileDownloadIcon /> Descargar Excel
             </button>
           </div>
@@ -269,7 +261,11 @@ const ListaDocentes = () => {
             <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
           </FilterContainer>
 
-          <ResponsiveTable>
+          <div className="relative">
+
+            {isLoading && <LoadingOverlay variant="overlay" message="Cargando..." />}
+
+            <ResponsiveTable dense>
             <TableHead>
               <TableRow>
                 <TableCell>
@@ -345,35 +341,43 @@ const ListaDocentes = () => {
                       {docente.estado === "1" ? "Activo" : "Inactivo"}
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => verDocente(docente.id)}
-                          className="p-2 text-green-600 hover:text-green-800 rounded-lg hover:bg-green-100 transition-colors duration-200"
-                          title="Ver detalles">
-                          <VisibilityIcon />
-                        </button>
-                        <button
-                          onClick={() =>
-                            router.push(
-                              `/dashboard/persons/docentes/edit/${docente.id}`
-                            )
-                          }
-                          className="p-2 text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-100 transition-colors duration-200"
-                          title="Editar">
-                          <EditIcon />
-                        </button>
-                        <button
-                          onClick={() => eliminarDocente(docente.id)}
-                          className="p-2 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-100 transition-colors duration-200"
-                          title="Eliminar">
-                          <DeleteIcon />
-                        </button>
-                      </div>
+                      <ActionMenu
+                        items={[
+                          {
+                            items: [
+                              {
+                                label: "Ver detalles",
+                                icon: <VisibilityIcon fontSize="small" />,
+                                onClick: () => verDocente(docente.id),
+                              },
+                              {
+                                label: "Editar",
+                                icon: <EditIcon fontSize="small" />,
+                                onClick: () =>
+                                  router.push(
+                                    `/dashboard/persons/docentes/edit/${docente.id}`
+                                  ),
+                              },
+                            ],
+                          },
+                          {
+                            items: [
+                              {
+                                label: "Eliminar",
+                                icon: <DeleteIcon fontSize="small" />,
+                                onClick: () => eliminarDocente(docente.id),
+                                danger: true,
+                              },
+                            ],
+                          },
+                        ]}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
           </ResponsiveTable>
+            </div>
 
           <Pagination
             currentPage={currentPage}

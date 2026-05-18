@@ -35,6 +35,7 @@ import {
 	FormButton,
 	SelectorButton,
 } from "@/components/Form";
+import { CompactFilterSelect } from "@/components/Filters";
 import {
 	MagnifyingGlassIcon,
 	XMarkIcon,
@@ -517,7 +518,7 @@ const CrearDepartamentoJefe = () => {
 		<DashboardMenu>
 			<FormContainer title="Agregar Jefe Departamento">
 				<FormSection title="Selecciones Requeridas">
-					<SelectorButton
+					<SelectorButton required
 						label="Seleccionar Resolución"
 						onClick={() => setOpenResolucion(true)}
 						selectedLabel="Nro Resolución"
@@ -527,7 +528,7 @@ const CrearDepartamentoJefe = () => {
 								: undefined
 						}
 					/>
-					<SelectorButton
+					<SelectorButton required
 						label="Seleccionar Jefe"
 						onClick={() => setOpenJefe(true)}
 						selectedLabel="Jefe"
@@ -535,7 +536,7 @@ const CrearDepartamentoJefe = () => {
 							jefe ? `${jefe.persona.nombre} ${jefe.persona.apellido}` : undefined
 						}
 					/>
-					<SelectorButton
+					<SelectorButton required
 						label="Seleccionar Departamento"
 						onClick={() => setOpenDepartamento(true)}
 						selectedLabel="Departamento"
@@ -658,30 +659,18 @@ const CrearDepartamentoJefe = () => {
 								/>
 								<MagnifyingGlassIcon className="absolute right-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
 							</div>
-							<div className="relative">
-								<select
-									value={filtroTipo}
-									onChange={(e) => setFiltroTipo(e.target.value)}
-									className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg
-										focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
-										hover:border-blue-400 hover:bg-white
-										transition-all duration-200
-										text-sm text-gray-700
-										shadow-sm appearance-none cursor-pointer
-										pr-10"
-								>
-									<option value="">Todos</option>
-									<option value="Rector">Rector</option>
-									<option value="Decano">Decano</option>
-									<option value="Consejo_Superior">Consejo Superior</option>
-									<option value="Consejo_Directivo">Consejo Directivo</option>
-								</select>
-								<div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-									<svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-									</svg>
-								</div>
-						</div>
+							<CompactFilterSelect
+								label=""
+								value={filtroTipo}
+								onChange={setFiltroTipo}
+								options={[
+									{ value: "Rector", label: "Rector" },
+									{ value: "Decano", label: "Decano" },
+									{ value: "Consejo_Superior", label: "Consejo Superior" },
+									{ value: "Consejo_Directivo", label: "Consejo Directivo" },
+								]}
+								placeholder="Todos los tipos"
+							/>
 						<div className="relative">
 							<LocalizationProvider dateAdapter={AdapterDayjs}>
 								<DatePicker
@@ -768,18 +757,18 @@ const CrearDepartamentoJefe = () => {
 								style={{ maxHeight: "400px", overflow: "auto" }}
 							>
 								<Table size="small">
-									<TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
+									<TableHead className="bg-blue-100 sticky top-0 z-10">
 										<TableRow>
-											<TableCell className="text-white font-semibold py-2">
+											<TableCell className="text-blue-800 font-bold py-2 uppercase text-xs tracking-wider">
 												Nro Expediente
 											</TableCell>
-											<TableCell className="text-white font-semibold py-2">
+											<TableCell className="text-blue-800 font-bold py-2 uppercase text-xs tracking-wider">
 												Nro Resolución
 											</TableCell>
-											<TableCell className="text-white font-semibold py-2">
+											<TableCell className="text-blue-800 font-bold py-2 uppercase text-xs tracking-wider">
 												Tipo
 											</TableCell>
-											<TableCell className="text-white font-semibold py-2">
+											<TableCell className="text-blue-800 font-bold py-2 uppercase text-xs tracking-wider">
 												Fecha
 											</TableCell>
 											<TableCell className="text-white font-semibold py-2 text-center">
@@ -1051,15 +1040,15 @@ const CrearDepartamentoJefe = () => {
 							style={{ maxHeight: "400px", overflow: "auto" }}
 						>
 							<Table size="small">
-								<TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
+								<TableHead className="bg-blue-100 sticky top-0 z-10">
 									<TableRow>
-										<TableCell className="text-white font-semibold py-2">
+										<TableCell className="text-blue-800 font-bold py-2 uppercase text-xs tracking-wider">
 											Nombre
 										</TableCell>
-										<TableCell className="text-white font-semibold py-2">
+										<TableCell className="text-blue-800 font-bold py-2 uppercase text-xs tracking-wider">
 											DNI
 										</TableCell>
-										<TableCell className="text-white font-semibold py-2">
+										<TableCell className="text-blue-800 font-bold py-2 uppercase text-xs tracking-wider">
 											Seleccionar
 										</TableCell>
 									</TableRow>
@@ -1215,12 +1204,12 @@ const CrearDepartamentoJefe = () => {
 							style={{ maxHeight: "400px", overflow: "auto" }}
 						>
 							<Table size="small">
-								<TableHead className="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
+								<TableHead className="bg-blue-100 sticky top-0 z-10">
 									<TableRow>
-										<TableCell className="text-white font-semibold py-2">
+										<TableCell className="text-blue-800 font-bold py-2 uppercase text-xs tracking-wider">
 											Nombre
 										</TableCell>
-										<TableCell className="text-white font-semibold py-2">
+										<TableCell className="text-blue-800 font-bold py-2 uppercase text-xs tracking-wider">
 											Seleccionar
 										</TableCell>
 									</TableRow>

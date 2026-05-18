@@ -30,10 +30,28 @@ class UserSerializer(serializers.ModelSerializer):
     )
     rol = serializers.PrimaryKeyRelatedField(queryset=Rol.objects.all(), required=False, allow_null=True)
     rol_detalle = serializers.CharField(source='rol.descripcion', read_only=True)
+    departamentos_administrados = serializers.PrimaryKeyRelatedField(
+        many=True, required=False,
+        queryset=__import__(
+            'departamentos.models', fromlist=['Departamento']
+        ).Departamento.objects.all(),
+    )
+    departamentos_administrados_detalle = serializers.SerializerMethodField()
+
+    def get_departamentos_administrados_detalle(self, obj):
+        return [
+            {'id': d.id, 'nombre': d.nombre}
+            for d in obj.departamentos_administrados.all()
+        ]
 
     class Meta:
         model = User
-        fields = ['id','email','password','nombre','apellido','legajo','documento','rol','rol_detalle','is_active','groups','date_joined','last_login']
+        fields = [
+            'id', 'email', 'password', 'nombre', 'apellido', 'legajo', 'documento',
+            'rol', 'rol_detalle',
+            'departamentos_administrados', 'departamentos_administrados_detalle',
+            'is_active', 'groups', 'date_joined', 'last_login',
+        ]
         
     def get_rol(self, obj):
         return obj.rol.id if obj.rol else None

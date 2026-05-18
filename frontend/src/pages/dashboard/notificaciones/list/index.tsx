@@ -17,7 +17,7 @@ import Swal from "sweetalert2";
 import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut";
 import { API_BASE_URL } from "../../../../utils/config";
-import { FilterContainer, FilterInput } from "../../../../components/Filters";
+import { FilterContainer, FilterInput, FilterDatePicker } from "../../../../components/Filters";
 
 interface Notificacion {
   id: number;
@@ -156,9 +156,8 @@ const ListaNotificaciones = () => {
                 }
                 placeholder="Buscar por nombre..."
               />
-              <FilterInput
+              <FilterDatePicker
                 label="Fecha"
-                type="date"
                 value={filters.fecha_creacion}
                 onChange={(value) =>
                   handleFilterChange("fecha_creacion", value)
