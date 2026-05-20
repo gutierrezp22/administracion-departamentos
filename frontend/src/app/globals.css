@@ -135,3 +135,181 @@ body {
 .sidebar-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.35);
 }
+
+/* ==========================================
+   SWEETALERT2 - Armonizado con el estilo del proyecto
+   Tipografía Inter, bordes redondeados, paleta gray-900 / blanco.
+   El background-color de los botones NO usa !important para permitir
+   que `confirmButtonColor` inline (ej. rojo en confirmaciones de
+   eliminar) siga funcionando como override semántico.
+   ========================================== */
+
+.swal2-container {
+  font-family: var(--font-primary) !important;
+}
+
+.swal2-popup {
+  font-family: var(--font-primary) !important;
+  border-radius: 1rem !important;
+  padding: 1.75rem 1.5rem 1.5rem !important;
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(17, 24, 39, 0.04) !important;
+}
+
+.swal2-title {
+  color: #111827 !important;
+  font-weight: 600 !important;
+  font-size: 1.375rem !important;
+  letter-spacing: -0.01em !important;
+  padding: 0.25rem 0 0 !important;
+}
+
+.swal2-html-container {
+  color: #4b5563 !important;
+  font-size: 0.9375rem !important;
+  line-height: 1.55 !important;
+  margin-top: 0.625rem !important;
+}
+
+.swal2-actions {
+  gap: 0.625rem !important;
+  margin-top: 1.5rem !important;
+}
+
+/* Botón confirmar (primario) — gris oscuro tipo "Iniciar sesión" */
+.swal2-styled.swal2-confirm {
+  background-color: #111827;
+  color: #ffffff !important;
+  border: 0 !important;
+  border-radius: 0.75rem !important;
+  padding: 0.625rem 1.5rem !important;
+  font-family: var(--font-primary) !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease !important;
+}
+.swal2-styled.swal2-confirm:hover {
+  filter: brightness(0.9);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15) !important;
+}
+.swal2-styled.swal2-confirm:focus {
+  box-shadow:
+    0 0 0 3px rgba(17, 24, 39, 0.25),
+    0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Botón cancelar — outline neutro */
+.swal2-styled.swal2-cancel {
+  background-color: #ffffff;
+  color: #374151 !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.75rem !important;
+  padding: 0.625rem 1.5rem !important;
+  font-family: var(--font-primary) !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease !important;
+}
+.swal2-styled.swal2-cancel:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db !important;
+}
+.swal2-styled.swal2-cancel:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Botón deny (rechazar) — rojo destructivo */
+.swal2-styled.swal2-deny {
+  background-color: #dc2626;
+  color: #ffffff !important;
+  border: 0 !important;
+  border-radius: 0.75rem !important;
+  padding: 0.625rem 1.5rem !important;
+  font-family: var(--font-primary) !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+}
+.swal2-styled.swal2-deny:hover {
+  filter: brightness(0.9);
+}
+
+/* Inputs dentro del modal */
+.swal2-input,
+.swal2-select,
+.swal2-textarea,
+.swal2-file {
+  border-radius: 0.75rem !important;
+  border: 1px solid #e5e7eb !important;
+  font-family: var(--font-primary) !important;
+  font-size: 0.9375rem !important;
+  color: #111827 !important;
+  box-shadow: none !important;
+  padding: 0.625rem 0.875rem !important;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease !important;
+}
+.swal2-input:focus,
+.swal2-select:focus,
+.swal2-textarea:focus,
+.swal2-file:focus {
+  border-color: #111827 !important;
+  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.12) !important;
+  outline: none !important;
+}
+
+.swal2-input-label,
+.swal2-label {
+  font-family: var(--font-primary) !important;
+  color: #374151 !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+}
+
+/* Iconos — espaciado consistente */
+.swal2-icon {
+  margin: 1rem auto 1.25rem !important;
+}
+
+/* Botón "cerrar" (X) */
+.swal2-close {
+  color: #9ca3af !important;
+  font-size: 2rem !important;
+  transition: color 0.2s ease !important;
+}
+.swal2-close:hover {
+  color: #111827 !important;
+}
+
+/* Mensaje de validación */
+.swal2-validation-message {
+  border-radius: 0.625rem !important;
+  background-color: #fef2f2 !important;
+  color: #991b1b !important;
+  font-family: var(--font-primary) !important;
+  font-size: 0.875rem !important;
+}
+
+/* Loader / spinner */
+.swal2-loader {
+  border-color: #111827 transparent #111827 transparent !important;
+}
+
+/* Toasts (cuando se usa Swal.fire({ toast: true })) */
+.swal2-toast {
+  border-radius: 0.875rem !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
+  font-family: var(--font-primary) !important;
+}
+
+/* Z-index alto cuando se usa swal-high-z-index (apilamiento sobre modales MUI) */
+.swal-high-z-index {
+  z-index: 10000 !important;
+}
