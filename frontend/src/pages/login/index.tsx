@@ -63,16 +63,7 @@ export default function LoginPage() {
         icon: "error",
         title: "Error de autenticación",
         text: "Correo electrónico o contraseña incorrectos.",
-        confirmButtonColor: "#3b82f6",
-        color: "#1f2937",
-        background: "#ffffff",
-        customClass: {
-          popup: "rounded-2xl shadow-xl",
-          title: "text-gray-800 font-semibold",
-          htmlContainer: "text-gray-600",
-          confirmButton:
-            "rounded-xl px-6 py-2 font-medium transition-colors duration-200 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
-        },
+        confirmButtonText: "Entendido",
       });
     } finally {
       setIsLoading(false);
