@@ -7,6 +7,28 @@ correrlo dentro del contenedor backend.
 
 El script es idempotente: re-ejecutarlo no duplica datos.
 
+## Pre-requisito: migraciones de Django
+
+Las migraciones 0005→0010 (que crean las tablas Cargo, TipoCargo,
+CargoHistorial, OperacionCargo) deben aplicarse antes que el script de
+seed. Por eso configuramos **DOS** comandos:
+
+**Pre-deployment Command:**
+```
+/opt/venv/bin/python manage.py migrate --noinput
+```
+
+**Post-deployment Command:**
+```
+/opt/venv/bin/python scripts/cargarCargos_embedded.py
+```
+
+> **Importante**: usar el path completo `/opt/venv/bin/python`, no
+> solo `python`. Nixpacks crea el virtualenv en `/opt/venv` y los
+> paquetes (Django, psycopg2) están instalados ahí. Si usás solo
+> `python` el comando corre con el python del sistema sin paquetes
+> y falla con `ModuleNotFoundError`.
+
 ## Qué carga el script
 
 1. **TipoCargo con puntaje** — 15 entradas (5 siglas × 3 dedicaciones)
@@ -86,7 +108,7 @@ los 998 registros, en deploys posteriores se ejecuta en ~2s y reporta
 2. Scroll hasta **Pre/Post Deployment Commands** (al final del form).
 3. En el campo **Post-deployment** pegar:
    ```
-   python scripts/cargarCargos_embedded.py
+   /opt/venv/bin/python scripts/cargarCargos_embedded.py
    ```
 4. Click **Save**.
 5. Volver al panel del backend y click **Redeploy**.
@@ -106,7 +128,7 @@ Si no querés que corra en cada deploy:
 2. Click en **+ New / Add**.
 3. Completar:
    - **Name**: `cargar-cargos`
-   - **Command**: `python scripts/cargarCargos_embedded.py`
+   - **Command**: `/opt/venv/bin/python scripts/cargarCargos_embedded.py`
    - **Frequency** / **Schedule**: cualquier cron lejano (ej. `0 0 1 1 0`) — se dispara manualmente.
    - **Container**: backend (default).
 4. Guardar y click **Run** (botón ▶ o "Trigger now") en la lista de tasks.
