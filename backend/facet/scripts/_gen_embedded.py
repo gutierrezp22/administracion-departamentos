@@ -1,6 +1,16 @@
 """Helper local: lee los Excel y genera cargarCargos_embedded.py con
-todos los datos inline. Para uso en producción sin SSH/pandas."""
+todos los datos inline. Para uso en producción sin SSH/pandas.
 
+Datos embebidos:
+- TIPOS_CON_PUNTAJE: catálogo de equivalencias (sigla, descripcion, dedicacion, puntaje)
+- TIPOS_SIN_PUNTAJE: descripciones del sistema sin puntaje (DECANO, Categoria Dto.366, etc.)
+- CARGOS: (nrocargo, descripcion, dedicacion, legajo, caracter, fecha_inicio, fecha_fin)
+
+El "legajo" sirve para matchear con Persona.legajo en prod. "caracter"
+decide si el ocupante es Docente o NoDocente.
+"""
+
+import json
 import os
 import pandas as pd
 
@@ -18,217 +28,348 @@ DESC_MAP = {
 }
 DED_MAP = {"Simple": "SIMP", "Part-Time": "SEMI", "Full-Time": "EXCL"}
 
-df_eq = pd.read_excel(PATH_EQ)
-df_eq.columns = ["Cargo", "Descripcion", "Simple", "Part-Time", "Full-Time"]
 
-tipos_puntaje = []
-for _, r in df_eq.iterrows():
-    sigla = str(r["Cargo"]).strip()
-    desc = DESC_MAP[str(r["Descripcion"]).strip()]
-    for col, ded in DED_MAP.items():
-        p = r[col]
-        if pd.isnull(p):
+def parse_eq():
+    df = pd.read_excel(PATH_EQ)
+    df.columns = ["Cargo", "Descripcion", "Simple", "Part-Time", "Full-Time"]
+    out = []
+    for _, r in df.iterrows():
+        sigla = str(r["Cargo"]).strip()
+        desc = DESC_MAP[str(r["Descripcion"]).strip()]
+        for col, ded in DED_MAP.items():
+            p = r[col]
+            if pd.isnull(p):
+                continue
+            out.append((sigla, desc, ded, float(p)))
+    return out
+
+
+def parse_cargos():
+    df = pd.read_html(PATH_C)[0]
+    cargos = []
+    seen = set()
+    for _, r in df.iterrows():
+        nro = r.get("nrocargo")
+        if pd.isnull(nro):
             continue
-        tipos_puntaje.append((sigla, desc, ded, float(p)))
+        nro = int(nro)
+        if nro in seen:
+            continue
+        seen.add(nro)
 
-df_c = pd.read_html(PATH_C)[0]
-covered = {(d, ded) for _, d, ded, _ in tipos_puntaje}
-extras = set()
-cargos = []
-for _, r in df_c.iterrows():
-    n = r.get("nrocargo")
-    if pd.isnull(n):
-        continue
-    n = int(n)
-    descrip = str(r["descrip"]).strip() if pd.notnull(r["descrip"]) else None
-    ded = str(r["dedicacion"]).strip().upper() if pd.notnull(r["dedicacion"]) else None
-    if descrip and ded and (descrip, ded) not in covered:
-        extras.add((descrip, ded))
-    cargos.append((n, descrip, ded))
+        descrip = str(r["descrip"]).strip() if pd.notnull(r["descrip"]) else None
+        ded = str(r["dedicacion"]).strip().upper() if pd.notnull(r["dedicacion"]) else None
+        legajo = str(int(r["nrolegajo"])) if pd.notnull(r["nrolegajo"]) else None
+        caracter = str(r["caracter"]).strip().upper() if pd.notnull(r["caracter"]) else None
 
-# Quitar duplicados de nrocargo manteniendo el primero (no debería haber pero por las dudas)
-seen = set()
-cargos_unique = []
-for n, d, ded in cargos:
-    if n in seen:
-        continue
-    seen.add(n)
-    cargos_unique.append((n, d, ded))
+        fa = r.get("fechaalta")
+        fb = r.get("fechabaja")
+        fa_iso = pd.to_datetime(fa).strftime("%Y-%m-%d") if pd.notnull(fa) else None
+        fb_iso = pd.to_datetime(fb).strftime("%Y-%m-%d") if pd.notnull(fb) else None
 
-extras_sorted = sorted(extras)
+        cargos.append((nro, descrip, ded, legajo, caracter, fa_iso, fb_iso))
+    return cargos
 
-# Generar el script embebido
-lines = []
-lines.append('"""')
-lines.append("Carga de TipoCargo + Cargo en producción — script autocontenido.")
-lines.append("")
-lines.append("Generado automáticamente desde los Excel oficiales por _gen_embedded.py.")
-lines.append("Solo depende de psycopg2 (ya viene con el backend Django).")
-lines.append("")
-lines.append("Uso:")
-lines.append("    python cargarCargos_embedded.py [--dry-run] [--solo-tipos]")
-lines.append("")
-lines.append("Requiere las env vars DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT")
-lines.append("(ya están configuradas en el contenedor backend de Coolify).")
-lines.append('"""')
-lines.append("")
-lines.append("import argparse")
-lines.append("import os")
-lines.append("import sys")
-lines.append("from datetime import datetime")
-lines.append("from decimal import Decimal")
-lines.append("")
-lines.append("import psycopg2")
-lines.append("")
-lines.append("DB_CONFIG = {")
-lines.append('    "dbname":   os.environ["DB_NAME"],')
-lines.append('    "user":     os.environ["DB_USER"],')
-lines.append('    "password": os.environ["DB_PASSWORD"],')
-lines.append('    "host":     os.environ["DB_HOST"],')
-lines.append('    "port":     os.environ.get("DB_PORT", "5432"),')
-lines.append("}")
-lines.append("")
-lines.append("# (sigla, descripcion, dedicacion, puntaje)")
-lines.append(f"TIPOS_CON_PUNTAJE = [")
-for t in tipos_puntaje:
-    lines.append(f"    {t!r},")
-lines.append("]")
-lines.append("")
-lines.append("# (descripcion, dedicacion) — TipoCargo sin puntaje (catálogo)")
-lines.append(f"TIPOS_SIN_PUNTAJE = [")
-for t in extras_sorted:
-    lines.append(f"    {t!r},")
-lines.append("]")
-lines.append("")
-lines.append(f"# (numero_de_cargo, descripcion, dedicacion) — {len(cargos_unique)} cargos")
-lines.append(f"CARGOS = [")
-for c in cargos_unique:
-    lines.append(f"    {c!r},")
-lines.append("]")
-lines.append("")
-lines.append("")
-lines.append("def main():")
-lines.append('    parser = argparse.ArgumentParser()')
-lines.append('    parser.add_argument("--dry-run", action="store_true")')
-lines.append('    parser.add_argument("--solo-tipos", action="store_true")')
-lines.append("    args = parser.parse_args()")
-lines.append("")
-lines.append('    print(f"DB: {DB_CONFIG[\'user\']}@{DB_CONFIG[\'host\']}:{DB_CONFIG[\'port\']}/{DB_CONFIG[\'dbname\']}")')
-lines.append("    if args.dry_run:")
-lines.append('        print(">>> DRY-RUN: no se hará COMMIT <<<")')
-lines.append("")
-lines.append("    conn = psycopg2.connect(**DB_CONFIG)")
-lines.append("    try:")
-lines.append("        cur = conn.cursor()")
-lines.append("        now = datetime.now()")
-lines.append("")
-lines.append('        print("[1/3] TipoCargo con puntaje...")')
-lines.append("        c1 = u1 = s1 = 0")
-lines.append("        for sigla, desc, ded, puntaje in TIPOS_CON_PUNTAJE:")
-lines.append('            puntaje = Decimal(str(puntaje)).quantize(Decimal("0.01"))')
-lines.append("            cur.execute(")
-lines.append('                "SELECT id, sigla, puntaje FROM departamentos_tipocargo "')
-lines.append('                "WHERE descripcion=%s AND dedicacion=%s", (desc, ded))')
-lines.append("            row = cur.fetchone()")
-lines.append("            if row is None:")
-lines.append("                if not args.dry_run:")
-lines.append("                    cur.execute(")
-lines.append('                        "INSERT INTO departamentos_tipocargo "')
-lines.append('                        "(sigla,descripcion,dedicacion,puntaje,estado,fecha_creacion,fecha_modificacion) "')
-lines.append('                        "VALUES (%s,%s,%s,%s,%s,%s,%s)",')
-lines.append('                        (sigla, desc, ded, puntaje, "1", now, now))')
-lines.append("                c1 += 1")
-lines.append("            else:")
-lines.append("                _id, sigla_old, puntaje_old = row")
-lines.append("                if sigla_old != sigla or puntaje_old != puntaje:")
-lines.append("                    if not args.dry_run:")
-lines.append("                        cur.execute(")
-lines.append('                            "UPDATE departamentos_tipocargo "')
-lines.append('                            "SET sigla=%s, puntaje=%s, fecha_modificacion=%s WHERE id=%s",')
-lines.append("                            (sigla, puntaje, now, _id))")
-lines.append("                    u1 += 1")
-lines.append("                else:")
-lines.append("                    s1 += 1")
-lines.append('        print(f"     creados={c1}  actualizados={u1}  sin_cambios={s1}")')
-lines.append("")
-lines.append('        print("[2/3] TipoCargo sin puntaje...")')
-lines.append("        c2 = s2 = 0")
-lines.append("        for desc, ded in TIPOS_SIN_PUNTAJE:")
-lines.append("            cur.execute(")
-lines.append('                "SELECT id FROM departamentos_tipocargo "')
-lines.append('                "WHERE descripcion=%s AND dedicacion=%s", (desc, ded))')
-lines.append("            if cur.fetchone():")
-lines.append("                s2 += 1")
-lines.append("                continue")
-lines.append("            if not args.dry_run:")
-lines.append("                cur.execute(")
-lines.append('                    "INSERT INTO departamentos_tipocargo "')
-lines.append('                    "(sigla,descripcion,dedicacion,puntaje,estado,fecha_creacion,fecha_modificacion) "')
-lines.append('                    "VALUES (%s,%s,%s,%s,%s,%s,%s)",')
-lines.append('                    ("", desc, ded, None, "1", now, now))')
-lines.append("            c2 += 1")
-lines.append('        print(f"     creados={c2}  sin_cambios={s2}")')
-lines.append("")
-lines.append("        if args.solo_tipos:")
-lines.append('            print("--solo-tipos: omitiendo Cargo.")')
-lines.append("        else:")
-lines.append('            print(f"[3/3] Cargo (total {len(CARGOS)})...")')
-lines.append("            cur.execute(")
-lines.append('                "SELECT id, descripcion, dedicacion FROM departamentos_tipocargo")')
-lines.append("            lookup = {(d, ded): _id for (_id, d, ded) in cur.fetchall()}")
-lines.append("            c3 = u3 = s3 = sin_tipo = 0")
-lines.append("            for nro, desc, ded in CARGOS:")
-lines.append("                tid = lookup.get((desc, ded))")
-lines.append("                if tid is None:")
-lines.append("                    sin_tipo += 1")
-lines.append("                cur.execute(")
-lines.append('                    "SELECT id, tipo_cargo_id FROM departamentos_cargo "')
-lines.append('                    "WHERE numero_de_cargo=%s", (nro,))')
-lines.append("                row = cur.fetchone()")
-lines.append("                if row is None:")
-lines.append("                    if not args.dry_run:")
-lines.append("                        cur.execute(")
-lines.append('                            "INSERT INTO departamentos_cargo "')
-lines.append('                            "(numero_de_cargo,tipo_cargo_id,departamento_id,asignatura_id,"')
-lines.append('                            "resolucion_oficializacion_id,observaciones,estado,"')
-lines.append('                            "fecha_creacion,fecha_modificacion) "')
-lines.append('                            "VALUES (%s,%s,NULL,NULL,NULL,NULL,%s,%s,%s)",')
-lines.append('                            (nro, tid, "1", now, now))')
-lines.append("                    c3 += 1")
-lines.append("                else:")
-lines.append("                    _id, tipo_old = row")
-lines.append("                    if tid is not None and tipo_old != tid:")
-lines.append("                        if not args.dry_run:")
-lines.append("                            cur.execute(")
-lines.append('                                "UPDATE departamentos_cargo "')
-lines.append('                                "SET tipo_cargo_id=%s, fecha_modificacion=%s WHERE id=%s",')
-lines.append("                                (tid, now, _id))")
-lines.append("                        u3 += 1")
-lines.append("                    else:")
-lines.append("                        s3 += 1")
-lines.append('            print(f"     creados={c3}  actualizados={u3}  sin_cambios={s3}  sin_tipo={sin_tipo}")')
-lines.append("")
-lines.append("        if args.dry_run:")
-lines.append("            conn.rollback()")
-lines.append('            print("DRY-RUN: rollback ejecutado.")')
-lines.append("        else:")
-lines.append("            conn.commit()")
-lines.append('            print("COMMIT realizado.")')
-lines.append("    except Exception as e:")
-lines.append("        conn.rollback()")
-lines.append('        print(f"ERROR: {e}", file=sys.stderr)')
-lines.append("        raise")
-lines.append("    finally:")
-lines.append("        conn.close()")
-lines.append("")
-lines.append("")
-lines.append('if __name__ == "__main__":')
-lines.append("    main()")
 
-with open(OUT, "w", encoding="utf-8") as f:
-    f.write("\n".join(lines) + "\n")
+def main():
+    tipos_puntaje = parse_eq()
+    cargos = parse_cargos()
 
-print(f"Generado: {OUT}")
-print(f"  TIPOS_CON_PUNTAJE: {len(tipos_puntaje)}")
-print(f"  TIPOS_SIN_PUNTAJE: {len(extras_sorted)}")
-print(f"  CARGOS: {len(cargos_unique)}")
+    covered = {(d, ded) for _, d, ded, _ in tipos_puntaje}
+    extras = sorted({
+        (d, ded) for (_, d, ded, _, _, _, _) in cargos
+        if d and ded and (d, ded) not in covered
+    })
+
+    template = TEMPLATE.format(
+        tipos_puntaje=_fmt_list(tipos_puntaje),
+        tipos_sin_puntaje=_fmt_list(extras),
+        cargos=_fmt_list(cargos),
+        n_cargos=len(cargos),
+    )
+
+    with open(OUT, "w", encoding="utf-8") as f:
+        f.write(template)
+
+    print(f"Generado: {OUT}")
+    print(f"  TIPOS_CON_PUNTAJE: {len(tipos_puntaje)}")
+    print(f"  TIPOS_SIN_PUNTAJE: {len(extras)}")
+    print(f"  CARGOS: {len(cargos)}")
+
+
+def _fmt_list(items):
+    lines = []
+    for it in items:
+        lines.append("    " + repr(it) + ",")
+    return "\n".join(lines)
+
+
+TEMPLATE = '''\
+"""
+Carga de TipoCargo + Cargo + CargoHistorial en producción.
+
+Script autocontenido, generado por _gen_embedded.py desde los Excel
+oficiales. Solo depende de psycopg2 (ya viene con el backend Django).
+
+Uso (dentro del contenedor backend):
+    python scripts/cargarCargos_embedded.py [--dry-run] [--solo-tipos]
+
+Pasos:
+  [1/4] Upsert TipoCargo con puntaje (15 entradas del catálogo).
+  [2/4] Upsert TipoCargo sin puntaje (descripciones del sistema).
+  [3/4] Upsert Cargo por numero_de_cargo (FK a TipoCargo).
+  [4/4] Insertar CargoHistorial: matchea legajo→Persona, decide
+        Docente vs NoDocente según caracter, y crea el historial
+        con fechaalta / fechabaja / motivo_fin.
+
+Idempotente: re-ejecutarlo no duplica datos.
+
+Requiere las env vars DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT
+(ya están configuradas en el contenedor backend de Coolify).
+"""
+
+import argparse
+import os
+import sys
+from datetime import datetime, date
+from decimal import Decimal
+
+import psycopg2
+
+DB_CONFIG = {{
+    "dbname":   os.environ["DB_NAME"],
+    "user":     os.environ["DB_USER"],
+    "password": os.environ["DB_PASSWORD"],
+    "host":     os.environ["DB_HOST"],
+    "port":     os.environ.get("DB_PORT", "5432"),
+}}
+
+# Caracteres docentes vs no-docentes en el Excel de origen.
+CARACTERES_DOCENTE = {{"D-OR", "D-IN", "DAUX", "D-NM"}}
+CARACTERES_NO_DOCENTE = {{"ND-P", "S-02"}}
+
+# (sigla, descripcion, dedicacion, puntaje)
+TIPOS_CON_PUNTAJE = [
+{tipos_puntaje}
+]
+
+# (descripcion, dedicacion) — TipoCargo sin puntaje (catálogo)
+TIPOS_SIN_PUNTAJE = [
+{tipos_sin_puntaje}
+]
+
+# (numero_de_cargo, descripcion, dedicacion, legajo, caracter,
+#  fecha_inicio, fecha_fin) — {n_cargos} cargos
+CARGOS = [
+{cargos}
+]
+
+
+def cargar_tipos_con_puntaje(cur, dry_run, now):
+    creados = actualizados = sin_cambios = 0
+    for sigla, desc, ded, puntaje in TIPOS_CON_PUNTAJE:
+        puntaje = Decimal(str(puntaje)).quantize(Decimal("0.01"))
+        cur.execute(
+            "SELECT id, sigla, puntaje FROM departamentos_tipocargo "
+            "WHERE descripcion=%s AND dedicacion=%s", (desc, ded))
+        row = cur.fetchone()
+        if row is None:
+            if not dry_run:
+                cur.execute(
+                    "INSERT INTO departamentos_tipocargo "
+                    "(sigla,descripcion,dedicacion,puntaje,estado,fecha_creacion,fecha_modificacion) "
+                    "VALUES (%s,%s,%s,%s,%s,%s,%s)",
+                    (sigla, desc, ded, puntaje, "1", now, now))
+            creados += 1
+        else:
+            _id, sigla_old, puntaje_old = row
+            if sigla_old != sigla or puntaje_old != puntaje:
+                if not dry_run:
+                    cur.execute(
+                        "UPDATE departamentos_tipocargo "
+                        "SET sigla=%s, puntaje=%s, fecha_modificacion=%s WHERE id=%s",
+                        (sigla, puntaje, now, _id))
+                actualizados += 1
+            else:
+                sin_cambios += 1
+    return creados, actualizados, sin_cambios
+
+
+def cargar_tipos_sin_puntaje(cur, dry_run, now):
+    creados = sin_cambios = 0
+    for desc, ded in TIPOS_SIN_PUNTAJE:
+        cur.execute(
+            "SELECT id FROM departamentos_tipocargo "
+            "WHERE descripcion=%s AND dedicacion=%s", (desc, ded))
+        if cur.fetchone():
+            sin_cambios += 1
+            continue
+        if not dry_run:
+            cur.execute(
+                "INSERT INTO departamentos_tipocargo "
+                "(sigla,descripcion,dedicacion,puntaje,estado,fecha_creacion,fecha_modificacion) "
+                "VALUES (%s,%s,%s,%s,%s,%s,%s)",
+                ("", desc, ded, None, "1", now, now))
+        creados += 1
+    return creados, sin_cambios
+
+
+def cargar_cargos(cur, dry_run, now):
+    cur.execute(
+        "SELECT id, descripcion, dedicacion FROM departamentos_tipocargo")
+    lookup_tipo = {{(d, ded): _id for (_id, d, ded) in cur.fetchall()}}
+
+    creados = actualizados = sin_cambios = sin_tipo = 0
+    for (nro, desc, ded, _legajo, _caracter, _fa, _fb) in CARGOS:
+        tid = lookup_tipo.get((desc, ded))
+        if tid is None:
+            sin_tipo += 1
+        cur.execute(
+            "SELECT id, tipo_cargo_id FROM departamentos_cargo "
+            "WHERE numero_de_cargo=%s", (nro,))
+        row = cur.fetchone()
+        if row is None:
+            if not dry_run:
+                cur.execute(
+                    "INSERT INTO departamentos_cargo "
+                    "(numero_de_cargo,tipo_cargo_id,departamento_id,asignatura_id,"
+                    "resolucion_oficializacion_id,observaciones,estado,"
+                    "fecha_creacion,fecha_modificacion) "
+                    "VALUES (%s,%s,NULL,NULL,NULL,NULL,%s,%s,%s)",
+                    (nro, tid, "1", now, now))
+            creados += 1
+        else:
+            _id, tipo_old = row
+            if tid is not None and tipo_old != tid:
+                if not dry_run:
+                    cur.execute(
+                        "UPDATE departamentos_cargo "
+                        "SET tipo_cargo_id=%s, fecha_modificacion=%s WHERE id=%s",
+                        (tid, now, _id))
+                actualizados += 1
+            else:
+                sin_cambios += 1
+    return creados, actualizados, sin_cambios, sin_tipo
+
+
+def cargar_historial(cur, dry_run, now):
+    # Pre-lookups en memoria
+    cur.execute("SELECT id, legajo FROM departamentos_persona WHERE legajo IS NOT NULL")
+    legajo_to_persona = {{l: i for (i, l) in cur.fetchall()}}
+
+    cur.execute("SELECT id, persona_id FROM departamentos_docente WHERE estado IN ('1', 'true')")
+    persona_to_docente = {{p: i for (i, p) in cur.fetchall()}}
+
+    cur.execute("SELECT id, persona_id FROM departamentos_nodocente WHERE estado IN ('1', 'true')")
+    persona_to_nodocente = {{p: i for (i, p) in cur.fetchall()}}
+
+    cur.execute("SELECT id, numero_de_cargo FROM departamentos_cargo")
+    nrocargo_to_cargo = {{n: i for (i, n) in cur.fetchall()}}
+
+    cur.execute("SELECT cargo_id FROM departamentos_cargohistorial")
+    cargos_con_historial = {{r[0] for r in cur.fetchall()}}
+
+    hoy = date.today()
+    creados = ya_existe = sin_persona = sin_ocupante = sin_cargo = 0
+
+    for (nro, _desc, _ded, legajo, caracter, fa, fb) in CARGOS:
+        cargo_id = nrocargo_to_cargo.get(nro)
+        if cargo_id is None:
+            sin_cargo += 1
+            continue
+        if cargo_id in cargos_con_historial:
+            ya_existe += 1
+            continue
+
+        persona_id = legajo_to_persona.get(legajo) if legajo else None
+        if persona_id is None:
+            sin_persona += 1
+            continue
+
+        docente_id = no_docente_id = None
+        if caracter in CARACTERES_DOCENTE:
+            docente_id = persona_to_docente.get(persona_id)
+        elif caracter in CARACTERES_NO_DOCENTE:
+            no_docente_id = persona_to_nodocente.get(persona_id)
+
+        if docente_id is None and no_docente_id is None:
+            sin_ocupante += 1
+            continue
+
+        fecha_inicio = date.fromisoformat(fa) if fa else None
+        fecha_fin = date.fromisoformat(fb) if fb else None
+        if fecha_inicio is None:
+            sin_ocupante += 1  # Sin fecha_inicio no se puede insertar
+            continue
+
+        motivo_fin = "vencimiento" if (fecha_fin and fecha_fin < hoy) else None
+
+        if not dry_run:
+            cur.execute(
+                "INSERT INTO departamentos_cargohistorial "
+                "(cargo_id, docente_id, no_docente_id, fecha_inicio, fecha_fin, "
+                " motivo_fin, observaciones, estado, fecha_creacion, fecha_modificacion) "
+                "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                (cargo_id, docente_id, no_docente_id, fecha_inicio, fecha_fin,
+                 motivo_fin, "Importado desde Excel.", "1", now, now))
+        creados += 1
+
+    return creados, ya_existe, sin_persona, sin_ocupante, sin_cargo
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--solo-tipos", action="store_true")
+    args = parser.parse_args()
+
+    print(f"DB: {{DB_CONFIG['user']}}@{{DB_CONFIG['host']}}:{{DB_CONFIG['port']}}/{{DB_CONFIG['dbname']}}")
+    if args.dry_run:
+        print(">>> DRY-RUN: no se hará COMMIT <<<")
+    print()
+
+    conn = psycopg2.connect(**DB_CONFIG)
+    try:
+        cur = conn.cursor()
+        now = datetime.now()
+
+        print("[1/4] TipoCargo con puntaje...")
+        c, u, s = cargar_tipos_con_puntaje(cur, args.dry_run, now)
+        print(f"     creados={{c}}  actualizados={{u}}  sin_cambios={{s}}")
+
+        print("[2/4] TipoCargo sin puntaje...")
+        c, s = cargar_tipos_sin_puntaje(cur, args.dry_run, now)
+        print(f"     creados={{c}}  sin_cambios={{s}}")
+
+        if args.solo_tipos:
+            print("--solo-tipos: omitiendo Cargo y CargoHistorial.")
+        else:
+            print(f"[3/4] Cargo (total {{len(CARGOS)}})...")
+            c, u, s, sin_tipo = cargar_cargos(cur, args.dry_run, now)
+            print(f"     creados={{c}}  actualizados={{u}}  sin_cambios={{s}}  sin_tipo={{sin_tipo}}")
+
+            print(f"[4/4] CargoHistorial...")
+            c, ye, sp, so, sc = cargar_historial(cur, args.dry_run, now)
+            print(f"     creados={{c}}  ya_existe={{ye}}  sin_persona={{sp}}  sin_ocupante={{so}}  sin_cargo={{sc}}")
+
+        if args.dry_run:
+            conn.rollback()
+            print("\\nDRY-RUN: rollback ejecutado.")
+        else:
+            conn.commit()
+            print("\\nCOMMIT realizado.")
+    except Exception as e:
+        conn.rollback()
+        print(f"ERROR: {{e}}", file=sys.stderr)
+        raise
+    finally:
+        conn.close()
+
+
+if __name__ == "__main__":
+    main()
+'''
+
+
+if __name__ == "__main__":
+    main()

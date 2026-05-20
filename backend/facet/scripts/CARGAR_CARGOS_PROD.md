@@ -2,10 +2,34 @@
 
 Esta guía es para el caso en que **no hay SSH al servidor** de Coolify.
 Usa el script autocontenido `cargarCargos_embedded.py` (datos
-embebidos) y la pestaña **Scheduled Tasks** de Coolify para correrlo
-dentro del contenedor backend.
+embebidos) y el campo **Post-deployment Command** de Coolify para
+correrlo dentro del contenedor backend.
 
 El script es idempotente: re-ejecutarlo no duplica datos.
+
+## Qué carga el script
+
+1. **TipoCargo con puntaje** — 15 entradas (5 siglas × 3 dedicaciones)
+   del catálogo de equivalencias.
+2. **TipoCargo sin puntaje** — 10 entradas para descripciones del
+   sistema sin equivalencia (DECANO, Categoria Dto.366, AUX 2da, etc.).
+3. **Cargo** — 958 cargos por `numero_de_cargo`, vinculados a su
+   TipoCargo (departamento/asignatura/resolución quedan en NULL para
+   completar después por la UI).
+4. **CargoHistorial** — vínculo cargo ↔ persona. Matchea por
+   `Persona.legajo` (campo público, no se incluye CUIL/DNI en el repo).
+   Según el `caracter` del Excel decide si el ocupante es Docente
+   (D-OR/D-IN/DAUX/D-NM) o NoDocente (ND-P/S-02). Setea fecha_inicio,
+   fecha_fin, y motivo_fin='vencimiento' si la fecha_fin ya pasó.
+
+**Pre-requisitos en producción:**
+- Las Personas (con su `legajo`) ya deben estar cargadas (por
+  `cargarPersonas.py` / `cargarNoDocentes.py`).
+- Los Docente / NoDocente para esas Personas también.
+
+Si falta alguna Persona, el script reporta `sin_persona=N` y omite
+ese historial pero igual carga el Cargo. Es seguro re-correrlo
+después de completar las Personas.
 
 ---
 
@@ -113,31 +137,41 @@ cargos sin TipoCargo matcheado y algo cambió en los datos.
 
 En el log del deploy (o del task) vas a ver al final:
 
-**Primer deploy** (DB vacía):
+**Primer deploy** (DB vacía de cargos, con Personas ya cargadas):
 ```
 DB: <user>@<host>:5432/<dbname>
-[1/3] TipoCargo con puntaje...
+[1/4] TipoCargo con puntaje...
      creados=15  actualizados=0  sin_cambios=0
-[2/3] TipoCargo sin puntaje...
+[2/4] TipoCargo sin puntaje...
      creados=10  sin_cambios=0
-[3/3] Cargo (total 958)...
+[3/4] Cargo (total 958)...
      creados=958  actualizados=0  sin_cambios=0  sin_tipo=0
+[4/4] CargoHistorial...
+     creados=958  ya_existe=0  sin_persona=0  sin_ocupante=0  sin_cargo=0
 COMMIT realizado.
 ```
 
 **Deploys siguientes** (datos ya cargados — idempotente):
 ```
-[1/3] TipoCargo con puntaje...
-     creados=0  actualizados=0  sin_cambios=15
-[2/3] TipoCargo sin puntaje...
-     creados=0  sin_cambios=10
-[3/3] Cargo (total 958)...
-     creados=0  actualizados=0  sin_cambios=958  sin_tipo=0
+[1/4] TipoCargo con puntaje:    sin_cambios=15
+[2/4] TipoCargo sin puntaje:    sin_cambios=10
+[3/4] Cargo (total 958):        sin_cambios=958  sin_tipo=0
+[4/4] CargoHistorial:           ya_existe=958
 COMMIT realizado.
 ```
 
-Si ves `sin_tipo > 0` después del primer deploy, algo cambió en los
-datos fuente — habría que regenerar el embedded.
+**Si las Personas todavía no están cargadas:**
+```
+[3/4] Cargo (total 958): creados=958
+[4/4] CargoHistorial: creados=0  sin_persona=958
+```
+Esto NO es un error — los Cargos se crearon. Re-correr después de
+cargar las Personas y el script completará los CargoHistorial.
+
+**Banderas de problema:**
+- `sin_tipo > 0` después del 1er deploy → cambió la fuente, regenerar embedded.
+- `sin_ocupante > 0` → hay Personas sin su Docente/NoDocente asociado.
+- `sin_cargo > 0` → bug del script (no debería pasar).
 
 ---
 
