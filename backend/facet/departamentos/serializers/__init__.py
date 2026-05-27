@@ -15,6 +15,7 @@ from .directorCarrera import DirectorCarreraSerializer
 from .tipoTitulo import TipoTituloSerializer
 from .notificacion import NotificacionSerializer
 from .tipoCargo import TipoCargoSerializer
+from .cargoDepartamento import CargoDepartamentoSerializer
 from .cargo import CargoSerializer
 from .cargoHistorial import CargoHistorialSerializer, CargoHistorialDetailSerializer
 from .operacionCargo import OperacionCargoSerializer, CargoMiniSerializer

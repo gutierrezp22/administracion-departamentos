@@ -1,9 +1,10 @@
 from rest_framework import serializers
-from ..models import CargoHistorial, Cargo, Docente, NoDocente, Resolucion
+from ..models import CargoHistorial, CargoDepartamento, Docente, NoDocente, Resolucion
 
 
 class CargoHistorialSerializer(serializers.ModelSerializer):
-    cargo = serializers.PrimaryKeyRelatedField(queryset=Cargo.objects.all())
+    cargo_departamento = serializers.PrimaryKeyRelatedField(
+        queryset=CargoDepartamento.objects.all())
     docente = serializers.PrimaryKeyRelatedField(
         queryset=Docente.objects.all(), allow_null=True, required=False)
     no_docente = serializers.PrimaryKeyRelatedField(
@@ -23,7 +24,8 @@ class CargoHistorialSerializer(serializers.ModelSerializer):
 
 
 class CargoHistorialDetailSerializer(serializers.ModelSerializer):
-    cargo_numero = serializers.IntegerField(source='cargo.numero_de_cargo', read_only=True)
+    cargo_departamento_descripcion = serializers.CharField(
+        source='cargo_departamento.descripcion', read_only=True)
     docente_detalle = serializers.SerializerMethodField()
     no_docente_detalle = serializers.SerializerMethodField()
     resolucion_detalle = serializers.SerializerMethodField()
@@ -33,7 +35,7 @@ class CargoHistorialDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = CargoHistorial
         fields = (
-            'id', 'cargo', 'cargo_numero',
+            'id', 'cargo_departamento', 'cargo_departamento_descripcion',
             'docente', 'docente_detalle',
             'no_docente', 'no_docente_detalle',
             'fecha_inicio', 'fecha_fin', 'duracion_dias', 'vacante',

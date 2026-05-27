@@ -69,4 +69,12 @@ frontend/.next/
 frontend/out/
 frontend/dist/
 
-.cursorrules  
+.cursorrules
+
+# 🖼️ Screenshots de prueba en la raíz
+/*.png
+
+# 📊 Excels sensibles del payroll (datos del decanato)
+backend/facet/scripts/e_*.xls
+backend/facet/scripts/Tabla de Cargos Docentes.xlsx
+

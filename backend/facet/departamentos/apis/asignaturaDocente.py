@@ -19,8 +19,8 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
         'tipo_cargo': ['exact'],
         'condicion': ['exact'],
         'dedicacion': ['exact'],
-        'cargo': ['exact'],
-        'cargo__numero_de_cargo': ['exact'],
+        'cargo_departamento': ['exact'],
+        'cargo_departamento__departamento': ['exact'],
         'docente__persona__legajo': ['icontains'],
         'docente__persona__apellido': ['icontains'],
         'docente__persona__nombre': ['icontains'],
@@ -49,7 +49,10 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
         Permite obtener todos los objetos (incluyendo inactivos) si se especifica el parámetro 'show_all'
         o si se filtra explícitamente por estado
         """
-        queryset = AsignaturaDocente.objects.select_related('docente__persona', 'asignatura', 'resolucion', 'cargo').all()
+        queryset = AsignaturaDocente.objects.select_related(
+            'docente__persona', 'asignatura', 'resolucion',
+            'cargo_departamento__departamento', 'cargo_departamento__asignatura',
+        ).all()
         
         # Si se especifica show_all, mostrar todos
         if self.request.query_params.get('show_all', False):
@@ -69,19 +72,29 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
         incluyendo fecha de inicio y fecha de vencimiento.
         """
         queryset = AsignaturaDocente.objects.select_related(
-            'docente__persona', 'asignatura', 'resolucion', 'cargo'
+            'docente__persona', 'asignatura', 'resolucion',
+            'cargo_departamento__departamento', 'cargo_departamento__asignatura',
+            'cargo_departamento__cargo',
         ).filter(asignatura__id=request.query_params.get('asignatura'))
 
         # Aplicar filtro de estado si no se especifica show_all
         if not request.query_params.get('show_all', False):
             queryset = queryset.filter(estado='1')
 
+        def _nro_cargo(ad):
+            cd = ad.cargo_departamento
+            if not cd:
+                return None
+            cargo_plata = getattr(cd, 'cargo', None)
+            return cargo_plata.numero_de_cargo if cargo_plata else None
+
         data = [
             {
                 'id': asignatura_docente.id,
                 'condicion': asignatura_docente.condicion,
                 'tipo_cargo': asignatura_docente.tipo_cargo,
-                'cargo': asignatura_docente.cargo.numero_de_cargo if asignatura_docente.cargo else None,
+                'cargo': _nro_cargo(asignatura_docente),
+                'cargo_departamento': asignatura_docente.cargo_departamento_id,
                 'dedicacion': asignatura_docente.dedicacion,
                 'estado': asignatura_docente.estado,
                 'fecha_de_inicio': asignatura_docente.fecha_de_inicio,
@@ -95,7 +108,7 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
                         'apellido': asignatura_docente.docente.persona.apellido,
                         'dni': asignatura_docente.docente.persona.dni,
                         'estado': asignatura_docente.docente.persona.estado,
-                        'email': asignatura_docente.docente.persona.email, 
+                        'email': asignatura_docente.docente.persona.email,
                     },
                 },
             }
@@ -112,7 +125,9 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
         dias_limite = int(request.query_params.get('dias', 30))  # Permite ajustar el límite con un parámetro opcional
         fecha_limite = now() + timedelta(days=dias_limite)
 
-        queryset = AsignaturaDocente.objects.select_related('docente__persona', 'cargo').filter(
+        queryset = AsignaturaDocente.objects.select_related(
+            'docente__persona', 'cargo_departamento__cargo',
+        ).filter(
             fecha_de_vencimiento__lte=fecha_limite,
             fecha_de_vencimiento__gte=now()
         )
@@ -121,12 +136,20 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
         if not request.query_params.get('show_all', False):
             queryset = queryset.filter(estado='1')
 
+        def _nro_cargo(ad):
+            cd = ad.cargo_departamento
+            if not cd:
+                return None
+            cargo_plata = getattr(cd, 'cargo', None)
+            return cargo_plata.numero_de_cargo if cargo_plata else None
+
         data = [
             {
                 'id': asignatura_docente.id,
                 'condicion': asignatura_docente.condicion,
                 'tipo_cargo': asignatura_docente.tipo_cargo,
-                'cargo': asignatura_docente.cargo.numero_de_cargo if asignatura_docente.cargo else None,
+                'cargo': _nro_cargo(asignatura_docente),
+                'cargo_departamento': asignatura_docente.cargo_departamento_id,
                 'dedicacion': asignatura_docente.dedicacion,
                 'fecha_de_inicio': asignatura_docente.fecha_de_inicio,  # Agregar este campo
                 'fecha_de_vencimiento': asignatura_docente.fecha_de_vencimiento,

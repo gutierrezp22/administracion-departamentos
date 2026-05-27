@@ -40,8 +40,8 @@ class AsignaturaDocente(BaseModel):
 
     condicion = models.CharField(max_length=50, choices=CONDICION_CHOICES)
     tipo_cargo = models.CharField(max_length=50, choices=TIPO_CARGO_CHOICES)
-    cargo = models.ForeignKey(
-        'Cargo', on_delete=models.SET_NULL, null=True, blank=True,
+    cargo_departamento = models.ForeignKey(
+        'CargoDepartamento', on_delete=models.SET_NULL, null=True, blank=True,
         related_name='asignaciones')
     dedicacion = models.CharField(max_length=20, choices=DEDICACION_CHOICES)
     fecha_de_inicio = models.DateTimeField(blank=True, null=True)

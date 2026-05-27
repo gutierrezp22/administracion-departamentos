@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import AsignaturaDocente,Docente,Asignatura,Resolucion
+from ..models import AsignaturaDocente, Docente, Asignatura, Resolucion, CargoDepartamento
 from .docente import DocenteSerializer
 from .resolucion import ResolucionSerializer
 from .asignatura import AsignaturaSerializer
@@ -13,6 +13,8 @@ class AsignaturaDocenteCreateSerializer(serializers.ModelSerializer):
     docente = serializers.PrimaryKeyRelatedField(queryset=Docente.objects.all())
     asignatura = serializers.PrimaryKeyRelatedField(queryset=Asignatura.objects.all())
     resolucion = serializers.PrimaryKeyRelatedField(queryset=Resolucion.objects.all())
+    cargo_departamento = serializers.PrimaryKeyRelatedField(
+        queryset=CargoDepartamento.objects.all(), required=False, allow_null=True)
 
     class Meta:
         model = AsignaturaDocente
@@ -25,4 +27,4 @@ class AsignaturaDocenteDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AsignaturaDocente
-        fields = '__all__'        
+        fields = '__all__'

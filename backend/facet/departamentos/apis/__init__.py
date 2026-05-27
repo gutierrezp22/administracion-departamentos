@@ -15,6 +15,7 @@ from .directorCarrera import DirectorCarreraViewSet
 from .tipoTitulo import TipoTituloViewSet
 from .notificacion import NotificacionViewSet
 from .tipoCargo import TipoCargoViewSet
+from .cargoDepartamento import CargoDepartamentoViewSet
 from .cargo import CargoViewSet
 from .cargoHistorial import CargoHistorialViewSet
 from .operacionCargo import OperacionCargoViewSet

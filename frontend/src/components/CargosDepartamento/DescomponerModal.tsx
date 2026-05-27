@@ -24,9 +24,9 @@ interface Combinacion {
   piezas: Pieza[];
 }
 
-interface CargoBasico {
+interface CargoDepBasico {
   id: number;
-  numero_de_cargo: number;
+  descripcion: string;
   puntaje: string | null;
   tipo_cargo_detalle: {
     descripcion: string;
@@ -35,12 +35,12 @@ interface CargoBasico {
 }
 
 interface Props {
-  cargo: CargoBasico;
+  cargoDep: CargoDepBasico;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-const DescomponerModal: React.FC<Props> = ({ cargo, onClose, onSuccess }) => {
+const DescomponerModal: React.FC<Props> = ({ cargoDep, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(true);
   const [combinaciones, setCombinaciones] = useState<Combinacion[]>([]);
   const [seleccionada, setSeleccionada] = useState<number | null>(null);
@@ -51,8 +51,9 @@ const DescomponerModal: React.FC<Props> = ({ cargo, onClose, onSuccess }) => {
   const fetchCombinaciones = async (mp = maxPiezas) => {
     setLoading(true);
     try {
-      const r = await API.get(`/facet/cargo/${cargo.id}/descomposiciones/?max_piezas=${mp}`);
-      // Filtrar la trivial (1 sola pieza)
+      const r = await API.get(
+        `/facet/cargo-departamento/${cargoDep.id}/descomposiciones/?max_piezas=${mp}`
+      );
       const combs = (r.data.combinaciones || []).filter(
         (c: Combinacion) => c.piezas.length >= 2
       );
@@ -67,18 +68,18 @@ const DescomponerModal: React.FC<Props> = ({ cargo, onClose, onSuccess }) => {
   useEffect(() => {
     fetchCombinaciones();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cargo.id]);
+  }, [cargoDep.id]);
 
   const ejecutar = async () => {
     if (seleccionada === null) return;
     const combo = combinaciones[seleccionada];
     setEnviando(true);
     try {
-      await API.post(`/facet/cargo/${cargo.id}/descomponer/`, {
+      await API.post(`/facet/cargo-departamento/${cargoDep.id}/descomponer/`, {
         tipos: combo.piezas.map((p) => p.id),
         observaciones,
       });
-      Swal.fire("Listo", "Cargo descompuesto con éxito.", "success");
+      Swal.fire("Listo", "Cargo de Departamento descompuesto con éxito.", "success");
       onSuccess();
     } catch (e: any) {
       Swal.fire("Error", e.response?.data?.detail || "No se pudo descomponer.", "error");
@@ -96,18 +97,19 @@ const DescomponerModal: React.FC<Props> = ({ cargo, onClose, onSuccess }) => {
       PaperProps={{ sx: { borderRadius: "1rem", overflow: "hidden" } }}
     >
       <DialogTitle className="bg-gradient-to-r from-orange-500 to-orange-600 text-white border-b border-orange-700/20 shadow-sm">
-        Descomponer Cargo #{cargo.numero_de_cargo}
+        Descomponer {cargoDep.descripcion || `Cargo de Departamento #${cargoDep.id}`}
       </DialogTitle>
       <DialogContent dividers className="p-6 bg-gray-50/30">
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5 text-sm">
           <p>
-            <strong>Cargo origen:</strong>{" "}
-            {cargo.tipo_cargo_detalle?.descripcion} ({cargo.tipo_cargo_detalle?.dedicacion}){" "}
-            — <strong>Puntaje:</strong> {cargo.puntaje}
+            <strong>Origen:</strong>{" "}
+            {cargoDep.tipo_cargo_detalle?.descripcion} ({cargoDep.tipo_cargo_detalle?.dedicacion}){" "}
+            — <strong>Puntaje:</strong> {cargoDep.puntaje}
           </p>
           <p className="text-gray-600 mt-1">
-            Elegí una combinación de tipos cuyos puntajes sumen exactamente el del cargo
-            original. El cargo se desactiva y se crean N nuevos cargos.
+            Elegí una combinación de tipos cuyos puntajes sumen exactamente el del Cargo de
+            Departamento original. El origen se desactiva, se crean N Cargos de Departamento
+            nuevos en el mismo depto, y si tenía un Cargo (plata) vinculado queda disponible.
           </p>
         </div>
 

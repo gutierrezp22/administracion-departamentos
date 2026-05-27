@@ -15,8 +15,8 @@ class CargoHistorial(BaseModel):
         ('otro', 'Otro'),
     ]
 
-    cargo = models.ForeignKey(
-        'Cargo', on_delete=models.CASCADE, related_name='historial')
+    cargo_departamento = models.ForeignKey(
+        'CargoDepartamento', on_delete=models.CASCADE, related_name='historial')
     docente = models.ForeignKey(
         'Docente', on_delete=models.SET_NULL, null=True, blank=True,
         help_text='Ocupante docente. Mutuamente exclusivo con no_docente.')
@@ -42,8 +42,10 @@ class CargoHistorial(BaseModel):
         if self.fecha_fin and self.fecha_fin < self.fecha_inicio:
             raise ValidationError({'fecha_fin': 'fecha_fin no puede ser anterior a fecha_inicio.'})
 
-        # Sin solapamiento de períodos para el mismo cargo (estado activo).
-        overlap = CargoHistorial.objects.filter(cargo=self.cargo, estado='1').exclude(pk=self.pk)
+        # Sin solapamiento de períodos para el mismo Cargo de Departamento (estado activo).
+        overlap = CargoHistorial.objects.filter(
+            cargo_departamento=self.cargo_departamento, estado='1',
+        ).exclude(pk=self.pk)
         if self.fecha_fin:
             overlap = overlap.filter(
                 Q(fecha_fin__isnull=True, fecha_inicio__lte=self.fecha_fin) |
@@ -63,9 +65,9 @@ class CargoHistorial(BaseModel):
     def __str__(self):
         quien = self.docente or 'Vacante'
         fin = self.fecha_fin or 'vigente'
-        return f"Cargo {self.cargo.numero_de_cargo} | {quien} | {self.fecha_inicio} → {fin}"
+        return f"{self.cargo_departamento} | {quien} | {self.fecha_inicio} → {fin}"
 
     class Meta:
-        ordering = ['cargo', '-fecha_inicio']
+        ordering = ['cargo_departamento', '-fecha_inicio']
         verbose_name = 'Historial de Cargo'
         verbose_name_plural = 'Historial de Cargos'

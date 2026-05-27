@@ -136,6 +136,7 @@ const PATH_LABELS: Record<string, string> = {
   careers: "Carreras",
   asignaturaCarrera: "Asignaturas en Carrera",
   cargos: "Cargos",
+  "cargos-departamento": "Cargos de Departamento",
   "sin-vincular": "Sin vincular",
   historial: "Historial",
   notificaciones: "Notificaciones",
@@ -223,7 +224,7 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
     // Si falla la request no rompe nada — simplemente no muestra el badge.
     const fetchPendientes = async () => {
       try {
-        const r = await API.get("/facet/cargo/?departamento__isnull=True&estado=1&page_size=1");
+        const r = await API.get("/facet/cargo/?cargo_departamento__isnull=True&estado=1&page_size=1");
         setCargosPendientes(r.data.count ?? 0);
       } catch {
         // ignore
@@ -292,10 +293,14 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
       path: "/dashboard/asignatura",
     },
     { icon: <SchoolIcon />, text: "Carreras", path: "/dashboard/careers" },
-    { icon: <WorkIcon />, text: "Cargos", path: "/dashboard/cargos/list" },
+    {
+      icon: <WorkIcon />,
+      text: "Cargos de Departamento",
+      path: "/dashboard/cargos-departamento/list",
+    },
     {
       icon: <AssignmentLateIcon />,
-      text: "Cargos pendientes",
+      text: "Cargos sin vincular",
       path: "/dashboard/cargos/sin-vincular",
       badge: cargosPendientes,
     },

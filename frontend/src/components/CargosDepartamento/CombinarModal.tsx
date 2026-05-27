@@ -17,10 +17,12 @@ interface TipoCargo {
   puntaje: string | null;
 }
 
-interface Cargo {
+interface CargoDep {
   id: number;
-  numero_de_cargo: number;
+  descripcion: string;
   puntaje: string | null;
+  departamento: number | null;
+  departamento_detalle: { id: number; nombre: string } | null;
   tipo_cargo_detalle: {
     descripcion: string;
     dedicacion: string;
@@ -28,21 +30,26 @@ interface Cargo {
 }
 
 interface Props {
-  cargos: Cargo[];
+  cargosDep: CargoDep[];
   onClose: () => void;
   onSuccess: () => void;
 }
 
-const CombinarModal: React.FC<Props> = ({ cargos, onClose, onSuccess }) => {
+const CombinarModal: React.FC<Props> = ({ cargosDep, onClose, onSuccess }) => {
   const [tipos, setTipos] = useState<TipoCargo[]>([]);
   const [tipoDestino, setTipoDestino] = useState<number | "">("");
   const [observaciones, setObservaciones] = useState("");
   const [enviando, setEnviando] = useState(false);
 
   const sumaPuntajes = useMemo(
-    () => cargos.reduce((acc, c) => acc + Number(c.puntaje || 0), 0),
-    [cargos]
+    () => cargosDep.reduce((acc, c) => acc + Number(c.puntaje || 0), 0),
+    [cargosDep]
   );
+
+  const deptosDistintos = useMemo(() => {
+    const set = new Set(cargosDep.map((c) => c.departamento));
+    return set.size > 1;
+  }, [cargosDep]);
 
   useEffect(() => {
     const fetch = async () => {
@@ -56,7 +63,6 @@ const CombinarModal: React.FC<Props> = ({ cargos, onClose, onSuccess }) => {
     fetch();
   }, []);
 
-  // Sugerencias: tipos cuyo puntaje coincide con la suma
   const tiposCoincidentes = useMemo(
     () => tipos.filter((t) => Number(t.puntaje) === sumaPuntajes),
     [tipos, sumaPuntajes]
@@ -69,12 +75,12 @@ const CombinarModal: React.FC<Props> = ({ cargos, onClose, onSuccess }) => {
     }
     setEnviando(true);
     try {
-      await API.post(`/facet/cargo/combinar/`, {
-        cargos: cargos.map((c) => c.id),
+      await API.post(`/facet/cargo-departamento/combinar/`, {
+        cargos_departamento: cargosDep.map((c) => c.id),
         tipo_cargo_destino: tipoDestino,
         observaciones,
       });
-      Swal.fire("Listo", "Cargos combinados con éxito.", "success");
+      Swal.fire("Listo", "Cargos de Departamento combinados.", "success");
       onSuccess();
     } catch (e: any) {
       Swal.fire("Error", e.response?.data?.detail || "No se pudo combinar.", "error");
@@ -83,7 +89,6 @@ const CombinarModal: React.FC<Props> = ({ cargos, onClose, onSuccess }) => {
     }
   };
 
-  // Opciones unificadas, con prefijo ✓ para las coincidentes (ordenadas primero)
   const tipoDestinoOptions = useMemo(
     () => [
       ...tiposCoincidentes.map((t) => ({
@@ -109,22 +114,30 @@ const CombinarModal: React.FC<Props> = ({ cargos, onClose, onSuccess }) => {
       PaperProps={{ sx: { borderRadius: "1rem", overflow: "hidden" } }}
     >
       <DialogTitle className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-b border-purple-700/20 shadow-sm">
-        Combinar Cargos
+        Combinar Cargos de Departamento
       </DialogTitle>
       <DialogContent dividers className="p-6 bg-gray-50/30">
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5 text-sm">
-          <p className="font-semibold mb-2">Cargos a combinar:</p>
+          <p className="font-semibold mb-2">Cargos de Departamento a combinar:</p>
           <ul className="list-disc list-inside space-y-0.5">
-            {cargos.map((c) => (
+            {cargosDep.map((c) => (
               <li key={c.id}>
-                #{c.numero_de_cargo} — {c.tipo_cargo_detalle?.descripcion}{" "}
+                {c.descripcion || `#${c.id}`} — {c.tipo_cargo_detalle?.descripcion}{" "}
                 ({c.tipo_cargo_detalle?.dedicacion}) =&gt; <strong>{c.puntaje}</strong>
+                {c.departamento_detalle && (
+                  <span className="text-gray-500"> · {c.departamento_detalle.nombre}</span>
+                )}
               </li>
             ))}
           </ul>
           <p className="mt-2">
             <strong>Suma de puntajes:</strong> {sumaPuntajes.toFixed(2)}
           </p>
+          {deptosDistintos && (
+            <p className="mt-2 text-red-700">
+              ⚠ Los Cargos de Departamento son de distintos departamentos. El backend va a rechazar la operación.
+            </p>
+          )}
         </div>
 
         <div className="mb-4">
@@ -170,7 +183,7 @@ const CombinarModal: React.FC<Props> = ({ cargos, onClose, onSuccess }) => {
         </button>
         <button
           onClick={ejecutar}
-          disabled={!tipoDestino || enviando}
+          disabled={!tipoDestino || enviando || deptosDistintos}
           className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed">
           {enviando ? "Ejecutando..." : "Combinar"}
         </button>

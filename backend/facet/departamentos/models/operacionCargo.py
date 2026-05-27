@@ -24,9 +24,9 @@ class OperacionCargo(BaseModel):
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
     fecha = models.DateField()
     cargos_origen = models.ManyToManyField(
-        'Cargo', related_name='operaciones_como_origen')
+        'CargoDepartamento', related_name='operaciones_como_origen')
     cargos_destino = models.ManyToManyField(
-        'Cargo', related_name='operaciones_como_destino')
+        'CargoDepartamento', related_name='operaciones_como_destino')
     resolucion = models.ForeignKey(
         'Resolucion', on_delete=models.SET_NULL, null=True, blank=True)
     observaciones = models.TextField(blank=True, null=True)
