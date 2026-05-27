@@ -67,11 +67,11 @@ const ItemsMenu = () => {
         </ListItemIcon>
         <ListItemText primary="Carreras" />
       </ListItemButton>
-      <ListItemButton onClick={() => handleNavigation('/dashboard/cargos/list')}>
+      <ListItemButton onClick={() => handleNavigation('/dashboard/cargos-departamento/list')}>
         <ListItemIcon>
           <WorkIcon />
         </ListItemIcon>
-        <ListItemText primary="Cargos" />
+        <ListItemText primary="Cargos de Departamento" />
       </ListItemButton>
       <ListItemButton onClick={() => handleNavigation('/dashboard/notificaciones')}>
         <ListItemIcon>

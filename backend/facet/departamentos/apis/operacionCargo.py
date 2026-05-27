@@ -15,11 +15,12 @@ class StandardResultsSetPagination(PageNumberPagination):
 
 
 class OperacionCargoViewSet(viewsets.ReadOnlyModelViewSet):
-    """Solo lectura: las operaciones se crean vía endpoints en CargoViewSet
-    (descomponer / combinar / renovar)."""
+    """Solo lectura: las operaciones se crean vía endpoints en
+    CargoDepartamentoViewSet (descomponer / combinar / renovar)."""
     permission_classes = [AllowAny]
     queryset = OperacionCargo.objects.prefetch_related(
-        'cargos_origen__tipo_cargo', 'cargos_destino__tipo_cargo'
+        'cargos_origen__tipo_cargo', 'cargos_origen__departamento',
+        'cargos_destino__tipo_cargo', 'cargos_destino__departamento',
     ).all()
     serializer_class = OperacionCargoSerializer
     pagination_class = StandardResultsSetPagination

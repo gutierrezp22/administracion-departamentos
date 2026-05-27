@@ -22,8 +22,8 @@ class CargoHistorialViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = {
         'estado': ['exact'],
-        'cargo': ['exact'],
-        'cargo__numero_de_cargo': ['exact'],
+        'cargo_departamento': ['exact'],
+        'cargo_departamento__departamento': ['exact'],
         'docente': ['exact'],
         'docente__persona__dni': ['icontains'],
         'docente__persona__apellido': ['icontains'],
@@ -32,7 +32,7 @@ class CargoHistorialViewSet(viewsets.ModelViewSet):
         'fecha_fin': ['gte', 'lte', 'isnull'],
     }
     search_fields = [
-        'cargo__numero_de_cargo',
+        'cargo_departamento__descripcion',
         'docente__persona__nombre',
         'docente__persona__apellido',
     ]
@@ -51,7 +51,8 @@ class CargoHistorialViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = CargoHistorial.objects.select_related(
-            'cargo', 'docente__persona', 'resolucion'
+            'cargo_departamento__departamento',
+            'docente__persona', 'resolucion'
         ).all()
         if self.request.query_params.get('show_all', False):
             return queryset

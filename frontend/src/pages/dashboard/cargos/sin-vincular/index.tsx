@@ -18,15 +18,19 @@ const normalizeUrl = (url: string) => {
 interface Cargo {
   id: number;
   numero_de_cargo: number;
+  tipo_cargo: number | null;
   tipo_cargo_detalle: {
     descripcion: string;
     dedicacion: string;
     sigla: string;
   } | null;
-  departamento: number | null;
-  departamento_detalle: { id: number; nombre: string } | null;
-  asignatura: number | null;
-  asignatura_detalle: { id: number; codigo: string; nombre: string } | null;
+  cargo_departamento: number | null;
+  cargo_departamento_detalle: {
+    id: number;
+    descripcion: string;
+    departamento: { id: number; nombre: string } | null;
+    asignatura: { id: number; codigo: string; nombre: string } | null;
+  } | null;
   resolucion_oficializacion: number | null;
   resolucion_oficializacion_detalle: {
     id: number;
@@ -88,9 +92,10 @@ const CargosSinVincular = () => {
               Cargos sin vincular
             </h1>
             <p className="text-sm text-gray-600 mt-1">
-              Estos cargos fueron importados pero todavía no tienen
-              departamento asignado. Vinculá cada uno al departamento que lo
-              gestiona (y opcionalmente a una asignatura).
+              Estos cargos (plata) fueron importados pero todavía no tienen
+              un <strong>Cargo de Departamento</strong> asignado. Vinculá cada
+              uno al Cargo de Departamento correspondiente (creálo desde su
+              sección si todavía no existe).
             </p>
             <div className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 bg-orange-50 border border-orange-200 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
@@ -146,7 +151,7 @@ const CargosSinVincular = () => {
                           🎉 No hay cargos sin vincular.
                         </p>
                         <p className="text-xs text-gray-400">
-                          Todos los cargos tienen un departamento asignado.
+                          Todos los cargos tienen un Cargo de Departamento asignado.
                         </p>
                       </TableCell>
                     </TableRow>

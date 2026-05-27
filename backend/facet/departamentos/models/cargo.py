@@ -8,14 +8,10 @@ class Cargo(BaseModel):
         'TipoCargo', on_delete=models.PROTECT, null=True, blank=True,
         related_name='cargos',
         help_text='Tipo de cargo (incluye dedicación). Null si aún no se asignó.')
-    departamento = models.ForeignKey(
-        'Departamento', on_delete=models.PROTECT, null=True, blank=True,
-        related_name='cargos',
-        help_text='Departamento que gestiona el cargo. Null mientras está sin vincular.')
-    asignatura = models.ForeignKey(
-        'Asignatura', on_delete=models.SET_NULL, null=True, blank=True,
-        related_name='cargos',
-        help_text='Asignatura vinculada (solo para cargos docentes). Opcional.')
+    cargo_departamento = models.OneToOneField(
+        'CargoDepartamento', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='cargo',
+        help_text='Slot de departamento al que está vinculado este cargo (plata). 1:1.')
     resolucion_oficializacion = models.ForeignKey(
         'Resolucion', on_delete=models.SET_NULL, null=True, blank=True,
         related_name='cargos_oficializados',

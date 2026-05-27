@@ -1105,10 +1105,10 @@ def cargar_cargos(cur, dry_run, now):
             if not dry_run:
                 cur.execute(
                     "INSERT INTO departamentos_cargo "
-                    "(numero_de_cargo,tipo_cargo_id,departamento_id,asignatura_id,"
+                    "(numero_de_cargo,tipo_cargo_id,cargo_departamento_id,"
                     "resolucion_oficializacion_id,observaciones,estado,"
                     "fecha_creacion,fecha_modificacion) "
-                    "VALUES (%s,%s,NULL,NULL,NULL,NULL,%s,%s,%s)",
+                    "VALUES (%s,%s,NULL,NULL,NULL,%s,%s,%s)",
                     (nro, tid, "1", now, now))
             creados += 1
         else:

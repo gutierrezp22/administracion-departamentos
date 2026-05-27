@@ -15,6 +15,7 @@ from .directorCarrera import DirectorCarrera
 from .tipoTitulo import TipoTitulo
 from .notificacion import Notificacion
 from .tipoCargo import TipoCargo
+from .cargoDepartamento import CargoDepartamento
 from .cargo import Cargo
 from .cargoHistorial import CargoHistorial
 from .operacionCargo import OperacionCargo
