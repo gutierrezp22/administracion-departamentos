@@ -458,19 +458,17 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
 
         {/* Content */}
         <main className="flex-1 overflow-y-auto p-6">
-          {children}
-
-          {/* Botón Volver Atrás */}
+          {/* Botón Volver Atrás (ghost sutil, arriba a la izquierda) */}
           {router.pathname !== "/dashboard/home" && (
-            <div className="mt-8 flex justify-center">
-              <button
-                onClick={() => router.back()}
-                className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2.5 rounded-md shadow-md transition-colors duration-200 font-medium">
-                <ArrowBackIcon />
-                Volver Atrás
-              </button>
-            </div>
+            <button
+              onClick={() => router.back()}
+              className="group mb-1 flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors duration-200">
+              <ArrowBackIcon fontSize="small" className="group-hover:-translate-x-0.5 transition-transform" />
+              Volver atrás
+            </button>
           )}
+
+          {children}
         </main>
       </div>
     </div>
