@@ -26,11 +26,12 @@ class NotificacionPagination(PageNumberPagination):
 class NotificacionFilter(filters.FilterSet):
     persona_apellido = filters.CharFilter(field_name="persona__apellido", lookup_expr="icontains")
     persona_nombre = filters.CharFilter(field_name="persona__nombre", lookup_expr="icontains")
-    fecha_creacion = filters.DateFromToRangeFilter(field_name="fecha_creacion")  
+    mensaje__icontains = filters.CharFilter(field_name="mensaje", lookup_expr="icontains")
+    fecha_creacion = filters.DateFromToRangeFilter(field_name="fecha_creacion")
 
     class Meta:
         model = Notificacion
-        fields = ['persona_apellido', 'persona_nombre', 'fecha_creacion']
+        fields = ['persona_apellido', 'persona_nombre', 'mensaje__icontains', 'fecha_creacion']
 
 class NotificacionViewSet(viewsets.ModelViewSet):
     queryset = Notificacion.objects.select_related('persona').all().order_by('-fecha_creacion')  

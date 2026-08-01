@@ -20,7 +20,13 @@ export async function exportToExcel({
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet(sheetName);
 
-  const headers = rows.length > 0 ? Object.keys(rows[0]) : [];
+  // Unión de claves de TODAS las filas: si una fila tiene columnas extra,
+  // no se pierden por derivar los encabezados solo de la primera
+  const headerSet = new Set<string>();
+  rows.forEach((row) => {
+    Object.keys(row).forEach((key) => headerSet.add(key));
+  });
+  const headers = Array.from(headerSet);
 
   worksheet.columns = headers.map((header) => ({
     header,

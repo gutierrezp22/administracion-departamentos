@@ -35,4 +35,9 @@ CELERY_RESULT_BACKEND=redis://localhost:6379/0
 
 # 🔐 Configuración de reCAPTCHA (opcional)
 RECAPTCHA_PUBLIC_KEY=your-recaptcha-public-key
-RECAPTCHA_PRIVATE_KEY=your-recaptcha-private-key 
+RECAPTCHA_PRIVATE_KEY=your-recaptcha-private-key
+
+# 🔗 Base del enlace de restablecimiento de contraseña que se envía por email.
+# Debe apuntar al frontend, terminando en /login/reset-password/
+# Si no se define, se construye a partir del Origin de la petición.
+RESET_LOCAL=http://localhost:3000/login/reset-password/ 

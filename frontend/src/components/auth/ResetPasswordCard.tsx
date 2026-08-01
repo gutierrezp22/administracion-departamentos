@@ -1,68 +1,31 @@
 "use client";
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 import Swal from "sweetalert2";
 import { FiLock, FiEye, FiEyeOff, FiCheckCircle } from "react-icons/fi";
-import "../../app/globals.css";
 import API from "@/api/axiosConfig";
 
-export default function ResetPasswordPage() {
+interface ResetPasswordCardProps {
+  uid: string;
+  token: string;
+}
+
+/**
+ * Tarjeta de restablecimiento de contraseña, compartida por las dos rutas
+ * de entrada: /login/reset-password/<uid>/<token>/ (path) y
+ * /login/reset-password/?uid=...&token=... (query string, compatible con
+ * export estático sin rewrites del servidor).
+ */
+const ResetPasswordCard: React.FC<ResetPasswordCardProps> = ({ uid, token }) => {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [token, setToken] = useState("");
-  const [uid, setUid] = useState("");
-
-  useEffect(() => {
-    // Obtener token y uid de la URL path
-    const path = window.location.pathname;
-    const pathParts = path.split('/');
-    
-    // Esperamos una URL como: /login/reset-password/uidb64/token/
-    if (pathParts.length >= 5) {
-      const uidParam = pathParts[3];
-      const tokenParam = pathParts[4];
-      
-      if (!tokenParam || !uidParam) {
-        Swal.fire({
-          icon: "error",
-          title: "Enlace inválido",
-          text: "El enlace de recuperación no es válido o ha expirado.",
-          confirmButtonColor: "#2563eb",
-        }).then(() => {
-          router.push("/login");
-        });
-        return;
-      }
-      
-      setToken(tokenParam);
-      setUid(uidParam);
-    } else {
-      // También intentar obtener de query params como fallback
-      const urlParams = new URLSearchParams(window.location.search);
-      const tokenParam = urlParams.get("token");
-      const uidParam = urlParams.get("uid");
-      
-      if (!tokenParam || !uidParam) {
-        Swal.fire({
-          icon: "error",
-          title: "Enlace inválido",
-          text: "El enlace de recuperación no es válido o ha expirado.",
-          confirmButtonColor: "#2563eb",
-        }).then(() => {
-          router.push("/login");
-        });
-        return;
-      }
-      
-      setToken(tokenParam);
-      setUid(uidParam);
-    }
-  }, [router]);
 
   const validatePassword = (pass: string) => {
     const minLength = pass.length >= 8;
@@ -73,13 +36,13 @@ export default function ResetPasswordPage() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    
+
     if (password !== confirmPassword) {
       Swal.fire({
         icon: "error",
         title: "Error",
         text: "Las contraseñas no coinciden.",
-        confirmButtonColor: "#2563eb",
+        confirmButtonColor: "#3b82f6",
       });
       return;
     }
@@ -89,7 +52,7 @@ export default function ResetPasswordPage() {
         icon: "error",
         title: "Contraseña inválida",
         text: "La contraseña debe tener al menos 8 caracteres e incluir letras y números.",
-        confirmButtonColor: "#2563eb",
+        confirmButtonColor: "#3b82f6",
       });
       return;
     }
@@ -99,25 +62,40 @@ export default function ResetPasswordPage() {
     try {
       await API.post(`/facet/password/reset/confirm/${uid}/${token}/`, {
         new_password: password,
-        new_password_confirm: password,
+        confirm_new_password: confirmPassword,
       });
 
       await Swal.fire({
         icon: "success",
         title: "¡Contraseña actualizada!",
-        text: "Su contraseña ha sido restablecida correctamente. Ahora puede iniciar sesión con su nueva contraseña.",
+        text: "Tu contraseña se restableció correctamente. Ya podés iniciar sesión con tu nueva contraseña.",
         confirmButtonText: "Ir al inicio de sesión",
-        confirmButtonColor: "#2563eb",
+        confirmButtonColor: "#3b82f6",
       });
 
       router.push("/login");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al restablecer contraseña:", error);
+      let mensaje =
+        "No se pudo restablecer la contraseña. El enlace puede haber expirado.";
+      if (!error?.response) {
+        mensaje =
+          "No se pudo conectar con el servidor. Verificá tu conexión e intentá nuevamente.";
+      } else if (error.response.status === 400) {
+        const data = error.response.data;
+        const detalle =
+          data?.detail ||
+          data?.error ||
+          (typeof data === "object"
+            ? Object.values(data).flat().join(" ")
+            : null);
+        if (detalle) mensaje = String(detalle);
+      }
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "No se pudo restablecer la contraseña. El enlace puede haber expirado.",
-        confirmButtonColor: "#2563eb",
+        text: mensaje,
+        confirmButtonColor: "#3b82f6",
       });
     } finally {
       setIsLoading(false);
@@ -126,12 +104,8 @@ export default function ResetPasswordPage() {
 
   const passwordStrength = () => {
     if (!password) return "";
-    
-    const minLength = password.length >= 8;
-    const hasNumber = /\d/.test(password);
-    const hasLetter = /[a-zA-Z]/.test(password);
-    
-    if (minLength && hasNumber && hasLetter) {
+
+    if (validatePassword(password)) {
       return "text-green-600";
     } else if (password.length >= 6) {
       return "text-yellow-600";
@@ -139,6 +113,9 @@ export default function ResetPasswordPage() {
       return "text-red-600";
     }
   };
+
+  const inputClass =
+    "appearance-none block w-full px-3 py-3 pl-10 pr-10 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 sm:text-sm transition-all duration-200";
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
@@ -151,14 +128,22 @@ export default function ResetPasswordPage() {
 
       <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-sm relative z-10 border border-gray-100">
         <div className="text-center">
+          <Image
+            src="/logoFACET.png"
+            alt="Logo FACET"
+            width={140}
+            height={42}
+            className="h-10 w-auto mx-auto mb-6"
+            unoptimized
+          />
           <div className="mx-auto h-14 w-14 flex items-center justify-center rounded-full bg-green-50 mb-6">
             <FiCheckCircle className="h-7 w-7 text-green-600" />
           </div>
           <h2 className="text-3xl font-extrabold text-gray-900">
-            Nueva Contraseña
+            Nueva contraseña
           </h2>
           <p className="mt-2 text-sm text-gray-500">
-            Ingrese su nueva contraseña para completar el restablecimiento
+            Ingresá tu nueva contraseña para completar el restablecimiento
           </p>
         </div>
 
@@ -168,14 +153,11 @@ export default function ResetPasswordPage() {
               <label
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700 mb-1">
-                Nueva Contraseña
+                Nueva contraseña
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock
-                    className="h-5 w-5 text-gray-400"
-                    aria-hidden="true"
-                  />
+                  <FiLock className="h-5 w-5 text-gray-400" aria-hidden="true" />
                 </div>
                 <input
                   id="password"
@@ -185,12 +167,15 @@ export default function ResetPasswordPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete="new-password"
                   required
-                  className="appearance-none block w-full px-3 py-3 pl-10 pr-10 border border-gray-300 placeholder-gray-400 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200"
+                  className={inputClass}
                   placeholder="••••••••"
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <button
                     type="button"
+                    aria-label={
+                      showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                    }
                     className="text-gray-400 hover:text-gray-600"
                     onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? (
@@ -203,8 +188,8 @@ export default function ResetPasswordPage() {
               </div>
               {password && (
                 <p className={`mt-1 text-xs ${passwordStrength()}`}>
-                  {validatePassword(password) 
-                    ? "✓ Contraseña segura" 
+                  {validatePassword(password)
+                    ? "✓ Contraseña segura"
                     : "Mínimo 8 caracteres, incluir letras y números"}
                 </p>
               )}
@@ -214,14 +199,11 @@ export default function ResetPasswordPage() {
               <label
                 htmlFor="confirmPassword"
                 className="block text-sm font-medium text-gray-700 mb-1">
-                Confirmar Nueva Contraseña
+                Confirmar nueva contraseña
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock
-                    className="h-5 w-5 text-gray-400"
-                    aria-hidden="true"
-                  />
+                  <FiLock className="h-5 w-5 text-gray-400" aria-hidden="true" />
                 </div>
                 <input
                   id="confirmPassword"
@@ -231,12 +213,17 @@ export default function ResetPasswordPage() {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   autoComplete="new-password"
                   required
-                  className="appearance-none block w-full px-3 py-3 pl-10 pr-10 border border-gray-300 placeholder-gray-400 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200"
+                  className={inputClass}
                   placeholder="••••••••"
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <button
                     type="button"
+                    aria-label={
+                      showConfirmPassword
+                        ? "Ocultar contraseña"
+                        : "Mostrar contraseña"
+                    }
                     className="text-gray-400 hover:text-gray-600"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
                     {showConfirmPassword ? (
@@ -248,10 +235,15 @@ export default function ResetPasswordPage() {
                 </div>
               </div>
               {confirmPassword && (
-                <p className={`mt-1 text-xs ${
-                  password === confirmPassword ? "text-green-600" : "text-red-600"
-                }`}>
-                  {password === confirmPassword ? "✓ Las contraseñas coinciden" : "✗ Las contraseñas no coinciden"}
+                <p
+                  className={`mt-1 text-xs ${
+                    password === confirmPassword
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}>
+                  {password === confirmPassword
+                    ? "✓ Las contraseñas coinciden"
+                    : "✗ Las contraseñas no coinciden"}
                 </p>
               )}
             </div>
@@ -260,8 +252,12 @@ export default function ResetPasswordPage() {
           <div>
             <button
               type="submit"
-              disabled={isLoading || !validatePassword(password) || password !== confirmPassword}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 ease-in-out shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+              disabled={
+                isLoading ||
+                !validatePassword(password) ||
+                password !== confirmPassword
+              }
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-gray-900 hover:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all duration-200 ease-in-out shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
               {isLoading ? (
                 <>
                   <svg
@@ -286,20 +282,30 @@ export default function ResetPasswordPage() {
               ) : (
                 <>
                   <FiCheckCircle className="mr-2 h-4 w-4" />
-                  Restablecer Contraseña
+                  Restablecer contraseña
                 </>
               )}
             </button>
           </div>
         </form>
 
+        <div className="text-center">
+          <Link
+            href="/login"
+            className="text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors">
+            Volver al inicio de sesión
+          </Link>
+        </div>
+
         <div className="text-center mt-4">
           <p className="text-xs text-gray-500">
-            &copy; {new Date().getFullYear()} FACET - UNT. Todos los derechos
+            © {new Date().getFullYear()} FACET — UNT. Todos los derechos
             reservados.
           </p>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default ResetPasswordCard;

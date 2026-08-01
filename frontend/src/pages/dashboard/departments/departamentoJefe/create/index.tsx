@@ -578,7 +578,7 @@ const CrearDepartamentoJefe = () => {
 
 				<FormActions>
 					<FormButton variant="success" onClick={crearNuevoJefeDepartamento}>
-						Crear Jefe Departamento
+						Crear Jefe de Departamento
 					</FormButton>
 				</FormActions>
 

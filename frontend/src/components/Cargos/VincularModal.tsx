@@ -84,9 +84,11 @@ const VincularModal: React.FC<Props> = ({ cargo, onClose, onSuccess }) => {
   useEffect(() => {
     const fetchAll = async () => {
       try {
+        // Estos endpoints usan LimitOffsetPagination: el parámetro es `limit`
+        // (con page_size devolvían solo los primeros 10)
         const [rD, rR] = await Promise.all([
-          API.get(`/facet/departamento/?page_size=100&estado=1`),
-          API.get(`/facet/resolucion/?page_size=50&estado=1`),
+          API.get(`/facet/departamento/?limit=500&estado=1`),
+          API.get(`/facet/resolucion/?limit=500&estado=1`),
         ]);
         setDepartamentos(rD.data.results || []);
         setResoluciones(rR.data.results || []);
@@ -103,7 +105,8 @@ const VincularModal: React.FC<Props> = ({ cargo, onClose, onSuccess }) => {
       setCargando(true);
       try {
         const params = new URLSearchParams();
-        params.append("page_size", "200");
+        // El backend limita page_size a 100 (max_page_size)
+        params.append("page_size", "100");
         params.append("estado", "1");
         if (departamentoFiltro) {
           params.append("departamento", String(departamentoFiltro));

@@ -32,6 +32,8 @@ import { useRouter } from "next/router";
 import DashboardMenu from "../../..";
 import withAuth from "../../../../../components/withAut";
 import { normalizeUrl } from "../../../../../utils/urlHelpers";
+import Pagination from "../../../../../components/Pagination";
+import { StatusBadge } from "../../../../../components/DetailModal";
 
 import {
 	FilterContainer,
@@ -105,31 +107,16 @@ const ListaJefesDepartamentos = () => {
 					apiUrl = urlObj.pathname + urlObj.search;
 				}
 
-				const response = await API.get(url);
-				let filteredResults = response.data.results;
+				const response = await API.get(apiUrl);
 
-				// Filtro temporal en el frontend para próximos vencimientos
-				if (filtroVencimientos === "proximos") {
-					const today = new Date();
-					const oneMonthFromNow = new Date();
-					oneMonthFromNow.setMonth(today.getMonth() + 1);
-
-					filteredResults = response.data.results.filter(
-						(jefe: JefeDepartamento) => {
-							const fechaFin = new Date(jefe.fecha_de_fin);
-							return fechaFin >= today && fechaFin <= oneMonthFromNow;
-						}
-					);
-				}
-
-				setJefesDepartamentos(filteredResults);
+				setJefesDepartamentos(response.data.results);
 				setNextUrl(
 					response.data.next ? normalizeUrl(response.data.next) : null
 				);
 				setPrevUrl(
 					response.data.previous ? normalizeUrl(response.data.previous) : null
 				);
-				setTotalItems(filteredResults.length);
+				setTotalItems(response.data.count);
 			} catch (error) {
 				Swal.fire({
 					icon: "error",
@@ -138,7 +125,7 @@ const ListaJefesDepartamentos = () => {
 				});
 			}
 		},
-		[filtroVencimientos, normalizeUrl]
+		[]
 	);
 
 	useEffect(() => {
@@ -179,6 +166,7 @@ const ListaJefesDepartamentos = () => {
 		}
 
 		const finalUrl = params.toString() ? `${url}?${params.toString()}` : url;
+		setCurrentPage(1);
 		setCurrentUrl(finalUrl);
 	};
 
@@ -191,6 +179,12 @@ const ListaJefesDepartamentos = () => {
 		setFiltroResolucion("");
 		setFiltroEstado("1");
 		setFiltroVencimientos("todos");
+		setCurrentPage(1);
+		if (currentUrl === `/facet/jefe-departamento/list_detalle/`) {
+			fetchData(currentUrl);
+		} else {
+			setCurrentUrl(`/facet/jefe-departamento/list_detalle/`);
+		}
 	};
 
 	const descargarExcel = async () => {
@@ -288,6 +282,7 @@ const ListaJefesDepartamentos = () => {
 
 	return (
 		<DashboardMenu>
+			<div className="p-6">
 			<div className="bg-white rounded-lg shadow-lg">
 				<div className="p-6 border-b border-gray-200">
 					<h1 className="text-2xl font-bold text-gray-800">
@@ -414,8 +409,8 @@ const ListaJefesDepartamentos = () => {
 											jefeDepartamento.fecha_de_fin
 										).toLocaleDateString()}
 									</TableCell>
-									<TableCell className="text-gray-800">
-										{jefeDepartamento.estado === "1" ? "Activo" : "Inactivo"}
+									<TableCell>
+										<StatusBadge estado={String(jefeDepartamento.estado)} />
 									</TableCell>
 									<TableCell>
 										<ActionMenu
@@ -442,40 +437,26 @@ const ListaJefesDepartamentos = () => {
 						</TableBody>
 					</ResponsiveTable>
 
-					<div className="flex justify-between items-center mt-6">
-						<button
-							onClick={() => {
-								prevUrl && setCurrentUrl(prevUrl);
-								setCurrentPage(currentPage - 1);
-							}}
-							disabled={!prevUrl}
-							className={`px-4 py-2 rounded-lg font-medium ${
-								prevUrl
-									? "bg-blue-500 text-white hover:bg-blue-600"
-									: "bg-gray-300 text-gray-500 cursor-not-allowed"
-							} transition-colors duration-200`}
-						>
-							Anterior
-						</button>
-						<span className="text-gray-600">
-							Página {currentPage} de {totalPages}
-						</span>
-						<button
-							onClick={() => {
-								nextUrl && setCurrentUrl(nextUrl);
-								setCurrentPage(currentPage + 1);
-							}}
-							disabled={!nextUrl}
-							className={`px-4 py-2 rounded-lg font-medium ${
-								nextUrl
-									? "bg-blue-500 text-white hover:bg-blue-600"
-									: "bg-gray-300 text-gray-500 cursor-not-allowed"
-							} transition-colors duration-200`}
-						>
-							Siguiente
-						</button>
-					</div>
+					<Pagination
+						currentPage={currentPage}
+						totalPages={totalPages}
+						onPrevious={() => {
+							if (prevUrl) {
+								setCurrentUrl(prevUrl);
+								setCurrentPage((p) => Math.max(1, p - 1));
+							}
+						}}
+						onNext={() => {
+							if (nextUrl) {
+								setCurrentUrl(nextUrl);
+								setCurrentPage((p) => p + 1);
+							}
+						}}
+						hasPrevious={!!prevUrl}
+						hasNext={!!nextUrl}
+					/>
 				</div>
+			</div>
 			</div>
 		</DashboardMenu>
 	);

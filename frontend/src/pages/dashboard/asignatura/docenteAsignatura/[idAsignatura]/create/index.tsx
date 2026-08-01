@@ -395,7 +395,7 @@ const CrearDocenteAsignatura: React.FC = () => {
       );
       handleOpenModal(
         "Éxito",
-        "Se creó el docente en Asignatura con Exito.",
+        "Se creó el docente en Asignatura con éxito.",
         handleConfirmModal
       );
     } catch (error: any) {

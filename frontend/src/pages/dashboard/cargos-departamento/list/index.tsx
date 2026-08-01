@@ -32,9 +32,9 @@ import {
 import VincularCargoModal from "@/components/CargosDepartamento/VincularCargoModal";
 import DescomponerModal from "@/components/CargosDepartamento/DescomponerModal";
 import CombinarModal from "@/components/CargosDepartamento/CombinarModal";
-
-const normalizeUrl = (url: string) =>
-  url.replace(window.location.origin, "").replace(/^\/+/, "/");
+import { normalizeUrl } from "@/utils/urlHelpers";
+import Pagination from "@/components/Pagination";
+import { StatusBadge } from "@/components/DetailModal";
 
 interface CargoDepartamento {
   id: number;
@@ -84,7 +84,10 @@ const ListaCargosDepartamento = () => {
   const [openVincular, setOpenVincular] = useState<CargoDepartamento | null>(null);
   const [openDescomponer, setOpenDescomponer] = useState<CargoDepartamento | null>(null);
   const [openCombinar, setOpenCombinar] = useState(false);
-  const [seleccionados, setSeleccionados] = useState<Set<number>>(new Set());
+  // Mapa id → item para conservar las selecciones hechas en otras páginas
+  const [seleccionados, setSeleccionados] = useState<
+    Map<number, CargoDepartamento>
+  >(new Map());
 
   useEffect(() => {
     fetchData(currentUrl);
@@ -149,8 +152,8 @@ const ListaCargosDepartamento = () => {
     } else if (filtroEstado) {
       params.append("estado", filtroEstado);
     }
-    if (filtroVinculacion === "vacantes") params.append("cargo__isnull", "True");
-    if (filtroVinculacion === "ocupados") params.append("cargo__isnull", "False");
+    if (filtroVinculacion === "vacantes") params.append("cargo__isnull", "true");
+    if (filtroVinculacion === "ocupados") params.append("cargo__isnull", "false");
     params.append("page", page.toString());
     return params;
   };
@@ -167,6 +170,7 @@ const ListaCargosDepartamento = () => {
     setFiltroDedicacion("");
     setFiltroEstado("1");
     setFiltroVinculacion("");
+    setCurrentPage(1);
     setCurrentUrl("/facet/cargo-departamento/?estado=1");
   };
 
@@ -196,7 +200,7 @@ const ListaCargosDepartamento = () => {
   };
 
   const renovar = async (cargoDep: CargoDepartamento) => {
-    const { value: confirmed } = await Swal.fire({
+    const result = await Swal.fire({
       title: "Renovar Cargo de Departamento",
       text: "Se crea uno nuevo igual y el actual queda inactivo. Si tenía un Cargo (plata) vinculado, queda disponible.",
       icon: "question",
@@ -204,7 +208,7 @@ const ListaCargosDepartamento = () => {
       confirmButtonText: "Renovar",
       cancelButtonText: "Cancelar",
     });
-    if (!confirmed) return;
+    if (!result.isConfirmed) return;
     try {
       await API.post(`/facet/cargo-departamento/${cargoDep.id}/renovar/`, {});
       Swal.fire("Renovado", "Cargo de Departamento renovado.", "success");
@@ -214,11 +218,11 @@ const ListaCargosDepartamento = () => {
     }
   };
 
-  const toggleSeleccion = (id: number) => {
+  const toggleSeleccion = (item: CargoDepartamento) => {
     setSeleccionados((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      const next = new Map(prev);
+      if (next.has(item.id)) next.delete(item.id);
+      else next.set(item.id, item);
       return next;
     });
   };
@@ -245,7 +249,7 @@ const ListaCargosDepartamento = () => {
 
   const totalPages = Math.ceil(totalItems / pageSize);
 
-  const seleccionadosCargosDep = items.filter((c) => seleccionados.has(c.id));
+  const seleccionadosCargosDep = Array.from(seleccionados.values());
   const sumaPuntajesSeleccionados = seleccionadosCargosDep.reduce(
     (acc, c) => acc + Number(c.puntaje || 0),
     0
@@ -271,12 +275,12 @@ const ListaCargosDepartamento = () => {
               <button
                 onClick={() => router.push("/dashboard/cargos-departamento/create")}
                 className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2.5 rounded-xl shadow-md shadow-blue-500/20 hover:shadow-lg transition-all duration-200 font-semibold text-sm">
-                <AddIcon /> Crear Cargo de Departamento
+                <AddIcon /> Agregar Cargo de Departamento
               </button>
               <button
                 onClick={() => setOpenCombinar(true)}
                 disabled={seleccionados.size < 2}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md shadow-md transition-colors duration-200 ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-md transition-colors duration-200 ${
                   seleccionados.size >= 2
                     ? "bg-purple-600 hover:bg-purple-700 text-white"
                     : "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -362,7 +366,7 @@ const ListaCargosDepartamento = () => {
                         <TableCell padding="checkbox">
                           <Checkbox
                             checked={seleccionados.has(s.id)}
-                            onChange={() => toggleSeleccion(s.id)}
+                            onChange={() => toggleSeleccion(s)}
                             disabled={!activo || !tienePuntaje}
                           />
                         </TableCell>
@@ -392,7 +396,7 @@ const ListaCargosDepartamento = () => {
                           )}
                         </TableCell>
                         <TableCell>{s.tipo_cargo_detalle?.dedicacion || "—"}</TableCell>
-                        <TableCell>{s.tipo_cargo_detalle?.puntaje ?? "—"}</TableCell>
+                        <TableCell>{s.puntaje ?? "—"}</TableCell>
                         <TableCell>
                           {s.cargo_vinculado ? (
                             <span className="inline-flex items-center gap-1 text-xs bg-green-50 border border-green-200 text-green-800 px-2 py-0.5 rounded-full">
@@ -409,7 +413,9 @@ const ListaCargosDepartamento = () => {
                             </button>
                           )}
                         </TableCell>
-                        <TableCell>{activo ? "Activo" : "Inactivo"}</TableCell>
+                        <TableCell>
+                          <StatusBadge estado={String(s.estado)} />
+                        </TableCell>
                         <TableCell>
                           <ActionMenu
                             items={[
@@ -489,31 +495,14 @@ const ListaCargosDepartamento = () => {
               </ResponsiveTable>
             </div>
 
-            <div className="flex justify-between items-center mt-6">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className={`px-4 py-2 rounded-lg font-medium ${
-                  currentPage > 1
-                    ? "bg-blue-500 text-white hover:bg-blue-600"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}>
-                Anterior
-              </button>
-              <span className="text-gray-600 font-medium">
-                Página {currentPage} de {totalPages || 1}
-              </span>
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage >= totalPages}
-                className={`px-4 py-2 rounded-lg font-medium ${
-                  currentPage < totalPages
-                    ? "bg-blue-500 text-white hover:bg-blue-600"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}>
-                Siguiente
-              </button>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPrevious={() => handlePageChange(currentPage - 1)}
+              onNext={() => handlePageChange(currentPage + 1)}
+              hasPrevious={currentPage > 1}
+              hasNext={currentPage < totalPages}
+            />
           </div>
         </div>
 
@@ -545,7 +534,7 @@ const ListaCargosDepartamento = () => {
             onClose={() => setOpenCombinar(false)}
             onSuccess={() => {
               setOpenCombinar(false);
-              setSeleccionados(new Set());
+              setSeleccionados(new Map());
               fetchData(currentUrl);
             }}
           />

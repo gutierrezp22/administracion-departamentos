@@ -50,7 +50,8 @@ const VincularCargoModal: React.FC<Props> = ({ cargoDep, onClose, onSuccess }) =
       setCargando(true);
       try {
         const params = new URLSearchParams();
-        params.append("page_size", "500");
+        // El backend limita page_size a 100 (max_page_size)
+        params.append("page_size", "100");
         // Si el Cargo de Departamento tiene tipo definido, solo traer cargos
         // de plata del mismo tipo. Los tipos deben coincidir para vincular.
         if (cargoDep.tipo_cargo) {
@@ -162,6 +163,12 @@ const VincularCargoModal: React.FC<Props> = ({ cargoDep, onClose, onSuccess }) =
           options={cargoOptions}
           placeholder={cargando ? "Cargando..." : "Seleccionar cargo..."}
         />
+        {!cargando && cargos.length > 0 && cargosFiltrados.length === 0 && (
+          <p className="text-xs text-gray-500 mt-2">
+            No hay cargos que coincidan con la búsqueda. Probá con otro número o
+            tipo.
+          </p>
+        )}
         {!cargando && cargos.length === 0 && (
           <p className="text-xs text-gray-500 mt-2">
             {cargoDep.tipo_cargo_detalle ? (

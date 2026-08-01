@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -16,9 +16,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
-  const rememberMeRef = useRef(rememberMe);
-  rememberMeRef.current = rememberMe;
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberedEmail");
@@ -56,14 +53,40 @@ export default function LoginPage() {
         localStorage.removeItem("rememberedEmail");
       }
 
+      // Si el usuario todavía usa la clave por defecto o venció la rotación,
+      // llevarlo directo a cambiar la contraseña
+      const hasChangedPassword =
+        response.data.has_changed_password ??
+        response.data.user?.has_changed_password;
+      if (hasChangedPassword === false) {
+        await Swal.fire({
+          icon: "info",
+          title: "Actualizá tu contraseña",
+          text: "Por seguridad, necesitás cambiar tu contraseña antes de continuar.",
+          confirmButtonText: "Continuar",
+          confirmButtonColor: "#3b82f6",
+        });
+        router.push("/dashboard/change-password");
+        return;
+      }
+
       router.push("/dashboard/home");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error de autenticación:", error);
+      let mensaje = "Correo electrónico o contraseña incorrectos.";
+      if (!error?.response) {
+        mensaje =
+          "No se pudo conectar con el servidor. Verificá tu conexión e intentá nuevamente.";
+      } else if (error.response.status >= 500) {
+        mensaje =
+          "El servidor no está disponible en este momento. Intentá más tarde.";
+      }
       Swal.fire({
         icon: "error",
         title: "Error de autenticación",
-        text: "Correo electrónico o contraseña incorrectos.",
+        text: mensaje,
         confirmButtonText: "Entendido",
+        confirmButtonColor: "#3b82f6",
       });
     } finally {
       setIsLoading(false);

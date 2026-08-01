@@ -29,6 +29,7 @@ const EditarAsignatura: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
+  const [redirectAfterClose, setRedirectAfterClose] = useState(false);
 
   const handleOpenModal = (title: string, message: string) => {
     setModalTitle(title);
@@ -39,7 +40,10 @@ const EditarAsignatura: React.FC = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setModalMessage("");
-    router.push("/dashboard/asignatura/");
+    if (redirectAfterClose) {
+      router.push("/dashboard/asignatura/");
+      setRedirectAfterClose(false);
+    }
   };
 
   const [asignatura, setAsignatura] = useState<any>();
@@ -97,6 +101,7 @@ const EditarAsignatura: React.FC = () => {
 
     try {
       await API.put(`/facet/asignatura/${idAsignatura}/`, asignaturaEditada);
+      setRedirectAfterClose(true);
       handleOpenModal("Éxito", "La acción se realizó con éxito.");
     } catch (error) {
       handleOpenModal("Error", "NO se pudo realizar la acción.");

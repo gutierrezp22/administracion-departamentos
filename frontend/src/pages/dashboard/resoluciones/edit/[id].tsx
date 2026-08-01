@@ -4,6 +4,7 @@ import dayjs, { Dayjs } from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { useRouter } from "next/router";
+import BasicModal from "@/utils/modal";
 import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut";
 import API from "@/api/axiosConfig";
@@ -27,7 +28,6 @@ const EditarResolucion = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
-  const [confirmarEliminacion, setConfirmarEliminacion] = useState(false);
   const [redirectAfterClose, setRedirectAfterClose] = useState(false);
 
   const [nroExpediente, setNroExpediente] = useState("");
@@ -93,82 +93,6 @@ const EditarResolucion = () => {
     }
   };
 
-  const eliminarResolucion = async () => {
-    try {
-      await API.delete(`/facet/resolucion/${idResolucion}/`);
-      setRedirectAfterClose(true);
-      handleOpenModal("Resolución Eliminada", "La acción se realizó con éxito.");
-    } catch (error) {
-      handleOpenModal("Error", "NO se pudo realizar la acción.");
-    }
-  };
-
-  const renderModalConfirmacion = () => {
-    if (!confirmarEliminacion) return null;
-    return (
-      <div
-        className="fixed inset-0 flex items-center justify-center z-50"
-        style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }}>
-        <div
-          className="fixed inset-0 bg-black opacity-50"
-          onClick={() => setConfirmarEliminacion(false)}></div>
-        <div className="bg-white rounded-lg shadow-xl p-6 w-96 z-50 relative">
-          <h3 className="text-xl font-bold text-center mb-2 text-gray-900">
-            Confirmar Eliminación
-          </h3>
-          <hr className="my-3 border-gray-200" />
-          <p className="text-gray-800 text-lg text-center mb-6 font-medium">
-            ¿Estás seguro?
-          </p>
-          <div className="flex justify-center space-x-4">
-            <button
-              onClick={() => {
-                setConfirmarEliminacion(false);
-                eliminarResolucion();
-              }}
-              className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-md font-medium">
-              Eliminar
-            </button>
-            <button
-              onClick={() => setConfirmarEliminacion(false)}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md font-medium">
-              Cancelar
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const renderBasicModal = () => {
-    if (!modalVisible) return null;
-    return (
-      <div
-        className="fixed inset-0 flex items-center justify-center z-50"
-        style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }}>
-        <div
-          className="fixed inset-0 bg-black opacity-50"
-          onClick={handleCloseModal}></div>
-        <div className="bg-white rounded-lg shadow-xl p-6 w-96 z-50 relative">
-          <h3 className="text-xl font-bold text-center mb-2 text-gray-900">
-            {modalTitle}
-          </h3>
-          <hr className="my-3 border-gray-200" />
-          <p className="text-gray-800 text-lg text-center mb-6 font-medium">
-            {modalMessage}
-          </p>
-          <div className="flex justify-center">
-            <button
-              onClick={handleCloseModal}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md font-medium">
-              OK
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <>
       <DashboardMenu>
@@ -228,8 +152,12 @@ const EditarResolucion = () => {
         </FormContainer>
       </DashboardMenu>
 
-      {renderModalConfirmacion()}
-      {renderBasicModal()}
+      <BasicModal
+        open={modalVisible}
+        onClose={handleCloseModal}
+        title={modalTitle}
+        content={modalMessage}
+      />
     </>
   );
 };

@@ -1,30 +1,28 @@
 "use client"; // Esto indica que el componente es del lado del cliente
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation'; // Cambiado a 'next/navigation'
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 const AppWrapper = () => {
-  const router = useRouter(); // Usamos useRouter de Next.js
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true); // Estado para verificar autenticación
+  const router = useRouter();
 
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem('access_token'); // Verifica si hay un token de acceso
+    // El login guarda el token en sessionStorage (ver pages/login/index.tsx)
+    const isAuthenticated = sessionStorage.getItem('access_token');
 
     if (isAuthenticated) {
-      router.replace('/dashboard/home'); // Redirige al Dashboard si está autenticado
+      router.replace('/dashboard/home');
     } else {
-      router.replace('/login'); // De lo contrario, redirige a la página de login
+      router.replace('/login');
     }
-
-    setIsCheckingAuth(false); // Finaliza la verificación de autenticación
   }, [router]);
 
-  // Mientras verifica autenticación, no renderiza nada
-  if (isCheckingAuth) {
-    return <div>Cargando...</div>; // Puedes reemplazar esto con un loader si lo deseas
-  }
-
-  return null; // Evita renderizar contenido después de redirección
+  // Mientras redirige, mostrar un loader consistente con el resto de la app
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+  );
 };
 
-AppWrapper.displayName = "AppWrapper"; // Agrega un displayName para ESLint
+AppWrapper.displayName = "AppWrapper";
 export default AppWrapper;

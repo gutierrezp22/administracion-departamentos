@@ -3,7 +3,6 @@ import "./styles.css";
 import API from "@/api/axiosConfig";
 import {
   Paper,
-  Typography,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -32,6 +31,8 @@ import {
   XMarkIcon,
   FunnelIcon,
 } from "@heroicons/react/24/outline";
+import { normalizeUrl } from "@/utils/urlHelpers";
+import Pagination from "@/components/Pagination";
 
 const CrearArea = () => {
   const router = useRouter();
@@ -67,10 +68,6 @@ const CrearArea = () => {
   function capitalizeFirstLetter(string: string) {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   }
-
-  const normalizeUrl = (url: string) => {
-    return url.replace(window.location.origin, "").replace(/^\/+/, "/");
-  };
 
   const handleOpenModal = (
     title: string,
@@ -313,31 +310,14 @@ const CrearArea = () => {
               </Table>
             </TableContainer>
 
-            <div className="flex justify-between items-center mt-4">
-              <button
-                onClick={() => prevUrl && setCurrentUrl(normalizeUrl(prevUrl))}
-                disabled={!prevUrl}
-                className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm ${
-                  !prevUrl
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
-                }`}>
-                Anterior
-              </button>
-              <Typography className="font-medium text-gray-700 text-sm">
-                Página {currentPage} de {Math.ceil(totalItems / pageSize)}
-              </Typography>
-              <button
-                onClick={() => nextUrl && setCurrentUrl(normalizeUrl(nextUrl))}
-                disabled={!nextUrl}
-                className={`px-3 py-1 rounded-lg font-medium transition-all duration-200 text-sm ${
-                  !nextUrl
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transform hover:scale-105"
-                }`}>
-                Siguiente
-              </button>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Math.ceil(totalItems / pageSize)}
+              onPrevious={() => prevUrl && setCurrentUrl(normalizeUrl(prevUrl))}
+              onNext={() => nextUrl && setCurrentUrl(normalizeUrl(nextUrl))}
+              hasPrevious={!!prevUrl}
+              hasNext={!!nextUrl}
+            />
           </DialogContent>
           <DialogActions className="p-4">
             <button

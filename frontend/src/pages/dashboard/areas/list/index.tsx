@@ -38,11 +38,9 @@ import {
   EstadoFilter,
 } from "../../../../components/Filters";
 import { exportToExcel } from "@/utils/exportToExcel";
-
-// Función para normalizar URLs de paginación
-const normalizeUrl = (url: string) => {
-  return url.replace(window.location.origin, "").replace(/^\/+/, "/");
-};
+import { normalizeUrl } from "@/utils/urlHelpers";
+import Pagination from "../../../../components/Pagination";
+import { StatusBadge } from "@/components/DetailModal";
 
 const ListaAreas = () => {
   interface Area {
@@ -115,6 +113,7 @@ const ListaAreas = () => {
   const limpiarFiltros = () => {
     setFiltroNombre("");
     setFiltroEstado("1");
+    setCurrentPage(1);
     setCurrentUrl(`/facet/area/?estado=1`);
   };
 
@@ -254,8 +253,8 @@ const ListaAreas = () => {
                     <TableCell className="text-gray-800">
                       {area.nombre}
                     </TableCell>
-                    <TableCell className="text-gray-800">
-                      {area.estado === "1" ? "Activo" : "Inactivo"}
+                    <TableCell>
+                      <StatusBadge estado={String(area.estado)} />
                     </TableCell>
                     <TableCell>
                       <ActionMenu
@@ -281,31 +280,14 @@ const ListaAreas = () => {
               </ResponsiveTable>
             </div>
 
-            <div className="flex justify-between items-center mt-6">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                  currentPage > 1
-                    ? "bg-blue-500 text-white hover:bg-blue-600"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}>
-                Anterior
-              </button>
-              <span className="text-gray-600 font-medium">
-                Página {currentPage} de {totalPages}
-              </span>
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage >= totalPages}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                  currentPage < totalPages
-                    ? "bg-blue-500 text-white hover:bg-blue-600"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}>
-                Siguiente
-              </button>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPrevious={() => handlePageChange(currentPage - 1)}
+              onNext={() => handlePageChange(currentPage + 1)}
+              hasPrevious={currentPage > 1}
+              hasNext={currentPage < totalPages}
+            />
           </div>
         </div>
       </div>

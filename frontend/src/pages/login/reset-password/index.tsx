@@ -1,35 +1,28 @@
 "use client";
 import * as React from "react";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import Swal from "sweetalert2";
 import ResetPasswordCard from "@/components/auth/ResetPasswordCard";
 
 /**
- * Entrada por path: /login/reset-password/<uid>/<token>/
- * Requiere un rewrite del servidor cuando se sirve como export estático;
- * la variante por query string (/login/reset-password/?uid=...&token=...)
- * no lo necesita y es la que generan los emails.
+ * Entrada por query string: /login/reset-password/?uid=...&token=...
+ * Es el formato que genera el backend en los emails y funciona en un
+ * hosting estático (output: "export") sin rewrites del servidor.
  */
-export default function ResetPasswordPage() {
+export default function ResetPasswordQueryPage() {
   const router = useRouter();
-  const params = useParams();
-  const [token, setToken] = useState("");
   const [uid, setUid] = useState("");
+  const [token, setToken] = useState("");
 
   useEffect(() => {
-    // Esperar a que los parámetros dinámicos estén hidratados (params es null
-    // durante el primer render de una página exportada estáticamente)
-    if (params === null) {
-      return;
-    }
-    if (
-      params?.params &&
-      Array.isArray(params.params) &&
-      params.params.length >= 2
-    ) {
-      const [uidParam, tokenParam] = params.params;
+    if (!router.isReady) return;
+
+    const uidParam = typeof router.query.uid === "string" ? router.query.uid : "";
+    const tokenParam =
+      typeof router.query.token === "string" ? router.query.token : "";
+
+    if (uidParam && tokenParam) {
       setUid(uidParam);
       setToken(tokenParam);
     } else {
@@ -42,7 +35,7 @@ export default function ResetPasswordPage() {
         router.push("/login");
       });
     }
-  }, [params, router]);
+  }, [router.isReady, router.query.uid, router.query.token, router]);
 
   // Mostrar loading mientras se procesan los parámetros
   if (!uid || !token) {

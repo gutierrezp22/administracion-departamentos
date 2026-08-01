@@ -33,16 +33,12 @@ interface UseSearchReturn<T> {
 }
 
 /**
- * Normaliza URLs de paginación para evitar problemas con URLs absolutas
- * del backend en producción
+ * Normaliza URLs de paginación.
+ * Re-exporta la implementación única de utils/urlHelpers para que toda la app
+ * comparta el mismo comportamiento.
  */
-export const normalizeUrl = (url: string): string => {
-  if (url.startsWith("http")) {
-    const urlObj = new URL(url);
-    return urlObj.pathname + urlObj.search;
-  }
-  return url.replace(/^\/+/, "/");
-};
+import { normalizeUrl } from "@/utils/urlHelpers";
+export { normalizeUrl };
 
 /**
  * Hook personalizado para manejar búsqueda y paginación de forma uniforme

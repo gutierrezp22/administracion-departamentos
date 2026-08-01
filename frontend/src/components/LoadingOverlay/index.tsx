@@ -27,9 +27,15 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
 
   if (resolved === "fullScreen") {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10002]">
         <div className="bg-white rounded-lg p-8 flex flex-col items-center shadow-xl">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+          <div
+            aria-hidden="true"
+            className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
           <p className="text-gray-700 text-lg font-medium">{message}</p>
         </div>
       </div>
@@ -38,9 +44,15 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
 
   if (resolved === "overlay") {
     return (
-      <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-lg">
+      <div
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+        className="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-lg">
         <div className="bg-white rounded-lg px-6 py-4 flex items-center gap-3 shadow-lg border border-gray-200">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+          <div
+            aria-hidden="true"
+            className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
           <p className="text-gray-700 text-sm font-medium">{message}</p>
         </div>
       </div>
@@ -48,8 +60,14 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
   }
 
   return (
-    <div className="flex flex-col items-center justify-center py-8">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-2"></div>
+    <div
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      className="flex flex-col items-center justify-center py-8">
+      <div
+        aria-hidden="true"
+        className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-2"></div>
       <p className="text-gray-600 text-sm">{message}</p>
     </div>
   );

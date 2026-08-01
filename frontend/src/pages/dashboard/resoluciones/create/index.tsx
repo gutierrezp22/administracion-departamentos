@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { useRouter } from "next/router";
+import BasicModal from "@/utils/modal";
 import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut";
 import API from "@/api/axiosConfig";
@@ -27,6 +28,7 @@ const CrearResolucion = () => {
   const [nroResolucion, setNroResolucion] = useState("");
   const [tipo, setTipo] = useState("");
   const [adjunto, setAdjunto] = useState("");
+  const [observaciones, setObservaciones] = useState("");
   const [fecha, setFecha] = useState<dayjs.Dayjs | null>(null);
   const [estado, setEstado] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
@@ -55,13 +57,25 @@ const CrearResolucion = () => {
   };
 
   const crearNuevaResolucion = async () => {
+    if (!nroResolucion.trim()) {
+      handleOpenModal("Error", "El número de resolución es obligatorio.", () => {});
+      return;
+    }
+    if (!tipo) {
+      handleOpenModal("Error", "Debe seleccionar un tipo de resolución.", () => {});
+      return;
+    }
+    if (!fecha) {
+      handleOpenModal("Error", "Debe seleccionar una fecha.", () => {});
+      return;
+    }
+
     const nuevaResolucion = {
       nexpediente: nroExpediente,
-      nresolucion: nroResolucion,
-      tipo: tipo || "",
+      nresolucion: nroResolucion.trim(),
+      tipo: tipo,
       adjunto: adjunto,
-      observaciones: "",
-      fechadecarga: new Date(),
+      observaciones: observaciones,
       fecha: formatFechaParaBackend(fecha),
       estado: estado,
     };
@@ -69,8 +83,45 @@ const CrearResolucion = () => {
     try {
       await API.post(`/facet/resolucion/`, nuevaResolucion);
       handleOpenModal("Éxito", "Se creó la resolución con éxito.", handleConfirmModal);
-    } catch (error) {
-      handleOpenModal("Error", "NO se pudo realizar la acción.", () => {});
+    } catch (error: any) {
+      console.error("Error al crear resolución:", error);
+      let errorMessage = "No se pudo crear la resolución.";
+
+      if (error.response?.data) {
+        const errorData = error.response.data;
+        if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.detail) {
+          errorMessage = errorData.detail;
+        } else if (typeof errorData === "object") {
+          const fieldErrors = errorData.errors || errorData;
+          const errorMessages: string[] = [];
+          const fieldNames = {
+            nexpediente: "Nro Expediente",
+            nresolucion: "Nro Resolución",
+            tipo: "Tipo",
+            adjunto: "Adjunto",
+            observaciones: "Observaciones",
+            fecha: "Fecha",
+            estado: "Estado",
+          };
+          for (const [field, messages] of Object.entries(fieldErrors)) {
+            const fieldName =
+              fieldNames[field as keyof typeof fieldNames] || field;
+            const fieldMessages = Array.isArray(messages)
+              ? messages
+              : [messages];
+            for (const msg of fieldMessages) {
+              errorMessages.push(`${fieldName}: ${msg}`);
+            }
+          }
+          if (errorMessages.length > 0) {
+            errorMessage = errorMessages.join("\n");
+          }
+        }
+      }
+
+      handleOpenModal("Error de Validación", errorMessage, () => {});
     }
   };
 
@@ -127,44 +178,26 @@ const CrearResolucion = () => {
               }
             }}
           />
+          <FormField
+            label="Observaciones"
+            value={observaciones}
+            onChange={(e) => setObservaciones(e.target.value)}
+            multiline
+            rows={2}
+          />
         </FormSection>
 
         <FormActions>
           <FormButton onClick={crearNuevaResolucion}>Crear Resolución</FormButton>
         </FormActions>
 
-        {modalVisible && (
-          <div
-            className="fixed inset-0 flex items-center justify-center z-[10000]"
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-            }}>
-            <div className="fixed inset-0 bg-black opacity-50"></div>
-            <div className="bg-white rounded-lg shadow-xl p-6 w-96 z-[10001] relative">
-              <h3 className="text-xl font-bold text-center mb-2 text-gray-900">
-                {modalTitle}
-              </h3>
-              <hr className="my-3 border-gray-200" />
-              <p className="text-gray-800 text-lg text-center mb-6 font-medium">
-                {modalMessage}
-              </p>
-              <div className="flex justify-center">
-                <button
-                  onClick={() => {
-                    handleCloseModal();
-                    fn();
-                  }}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md font-medium">
-                  OK
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <BasicModal
+          open={modalVisible}
+          onClose={handleCloseModal}
+          title={modalTitle}
+          content={modalMessage}
+          onConfirm={fn}
+        />
       </FormContainer>
     </DashboardMenu>
   );

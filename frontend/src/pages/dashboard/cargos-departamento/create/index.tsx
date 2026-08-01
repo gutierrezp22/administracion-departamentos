@@ -135,7 +135,8 @@ const CrearCargoDepartamento = () => {
       <FormContainer title="Crear Cargo de Departamento">
         <FormSection title="Departamento y asignatura">
           <FormField
-            label="Departamento *"
+            label="Departamento"
+            required
             value={departamentoId === "" ? "" : departamentoId}
             onChange={(e) =>
               setDepartamentoId(e.target.value === "" ? "" : Number(e.target.value))
@@ -202,7 +203,7 @@ const CrearCargoDepartamento = () => {
         </FormSection>
 
         <FormActions>
-          <FormButton onClick={crear}>Crear</FormButton>
+          <FormButton onClick={crear}>Crear Cargo de Departamento</FormButton>
         </FormActions>
 
         <BasicModal

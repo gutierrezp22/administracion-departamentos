@@ -29,29 +29,33 @@ const Pagination: React.FC<PaginationProps> = ({
   const disabledClasses = "bg-gray-300 text-gray-500 cursor-not-allowed";
 
   return (
-    <div className={`flex justify-between items-center mt-6 ${className}`}>
+    <nav
+      aria-label="Paginación"
+      className={`flex justify-between items-center mt-6 ${className}`}>
       <button
         onClick={onPrevious}
         disabled={!hasPrevious}
+        aria-disabled={!hasPrevious}
         className={`${buttonBaseClasses} ${
           hasPrevious ? activeClasses : disabledClasses
         }`}
       >
         Anterior
       </button>
-      <span className="text-gray-600 font-medium">
-        Pagina {currentPage} de {totalPages || 1}
+      <span aria-live="polite" className="text-gray-600 font-medium">
+        Página {currentPage} de {totalPages || 1}
       </span>
       <button
         onClick={onNext}
         disabled={!hasNext}
+        aria-disabled={!hasNext}
         className={`${buttonBaseClasses} ${
           hasNext ? activeClasses : disabledClasses
         }`}
       >
         Siguiente
       </button>
-    </div>
+    </nav>
   );
 };
 

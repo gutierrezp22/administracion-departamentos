@@ -1,21 +1,12 @@
 import React from 'react';
-import { useRouter } from 'next/router';
-import ListaArea from './list';
+import ListaNotificaciones from './list';
 
-const Areas = () => {
-  const router = useRouter();
-  const { path } = router.query;
-
-  const renderComponent = () => {
-
-      return <ListaArea />; // Renderiza ListaArea por defecto
-  };
-
+const Notificaciones = () => {
   return (
     <div>
-      {renderComponent()}
+      <ListaNotificaciones />
     </div>
   );
 };
 
-export default Areas;
+export default Notificaciones;

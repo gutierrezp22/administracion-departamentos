@@ -19,8 +19,8 @@ import EmailIcon from "@mui/icons-material/Email";
 import WorkIcon from "@mui/icons-material/Work";
 import AssignmentLateIcon from "@mui/icons-material/AssignmentLate";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
 import API from "@/api/axiosConfig";
-import ItemsMenu from "./components/itemsMenu";
 
 // Define las propiedades del componente
 interface DashboardMenuProps {
@@ -286,13 +286,18 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
       text: "Departamentos",
       path: "/dashboard/departments",
     },
-    { icon: <AutoAwesomeMotionIcon />, text: "Area", path: "/dashboard/areas" },
+    { icon: <AutoAwesomeMotionIcon />, text: "Áreas", path: "/dashboard/areas" },
     {
       icon: <NoteAltIcon />,
       text: "Asignaturas",
       path: "/dashboard/asignatura",
     },
     { icon: <SchoolIcon />, text: "Carreras", path: "/dashboard/careers" },
+    {
+      icon: <WorkOutlineIcon />,
+      text: "Cargos",
+      path: "/dashboard/cargos/list",
+    },
     {
       icon: <WorkIcon />,
       text: "Cargos de Departamento",

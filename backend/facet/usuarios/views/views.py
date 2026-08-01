@@ -17,7 +17,7 @@ from django.utils.http import urlsafe_base64_decode
 from django.utils.translation import gettext_lazy as _
 from rest_framework.views import APIView
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.utils.encoding import force_str
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
@@ -45,16 +45,23 @@ class PasswordResetView(generics.CreateAPIView):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            raise ValidationError(_('No existe un usuario con ese correo electrónico.'))
-        
-        #Controla de donde se esta realizando la consulta
+            # No revelar si el correo existe o no: responder siempre 200
+            return Response(status=status.HTTP_200_OK)
 
+        # Controla de donde se esta realizando la consulta
         reset = os.environ.get('RESET_LOCAL')
+        if not reset:
+            # Fallback: construir el enlace a partir del origen de la petición
+            origin = request.headers.get('Origin') or f"{request.scheme}://{request.get_host()}"
+            reset = f"{origin.rstrip('/')}/login/reset-password/"
 
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
         token = AccountActivationTokenGenerator().make_token(user)
-        # reset_link = f"{request.scheme}://{request.get_host()}/api/login/password/reset/confirm/{uidb64}/{token}/"
-        reset_link = f"{reset}{uidb64}/{token}/"
+        # Formato query string: funciona con el frontend exportado estático
+        # sin necesidad de rewrites del servidor (la ruta por path
+        # /<uid>/<token>/ sigue soportada por compatibilidad).
+        base = reset if reset.endswith('/') else f"{reset}/"
+        reset_link = f"{base}?uid={uidb64}&token={token}"
         email_subject = _('Restablecimiento de contraseña')
         email_message = render_to_string('password_reset_email.html', {'reset_link': reset_link})
         try:
@@ -105,41 +112,40 @@ class PasswordResetConfirmView(APIView):
             if (respuesta == 'ok'):
                 return Response({"detail": _("Contraseña actualizada con éxito.")}, status=status.HTTP_200_OK)
             if (respuesta == 'claveRepetida'):
-                    return Response({"error": "La nueva contraseña no puede ser una de las últimas tres contraseñas."}, status=409)
+                return Response({"error": "La nueva contraseña no puede ser una de las últimas tres contraseñas."}, status=409)
+            return Response({"error": "No se pudo actualizar la contraseña. Intente nuevamente."}, status=500)
         else:
             return Response({"detail": _("El enlace de restablecimiento de contraseña no es válido o ha expirado.")}, status=status.HTTP_400_BAD_REQUEST)
-      
+
 
 class CambiarClaveView(APIView):
-    permission_classes = [AllowAny]
-    
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         serializer = CambiarClaveSerializer(data=request.data)
-        print("11")
-        if serializer.is_valid():
-            print("12")
-            email = serializer.validated_data['email']
-            newPassword = serializer.validated_data['newPassword']
-            confirmPassword = serializer.validated_data['confirmPassword']
-            if serializer.validated_data['currentPassword']:
-                currentPassword = serializer.validated_data['currentPassword']
-                if not request.user.check_password(currentPassword):
-                    return Response({"error": "La clave actual no es la correcta."}, status=400)
-            if newPassword != confirmPassword:
-                return Response({"error": "La nueva clave no coincide la confirmacion."}, status=400)
-            try:
-                user = User.objects.get(email=email)
-            except User.DoesNotExist:
-                return Response({"error": "Usuario no encontrado"}, status=404)
-            respuesta = resetPassword(newPassword, user)
-            print(respuesta)
-            if (respuesta == 'ok'):
-                logout(request)
-                return Response({"has_changed_password": True, "message": "Clave cambiada exitosamente"}, status=200)
-            if (respuesta == 'claveRepetida'):
-                    return Response({"error": "La nueva contraseña no puede ser una de las últimas tres contraseñas."}, status=409)
-        else:
+        if not serializer.is_valid():
             return Response(serializer.errors, status=400)
+
+        newPassword = serializer.validated_data['newPassword']
+        confirmPassword = serializer.validated_data['confirmPassword']
+        currentPassword = serializer.validated_data.get('currentPassword')
+
+        # La identidad sale del token de autenticación, nunca del body:
+        # de lo contrario un usuario autenticado podría cambiar la clave de otro.
+        user = request.user
+
+        if not currentPassword or not user.check_password(currentPassword):
+            return Response({"error": "La clave actual no es la correcta."}, status=400)
+        if newPassword != confirmPassword:
+            return Response({"error": "La nueva clave no coincide con la confirmación."}, status=400)
+
+        respuesta = resetPassword(newPassword, user)
+        if respuesta == 'ok':
+            logout(request)
+            return Response({"has_changed_password": True, "message": "Clave cambiada exitosamente"}, status=200)
+        if respuesta == 'claveRepetida':
+            return Response({"error": "La nueva contraseña no puede ser una de las últimas tres contraseñas."}, status=409)
+        return Response({"error": "No se pudo cambiar la contraseña. Intente nuevamente."}, status=500)
 
 #  Funcion para agregar la clave actual al historial de claves, verificar si la nueva clave se encuentra entre las ultimas tres claves almacenadas y establecer la fecha de ultimo cambio de clave
 def resetPassword(newPassword: str, user: object):

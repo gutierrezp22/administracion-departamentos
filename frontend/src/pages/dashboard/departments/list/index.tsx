@@ -24,7 +24,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import API from "@/api/axiosConfig";
 import Pagination from "../../../../components/Pagination";
 import LoadingOverlay from "../../../../components/LoadingOverlay";
-import { normalizeUrl } from "../../../../hooks/useSearch";
+import { normalizeUrl } from "@/utils/urlHelpers";
+import { StatusBadge } from "@/components/DetailModal";
 import { exportToExcel } from "@/utils/exportToExcel";
 
 interface Departamento {
@@ -67,14 +68,16 @@ const ListaDepartamentos = () => {
 					? normalizeUrl(response.data.previous)
 					: null;
 
-				console.log("Original next URL:", response.data.next);
-				console.log("Normalized next URL:", normalizedNext);
-				console.log("Original prev URL:", response.data.previous);
-				console.log("Normalized prev URL:", normalizedPrev);
-
 				setNextUrl(normalizedNext);
 				setPrevUrl(normalizedPrev);
 				setTotalItems(response.data.count);
+
+				// El backend usa LimitOffsetPagination: derivar la página actual
+				// del offset/limit de la URL consultada.
+				const queryParams = new URLSearchParams(url.split("?")[1] || "");
+				const limit = Number(queryParams.get("limit")) || pageSize;
+				const offset = Number(queryParams.get("offset")) || 0;
+				setCurrentPage(Math.floor(offset / limit) + 1);
 			} catch (error) {
 				Swal.fire({
 					icon: "error",
@@ -85,7 +88,7 @@ const ListaDepartamentos = () => {
 				setIsLoading(false);
 			}
 		},
-		[]
+		[pageSize]
 	);
 
 	useEffect(() => {
@@ -106,9 +109,7 @@ const ListaDepartamentos = () => {
 		if (filtroTelefono !== "") {
 			params.append("telefono__icontains", filtroTelefono);
 		}
-		params.append("page", "1");
 		url += params.toString();
-		setCurrentPage(1);
 		setCurrentUrl(url);
 	};
 
@@ -116,29 +117,11 @@ const ListaDepartamentos = () => {
 		setFiltroNombre("");
 		setFiltroTelefono("");
 		setFiltroEstado("1");
-	};
-
-	const handlePageChange = (newPage: number) => {
-		let url = `/facet/departamento/?`;
-		const params = new URLSearchParams();
-
-		if (filtroNombre !== "") {
-			params.append("nombre__icontains", filtroNombre);
+		if (currentUrl === `/facet/departamento/`) {
+			fetchData(currentUrl);
+		} else {
+			setCurrentUrl(`/facet/departamento/`);
 		}
-		if (filtroEstado === "todos") {
-			params.append("show_all", "true");
-		} else if (filtroEstado !== "" && filtroEstado !== "todos") {
-			params.append("estado", filtroEstado.toString());
-		}
-		if (filtroTelefono !== "") {
-			params.append("telefono__icontains", filtroTelefono);
-		}
-
-		params.append("page", newPage.toString());
-		url += params.toString();
-
-		setCurrentPage(newPage);
-		setCurrentUrl(url);
 	};
 
 	const totalPages = Math.ceil(totalItems / pageSize);
@@ -152,7 +135,9 @@ const ListaDepartamentos = () => {
 			if (filtroNombre !== "") {
 				params.append("nombre__icontains", filtroNombre);
 			}
-			if (filtroEstado !== "") {
+			if (filtroEstado === "todos") {
+				params.append("show_all", "true");
+			} else if (filtroEstado !== "" && filtroEstado !== "todos") {
 				params.append("estado", filtroEstado.toString());
 			}
 			if (filtroTelefono !== "") {
@@ -219,6 +204,7 @@ const ListaDepartamentos = () => {
 
 	return (
 		<DashboardMenu>
+			<div className="p-6">
 			<div className="bg-white rounded-lg shadow-lg">
 				<div className="p-6 border-b border-gray-200">
 					<h1 className="text-2xl font-bold text-gray-800">Departamentos</h1>
@@ -236,7 +222,7 @@ const ListaDepartamentos = () => {
 							onClick={() =>
 								router.push("/dashboard/departments/departamentoJefe")
 							}
-							className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+							className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2.5 rounded-xl shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200 font-semibold text-sm"
 						>
 							<PeopleIcon /> Jefes
 						</button>
@@ -299,8 +285,8 @@ const ListaDepartamentos = () => {
 									<TableCell className="text-gray-800">
 										{departamento.mail_jefe_departamento || "-"}
 									</TableCell>
-									<TableCell className="text-gray-800">
-										{departamento.estado === "1" ? "Activo" : "Inactivo"}
+									<TableCell>
+										<StatusBadge estado={String(departamento.estado)} />
 									</TableCell>
 									<TableCell>
 										<ActionMenu
@@ -329,12 +315,13 @@ const ListaDepartamentos = () => {
 					<Pagination
 						currentPage={currentPage}
 						totalPages={totalPages}
-						onPrevious={() => handlePageChange(currentPage - 1)}
-						onNext={() => handlePageChange(currentPage + 1)}
-						hasPrevious={currentPage > 1}
-						hasNext={currentPage < totalPages}
+						onPrevious={() => prevUrl && setCurrentUrl(prevUrl)}
+						onNext={() => nextUrl && setCurrentUrl(nextUrl)}
+						hasPrevious={!!prevUrl}
+						hasNext={!!nextUrl}
 					/>
 				</div>
+			</div>
 			</div>
 		</DashboardMenu>
 	);

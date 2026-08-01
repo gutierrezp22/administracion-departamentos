@@ -27,7 +27,7 @@ import {
 import Pagination from "../../../../../components/Pagination";
 import DetailModal, { StatusBadge } from "../../../../../components/DetailModal";
 import LoadingOverlay from "../../../../../components/LoadingOverlay";
-import { normalizeUrl } from "../../../../../hooks/useSearch";
+import { normalizeUrl } from "@/utils/urlHelpers";
 
 const ListaDocentes = () => {
   interface Docente {
@@ -112,6 +112,7 @@ const ListaDocentes = () => {
       params.append("persona__legajo__icontains", filtroLegajo);
     }
     url += params.toString();
+    setCurrentPage(1);
     setCurrentUrl(url);
   };
 
@@ -121,6 +122,7 @@ const ListaDocentes = () => {
     setFiltroDni("");
     setFiltroLegajo("");
     setFiltroEstado("1");
+    setCurrentPage(1);
     setCurrentUrl(`/facet/docente/?estado=1`);
   };
 
@@ -148,7 +150,7 @@ const ListaDocentes = () => {
         const response = await API.get(url);
         const { results, next } = response.data;
         allDocentes = [...allDocentes, ...results];
-        url = next;
+        url = next ? normalizeUrl(next) : "";
       }
 
       await exportToExcel({
@@ -214,6 +216,7 @@ const ListaDocentes = () => {
 
   return (
     <DashboardMenu>
+      <div className="p-6">
       <div className="bg-white rounded-lg shadow-lg">
         <div className="p-6 border-b border-gray-200">
           <h1 className="text-2xl font-bold text-gray-800">Docentes</h1>
@@ -287,9 +290,6 @@ const ListaDocentes = () => {
                   Email
                 </TableCell>
                 <TableCell>
-                  Interno
-                </TableCell>
-                <TableCell>
                   Estado
                 </TableCell>
                 <TableCell>
@@ -300,45 +300,26 @@ const ListaDocentes = () => {
               <TableBody>
                 {docentes.map((docente) => (
                   <TableRow key={docente.id} className="hover:bg-gray-50">
-                    <TableCell
-                      className="text-gray-800"
-                      style={{ color: "#1f2937" }}>
+                    <TableCell className="text-gray-800">
                       {docente.persona_detalle?.nombre || "N/A"}
                     </TableCell>
-                    <TableCell
-                      className="text-gray-800"
-                      style={{ color: "#1f2937" }}>
+                    <TableCell className="text-gray-800">
                       {docente.persona_detalle?.apellido || "N/A"}
                     </TableCell>
-                    <TableCell
-                      className="text-gray-800"
-                      style={{ color: "#1f2937" }}>
+                    <TableCell className="text-gray-800">
                       {docente.persona_detalle?.dni || "N/A"}
                     </TableCell>
-                    <TableCell
-                      className="text-gray-800"
-                      style={{ color: "#1f2937" }}>
+                    <TableCell className="text-gray-800">
                       {docente.persona_detalle?.legajo || "N/A"}
                     </TableCell>
-                    <TableCell
-                      className="text-gray-800"
-                      style={{ color: "#1f2937" }}>
+                    <TableCell className="text-gray-800">
                       {docente.persona_detalle?.telefono || "N/A"}
                     </TableCell>
-                    <TableCell
-                      className="text-gray-800"
-                      style={{ color: "#1f2937" }}>
+                    <TableCell className="text-gray-800">
                       {docente.persona_detalle?.email || "N/A"}
                     </TableCell>
-                    <TableCell
-                      className="text-gray-800"
-                      style={{ color: "#1f2937" }}>
-                      N/A
-                    </TableCell>
-                    <TableCell
-                      className="text-gray-800"
-                      style={{ color: "#1f2937" }}>
-                      {docente.estado === "1" ? "Activo" : "Inactivo"}
+                    <TableCell className="text-gray-800">
+                      <StatusBadge estado={String(docente.estado)} />
                     </TableCell>
                     <TableCell>
                       <ActionMenu
@@ -395,6 +376,7 @@ const ListaDocentes = () => {
           />
         </div>
       </div>
+      </div>
 
       {/* Modal de vista de docente */}
       {viewDocente && (
@@ -408,7 +390,7 @@ const ListaDocentes = () => {
           title="Detalles del Docente"
           sections={[
             {
-              title: "Informacion Personal",
+              title: "Información personal",
               fields: [
                 { label: "DNI", value: viewDocente.persona_detalle?.dni },
                 { label: "Legajo", value: viewDocente.persona_detalle?.legajo },
@@ -417,9 +399,9 @@ const ListaDocentes = () => {
               ],
             },
             {
-              title: "Informacion de Contacto",
+              title: "Información de contacto",
               fields: [
-                { label: "Telefono", value: viewDocente.persona_detalle?.telefono },
+                { label: "Teléfono", value: viewDocente.persona_detalle?.telefono },
                 { label: "Email", value: viewDocente.persona_detalle?.email },
                 { label: "Estado", value: <StatusBadge estado={viewDocente.estado} /> },
               ],

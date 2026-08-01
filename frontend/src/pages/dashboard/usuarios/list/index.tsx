@@ -23,6 +23,8 @@ import {
 import ResponsiveTable from "../../../../components/ResponsiveTable";
 import ActionMenu from "../../../../components/ActionMenu";
 import LoadingOverlay from "@/components/LoadingOverlay";
+import Pagination from "@/components/Pagination";
+import DetailModal, { StatusBadge } from "@/components/DetailModal";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -42,16 +44,11 @@ import {
   EstadoFilter,
 } from "../../../../components/Filters";
 import { FilterSelect } from "../../../../components/Filters";
-import BasicModal from "../../../../utils/modal";
+import { normalizeUrl } from "@/utils/urlHelpers";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-
-// Función para normalizar URLs de paginación
-const normalizeUrl = (url: string) => {
-  return url.replace(window.location.origin, "").replace(/^\/+/, "/");
-};
 
 // Configurar dayjs plugins
 dayjs.extend(utc);
@@ -61,37 +58,37 @@ dayjs.extend(customParseFormat);
 // Función para formatear fechas
 const formatearFecha = (fecha: string | null) => {
   if (!fecha) return "No disponible";
-  
+
   try {
     const fechaStr = String(fecha).trim();
-    
+
     // Detectar si es formato DD/MM/YYYY HH:mm:ss (formato español)
     const formatoEspanol = /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{1,2}):(\d{1,2})$/;
     const match = fechaStr.match(formatoEspanol);
-    
+
     if (match) {
       const [, dia, mes, anio, hora, minuto, segundo] = match;
       // Convertir a formato ISO: YYYY-MM-DD HH:mm:ss
       const fechaISO = `${anio}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')} ${hora.padStart(2, '0')}:${minuto.padStart(2, '0')}:${segundo.padStart(2, '0')}`;
-      
+
       const fechaParseada = dayjs(fechaISO);
       if (fechaParseada.isValid()) {
         return fechaParseada.format("DD/MM/YYYY HH:mm");
       }
     }
-    
+
     // Si no es formato español, intentar parseo directo con dayjs
     const fechaParseada = dayjs(fechaStr);
     if (fechaParseada.isValid()) {
       return fechaParseada.format("DD/MM/YYYY HH:mm");
     }
-    
+
     // Fallback: intentar con Date nativo
     const nativeDate = new Date(fechaStr);
     if (!isNaN(nativeDate.getTime())) {
       return dayjs(nativeDate).format("DD/MM/YYYY HH:mm");
     }
-    
+
     return "Fecha inválida";
   } catch (error) {
     console.error("Error al formatear fecha:", fecha, error);
@@ -143,14 +140,6 @@ const ListaUsuarios = () => {
 
   const router = useRouter();
 
-  useEffect(() => {
-    fetchData(currentUrl);
-  }, [currentUrl]);
-
-  useEffect(() => {
-    fetchRoles();
-  }, []);
-
   const fetchRoles = async () => {
     try {
       const response = await API.get(`/facet/roles/`);
@@ -170,6 +159,12 @@ const ListaUsuarios = () => {
       setNextUrl(response.data.next ? normalizeUrl(response.data.next) : null);
       setPrevUrl(response.data.previous ? normalizeUrl(response.data.previous) : null);
       setTotalItems(response.data.count);
+      // Derivar página actual desde offset/limit (LimitOffsetPagination)
+      const queryParams = new URLSearchParams(url.split("?")[1] || "");
+      const limit = parseInt(queryParams.get("limit") || "", 10) || pageSize;
+      const offset = parseInt(queryParams.get("offset") || "0", 10);
+      setPageSize(limit);
+      setCurrentPage(Math.floor(offset / limit) + 1);
       // Pequeño delay para asegurar que los estilos se cargan
       setTimeout(() => setIsLoading(false), 500);
     } catch (error) {
@@ -181,6 +176,14 @@ const ListaUsuarios = () => {
       });
     }
   };
+
+  useEffect(() => {
+    fetchData(currentUrl);
+  }, [currentUrl]);
+
+  useEffect(() => {
+    fetchRoles();
+  }, []);
 
   const filtrarUsuarios = () => {
     let url = `/facet/users/?`;
@@ -210,7 +213,6 @@ const ListaUsuarios = () => {
       params.append("is_active", filtroEstado === "1" ? "true" : "false");
     }
 
-    params.append("page", "1");
     url += params.toString();
     setCurrentPage(1);
     setCurrentUrl(url);
@@ -224,42 +226,8 @@ const ListaUsuarios = () => {
     setFiltroDocumento("");
     setFiltroRol("");
     setFiltroEstado("1");
+    setCurrentPage(1);
     setCurrentUrl(`/facet/users/?is_active=true`);
-  };
-
-  const handlePageChange = (newPage: number) => {
-    let url = `/facet/users/?`;
-    const params = new URLSearchParams();
-
-    if (filtroEmail !== "") {
-      params.append("email__icontains", filtroEmail);
-    }
-    if (filtroNombre !== "") {
-      params.append("nombre__icontains", filtroNombre);
-    }
-    if (filtroApellido !== "") {
-      params.append("apellido__icontains", filtroApellido);
-    }
-    if (filtroLegajo !== "") {
-      params.append("legajo__icontains", filtroLegajo);
-    }
-    if (filtroDocumento !== "") {
-      params.append("documento__icontains", filtroDocumento);
-    }
-    if (filtroRol !== "") {
-      params.append("rol", filtroRol);
-    }
-    if (filtroEstado === "todos") {
-      params.append("show_all", "true");
-    } else if (filtroEstado !== "" && filtroEstado !== "todos") {
-      params.append("is_active", filtroEstado === "1" ? "true" : "false");
-    }
-
-    params.append("page", newPage.toString());
-    url += params.toString();
-
-    setCurrentPage(newPage);
-    setCurrentUrl(url);
   };
 
   const verUsuario = async (id: number) => {
@@ -290,7 +258,7 @@ const ListaUsuarios = () => {
       if (filtroLegajo !== "") params.append("legajo__icontains", filtroLegajo);
       if (filtroDocumento !== "")
         params.append("documento__icontains", filtroDocumento);
-      if (filtroRol !== "") params.append("rol_detalle__icontains", filtroRol);
+      if (filtroRol !== "") params.append("rol", filtroRol);
       if (filtroEstado === "todos") {
         params.append("show_all", "true");
       } else if (filtroEstado !== "" && filtroEstado !== "todos") {
@@ -303,7 +271,7 @@ const ListaUsuarios = () => {
         const response = await API.get(url);
         const { results, next } = response.data;
         allUsuarios = [...allUsuarios, ...results];
-        url = next;
+        url = next ? normalizeUrl(next) : "";
       }
 
       await exportToExcel({
@@ -326,7 +294,7 @@ const ListaUsuarios = () => {
           "Cambió Contraseña": usuario.has_changed_password ? "Sí" : "No",
         })),
       });
-      
+
       // Simular un pequeño delay para mostrar el modal antes de cerrar
       setTimeout(() => {
         setIsDownloading(false);
@@ -395,342 +363,223 @@ const ListaUsuarios = () => {
 
   return (
     <DashboardMenu>
-      <div className="bg-white rounded-lg shadow-lg">
-        <div className="p-6 border-b border-gray-200">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Usuarios del Sistema
-          </h1>
-        </div>
-
-        <div className="p-6">
-          <div className="flex flex-wrap gap-4 mb-6">
-            <button
-              onClick={() => router.push("/dashboard/usuarios/create")}
-              className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2.5 rounded-xl shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200 font-semibold text-sm">
-              <AddIcon /> Agregar Usuario
-            </button>
-            <button
-              onClick={descargarExcel}
-              className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2.5 rounded-xl shadow-md shadow-green-500/20 hover:shadow-lg hover:shadow-green-500/30 transition-all duration-200 font-semibold text-sm">
-              <FileDownloadIcon /> Descargar Excel
-            </button>
+      <div className="p-6">
+        <div className="bg-white rounded-lg shadow-lg">
+          <div className="p-6 border-b border-gray-200">
+            <h1 className="text-2xl font-bold text-gray-800">
+              Usuarios
+            </h1>
           </div>
 
-          <FilterContainer onApply={filtrarUsuarios} onClear={limpiarFiltros}>
-            <FilterInput
-              label="Email"
-              value={filtroEmail}
-              onChange={setFiltroEmail}
-              placeholder="Buscar por email"
-            />
-            <FilterInput
-              label="Nombre"
-              value={filtroNombre}
-              onChange={setFiltroNombre}
-              placeholder="Buscar por nombre"
-            />
-            <FilterInput
-              label="Apellido"
-              value={filtroApellido}
-              onChange={setFiltroApellido}
-              placeholder="Buscar por apellido"
-            />
-            <FilterInput
-              label="Legajo"
-              value={filtroLegajo}
-              onChange={setFiltroLegajo}
-              placeholder="Buscar por legajo"
-            />
-            <FilterInput
-              label="Documento"
-              value={filtroDocumento}
-              onChange={setFiltroDocumento}
-              placeholder="Buscar por documento"
-            />
-            {/* Filtro de rol como selector por ID */}
-            <FilterSelect
-              label="Rol"
-              value={filtroRol}
-              onChange={setFiltroRol}
-              options={roles.map((rol) => ({
-                value: String(rol.id),
-                label: rol.descripcion,
-              }))}
-              placeholder="Todos"
-            />
-            <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
-          </FilterContainer>
+          <div className="p-6">
+            <div className="flex flex-wrap gap-4 mb-6">
+              <button
+                onClick={() => router.push("/dashboard/usuarios/create")}
+                className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2.5 rounded-xl shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200 font-semibold text-sm">
+                <AddIcon /> Agregar Usuario
+              </button>
+              <button
+                onClick={descargarExcel}
+                className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2.5 rounded-xl shadow-md shadow-green-500/20 hover:shadow-lg hover:shadow-green-500/30 transition-all duration-200 font-semibold text-sm">
+                <FileDownloadIcon /> Descargar Excel
+              </button>
+            </div>
 
-          <div className="mt-6 relative">
-            {isLoading && <LoadingOverlay variant="overlay" message="Cargando..." />}
-            <ResponsiveTable dense className="shadow-lg">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Nombre</TableCell>
-                  <TableCell>Apellido</TableCell>
-                  <TableCell>Legajo</TableCell>
-                  <TableCell>Documento</TableCell>
-                  <TableCell>Rol</TableCell>
-                  <TableCell>Estado</TableCell>
-                  <TableCell>Acciones</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {usuarios.map((usuario) => (
-                  <TableRow key={usuario.id} className="hover:bg-gray-50">
-                    <TableCell>{usuario.email}</TableCell>
-                    <TableCell>{usuario.nombre}</TableCell>
-                    <TableCell>{usuario.apellido}</TableCell>
-                    <TableCell>{usuario.legajo}</TableCell>
-                    <TableCell>{usuario.documento}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={usuario.rol_detalle || "Sin rol"}
-                        color="primary"
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={usuario.is_active ? "Activo" : "Inactivo"}
-                        color={usuario.is_active ? "success" : "error"}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <ActionMenu
-                        items={[
-                          {
-                            items: [
-                              {
-                                label: "Ver detalles",
-                                icon: <VisibilityIcon fontSize="small" />,
-                                onClick: () => verUsuario(usuario.id),
-                              },
-                              {
-                                label: "Editar",
-                                icon: <EditIcon fontSize="small" />,
-                                onClick: () =>
-                                  router.push(`/dashboard/usuarios/edit/${usuario.id}`),
-                              },
-                            ],
-                          },
-                          {
-                            items: usuario.is_active
-                              ? [
-                                  {
-                                    label: "Desactivar",
-                                    icon: <DeleteIcon fontSize="small" />,
-                                    onClick: () => eliminarUsuario(usuario.id),
-                                    danger: true,
-                                  },
-                                ]
-                              : [
-                                  {
-                                    label: "Activar",
-                                    icon: <PersonIcon fontSize="small" />,
-                                    onClick: () => activarUsuario(usuario.id),
-                                  },
-                                ],
-                          },
-                        ]}
-                      />
-                    </TableCell>
+            <FilterContainer onApply={filtrarUsuarios} onClear={limpiarFiltros}>
+              <FilterInput
+                label="Email"
+                value={filtroEmail}
+                onChange={setFiltroEmail}
+                placeholder="Buscar por email"
+              />
+              <FilterInput
+                label="Nombre"
+                value={filtroNombre}
+                onChange={setFiltroNombre}
+                placeholder="Buscar por nombre"
+              />
+              <FilterInput
+                label="Apellido"
+                value={filtroApellido}
+                onChange={setFiltroApellido}
+                placeholder="Buscar por apellido"
+              />
+              <FilterInput
+                label="Legajo"
+                value={filtroLegajo}
+                onChange={setFiltroLegajo}
+                placeholder="Buscar por legajo"
+              />
+              <FilterInput
+                label="Documento"
+                value={filtroDocumento}
+                onChange={setFiltroDocumento}
+                placeholder="Buscar por documento"
+              />
+              {/* Filtro de rol como selector por ID */}
+              <FilterSelect
+                label="Rol"
+                value={filtroRol}
+                onChange={setFiltroRol}
+                options={roles.map((rol) => ({
+                  value: String(rol.id),
+                  label: rol.descripcion,
+                }))}
+                placeholder="Todos"
+              />
+              <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
+            </FilterContainer>
+
+            <div className="mt-6 relative">
+              {isLoading && <LoadingOverlay variant="overlay" message="Cargando..." />}
+              <ResponsiveTable dense className="shadow-lg">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Email</TableCell>
+                    <TableCell>Nombre</TableCell>
+                    <TableCell>Apellido</TableCell>
+                    <TableCell>Legajo</TableCell>
+                    <TableCell>Documento</TableCell>
+                    <TableCell>Rol</TableCell>
+                    <TableCell>Estado</TableCell>
+                    <TableCell>Acciones</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </ResponsiveTable>
-          </div>
+                </TableHead>
+                <TableBody>
+                  {usuarios.map((usuario) => (
+                    <TableRow key={usuario.id} className="hover:bg-gray-50">
+                      <TableCell>{usuario.email}</TableCell>
+                      <TableCell>{usuario.nombre}</TableCell>
+                      <TableCell>{usuario.apellido}</TableCell>
+                      <TableCell>{usuario.legajo}</TableCell>
+                      <TableCell>{usuario.documento}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={usuario.rol_detalle || "Sin rol"}
+                          color="primary"
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge estado={usuario.is_active ? "1" : "0"} />
+                      </TableCell>
+                      <TableCell>
+                        <ActionMenu
+                          items={[
+                            {
+                              items: [
+                                {
+                                  label: "Ver detalles",
+                                  icon: <VisibilityIcon fontSize="small" />,
+                                  onClick: () => verUsuario(usuario.id),
+                                },
+                                {
+                                  label: "Editar",
+                                  icon: <EditIcon fontSize="small" />,
+                                  onClick: () =>
+                                    router.push(`/dashboard/usuarios/edit/${usuario.id}`),
+                                },
+                              ],
+                            },
+                            {
+                              items: usuario.is_active
+                                ? [
+                                    {
+                                      label: "Desactivar",
+                                      icon: <DeleteIcon fontSize="small" />,
+                                      onClick: () => eliminarUsuario(usuario.id),
+                                      danger: true,
+                                    },
+                                  ]
+                                : [
+                                    {
+                                      label: "Activar",
+                                      icon: <PersonIcon fontSize="small" />,
+                                      onClick: () => activarUsuario(usuario.id),
+                                    },
+                                  ],
+                            },
+                          ]}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </ResponsiveTable>
+            </div>
 
-          <div className="flex justify-between items-center mt-6">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className={`px-4 py-2 rounded-lg font-medium ${
-                currentPage > 1
-                  ? "bg-blue-500 text-white hover:bg-blue-600"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              } transition-colors duration-200`}>
-              Anterior
-            </button>
-            <span className="text-gray-600">
-              Página {currentPage} de {totalPages}
-            </span>
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage >= totalPages}
-              className={`px-4 py-2 rounded-lg font-medium ${
-                currentPage < totalPages
-                  ? "bg-blue-500 text-white hover:bg-blue-600"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              } transition-colors duration-200`}>
-              Siguiente
-            </button>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPrevious={() => {
+                if (prevUrl) {
+                  setCurrentUrl(prevUrl);
+                }
+              }}
+              onNext={() => {
+                if (nextUrl) {
+                  setCurrentUrl(nextUrl);
+                }
+              }}
+              hasPrevious={!!prevUrl}
+              hasNext={!!nextUrl}
+            />
           </div>
         </div>
       </div>
 
       {/* Modal de vista de usuario */}
-      {modalViewVisible && viewUsuario && (
-        <div
-          className="fixed inset-0 flex items-center justify-center z-[10000]"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-          }}>
-          <div
-            className="fixed inset-0 bg-black opacity-50"
-            onClick={() => setModalViewVisible(false)}></div>
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto z-[10001] relative">
-            <div className="p-6 border-b border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900">
-                Detalles del Usuario
-              </h3>
-            </div>
-
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Información Personal */}
-                <div className="space-y-4">
-                  <h4 className="text-lg font-semibold text-gray-700 border-b pb-2">
-                    Información Personal
-                  </h4>
-
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Email
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {viewUsuario.email || "No especificado"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Nombre
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {viewUsuario.nombre || "No especificado"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Apellido
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {viewUsuario.apellido || "No especificado"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Legajo
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {viewUsuario.legajo || "No especificado"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Documento
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {viewUsuario.documento || "No especificado"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Información del Sistema */}
-                <div className="space-y-4">
-                  <h4 className="text-lg font-semibold text-gray-700 border-b pb-2">
-                    Información del Sistema
-                  </h4>
-
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Rol
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {viewUsuario.rol_detalle || "Sin rol asignado"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Estado
-                      </label>
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          viewUsuario.is_active
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}>
-                        {viewUsuario.is_active ? "Activo" : "Inactivo"}
-                      </span>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Fecha de Registro
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {formatearFecha(viewUsuario.date_joined)}
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Último Login
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {viewUsuario.last_login ? formatearFecha(viewUsuario.last_login) : "Nunca"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Cambió Contraseña
-                      </label>
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          viewUsuario.has_changed_password
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}>
-                        {viewUsuario.has_changed_password ? "Sí" : "No"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 border-t border-gray-200 flex justify-end space-x-3">
-              <button
-                onClick={() => setModalViewVisible(false)}
-                className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors duration-200">
-                Cerrar
-              </button>
-              <button
-                onClick={() => {
-                  setModalViewVisible(false);
-                  router.push(`/dashboard/usuarios/edit/${viewUsuario.id}`);
-                }}
-                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors duration-200">
-                Editar
-              </button>
-            </div>
-          </div>
-        </div>
+      {viewUsuario && (
+        <DetailModal
+          open={modalViewVisible}
+          onClose={() => setModalViewVisible(false)}
+          onEdit={() => {
+            setModalViewVisible(false);
+            router.push(`/dashboard/usuarios/edit/${viewUsuario.id}`);
+          }}
+          title="Detalles del Usuario"
+          sections={[
+            {
+              title: "Información Personal",
+              fields: [
+                { label: "Email", value: viewUsuario.email },
+                { label: "Nombre", value: viewUsuario.nombre },
+                { label: "Apellido", value: viewUsuario.apellido },
+                { label: "Legajo", value: viewUsuario.legajo },
+                { label: "Documento", value: viewUsuario.documento },
+              ],
+            },
+            {
+              title: "Información del Sistema",
+              fields: [
+                {
+                  label: "Rol",
+                  value: viewUsuario.rol_detalle || "Sin rol asignado",
+                },
+                {
+                  label: "Estado",
+                  value: (
+                    <StatusBadge estado={viewUsuario.is_active ? "1" : "0"} />
+                  ),
+                },
+                {
+                  label: "Fecha de Registro",
+                  value: formatearFecha(viewUsuario.date_joined),
+                },
+                {
+                  label: "Último Login",
+                  value: viewUsuario.last_login
+                    ? formatearFecha(viewUsuario.last_login)
+                    : "Nunca",
+                },
+                {
+                  label: "Cambió Contraseña",
+                  value: viewUsuario.has_changed_password ? "Sí" : "No",
+                },
+              ],
+            },
+          ]}
+        />
       )}
 
       {/* Modal de descarga de Excel */}
@@ -754,5 +603,3 @@ const ListaUsuarios = () => {
 };
 
 export default withAuth(ListaUsuarios);
-
-

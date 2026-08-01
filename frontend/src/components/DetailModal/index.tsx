@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { lockBodyScroll, unlockBodyScroll } from "../../utils/scrollLock";
 
 interface DetailField {
   label: string;
@@ -32,16 +33,21 @@ const DetailModal: React.FC<DetailModalProps> = ({
   showEditButton = true,
 }) => {
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    if (!open) return;
+    lockBodyScroll();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.body.style.overflow = "";
+      document.removeEventListener("keydown", handleKeyDown);
+      unlockBodyScroll();
     };
-  }, [open]);
+  }, [open, onClose]);
 
   if (!open) return null;
 
@@ -63,10 +69,16 @@ const DetailModal: React.FC<DetailModalProps> = ({
       ></div>
 
       {/* Modal Content */}
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto z-[10001] relative">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="detail-modal-title"
+        className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto z-[10001] relative">
         {/* Header */}
         <div className="p-6 border-b border-gray-200">
-          <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+          <h3 id="detail-modal-title" className="text-xl font-bold text-gray-900">
+            {title}
+          </h3>
         </div>
 
         {/* Body */}
@@ -87,7 +99,9 @@ const DetailModal: React.FC<DetailModalProps> = ({
                       {typeof field.value === "string" ||
                       typeof field.value === "number" ? (
                         <p className="text-gray-900 font-medium">
-                          {field.value || "No especificado"}
+                          {field.value === "" || field.value == null
+                            ? "No especificado"
+                            : field.value}
                         </p>
                       ) : (
                         field.value

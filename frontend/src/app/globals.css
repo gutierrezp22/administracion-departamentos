@@ -3,29 +3,17 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 255, 255, 255;
+  /* gray-900: el texto por defecto debe ser oscuro sobre fondo blanco */
+  --foreground-rgb: 17, 24, 39;
   --background-start-rgb: 255, 255, 255;
   --background-end-rgb: 255, 255, 255;
   --font-primary: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 255, 255, 255;
-    --background-end-rgb: 255, 255, 255;
-  }
-}
-
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background: rgb(var(--background-start-rgb));
   font-family: var(--font-primary);
 }
 
@@ -62,10 +50,7 @@ body {
   font-feature-settings: "tnum" 1, "lnum" 1;
 }
 
-/* Hover en filas */
-.MuiTableBody-root .MuiTableRow-root:hover .MuiTableCell-root {
-  font-weight: 500 !important;
-}
+/* Hover en filas: sin cambio de font-weight para evitar reflow/jitter */
 
 /* Componentes ResponsiveTable */
 [class*="ResponsiveTable"] table {
@@ -177,9 +162,11 @@ body {
   margin-top: 1.5rem !important;
 }
 
-/* Botón confirmar (primario) — gris oscuro tipo "Iniciar sesión" */
+/* Botón confirmar (primario) — azul, igual que el primario de la app.
+   Sin !important en background-color: un confirmButtonColor inline
+   (p. ej. #d33 en confirmaciones de borrado) debe poder ganar. */
 .swal2-styled.swal2-confirm {
-  background-color: #111827;
+  background-color: #3b82f6;
   color: #ffffff !important;
   border: 0 !important;
   border-radius: 0.75rem !important;
@@ -199,7 +186,7 @@ body {
 }
 .swal2-styled.swal2-confirm:focus {
   box-shadow:
-    0 0 0 3px rgba(17, 24, 39, 0.25),
+    0 0 0 3px rgba(59, 130, 246, 0.35),
     0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
 }
 

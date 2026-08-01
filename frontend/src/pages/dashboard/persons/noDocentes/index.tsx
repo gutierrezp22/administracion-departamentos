@@ -1,7 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import ListaNoDocentes from './list';
-import CrearNoDocente from './create';
 import EditarNoDocente from './edit/[id]';
 
 const NoDocentes = () => {
@@ -12,8 +11,6 @@ const NoDocentes = () => {
     // Verifica que idPersona esté definido
     if (idPersona) {
       return <EditarNoDocente />; // Renderiza EditarNoDocente si hay un id
-    } else if (router.pathname.endsWith('/crear')) {
-      return <CrearNoDocente />; // Renderiza CrearNoDocente si el path es de crear
     } else {
       return <ListaNoDocentes />; // Renderiza la lista por defecto
     }
