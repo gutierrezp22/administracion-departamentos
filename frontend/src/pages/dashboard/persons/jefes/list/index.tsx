@@ -6,7 +6,6 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  Chip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
@@ -28,7 +27,7 @@ import ActionMenu from "../../../../../components/ActionMenu";
 import Pagination from "../../../../../components/Pagination";
 import DetailModal, { StatusBadge } from "../../../../../components/DetailModal";
 import LoadingOverlay from "../../../../../components/LoadingOverlay";
-import { normalizeUrl } from "../../../../../hooks/useSearch";
+import { normalizeUrl } from "@/utils/urlHelpers";
 
 const ListaJefes = () => {
   interface Jefe {
@@ -115,6 +114,7 @@ const ListaJefes = () => {
       params.append("persona__legajo__icontains", filtroLegajo);
     }
     url += params.toString();
+    setCurrentPage(1);
     setCurrentUrl(url);
   };
 
@@ -124,6 +124,7 @@ const ListaJefes = () => {
     setFiltroDni("");
     setFiltroLegajo("");
     setFiltroEstado("1");
+    setCurrentPage(1);
     setCurrentUrl(`/facet/jefe/list_jefes_persona/?estado=1`);
   };
 
@@ -151,7 +152,7 @@ const ListaJefes = () => {
         const response = await API.get(url);
         const { results, next } = response.data;
         allJefes = [...allJefes, ...results];
-        url = next;
+        url = next ? normalizeUrl(next) : "";
       }
 
       await exportToExcel({
@@ -227,6 +228,7 @@ const ListaJefes = () => {
 
   return (
     <DashboardMenu>
+      <div className="p-6">
       <div className="bg-white rounded-lg shadow-lg">
         <div className="p-6 border-b border-gray-200">
           <h1 className="text-2xl font-bold text-gray-800">Jefes</h1>
@@ -305,11 +307,7 @@ const ListaJefes = () => {
                   <TableCell>{jefe.persona.interno}</TableCell>
                   <TableCell>{jefe.observaciones}</TableCell>
                   <TableCell>
-                    <Chip
-                      label={jefe.estado === "1" ? "Activo" : "Inactivo"}
-                      color={jefe.estado === "1" ? "success" : "error"}
-                      size="small"
-                    />
+                    <StatusBadge estado={String(jefe.estado)} />
                   </TableCell>
                   <TableCell>
                     <ActionMenu
@@ -364,6 +362,7 @@ const ListaJefes = () => {
           />
         </div>
       </div>
+      </div>
 
       {/* Modal de vista de jefe */}
       {viewJefe && (
@@ -377,7 +376,7 @@ const ListaJefes = () => {
           title="Detalles del Jefe"
           sections={[
             {
-              title: "Informacion Personal",
+              title: "Información personal",
               fields: [
                 { label: "DNI", value: viewJefe.persona.dni },
                 { label: "Legajo", value: viewJefe.persona.legajo },
@@ -386,9 +385,9 @@ const ListaJefes = () => {
               ],
             },
             {
-              title: "Informacion de Contacto",
+              title: "Información de contacto",
               fields: [
-                { label: "Telefono", value: viewJefe.persona.telefono },
+                { label: "Teléfono", value: viewJefe.persona.telefono },
                 { label: "Email", value: viewJefe.persona.email },
                 { label: "Interno", value: viewJefe.persona.interno },
                 { label: "Estado", value: <StatusBadge estado={viewJefe.estado} /> },

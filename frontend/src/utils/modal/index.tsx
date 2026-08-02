@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { lockBodyScroll, unlockBodyScroll } from "../scrollLock";
 
 interface BasicModalProps {
   open: boolean;
@@ -16,29 +17,42 @@ const BasicModal: React.FC<BasicModalProps> = ({
   onConfirm = () => {},
 }) => {
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    
-    return () => {
-      document.body.style.overflow = '';
+    if (!open) return;
+    lockBodyScroll();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
     };
-  }, [open]);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      unlockBodyScroll();
+    };
+  }, [open, onClose]);
 
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-[10000]">
       <div className="fixed inset-0 bg-black opacity-50" onClick={onClose}></div>
-      <div className="bg-white rounded-lg shadow-xl p-6 w-96 z-[10001] relative max-h-[80vh] overflow-y-auto">
-        <h3 className="text-xl font-bold text-center mb-2">{title}</h3>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="basic-modal-title"
+        className="bg-white rounded-lg shadow-xl p-6 w-96 z-[10001] relative max-h-[80vh] overflow-y-auto">
+        <h3 id="basic-modal-title" className="text-xl font-bold text-center mb-2">
+          {title}
+        </h3>
         <hr className="my-3 border-gray-200" />
         <div className="text-gray-600 mb-6">
           {content.split('\n').map((line, index) => {
-            // Si la línea contiene ":", es probablemente un error de campo específico
-            const isFieldError = line.includes(':');
+            // Solo tratar como error de campo las líneas "campo: mensaje" cuando
+            // el modal es de error (evita marcar en rojo contenido normal con ":")
+            const isFieldError =
+              /error/i.test(title) && /^[^:]{1,40}:\s/.test(line);
             return (
               <div key={index} className={`${index > 0 ? 'mt-3' : ''} ${isFieldError ? 'bg-red-50 border-l-4 border-red-400 p-3 rounded' : ''}`}>
                 {isFieldError ? (
@@ -59,9 +73,10 @@ const BasicModal: React.FC<BasicModalProps> = ({
         </div>
         <div className="flex justify-center">
           <button
+            autoFocus
             onClick={() => {
-              onClose();
               onConfirm();
+              onClose();
             }}
             className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md font-medium"
           >

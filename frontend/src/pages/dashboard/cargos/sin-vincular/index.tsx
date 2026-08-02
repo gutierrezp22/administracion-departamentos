@@ -10,10 +10,8 @@ import Swal from "sweetalert2";
 import DashboardMenu from "../..";
 import withAuth from "@/components/withAut";
 import VincularModal from "@/components/Cargos/VincularModal";
-
-const normalizeUrl = (url: string) => {
-  return url.replace(window.location.origin, "").replace(/^\/+/, "/");
-};
+import { normalizeUrl } from "@/utils/urlHelpers";
+import Pagination from "@/components/Pagination";
 
 interface Cargo {
   id: number;
@@ -52,7 +50,7 @@ const CargosSinVincular = () => {
   );
   const [totalItems, setTotalItems] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 25;
+  const pageSize = 10;
 
   const [openVincular, setOpenVincular] = useState<Cargo | null>(null);
 
@@ -161,37 +159,24 @@ const CargosSinVincular = () => {
             </div>
 
             {totalPages > 1 && (
-              <div className="flex justify-between items-center mt-6">
-                <button
-                  onClick={() => {
-                    if (prevUrl) setCurrentUrl(prevUrl);
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPrevious={() => {
+                  if (prevUrl) {
+                    setCurrentUrl(prevUrl);
                     setCurrentPage((p) => Math.max(1, p - 1));
-                  }}
-                  disabled={!prevUrl}
-                  className={`px-4 py-2 rounded-lg font-medium ${
-                    prevUrl
-                      ? "bg-blue-500 text-white hover:bg-blue-600"
-                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  }`}>
-                  Anterior
-                </button>
-                <span className="text-gray-600 font-medium">
-                  Página {currentPage} de {totalPages || 1}
-                </span>
-                <button
-                  onClick={() => {
-                    if (nextUrl) setCurrentUrl(nextUrl);
+                  }
+                }}
+                onNext={() => {
+                  if (nextUrl) {
+                    setCurrentUrl(nextUrl);
                     setCurrentPage((p) => p + 1);
-                  }}
-                  disabled={!nextUrl}
-                  className={`px-4 py-2 rounded-lg font-medium ${
-                    nextUrl
-                      ? "bg-blue-500 text-white hover:bg-blue-600"
-                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  }`}>
-                  Siguiente
-                </button>
-              </div>
+                  }
+                }}
+                hasPrevious={!!prevUrl}
+                hasNext={!!nextUrl}
+              />
             )}
           </div>
         </div>

@@ -105,16 +105,19 @@ function SearchModal<T>({
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const applyFilters = () => {
+  const buildFilterParams = () => {
     const params = new URLSearchParams();
-
     filterFields.forEach((field) => {
       const value = filters[field.key];
       if (value && value.trim()) {
         params.append(field.filterParam, value.trim());
       }
     });
+    return params;
+  };
 
+  const applyFilters = () => {
+    const params = buildFilterParams();
     const queryString = params.toString();
     const url = queryString ? `${apiEndpoint}?${queryString}` : apiEndpoint;
     fetchData(url);
@@ -134,11 +137,21 @@ function SearchModal<T>({
     return path.split(".").reduce((acc, part) => acc?.[part], obj);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, key: string) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
       applyFilters();
     }
+  };
+
+  const goToPage = (page: number) => {
+    if (page < 1 || page > totalPages) return;
+    // Conservar los filtros activos al saltar de página
+    const params = buildFilterParams();
+    params.set("offset", String((page - 1) * pageSize));
+    params.set("limit", String(pageSize));
+    const baseUrl = apiEndpoint.split("?")[0];
+    fetchData(`${baseUrl}?${params.toString()}`);
   };
 
   return (
@@ -188,7 +201,7 @@ function SearchModal<T>({
                   type="text"
                   value={filters[field.key] || ""}
                   onChange={(e) => handleFilterChange(field.key, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(e, field.key)}
+                  onKeyDown={handleKeyDown}
                   placeholder={field.placeholder}
                   className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg
                     focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 
@@ -242,7 +255,7 @@ function SearchModal<T>({
                         key={`${getItemId(item)}-${String(col.key)}`}>
                         {col.render
                           ? col.render(item)
-                          : getNestedValue(item, String(col.key)) ?? "N/A"}
+                          : getNestedValue(item, String(col.key)) ?? "—"}
                       </TableCell>
                     ))}
                     <TableCell style={{ textAlign: "center" }}>
@@ -282,8 +295,9 @@ function SearchModal<T>({
           </ResponsiveTable>
         </div>
 
-        {/* Paginación + contador */}
-        {!isLoading && (
+        {/* Paginación + contador (se mantiene montada durante la carga para
+            evitar saltos de layout y pérdida de foco) */}
+        {(
           <>
             {data.length > 0 && (
               <div className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-4 bg-white rounded-xl shadow-sm border border-gray-200/60 p-3">
@@ -311,17 +325,17 @@ function SearchModal<T>({
                       type="number"
                       min={1}
                       max={totalPages}
-                      value={currentPage}
-                      onChange={(e) => {
-                        const page = parseInt(e.target.value);
-                        if (page >= 1 && page <= totalPages) {
-                          const offset = (page - 1) * pageSize;
-                          const baseUrl = apiEndpoint.split("?")[0];
-                          const params = new URLSearchParams();
-                          params.set("offset", offset.toString());
-                          params.set("limit", pageSize.toString());
-                          fetchData(`${baseUrl}?${params.toString()}`);
+                      defaultValue={currentPage}
+                      key={currentPage}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          goToPage(parseInt(e.currentTarget.value));
                         }
+                      }}
+                      onBlur={(e) => {
+                        const page = parseInt(e.target.value);
+                        if (page !== currentPage) goToPage(page);
                       }}
                       className="w-14 px-2 py-1.5 text-center border border-gray-200 rounded-lg text-sm font-semibold 
                         focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500

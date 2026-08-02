@@ -1,34 +1,19 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
-import axios from "axios";
 import API from "@/api/axiosConfig";
 import {
-  Container,
-  Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
-  Typography,
-  Paper,
-  TextField,
-  Button,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormControl,
-  Grid,
 } from "@mui/material";
 import ResponsiveTable from "../../../../components/ResponsiveTable";
 import ActionMenu from "../../../../components/ActionMenu";
 import LoadingOverlay from "@/components/LoadingOverlay";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
@@ -41,7 +26,6 @@ import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut";
-import { API_BASE_URL } from "../../../../utils/config";
 import {
   FilterContainer,
   FilterInput,
@@ -49,19 +33,13 @@ import {
   FilterDatePicker,
   EstadoFilter,
 } from "../../../../components/Filters";
-
-// Función para normalizar URLs de paginación
-const normalizeUrl = (url: string) => {
-  if (url.startsWith('http')) {
-    // Extract path and query from full URL
-    const urlObj = new URL(url);
-    return urlObj.pathname + urlObj.search;
-  }
-  return url.replace(/^\/+/, "/");
-};
+import Pagination from "../../../../components/Pagination";
+import DetailModal, { StatusBadge } from "@/components/DetailModal";
+import { normalizeUrl } from "@/utils/urlHelpers";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+dayjs.extend(customParseFormat);
 
 const ListaResoluciones = () => {
   interface Resolucion {
@@ -183,41 +161,8 @@ const ListaResoluciones = () => {
     setFiltroFechaDesde("");
     setFiltroFechaHasta("");
     setFiltroEstado("1");
-  };
-
-  const handlePageChange = (newPage: number) => {
-    let url = `/facet/resolucion/?`;
-    const params = new URLSearchParams();
-
-    if (filtroNExpediente !== "") {
-      params.append("nexpediente__icontains", filtroNExpediente);
-    }
-    if (filtroNResolucion !== "") {
-      params.append("nresolucion__icontains", filtroNResolucion);
-    }
-    if (filtroTipo !== "") {
-      params.append("tipo", filtroTipo);
-    }
-    if (filtroFechaExacta !== "") {
-      params.append("fecha", filtroFechaExacta);
-    }
-    if (filtroFechaDesde !== "") {
-      params.append("fecha__gte", filtroFechaDesde);
-    }
-    if (filtroFechaHasta !== "") {
-      params.append("fecha__lte", filtroFechaHasta);
-    }
-    if (filtroEstado === "todos") {
-      params.append("show_all", "true");
-    } else if (filtroEstado !== "" && filtroEstado !== "todos") {
-      params.append("estado", filtroEstado.toString());
-    }
-
-    params.append("page", newPage.toString());
-    url += params.toString();
-
-    setCurrentPage(newPage);
-    setCurrentUrl(url);
+    setCurrentPage(1);
+    setCurrentUrl(`/facet/resolucion/?page=1`);
   };
 
   const descargarExcel = async () => {
@@ -248,7 +193,7 @@ const ListaResoluciones = () => {
         const response = await API.get(url);
         const { results, next } = response.data;
         allResoluciones = [...allResoluciones, ...results];
-        url = next;
+        url = next ? normalizeUrl(next) : next;
       }
 
       // Crea el archivo Excel con las columnas de la grilla!
@@ -273,11 +218,11 @@ const ListaResoluciones = () => {
             resolucion.fecha_creacion,
             "DD/MM/YYYY HH:mm:ss"
           ).isValid()
-            ? dayjs(resolucion.fecha_creacion, "DD/MM/YYYY").format(
+            ? dayjs(resolucion.fecha_creacion, "DD/MM/YYYY HH:mm:ss").format(
                 "DD/MM/YYYY"
               )
             : "No disponible",
-          Estado: resolucion.estado,
+          Estado: resolucion.estado == 1 ? "Activo" : "Inactivo",
           Adjunto: resolucion.adjunto,
           Observaciones: resolucion.observaciones,
         })),
@@ -345,7 +290,8 @@ const ListaResoluciones = () => {
 
   return (
     <DashboardMenu>
-      <div className="bg-white rounded-lg shadow-lg">
+      <div className="p-6">
+        <div className="bg-white rounded-lg shadow-lg">
         <div className="p-6 border-b border-gray-200">
           <h1 className="text-2xl font-bold text-gray-800">Resoluciones</h1>
         </div>
@@ -384,9 +330,10 @@ const ListaResoluciones = () => {
               value={filtroTipo}
               onChange={setFiltroTipo}
               options={[
-                { value: "Rectoral", label: "Rectoral" },
-                { value: "Consejo Superior", label: "Consejo Superior" },
-                { value: "Consejo Directivo", label: "Consejo Directivo" },
+                { value: "Rector", label: "Rector" },
+                { value: "Decano", label: "Decano" },
+                { value: "Consejo_Superior", label: "Consejo Superior" },
+                { value: "Consejo_Directivo", label: "Consejo Directivo" },
               ]}
               placeholder="Seleccionar tipo"
             />
@@ -475,13 +422,14 @@ const ListaResoluciones = () => {
                         resolucion.fecha_creacion,
                         "DD/MM/YYYY HH:mm:ss"
                       ).isValid()
-                        ? dayjs(resolucion.fecha_creacion, "DD/MM/YYYY").format(
-                            "DD/MM/YYYY"
-                          )
+                        ? dayjs(
+                            resolucion.fecha_creacion,
+                            "DD/MM/YYYY HH:mm:ss"
+                          ).format("DD/MM/YYYY")
                         : "No disponible"}
                     </TableCell>
-                    <TableCell className="text-gray-800">
-                      {resolucion.estado == 1 ? "Activo" : "Inactivo"}
+                    <TableCell>
+                      <StatusBadge estado={String(resolucion.estado)} />
                     </TableCell>
                     <TableCell className="text-center">
                       <a
@@ -534,202 +482,113 @@ const ListaResoluciones = () => {
           </ResponsiveTable>
             </div>
 
-          <div className="flex justify-between items-center mt-6">
-            <button
-              onClick={() => prevUrl && setCurrentUrl(prevUrl)}
-              disabled={!prevUrl}
-              className={`px-4 py-2 rounded-lg font-medium ${
-                prevUrl
-                  ? "bg-blue-500 text-white hover:bg-blue-600"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              } transition-colors duration-200`}>
-              Anterior
-            </button>
-            <span className="text-gray-600">
-              Página {currentPage} de {totalPages}
-            </span>
-            <button
-              onClick={() => nextUrl && setCurrentUrl(nextUrl)}
-              disabled={!nextUrl}
-              className={`px-4 py-2 rounded-lg font-medium ${
-                nextUrl
-                  ? "bg-blue-500 text-white hover:bg-blue-600"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              } transition-colors duration-200`}>
-              Siguiente
-            </button>
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPrevious={() => prevUrl && setCurrentUrl(prevUrl)}
+            onNext={() => nextUrl && setCurrentUrl(nextUrl)}
+            hasPrevious={!!prevUrl}
+            hasNext={!!nextUrl}
+          />
+        </div>
         </div>
       </div>
 
       {/* Modal de vista de resolución */}
-      {modalViewVisible && viewResolucion && (
-        <div
-          className="fixed inset-0 flex items-center justify-center z-[10000]"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-          }}>
-          <div
-            className="fixed inset-0 bg-black opacity-50"
-            onClick={() => setModalViewVisible(false)}></div>
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto z-[10001] relative">
-            <div className="p-6 border-b border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900">
-                Detalles de la Resolución
-              </h3>
-            </div>
-
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Información Principal */}
-                <div className="space-y-4">
-                  <h4 className="text-lg font-semibold text-gray-700 border-b pb-2">
-                    Información Principal
-                  </h4>
-
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        N° Expediente
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {viewResolucion.nexpediente || "No especificado"}
-                      </p>
+      {viewResolucion && (
+        <DetailModal
+          open={modalViewVisible}
+          onClose={() => setModalViewVisible(false)}
+          onEdit={() => {
+            setModalViewVisible(false);
+            router.push(`/dashboard/resoluciones/edit/${viewResolucion.id}`);
+          }}
+          title="Detalles de la Resolución"
+          sections={[
+            {
+              title: "Información Principal",
+              fields: [
+                { label: "N° Expediente", value: viewResolucion.nexpediente },
+                { label: "N° Resolución", value: viewResolucion.nresolucion },
+                {
+                  label: "Tipo",
+                  value:
+                    viewResolucion.tipo === "Consejo_Superior"
+                      ? "Consejo Superior"
+                      : viewResolucion.tipo === "Consejo_Directivo"
+                      ? "Consejo Directivo"
+                      : viewResolucion.tipo || "No especificado",
+                },
+                {
+                  label: "Estado",
+                  value: (
+                    <StatusBadge estado={String(viewResolucion.estado)} />
+                  ),
+                },
+              ],
+            },
+            {
+              title: "Fechas y Archivos",
+              fields: [
+                {
+                  label: "Fecha",
+                  value: dayjs(
+                    viewResolucion.fecha,
+                    "DD/MM/YYYY HH:mm:ss"
+                  ).isValid()
+                    ? dayjs(viewResolucion.fecha, "DD/MM/YYYY HH:mm:ss").format(
+                        "DD/MM/YYYY"
+                      )
+                    : "No disponible",
+                },
+                {
+                  label: "Fecha de Carga",
+                  value: dayjs(
+                    viewResolucion.fecha_creacion,
+                    "DD/MM/YYYY HH:mm:ss"
+                  ).isValid()
+                    ? dayjs(
+                        viewResolucion.fecha_creacion,
+                        "DD/MM/YYYY HH:mm:ss"
+                      ).format("DD/MM/YYYY")
+                    : "No disponible",
+                },
+                {
+                  label: "Adjunto",
+                  value: viewResolucion.adjunto ? (
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={viewResolucion.adjunto}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium">
+                        <TextSnippetIcon />
+                        Ver archivo
+                      </a>
                     </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        N° Resolución
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {viewResolucion.nresolucion || "No especificado"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Tipo
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {viewResolucion.tipo === "Consejo_Superior"
-                          ? "Consejo Superior"
-                          : viewResolucion.tipo === "Consejo_Directivo"
-                          ? "Consejo Directivo"
-                          : viewResolucion.tipo || "No especificado"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Estado
-                      </label>
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          viewResolucion.estado == 1
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}>
-                        {viewResolucion.estado == 1 ? "Activo" : "Inactivo"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Información de Fechas y Archivos */}
-                <div className="space-y-4">
-                  <h4 className="text-lg font-semibold text-gray-700 border-b pb-2">
-                    Fechas y Archivos
-                  </h4>
-
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Fecha
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {dayjs(viewResolucion.fecha, "DD/MM/YYYY HH:mm:ss").isValid()
-                          ? dayjs(viewResolucion.fecha, "DD/MM/YYYY HH:mm:ss").format(
-                              "DD/MM/YYYY"
-                            )
-                          : "No disponible"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Fecha de Carga
-                      </label>
-                      <p className="text-gray-900 font-medium">
-                        {dayjs(
-                          viewResolucion.fecha_creacion,
-                          "DD/MM/YYYY HH:mm:ss"
-                        ).isValid()
-                          ? dayjs(viewResolucion.fecha_creacion, "DD/MM/YYYY").format(
-                              "DD/MM/YYYY"
-                            )
-                          : "No disponible"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">
-                        Adjunto
-                      </label>
-                      {viewResolucion.adjunto ? (
-                        <div className="flex items-center gap-2">
-                          <a
-                            href={viewResolucion.adjunto}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium">
-                            <TextSnippetIcon />
-                            Ver archivo
-                          </a>
-                        </div>
-                      ) : (
-                        <p className="text-gray-500 italic">Sin adjunto</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Observaciones - Ancho completo */}
-              {viewResolucion.observaciones && (
-                <div className="mt-6">
-                  <h4 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">
-                    Observaciones
-                  </h4>
-                  <div className="bg-gray-50 p-4 rounded-lg">
+                  ) : (
+                    <p className="text-gray-500 italic">Sin adjunto</p>
+                  ),
+                },
+              ],
+            },
+            {
+              title: "Observaciones",
+              fields: [
+                {
+                  label: "Observaciones",
+                  value: viewResolucion.observaciones ? (
                     <p className="text-gray-900 whitespace-pre-wrap">
                       {viewResolucion.observaciones}
                     </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="p-6 border-t border-gray-200 flex justify-end space-x-3">
-              <button
-                onClick={() => setModalViewVisible(false)}
-                className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors duration-200">
-                Cerrar
-              </button>
-              <button
-                onClick={() => {
-                  setModalViewVisible(false);
-                  router.push(`/dashboard/resoluciones/edit/${viewResolucion.id}`);
-                }}
-                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors duration-200">
-                Editar
-              </button>
-            </div>
-          </div>
-        </div>
+                  ) : (
+                    <p className="text-gray-500 italic">Sin observaciones</p>
+                  ),
+                },
+              ],
+            },
+          ]}
+        />
       )}
 
       {/* Modal de descarga de Excel */}

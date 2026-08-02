@@ -47,22 +47,24 @@ const ActionMenu: React.FC<ActionMenuProps> = ({ items, label = "Acciones" }) =>
     ? (items as ActionMenuSection[])
     : [{ items: items as ActionMenuItem[] }];
 
-  const totalEnabled = sections.reduce(
-    (acc, s) => acc + s.items.filter((i) => !i.disabled).length,
-    0
-  );
+  const totalItems = sections.reduce((acc, s) => acc + s.items.length, 0);
 
   return (
     <>
+      {/* El trigger se deshabilita solo si NO hay items: aunque todas las
+          acciones estén deshabilitadas, el menú debe poder abrirse para que
+          el usuario lea el helperText que explica por qué */}
       <button
         type="button"
         aria-label={label}
+        aria-haspopup="menu"
+        aria-expanded={open}
         onClick={(e) => {
           e.stopPropagation();
           setAnchorEl(e.currentTarget);
         }}
-        disabled={totalEnabled === 0}
-        className="p-1.5 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        disabled={totalItems === 0}
+        className="p-1.5 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         title={label}>
         <MoreVertIcon sx={{ fontSize: 18 }} />
       </button>

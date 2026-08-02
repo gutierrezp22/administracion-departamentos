@@ -11,30 +11,31 @@
  */
 export const normalizeUrl = (url: string): string => {
   // If URL already contains a full domain, extract just the path
+  // (no early return: the /api/ dedup below must also apply to absolute URLs)
   if (url.includes("://")) {
     try {
       const urlObj = new URL(url);
-      return urlObj.pathname + urlObj.search;
+      url = urlObj.pathname + urlObj.search;
     } catch {
-      return url;
+      // keep the original string; the replacements below still help
     }
   }
-  
+
   // Remove any manually added base URL prefixes
-  url = url.replace(/^.*127\.0\.0\.1:8000/, "");
-  url = url.replace(/^.*docentes\.facet\.unt\.edu\.ar/, "");
-  url = url.replace(/^.*localhost:8000/, "");
-  
+  url = url.replace(/^.*?127\.0\.0\.1:8000/, "");
+  url = url.replace(/^.*?docentes\.facet\.unt\.edu\.ar/, "");
+  url = url.replace(/^.*?localhost:8000/, "");
+
   // Remove duplicate /api/ patterns
   url = url.replace(/\/api\/api\//, "/api/");
   url = url.replace(/\/api\/facet\//, "/facet/");
   url = url.replace(/\/api\/login\//, "/login/");
-  
+
   // Ensure URL starts with / if it's a relative path
   if (!url.startsWith("/") && !url.startsWith("http")) {
     url = "/" + url;
   }
-  
+
   return url;
 };
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ChevronDownIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { useSelectNavigation } from "@/hooks/useSelectNavigation";
 
 /**
  * Estilo unificado de inputs/selects para formularios. Mismo lenguaje visual
@@ -182,6 +183,19 @@ const FormSelectInput: React.FC<FormSelectInputProps> = ({
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const normalizedOptions = React.useMemo(
+    () => options.map((o) => ({ value: String(o.value) })),
+    [options]
+  );
+  const { highlighted, setHighlighted, selectIndex, handleTriggerKeyDown } =
+    useSelectNavigation({
+      open,
+      setOpen,
+      options: normalizedOptions,
+      value: String(value),
+      onChange,
+    });
+
   useEffect(() => {
     if (!open) return;
     const handleClickOutside = (e: MouseEvent) => {
@@ -208,7 +222,10 @@ const FormSelectInput: React.FC<FormSelectInputProps> = ({
     <div className="relative group" ref={containerRef}>
       <button
         type="button"
-        onClick={() => !disabled && setOpen((v) => !v)}
+        onClick={() => !disabled && setOpen(!open)}
+        onKeyDown={(e) => !disabled && handleTriggerKeyDown(e)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
         disabled={disabled}
         className={`${baseInputClass} text-left pr-10 cursor-pointer ${
           isPlaceholder ? "text-gray-400" : "text-gray-800"
@@ -228,34 +245,35 @@ const FormSelectInput: React.FC<FormSelectInputProps> = ({
         <ul
           className="absolute left-0 right-0 top-full mt-1 z-30
             bg-white border border-gray-200 rounded-xl shadow-lg
-            max-h-60 overflow-y-auto py-1"
+            max-h-60 overflow-y-auto py-1
+            animate-[fadeIn_0.15s_ease-out]"
           role="listbox">
           <li
             role="option"
             aria-selected={value === ""}
-            onClick={() => {
-              onChange("");
-              setOpen(false);
-            }}
-            className="px-3 py-2 text-sm text-gray-400 hover:bg-blue-50 hover:text-gray-700 cursor-pointer flex items-center gap-2">
+            onClick={() => selectIndex(0)}
+            onMouseEnter={() => setHighlighted(0)}
+            className={`px-3 py-2 text-sm text-gray-400 hover:text-gray-700 cursor-pointer flex items-center gap-2
+              ${highlighted === 0 ? "bg-blue-50" : "hover:bg-blue-50"}`}>
             <span className="w-4" />
             {placeholder}
           </li>
-          {options.map((option) => {
+          {options.map((option, i) => {
             const isSelected = String(option.value) === String(value);
+            const isHighlighted = highlighted === i + 1;
             return (
               <li
                 key={String(option.value)}
                 role="option"
                 aria-selected={isSelected}
-                onClick={() => {
-                  onChange(String(option.value));
-                  setOpen(false);
-                }}
+                onClick={() => selectIndex(i + 1)}
+                onMouseEnter={() => setHighlighted(i + 1)}
                 className={`px-3 py-2 text-sm cursor-pointer flex items-center gap-2 transition-colors duration-150
                   ${
                     isSelected
                       ? "bg-blue-50 text-blue-700 font-semibold"
+                      : isHighlighted
+                      ? "bg-gray-100 text-gray-900"
                       : "text-gray-800 hover:bg-gray-50"
                   }`}>
                 {isSelected ? (

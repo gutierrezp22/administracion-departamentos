@@ -14,6 +14,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import LinkIcon from "@mui/icons-material/Link";
 import LinkOffIcon from "@mui/icons-material/LinkOff";
+import HistoryIcon from "@mui/icons-material/History";
 import ActionMenu from "@/components/ActionMenu";
 import Swal from "sweetalert2";
 import DashboardMenu from "../..";
@@ -25,9 +26,9 @@ import {
   EstadoFilter,
 } from "@/components/Filters";
 import VincularModal from "@/components/Cargos/VincularModal";
-
-const normalizeUrl = (url: string) =>
-  url.replace(window.location.origin, "").replace(/^\/+/, "/");
+import { normalizeUrl } from "@/utils/urlHelpers";
+import Pagination from "@/components/Pagination";
+import { StatusBadge } from "@/components/DetailModal";
 
 interface Cargo {
   id: number;
@@ -118,7 +119,7 @@ const ListaCargos = () => {
     const fetchPendientes = async () => {
       try {
         const r = await API.get(
-          "/facet/cargo/?cargo_departamento__isnull=True&estado=1&page_size=1"
+          "/facet/cargo/?cargo_departamento__isnull=true&estado=1&page_size=1"
         );
         setTotalPendientes(r.data.count ?? 0);
       } catch {
@@ -153,8 +154,8 @@ const ListaCargos = () => {
     }
     if (filtroDedicacion) params.append("tipo_cargo__dedicacion", filtroDedicacion);
     if (filtroDescripcion) params.append("tipo_cargo__descripcion", filtroDescripcion);
-    if (filtroVinculacion === "sin_vincular") params.append("cargo_departamento__isnull", "True");
-    if (filtroVinculacion === "vinculados") params.append("cargo_departamento__isnull", "False");
+    if (filtroVinculacion === "sin_vincular") params.append("cargo_departamento__isnull", "true");
+    if (filtroVinculacion === "vinculados") params.append("cargo_departamento__isnull", "false");
     params.append("page", page.toString());
     return params;
   };
@@ -170,6 +171,7 @@ const ListaCargos = () => {
     setFiltroDedicacion("");
     setFiltroDescripcion("");
     setFiltroVinculacion("");
+    setCurrentPage(1);
     setCurrentUrl("/facet/cargo/?estado=1");
   };
 
@@ -180,7 +182,7 @@ const ListaCargos = () => {
 
   const eliminar = async (id: number) => {
     const result = await Swal.fire({
-      title: "¿Eliminar cargo (plata)?",
+      title: "¿Eliminar cargo?",
       text: "Se marcará como inactivo.",
       icon: "warning",
       showCancelButton: true,
@@ -205,7 +207,7 @@ const ListaCargos = () => {
       <div className="p-6">
         <div className="bg-white rounded-lg shadow-lg">
           <div className="p-6 border-b border-gray-200">
-            <h1 className="text-2xl font-bold text-gray-800">Cargos (payroll)</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Cargos</h1>
             <p className="text-sm text-gray-600 mt-1">
               Cargos de plata importados desde el Excel del decanato. Cada uno
               se vincula a un Cargo de Departamento (operaciones de
@@ -324,7 +326,9 @@ const ListaCargos = () => {
                             <span className="text-orange-600 text-xs font-medium">Sin vincular</span>
                           )}
                         </TableCell>
-                        <TableCell>{activo ? "Activo" : "Inactivo"}</TableCell>
+                        <TableCell>
+                          <StatusBadge estado={String(c.estado)} />
+                        </TableCell>
                         <TableCell>
                           <ActionMenu
                             items={[
@@ -334,6 +338,12 @@ const ListaCargos = () => {
                                     label: "Editar",
                                     icon: <EditIcon fontSize="small" />,
                                     onClick: () => router.push(`/dashboard/cargos/edit/${c.id}`),
+                                  },
+                                  {
+                                    label: "Ver historial",
+                                    icon: <HistoryIcon fontSize="small" />,
+                                    onClick: () =>
+                                      router.push(`/dashboard/cargos/${c.id}/historial`),
                                   },
                                   {
                                     label: c.cargo_departamento ? "Re-vincular" : "Vincular a Cargo de Departamento",
@@ -374,31 +384,14 @@ const ListaCargos = () => {
               </ResponsiveTable>
             </div>
 
-            <div className="flex justify-between items-center mt-6">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className={`px-4 py-2 rounded-lg font-medium ${
-                  currentPage > 1
-                    ? "bg-blue-500 text-white hover:bg-blue-600"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}>
-                Anterior
-              </button>
-              <span className="text-gray-600 font-medium">
-                Página {currentPage} de {totalPages || 1}
-              </span>
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage >= totalPages}
-                className={`px-4 py-2 rounded-lg font-medium ${
-                  currentPage < totalPages
-                    ? "bg-blue-500 text-white hover:bg-blue-600"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}>
-                Siguiente
-              </button>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPrevious={() => handlePageChange(currentPage - 1)}
+              onNext={() => handlePageChange(currentPage + 1)}
+              hasPrevious={currentPage > 1}
+              hasNext={currentPage < totalPages}
+            />
           </div>
         </div>
 

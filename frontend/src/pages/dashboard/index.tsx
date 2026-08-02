@@ -19,8 +19,8 @@ import EmailIcon from "@mui/icons-material/Email";
 import WorkIcon from "@mui/icons-material/Work";
 import AssignmentLateIcon from "@mui/icons-material/AssignmentLate";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
 import API from "@/api/axiosConfig";
-import ItemsMenu from "./components/itemsMenu";
 
 // Define las propiedades del componente
 interface DashboardMenuProps {
@@ -286,13 +286,18 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
       text: "Departamentos",
       path: "/dashboard/departments",
     },
-    { icon: <AutoAwesomeMotionIcon />, text: "Area", path: "/dashboard/areas" },
+    { icon: <AutoAwesomeMotionIcon />, text: "Áreas", path: "/dashboard/areas" },
     {
       icon: <NoteAltIcon />,
       text: "Asignaturas",
       path: "/dashboard/asignatura",
     },
     { icon: <SchoolIcon />, text: "Carreras", path: "/dashboard/careers" },
+    {
+      icon: <WorkOutlineIcon />,
+      text: "Cargos",
+      path: "/dashboard/cargos/list",
+    },
     {
       icon: <WorkIcon />,
       text: "Cargos de Departamento",
@@ -458,19 +463,17 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
 
         {/* Content */}
         <main className="flex-1 overflow-y-auto p-6">
-          {children}
-
-          {/* Botón Volver Atrás */}
+          {/* Botón Volver Atrás (ghost sutil, arriba a la izquierda) */}
           {router.pathname !== "/dashboard/home" && (
-            <div className="mt-8 flex justify-center">
-              <button
-                onClick={() => router.back()}
-                className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2.5 rounded-md shadow-md transition-colors duration-200 font-medium">
-                <ArrowBackIcon />
-                Volver Atrás
-              </button>
-            </div>
+            <button
+              onClick={() => router.back()}
+              className="group mb-1 flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors duration-200">
+              <ArrowBackIcon fontSize="small" className="group-hover:-translate-x-0.5 transition-transform" />
+              Volver atrás
+            </button>
           )}
+
+          {children}
         </main>
       </div>
     </div>

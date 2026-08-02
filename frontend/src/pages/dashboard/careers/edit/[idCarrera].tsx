@@ -26,6 +26,7 @@ const EditarCarrera: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
+  const [redirectAfterClose, setRedirectAfterClose] = useState(false);
 
   const handleOpenModal = (title: string, message: string) => {
     setModalTitle(title);
@@ -36,7 +37,10 @@ const EditarCarrera: React.FC = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setModalMessage("");
-    router.push("/dashboard/careers/");
+    if (redirectAfterClose) {
+      router.push("/dashboard/careers/");
+      setRedirectAfterClose(false);
+    }
   };
 
   type TipoCarrera = "Pregrado" | "Grado" | "Posgrado";
@@ -93,6 +97,7 @@ const EditarCarrera: React.FC = () => {
 
     try {
       await API.put(`/facet/carrera/${idCarrera}/`, carreraEditada);
+      setRedirectAfterClose(true);
       handleOpenModal("Éxito", "La acción se realizó con éxito.");
     } catch (error) {
       console.error("Error al hacer la solicitud PUT:", error);

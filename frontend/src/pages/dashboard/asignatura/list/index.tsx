@@ -27,7 +27,8 @@ import {
 } from "../../../../components/Filters";
 import Pagination from "../../../../components/Pagination";
 import LoadingOverlay from "../../../../components/LoadingOverlay";
-import { normalizeUrl } from "../../../../hooks/useSearch";
+import { StatusBadge } from "@/components/DetailModal";
+import { normalizeUrl } from "@/utils/urlHelpers";
 
 const ListaAsignaturas = () => {
   interface Asignatura {
@@ -147,38 +148,8 @@ const ListaAsignaturas = () => {
     setFiltroModulo("");
     setFiltroPrograma("");
     setFiltroEstado("1");
-  };
-
-  const handlePageChange = (newPage: number) => {
-    let url = `/facet/asignatura/?`;
-    const params = new URLSearchParams();
-
-    if (filtroNombre !== "") {
-      params.append("nombre__icontains", filtroNombre);
-    }
-    if (filtroCodigo !== "") {
-      params.append("codigo__icontains", filtroCodigo);
-    }
-    if (filtroTipo !== "") {
-      params.append("tipo", filtroTipo);
-    }
-    if (filtroModulo !== "") {
-      params.append("modulo__icontains", filtroModulo);
-    }
-    if (filtroPrograma !== "") {
-      params.append("programa__icontains", filtroPrograma);
-    }
-    if (filtroEstado === "todos") {
-      params.append("show_all", "true");
-    } else if (filtroEstado !== "" && filtroEstado !== "todos") {
-      params.append("estado", filtroEstado.toString());
-    }
-
-    params.append("page", newPage.toString());
-    url += params.toString();
-
-    setCurrentPage(newPage);
-    setCurrentUrl(url);
+    setCurrentPage(1);
+    setCurrentUrl(`/facet/asignatura/?page=1`);
   };
 
   const eliminarAsignatura = async (id: number) => {
@@ -229,7 +200,7 @@ const ListaAsignaturas = () => {
         const response = await API.get(url);
         const { results, next } = response.data;
         allAsignaturas = [...allAsignaturas, ...results];
-        url = next;
+        url = next ? normalizeUrl(next) : next;
       }
 
       await exportToExcel({
@@ -257,7 +228,8 @@ const ListaAsignaturas = () => {
 
   return (
     <DashboardMenu>
-      <div className="bg-white rounded-lg shadow-lg">
+      <div className="p-6">
+        <div className="bg-white rounded-lg shadow-lg">
         <div className="p-6 border-b border-gray-200">
           <h1 className="text-2xl font-bold text-gray-800">Asignaturas</h1>
         </div>
@@ -296,9 +268,8 @@ const ListaAsignaturas = () => {
               value={filtroTipo}
               onChange={setFiltroTipo}
               options={[
-                { value: "Teórica", label: "Teórica" },
-                { value: "Práctica", label: "Práctica" },
-                { value: "Teórico-Práctica", label: "Teórico-Práctica" },
+                { value: "Electiva", label: "Electiva" },
+                { value: "Obligatoria", label: "Obligatoria" },
               ]}
               placeholder="Seleccionar tipo"
             />
@@ -369,8 +340,8 @@ const ListaAsignaturas = () => {
                     <TableCell className="text-gray-800">
                       {asignatura.departamento_detalle?.nombre || "N/A"}
                     </TableCell>
-                    <TableCell className="text-gray-800">
-                      {asignatura.estado === "1" ? "Activo" : "Inactivo"}
+                    <TableCell>
+                      <StatusBadge estado={String(asignatura.estado)} />
                     </TableCell>
                     <TableCell>
                       <ActionMenu
@@ -420,6 +391,7 @@ const ListaAsignaturas = () => {
             hasPrevious={!!prevUrl}
             hasNext={!!nextUrl}
           />
+        </div>
         </div>
       </div>
     </DashboardMenu>

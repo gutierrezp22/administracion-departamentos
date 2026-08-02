@@ -22,8 +22,8 @@ export default function ForgotPasswordPage() {
 
       await Swal.fire({
         icon: "success",
-        title: "Correo enviado",
-        text: "Se ha enviado un enlace de recuperación a su correo electrónico. Revise su bandeja de entrada y spam.",
+        title: "Solicitud recibida",
+        text: "Si el correo está registrado, vas a recibir un enlace de recuperación. Revisá tu bandeja de entrada y spam.",
         confirmButtonText: "Entendido",
         confirmButtonColor: "#3b82f6",
         customClass: {
@@ -32,12 +32,15 @@ export default function ForgotPasswordPage() {
       });
 
       router.push("/login");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al solicitar recuperación:", error);
+      const mensaje = !error?.response
+        ? "No se pudo conectar con el servidor. Verificá tu conexión e intentá nuevamente."
+        : "No se pudo procesar la solicitud. Intentá nuevamente en unos minutos.";
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "No se pudo enviar el correo de recuperación. Verifique que el correo electrónico esté registrado.",
+        text: mensaje,
         confirmButtonColor: "#3b82f6",
         customClass: {
           popup: "rounded-2xl shadow-xl",

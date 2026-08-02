@@ -1,6 +1,7 @@
 import React from "react";
 import { useRouter } from "next/router";
 import DashboardMenu from "../../dashboard";
+import withAuth from "@/components/withAut";
 import {
   FiUsers,
   FiBookOpen,
@@ -228,4 +229,4 @@ const FeatureCard: React.FC<FeatureCardProps & { onClick?: () => void }> = ({
   );
 };
 
-export default Home;
+export default withAuth(Home);

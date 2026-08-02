@@ -11,6 +11,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
+import { useSelectNavigation } from "@/hooks/useSelectNavigation";
 
 interface FilterInputProps {
   label: string;
@@ -105,6 +106,11 @@ interface FilterDatePickerProps {
   className?: string;
 }
 
+import {
+  datePickerTextFieldSx,
+  datePickerPopperSlotProps,
+} from "@/styles/datePickerSlotProps";
+
 /**
  * Date picker consistente con los demás filtros, basado en MUI DatePicker.
  * Reemplazo de <input type="date"> que evita el picker nativo del browser.
@@ -133,48 +139,9 @@ export const FilterDatePicker: React.FC<FilterDatePickerProps> = ({
               fullWidth: true,
               size: "small",
               placeholder,
-              sx: {
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "0.75rem",
-                  backgroundColor: "#f9fafb",
-                  border: "1px solid #e5e7eb",
-                  transition: "all 0.2s ease",
-                  paddingRight: "8px",
-                  fontFamily: "inherit",
-                  fontSize: "0.875rem",
-                  color: "#1f2937",
-                  "& fieldset": { border: "none" },
-                  "&:hover": {
-                    backgroundColor: "#ffffff",
-                    borderColor: "#60a5fa",
-                  },
-                  "&.Mui-focused": {
-                    backgroundColor: "#ffffff",
-                    borderColor: "#3b82f6",
-                    boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.2)",
-                  },
-                  "& input": {
-                    padding: "10px 12px",
-                  },
-                  "& .MuiSvgIcon-root": {
-                    fontSize: "1.125rem",
-                    color: "#9ca3af",
-                  },
-                },
-              },
+              sx: datePickerTextFieldSx,
             },
-            popper: {
-              placement: "bottom-start",
-              modifiers: [
-                { name: "flip", enabled: false },
-                { name: "preventOverflow", enabled: false },
-                { name: "hide", enabled: false },
-                { name: "offset", options: { offset: [0, 4] } },
-              ],
-              sx: {
-                zIndex: 1500,
-              },
-            },
+            popper: datePickerPopperSlotProps,
           }}
         />
       </LocalizationProvider>
@@ -203,6 +170,8 @@ export const FilterSelect: React.FC<FilterSelectProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { highlighted, setHighlighted, selectIndex, handleTriggerKeyDown } =
+    useSelectNavigation({ open, setOpen, options, value, onChange });
 
   useEffect(() => {
     if (!open) return;
@@ -235,7 +204,10 @@ export const FilterSelect: React.FC<FilterSelectProps> = ({
       <div className="relative group" ref={containerRef}>
         <button
           type="button"
-          onClick={() => setOpen((v) => !v)}
+          onClick={() => setOpen(!open)}
+          onKeyDown={handleTriggerKeyDown}
+          aria-haspopup="listbox"
+          aria-expanded={open}
           className={`w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl
             focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
             hover:border-blue-400 hover:bg-white
@@ -267,30 +239,30 @@ export const FilterSelect: React.FC<FilterSelectProps> = ({
             <li
               role="option"
               aria-selected={value === ""}
-              onClick={() => {
-                onChange("");
-                setOpen(false);
-              }}
-              className="px-3 py-2 text-sm text-gray-400 hover:bg-blue-50 hover:text-gray-700 cursor-pointer flex items-center gap-2"
+              onClick={() => selectIndex(0)}
+              onMouseEnter={() => setHighlighted(0)}
+              className={`px-3 py-2 text-sm text-gray-400 hover:text-gray-700 cursor-pointer flex items-center gap-2
+                ${highlighted === 0 ? "bg-blue-50" : "hover:bg-blue-50"}`}
             >
               <span className="w-4" />
               {placeholder}
             </li>
-            {options.map((option) => {
+            {options.map((option, i) => {
               const isSelected = option.value === value;
+              const isHighlighted = highlighted === i + 1;
               return (
                 <li
                   key={option.value}
                   role="option"
                   aria-selected={isSelected}
-                  onClick={() => {
-                    onChange(option.value);
-                    setOpen(false);
-                  }}
+                  onClick={() => selectIndex(i + 1)}
+                  onMouseEnter={() => setHighlighted(i + 1)}
                   className={`px-3 py-2 text-sm cursor-pointer flex items-center gap-2 transition-colors duration-150
                     ${
                       isSelected
                         ? "bg-blue-50 text-blue-700 font-semibold"
+                        : isHighlighted
+                        ? "bg-gray-100 text-gray-900"
                         : "text-gray-800 hover:bg-gray-50"
                     }`}
                 >
@@ -321,7 +293,7 @@ export const FilterContainer: React.FC<FilterContainerProps> = ({
   children,
   onApply,
   onClear,
-  showClearButton = false,
+  showClearButton = true,
 }) => {
   // Clonar los children y pasarles la función onEnterPress
   const childrenWithEnterPress = React.Children.map(children, (child) => {
@@ -342,10 +314,10 @@ export const FilterContainer: React.FC<FilterContainerProps> = ({
           </div>
           <h3 className="text-base font-bold text-gray-800">Filtros de Búsqueda</h3>
         </div>
-        {onClear && (
+        {onClear && showClearButton && (
           <button
             onClick={onClear}
-            className="flex items-center space-x-1.5 text-sm text-gray-500 hover:text-red-500 
+            className="flex items-center space-x-1.5 text-sm text-gray-500 hover:text-red-500
               transition-colors duration-200 px-2 py-1 rounded-lg hover:bg-red-50"
           >
             <XMarkIcon className="h-4 w-4" />
@@ -480,6 +452,8 @@ export const CompactFilterSelect: React.FC<CompactFilterSelectProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { highlighted, setHighlighted, selectIndex, handleTriggerKeyDown } =
+    useSelectNavigation({ open, setOpen, options, value, onChange });
 
   useEffect(() => {
     if (!open) return;
@@ -507,7 +481,10 @@ export const CompactFilterSelect: React.FC<CompactFilterSelectProps> = ({
     <div className={`relative ${className}`} ref={containerRef}>
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen(!open)}
+        onKeyDown={handleTriggerKeyDown}
+        aria-haspopup="listbox"
+        aria-expanded={open}
         className={`w-full px-3 py-2 bg-white border border-gray-200 rounded-lg
           focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
           hover:border-blue-400
@@ -529,36 +506,37 @@ export const CompactFilterSelect: React.FC<CompactFilterSelectProps> = ({
         <ul
           className="absolute left-0 right-0 top-full mt-1 z-30
             bg-white border border-gray-200 rounded-lg shadow-lg
-            max-h-60 overflow-y-auto py-1"
+            max-h-60 overflow-y-auto py-1
+            animate-[fadeIn_0.15s_ease-out]"
           role="listbox"
         >
           <li
             role="option"
             aria-selected={value === ""}
-            onClick={() => {
-              onChange("");
-              setOpen(false);
-            }}
-            className="px-3 py-2 text-sm text-gray-400 hover:bg-blue-50 hover:text-gray-700 cursor-pointer flex items-center gap-2"
+            onClick={() => selectIndex(0)}
+            onMouseEnter={() => setHighlighted(0)}
+            className={`px-3 py-2 text-sm text-gray-400 hover:text-gray-700 cursor-pointer flex items-center gap-2
+              ${highlighted === 0 ? "bg-blue-50" : "hover:bg-blue-50"}`}
           >
             <span className="w-4" />
             {placeholder}
           </li>
-          {options.map((option) => {
+          {options.map((option, i) => {
             const isSelected = option.value === value;
+            const isHighlighted = highlighted === i + 1;
             return (
               <li
                 key={option.value}
                 role="option"
                 aria-selected={isSelected}
-                onClick={() => {
-                  onChange(option.value);
-                  setOpen(false);
-                }}
+                onClick={() => selectIndex(i + 1)}
+                onMouseEnter={() => setHighlighted(i + 1)}
                 className={`px-3 py-2 text-sm cursor-pointer flex items-center gap-2 transition-colors duration-150
                   ${
                     isSelected
                       ? "bg-blue-50 text-blue-700 font-semibold"
+                      : isHighlighted
+                      ? "bg-gray-100 text-gray-900"
                       : "text-gray-700 hover:bg-gray-50"
                   }`}
               >

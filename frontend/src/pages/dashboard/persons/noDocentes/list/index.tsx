@@ -19,7 +19,6 @@ import {
 	MenuItem,
 	FormControl,
 	Grid,
-	Chip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
@@ -40,16 +39,9 @@ import {
 import ResponsiveTable from "../../../../../components/ResponsiveTable";
 import ActionMenu from "../../../../../components/ActionMenu";
 import LoadingOverlay from "@/components/LoadingOverlay";
-
-// Función para normalizar URLs de paginación
-const normalizeUrl = (url: string) => {
-	if (url.startsWith('http')) {
-		// Extract path and query from full URL
-		const urlObj = new URL(url);
-		return urlObj.pathname + urlObj.search;
-	}
-	return url.replace(/^\/+/, "/");
-};
+import Pagination from "@/components/Pagination";
+import DetailModal, { StatusBadge } from "@/components/DetailModal";
+import { normalizeUrl } from "@/utils/urlHelpers";
 
 const ListaNoDocentes = () => {
 	interface NoDocente {
@@ -127,6 +119,7 @@ const ListaNoDocentes = () => {
 			params.append("estado", filtroEstado.toString());
 		}
 		url += params.toString();
+		setCurrentPage(1);
 		setCurrentUrl(url);
 	};
 
@@ -136,6 +129,7 @@ const ListaNoDocentes = () => {
 		setFiltroDni("");
 		setFiltroLegajo("");
 		setFiltroEstado("1");
+		setCurrentPage(1);
 		setCurrentUrl(`/facet/nodocente/?estado=1`);
 	};
 
@@ -163,7 +157,7 @@ const ListaNoDocentes = () => {
 				const response = await API.get(url);
 				const { results, next } = response.data;
 				allNoDocentes = [...allNoDocentes, ...results];
-				url = next;
+				url = next ? normalizeUrl(next) : "";
 			}
 
 			await exportToExcel({
@@ -229,6 +223,7 @@ const ListaNoDocentes = () => {
 
 	return (
 		<DashboardMenu>
+			<div className="p-6">
 			<div className="bg-white rounded-lg shadow-lg">
 				<div className="p-6 border-b border-gray-200">
 					<h1 className="text-2xl font-bold text-gray-800">No Docentes</h1>
@@ -293,7 +288,6 @@ const ListaNoDocentes = () => {
 								<TableCell>Legajo</TableCell>
 								<TableCell>Teléfono</TableCell>
 								<TableCell>Email</TableCell>
-								<TableCell>Interno</TableCell>
 								<TableCell>Estado</TableCell>
 								<TableCell>Acciones</TableCell>
 							</TableRow>
@@ -319,13 +313,8 @@ const ListaNoDocentes = () => {
 									<TableCell>
 										{noDocente.persona_detalle?.email || "N/A"}
 									</TableCell>
-									<TableCell>N/A</TableCell>
 									<TableCell>
-										<Chip
-											label={noDocente.estado === "1" ? "Activo" : "Inactivo"}
-											color={noDocente.estado === "1" ? "success" : "error"}
-											size="small"
-										/>
+										<StatusBadge estado={String(noDocente.estado)} />
 									</TableCell>
 										<TableCell>
 											<ActionMenu
@@ -366,175 +355,58 @@ const ListaNoDocentes = () => {
 					</ResponsiveTable>
             </div>
 
-					<div className="flex justify-between items-center mt-6">
-						<button
-							onClick={() => {
-								prevUrl && setCurrentUrl(prevUrl);
+					<Pagination
+						currentPage={currentPage}
+						totalPages={totalPages}
+						onPrevious={() => {
+							if (prevUrl) {
+								setCurrentUrl(prevUrl);
 								setCurrentPage(currentPage - 1);
-							}}
-							disabled={!prevUrl}
-							className={`px-4 py-2 rounded-lg font-medium ${
-								prevUrl
-									? "bg-blue-500 text-white hover:bg-blue-600"
-									: "bg-gray-300 text-gray-500 cursor-not-allowed"
-							} transition-colors duration-200`}
-						>
-							Anterior
-						</button>
-						<span className="text-gray-600">
-							Página {currentPage} de {totalPages}
-						</span>
-						<button
-							onClick={() => {
-								nextUrl && setCurrentUrl(nextUrl);
+							}
+						}}
+						onNext={() => {
+							if (nextUrl) {
+								setCurrentUrl(nextUrl);
 								setCurrentPage(currentPage + 1);
-							}}
-							disabled={!nextUrl}
-							className={`px-4 py-2 rounded-lg font-medium ${
-								nextUrl
-									? "bg-blue-500 text-white hover:bg-blue-600"
-									: "bg-gray-300 text-gray-500 cursor-not-allowed"
-							} transition-colors duration-200`}
-						>
-							Siguiente
-						</button>
-					</div>
+							}
+						}}
+						hasPrevious={!!prevUrl}
+						hasNext={!!nextUrl}
+					/>
 				</div>
+			</div>
 			</div>
 
 			{/* Modal de vista de no docente */}
-			{modalViewVisible && viewNoDocente && (
-				<div
-					className="fixed inset-0 flex items-center justify-center z-[10000]"
-					style={{
-						position: "fixed",
-						top: 0,
-						left: 0,
-						right: 0,
-						bottom: 0,
+			{viewNoDocente && (
+				<DetailModal
+					open={modalViewVisible}
+					onClose={() => setModalViewVisible(false)}
+					onEdit={() => {
+						setModalViewVisible(false);
+						router.push(`/dashboard/persons/noDocentes/edit/${viewNoDocente.id}`);
 					}}
-				>
-					<div
-						className="fixed inset-0 bg-black opacity-50"
-						onClick={() => setModalViewVisible(false)}
-					></div>
-					<div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto z-[10001] relative">
-						<div className="p-6 border-b border-gray-200">
-							<h3 className="text-xl font-bold text-gray-900">
-								Detalles del No Docente
-							</h3>
-						</div>
-
-						<div className="p-6">
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-								{/* Información Personal */}
-								<div className="space-y-4">
-									<h4 className="text-lg font-semibold text-gray-700 border-b pb-2">
-										Información Personal
-									</h4>
-
-									<div className="space-y-3">
-										<div>
-											<label className="text-sm font-medium text-gray-500">
-												DNI
-											</label>
-											<p className="text-gray-900 font-medium">
-												{viewNoDocente.persona_detalle?.dni || "No especificado"}
-											</p>
-										</div>
-
-										<div>
-											<label className="text-sm font-medium text-gray-500">
-												Legajo
-											</label>
-											<p className="text-gray-900 font-medium">
-												{viewNoDocente.persona_detalle?.legajo || "No especificado"}
-											</p>
-										</div>
-
-										<div>
-											<label className="text-sm font-medium text-gray-500">
-												Nombres
-											</label>
-											<p className="text-gray-900 font-medium">
-												{viewNoDocente.persona_detalle?.nombre || "No especificado"}
-											</p>
-										</div>
-
-										<div>
-											<label className="text-sm font-medium text-gray-500">
-												Apellido
-											</label>
-											<p className="text-gray-900 font-medium">
-												{viewNoDocente.persona_detalle?.apellido || "No especificado"}
-											</p>
-										</div>
-									</div>
-								</div>
-
-								{/* Información de Contacto */}
-								<div className="space-y-4">
-									<h4 className="text-lg font-semibold text-gray-700 border-b pb-2">
-										Información de Contacto
-									</h4>
-
-									<div className="space-y-3">
-										<div>
-											<label className="text-sm font-medium text-gray-500">
-												Teléfono
-											</label>
-											<p className="text-gray-900 font-medium">
-												{viewNoDocente.persona_detalle?.telefono || "No especificado"}
-											</p>
-										</div>
-
-										<div>
-											<label className="text-sm font-medium text-gray-500">
-												Email
-											</label>
-											<p className="text-gray-900 font-medium">
-												{viewNoDocente.persona_detalle?.email || "No especificado"}
-											</p>
-										</div>
-
-										<div>
-											<label className="text-sm font-medium text-gray-500">
-												Estado
-											</label>
-											<span
-												className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-													viewNoDocente.estado === "1"
-														? "bg-green-100 text-green-800"
-														: "bg-red-100 text-red-800"
-												}`}
-											>
-												{viewNoDocente.estado === "1" ? "Activo" : "Inactivo"}
-											</span>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<div className="p-6 border-t border-gray-200 flex justify-end space-x-3">
-							<button
-								onClick={() => setModalViewVisible(false)}
-								className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors duration-200"
-							>
-								Cerrar
-							</button>
-							<button
-								onClick={() => {
-									setModalViewVisible(false);
-									router.push(`/dashboard/persons/noDocentes/edit/${viewNoDocente.id}`);
-								}}
-								className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors duration-200"
-							>
-								Editar
-							</button>
-						</div>
-					</div>
-				</div>
+					title="Detalles del No Docente"
+					sections={[
+						{
+							title: "Información Personal",
+							fields: [
+								{ label: "DNI", value: viewNoDocente.persona_detalle?.dni },
+								{ label: "Legajo", value: viewNoDocente.persona_detalle?.legajo },
+								{ label: "Nombres", value: viewNoDocente.persona_detalle?.nombre },
+								{ label: "Apellido", value: viewNoDocente.persona_detalle?.apellido },
+							],
+						},
+						{
+							title: "Información de Contacto",
+							fields: [
+								{ label: "Teléfono", value: viewNoDocente.persona_detalle?.telefono },
+								{ label: "Email", value: viewNoDocente.persona_detalle?.email },
+								{ label: "Estado", value: <StatusBadge estado={String(viewNoDocente.estado)} /> },
+							],
+						},
+					]}
+				/>
 			)}
 		</DashboardMenu>
 	);

@@ -61,8 +61,13 @@ const EditarPersona: React.FC = () => {
   useEffect(() => {
     const fetchTitulos = async () => {
       try {
-        const response = await API.get(`/facet/tipo-titulo/`);
-        setTitulos(response.data.results);
+        // Traer todos los títulos (LimitOffsetPagination por defecto)
+        const response = await API.get(`/facet/tipo-titulo/?limit=1000`);
+        setTitulos(
+          Array.isArray(response.data)
+            ? response.data
+            : response.data.results || []
+        );
       } catch (error) {
         console.error("Error al obtener títulos:", error);
       }

@@ -5,7 +5,7 @@ import Swal from "sweetalert2";
 import DashboardMenu from "../..";
 import withAuth from "../../../../components/withAut";
 import "./styles.css";
-import BasicModal from "../../../../utils/modal";
+import LoadingOverlay from "@/components/LoadingOverlay";
 import {
   FormContainer,
   FormSection,
@@ -23,6 +23,8 @@ const CrearUsuario = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [roles, setRoles] = useState<Rol[]>([]);
+  const [loadingRoles, setLoadingRoles] = useState(true);
+  const [rolesError, setRolesError] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -41,15 +43,21 @@ const CrearUsuario = () => {
 
   const fetchRoles = async () => {
     try {
+      setLoadingRoles(true);
+      setRolesError(false);
       const response = await API.get(`/facet/roles/`);
-      setRoles(Array.isArray(response.data) ? response.data : response.data.results);
+      const data = Array.isArray(response.data)
+        ? response.data
+        : response.data.results;
+      setRoles(data || []);
+      if (!data || data.length === 0) {
+        setRolesError(true);
+      }
     } catch (error) {
       console.error("Error al cargar roles:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "No se pudieron cargar los roles.",
-      });
+      setRolesError(true);
+    } finally {
+      setLoadingRoles(false);
     }
   };
 
@@ -165,22 +173,48 @@ const CrearUsuario = () => {
     }
   };
 
-  if (loading || roles.length === 0) {
+  if (loadingRoles) {
     return (
       <DashboardMenu>
-        <BasicModal
-          open={true}
-          onClose={() => {}}
-          title="Cargando..."
-          content="Por favor espere mientras se cargan los datos."
-        />
+        <LoadingOverlay variant="inline" message="Cargando roles..." />
+      </DashboardMenu>
+    );
+  }
+
+  if (rolesError) {
+    return (
+      <DashboardMenu>
+        <div className="p-6">
+          <div className="bg-white rounded-lg shadow-lg p-8 flex flex-col items-center text-center">
+            <h2 className="text-xl font-bold text-gray-800 mb-2">
+              No se pudieron cargar los roles
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Ocurrió un error al obtener los roles o no hay roles disponibles.
+              Verifique su conexión e intente nuevamente.
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={fetchRoles}
+                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors duration-200">
+                Reintentar
+              </button>
+              <button
+                onClick={() => router.push("/dashboard/usuarios")}
+                className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors duration-200">
+                Volver
+              </button>
+            </div>
+          </div>
+        </div>
       </DashboardMenu>
     );
   }
 
   return (
     <DashboardMenu>
-      <FormContainer title="Crear Nuevo Usuario">
+      {loading && <LoadingOverlay message="Creando usuario..." />}
+      <FormContainer title="Crear Usuario">
         <FormSection title="Información de Acceso">
           <FormField
             label="Email"
@@ -259,7 +293,9 @@ const CrearUsuario = () => {
         </FormSection>
 
         <FormActions>
-          <FormButton onClick={() => handleSubmit()}>Crear Usuario</FormButton>
+          <FormButton onClick={() => handleSubmit()} disabled={loading}>
+            Crear Usuario
+          </FormButton>
         </FormActions>
       </FormContainer>
     </DashboardMenu>

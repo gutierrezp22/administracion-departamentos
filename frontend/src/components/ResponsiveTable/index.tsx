@@ -64,6 +64,8 @@ const ResponsiveTable: React.FC<ResponsiveTableProps> = ({ children, className =
             ...(dense && { padding: bodyPadding }),
           },
           // Header: bg azul claro, texto azul oscuro (mismo tono que el chip de Filtros)
+          // fontSize/lineHeight llevan !important para ganarle a las reglas
+          // globales de globals.css y que el modo dense realmente aplique
           '& .MuiTableHead-root .MuiTableCell-root': {
             position: 'sticky',
             top: 0,
@@ -72,10 +74,10 @@ const ResponsiveTable: React.FC<ResponsiveTableProps> = ({ children, className =
             color: '#1e40af',           // blue-800
             fontWeight: 700,
             fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif',
-            fontSize: headerFontSize,
-            letterSpacing: '0.04em',
+            fontSize: `${headerFontSize} !important`,
+            letterSpacing: '0.04em !important',
             textTransform: 'uppercase',
-            lineHeight: 1.5,
+            lineHeight: '1.5 !important',
             borderBottom: '1px solid #bfdbfe', // blue-200
             ...(dense && { padding: headerPadding }),
           },
@@ -83,14 +85,14 @@ const ResponsiveTable: React.FC<ResponsiveTableProps> = ({ children, className =
             fontFamily: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif',
             fontWeight: 400,
             color: '#1f2937',
-            fontSize: bodyFontSize,
-            lineHeight: bodyLineHeight,
+            fontSize: `${bodyFontSize} !important`,
+            lineHeight: `${bodyLineHeight} !important`,
             letterSpacing: '0.01em',
             backgroundColor: '#ffffff',
           },
+          // Sin cambio de fontWeight en hover: evita reflow/jitter del contenido
           '& .MuiTableBody-root .MuiTableRow-root:hover .MuiTableCell-root': {
             backgroundColor: '#f9fafb', // gray-50
-            fontWeight: 500,
           },
           '& .MuiTableBody-root .MuiTableRow-root:last-child .MuiTableCell-root': {
             borderBottom: 'none',

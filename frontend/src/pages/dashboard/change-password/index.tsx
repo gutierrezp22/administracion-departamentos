@@ -28,6 +28,10 @@ const CambiarContrasena = () => {
     }
   }, [router]);
 
+  const validatePassword = (pass: string) => {
+    return pass.length >= 8 && /\d/.test(pass) && /[a-zA-Z]/.test(pass);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -42,11 +46,11 @@ const CambiarContrasena = () => {
       return;
     }
 
-    if (newPassword.length < 8) {
+    if (!validatePassword(newPassword)) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "La nueva contraseña debe tener al menos 8 caracteres.",
+        text: "La nueva contraseña debe tener al menos 8 caracteres e incluir letras y números.",
         confirmButtonColor: "#3b82f6",
       });
       return;
@@ -65,7 +69,7 @@ const CambiarContrasena = () => {
     setIsLoading(true);
 
     try {
-      const response = await API.post(`/cambiar-clave/`, {
+      const response = await API.post(`/facet/cambiar-clave/`, {
         email: userEmail,
         currentPassword: currentPassword,
         newPassword: newPassword,
@@ -132,10 +136,10 @@ const CambiarContrasena = () => {
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
               <h1 className="text-xl font-bold text-white flex items-center gap-2">
                 <FiLock className="w-6 h-6" />
-                Cambiar Contraseña
+                Cambiar contraseña
               </h1>
               <p className="text-blue-100 text-sm mt-1">
-                Actualiza tu contraseña de acceso
+                Actualizá tu contraseña de acceso
               </p>
             </div>
 
@@ -143,22 +147,33 @@ const CambiarContrasena = () => {
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
               {/* Contraseña actual */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Contraseña Actual
+                <label
+                  htmlFor="currentPassword"
+                  className="block text-sm font-medium text-gray-700 mb-1">
+                  Contraseña actual
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <FiLock className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
+                    id="currentPassword"
+                    name="currentPassword"
                     type={showCurrentPassword ? "text" : "password"}
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
+                    autoComplete="current-password"
+                    required
                     className="appearance-none block w-full px-3 py-3 pl-10 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200"
-                    placeholder="Ingresa tu contraseña actual"
+                    placeholder="Ingresá tu contraseña actual"
                   />
                   <button
                     type="button"
+                    aria-label={
+                      showCurrentPassword
+                        ? "Ocultar contraseña"
+                        : "Mostrar contraseña"
+                    }
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200">
                     {showCurrentPassword ? (
@@ -172,22 +187,33 @@ const CambiarContrasena = () => {
 
               {/* Nueva contraseña */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nueva Contraseña
+                <label
+                  htmlFor="newPassword"
+                  className="block text-sm font-medium text-gray-700 mb-1">
+                  Nueva contraseña
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <FiLock className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
+                    id="newPassword"
+                    name="newPassword"
                     type={showNewPassword ? "text" : "password"}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
+                    autoComplete="new-password"
+                    required
                     className="appearance-none block w-full px-3 py-3 pl-10 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200"
-                    placeholder="Mínimo 8 caracteres"
+                    placeholder="Mínimo 8 caracteres, letras y números"
                   />
                   <button
                     type="button"
+                    aria-label={
+                      showNewPassword
+                        ? "Ocultar contraseña"
+                        : "Mostrar contraseña"
+                    }
                     onClick={() => setShowNewPassword(!showNewPassword)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200">
                     {showNewPassword ? (
@@ -197,29 +223,51 @@ const CambiarContrasena = () => {
                     )}
                   </button>
                 </div>
-                <p className="mt-1 text-xs text-gray-500">
-                  Debe tener al menos 8 caracteres
+                <p
+                  className={`mt-1 text-xs ${
+                    !newPassword
+                      ? "text-gray-500"
+                      : validatePassword(newPassword)
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}>
+                  {!newPassword
+                    ? "Debe tener al menos 8 caracteres e incluir letras y números"
+                    : validatePassword(newPassword)
+                    ? "✓ Contraseña segura"
+                    : "Mínimo 8 caracteres, incluir letras y números"}
                 </p>
               </div>
 
               {/* Confirmar nueva contraseña */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Confirmar Nueva Contraseña
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-gray-700 mb-1">
+                  Confirmar nueva contraseña
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <FiLock className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
+                    id="confirmPassword"
+                    name="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
+                    autoComplete="new-password"
+                    required
                     className="appearance-none block w-full px-3 py-3 pl-10 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200"
-                    placeholder="Repite la nueva contraseña"
+                    placeholder="Repetí la nueva contraseña"
                   />
                   <button
                     type="button"
+                    aria-label={
+                      showConfirmPassword
+                        ? "Ocultar contraseña"
+                        : "Mostrar contraseña"
+                    }
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200">
                     {showConfirmPassword ? (
@@ -229,6 +277,18 @@ const CambiarContrasena = () => {
                     )}
                   </button>
                 </div>
+                {confirmPassword && (
+                  <p
+                    className={`mt-1 text-xs ${
+                      newPassword === confirmPassword
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}>
+                    {newPassword === confirmPassword
+                      ? "✓ Las contraseñas coinciden"
+                      : "✗ Las contraseñas no coinciden"}
+                  </p>
+                )}
               </div>
 
               {/* Botones */}
@@ -241,7 +301,12 @@ const CambiarContrasena = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={
+                    isLoading ||
+                    !currentPassword ||
+                    !validatePassword(newPassword) ||
+                    newPassword !== confirmPassword
+                  }
                   className="flex-1 py-2.5 px-4 border border-transparent rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
                   {isLoading ? (
                     <div className="flex items-center justify-center">
@@ -265,7 +330,7 @@ const CambiarContrasena = () => {
                       Cambiando...
                     </div>
                   ) : (
-                    "Cambiar Contraseña"
+                    "Cambiar contraseña"
                   )}
                 </button>
               </div>
@@ -278,10 +343,10 @@ const CambiarContrasena = () => {
               Recomendaciones de seguridad:
             </h3>
             <ul className="text-sm text-blue-700 space-y-1 list-disc list-inside">
-              <li>Usa al menos 8 caracteres</li>
-              <li>Combina letras mayúsculas y minúsculas</li>
-              <li>Incluye números y símbolos especiales</li>
-              <li>Evita usar contraseñas anteriores</li>
+              <li>Usá al menos 8 caracteres con letras y números</li>
+              <li>Combiná letras mayúsculas y minúsculas</li>
+              <li>Incluí símbolos especiales</li>
+              <li>Evitá usar contraseñas anteriores</li>
             </ul>
           </div>
         </div>

@@ -57,4 +57,73 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
+// Refresco de token single-flight: si varias peticiones reciben 401 a la vez,
+// solo se dispara un refresh y las demás esperan el resultado
+let refreshPromise: Promise<string | null> | null = null;
+
+const refreshAccessToken = (): Promise<string | null> => {
+  if (!refreshPromise) {
+    refreshPromise = (async () => {
+      const refresh = sessionStorage.getItem("refresh_token");
+      if (!refresh) return null;
+      try {
+        const { data } = await API.post(`/login/token/refresh/`, { refresh });
+        sessionStorage.setItem("access_token", data.access);
+        if (data.refresh) {
+          sessionStorage.setItem("refresh_token", data.refresh);
+        }
+        return data.access as string;
+      } catch {
+        return null;
+      } finally {
+        refreshPromise = null;
+      }
+    })();
+  }
+  return refreshPromise;
+};
+
+const clearSessionAndRedirect = () => {
+  sessionStorage.removeItem("access_token");
+  sessionStorage.removeItem("refresh_token");
+  sessionStorage.removeItem("user_email");
+  sessionStorage.removeItem("user_name");
+  sessionStorage.removeItem("user_rol");
+  if (
+    typeof window !== "undefined" &&
+    !window.location.pathname.startsWith("/login")
+  ) {
+    window.location.href = "/login";
+  }
+};
+
+// Manejo de sesión expirada: ante un 401 intenta refrescar el token una vez
+// y reintenta la petición; si no se puede, cierra sesión y redirige al login
+API.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const original = error.config;
+    const isAuthEndpoint = original?.url?.includes("/login/token/");
+
+    if (
+      error.response?.status === 401 &&
+      original &&
+      !original._retry &&
+      !isAuthEndpoint &&
+      typeof window !== "undefined" &&
+      sessionStorage.getItem("access_token")
+    ) {
+      original._retry = true;
+      const newToken = await refreshAccessToken();
+      if (newToken) {
+        original.headers["Authorization"] = `Bearer ${newToken}`;
+        return API(original);
+      }
+      clearSessionAndRedirect();
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 export default API;

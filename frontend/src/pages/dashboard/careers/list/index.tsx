@@ -36,7 +36,8 @@ import {
   EstadoFilter,
 } from "../../../../components/Filters";
 import Pagination from "../../../../components/Pagination";
-import { normalizeUrl } from "../../../../hooks/useSearch";
+import LoadingOverlay from "../../../../components/LoadingOverlay";
+import { normalizeUrl } from "@/utils/urlHelpers";
 import { exportToExcel } from "@/utils/exportToExcel";
 
 // Agregar estilos CSS para forzar el z-index de SweetAlert
@@ -98,6 +99,7 @@ const ListaCarreras = () => {
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Estados para el modal de asignaturas
   const [modalAsignaturasVisible, setModalAsignaturasVisible] = useState(false);
@@ -111,7 +113,6 @@ const ListaCarreras = () => {
   const [todasAsignaturas, setTodasAsignaturas] = useState<Asignatura[]>([]);
   const [asignaturaParaAgregar, setAsignaturaParaAgregar] =
     useState<Asignatura | null>(null);
-  const [filtroAsignaturas, setFiltroAsignaturas] = useState("");
   const [filtroNombreAsignatura, setFiltroNombreAsignatura] = useState("");
   const [filtroCodigoAsignatura, setFiltroCodigoAsignatura] = useState("");
   const [filtroModuloAsignatura, setFiltroModuloAsignatura] = useState("");
@@ -126,6 +127,7 @@ const ListaCarreras = () => {
 
   const fetchData = async (url: string) => {
     try {
+      setIsLoading(true);
       // Normalizar la URL de entrada si es absoluta
       let apiUrl = url;
       if (url.startsWith("http")) {
@@ -148,13 +150,14 @@ const ListaCarreras = () => {
       setPrevUrl(normalizedPrev);
       setTotalItems(response.data.count);
 
-      // Calcular la página actual basándose en los parámetros de la URL
+      // Calcular la página actual basándose en el parámetro "page" de la URL
+      // (el backend usa PageNumberPagination)
       const urlParams = new URLSearchParams(apiUrl.split("?")[1] || "");
-      const offset = parseInt(urlParams.get("offset") || "0");
-      const limit = parseInt(urlParams.get("limit") || "10");
-      const calculatedPage = Math.floor(offset / limit) + 1;
-      setCurrentPage(calculatedPage);
+      const page = parseInt(urlParams.get("page") || "1");
+      setCurrentPage(page);
+      setIsLoading(false);
     } catch (error) {
+      setIsLoading(false);
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -195,7 +198,7 @@ const ListaCarreras = () => {
   const descargarExcel = async () => {
     try {
       let allCarreras: Carrera[] = [];
-      let url = `/facet/carrera/?`;
+      let url: string | null = `/facet/carrera/?`;
       const params = new URLSearchParams();
 
       if (filtroNombre !== "") {
@@ -215,10 +218,11 @@ const ListaCarreras = () => {
       url += params.toString();
 
       while (url) {
-        const response = await API.get(url);
+        const response: { data: { results: Carrera[]; next: string | null } } =
+          await API.get(url);
         const { results, next } = response.data;
         allCarreras = [...allCarreras, ...results];
-        url = next;
+        url = next ? normalizeUrl(next) : null;
       }
 
       await exportToExcel({
@@ -386,7 +390,6 @@ const ListaCarreras = () => {
       // Limpiar estados anteriores
       setAsignaturasCarrera([]);
       setTodasAsignaturas([]);
-      setFiltroAsignaturas("");
       setAsignaturaParaAgregar(null);
 
       // Cargar TODAS las asignaturas de la carrera (con paginación)
@@ -696,7 +699,11 @@ const ListaCarreras = () => {
               <EstadoFilter value={filtroEstado} onChange={setFiltroEstado} />
             </FilterContainer>
 
-            <ResponsiveTable dense>
+            <div className="relative">
+              {isLoading && (
+                <LoadingOverlay variant="overlay" message="Cargando..." />
+              )}
+              <ResponsiveTable dense>
               <TableHead>
                 <TableRow>
                   <TableCell>Nombre</TableCell>
@@ -757,7 +764,8 @@ const ListaCarreras = () => {
                   </TableRow>
                 ))}
               </TableBody>
-            </ResponsiveTable>
+              </ResponsiveTable>
+            </div>
 
             <Pagination
               currentPage={currentPage}

@@ -82,6 +82,7 @@ class CargoDepartamentoViewSet(viewsets.ModelViewSet):
         'estado': ['exact'],
         'departamento': ['exact'],
         'asignatura': ['exact', 'isnull'],
+        'cargo': ['isnull'],
         'tipo_cargo': ['exact'],
         'tipo_cargo__sigla': ['exact'],
         'tipo_cargo__dedicacion': ['exact'],
