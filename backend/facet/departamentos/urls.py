@@ -28,9 +28,15 @@ router.register(r'cargo-departamento', CargoDepartamentoViewSet)
 router.register(r'cargo', CargoViewSet)
 router.register(r'cargo-historial', CargoHistorialViewSet)
 router.register(r'operacion-cargo', OperacionCargoViewSet)
+router.register(r'designacion', DesignacionViewSet)
+router.register(r'seguimiento', SeguimientoViewSet)
+router.register(r'licencia', LicenciaViewSet)
+router.register(r'asignacion-funcion', AsignacionFuncionViewSet)
+router.register(r'estadistica-asignatura', EstadisticaAsignaturaViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('reporte-planta/', ReportePlantaView.as_view(), name='reporte_planta'),
     path('docs/', include_docs_urls(title="FACET API")),
     # path('export/excel/departamentos/', DepartamentoExportExcel.as_view(), name='export_excel_departamentos'),
     # path('export/pdf/departamentos/', DepartamentoExportPDF.as_view(), name='export_pdf_departamentos'),

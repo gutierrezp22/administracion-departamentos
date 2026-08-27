@@ -3,6 +3,12 @@ from .base import BaseModel
 
 class Asignatura(BaseModel):
     codigo = models.CharField(max_length=45)
+    codigo_siu = models.CharField(
+        max_length=45, blank=True, null=True,
+        help_text='Código en SIU Guaraní (ej. 15_E10). Clave de cruce con el sistema académico.')
+    conciliada_siu = models.BooleanField(
+        default=False,
+        help_text='True si el nombre coincide con el de SIU Guaraní y no requiere revisión.')
     nombre = models.CharField(max_length=150)
     modulo = models.CharField(max_length=45)
     programa = models.CharField(max_length=45, blank=True, null=True)

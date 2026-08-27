@@ -20,6 +20,9 @@ import WorkIcon from "@mui/icons-material/Work";
 import AssignmentLateIcon from "@mui/icons-material/AssignmentLate";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import FactCheckIcon from "@mui/icons-material/FactCheck";
+import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import API from "@/api/axiosConfig";
 
 // Define las propiedades del componente
@@ -308,6 +311,21 @@ const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
       text: "Cargos sin vincular",
       path: "/dashboard/cargos/sin-vincular",
       badge: cargosPendientes,
+    },
+    {
+      icon: <FactCheckIcon />,
+      text: "Designaciones",
+      path: "/dashboard/designaciones",
+    },
+    {
+      icon: <PendingActionsIcon />,
+      text: "Seguimientos",
+      path: "/dashboard/seguimientos",
+    },
+    {
+      icon: <AssessmentIcon />,
+      text: "Reporte de Planta",
+      path: "/dashboard/reporte-planta",
     },
     {
       icon: <EmailIcon />,

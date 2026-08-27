@@ -19,3 +19,8 @@ from .cargoDepartamento import CargoDepartamento
 from .cargo import Cargo
 from .cargoHistorial import CargoHistorial
 from .operacionCargo import OperacionCargo
+from .designacion import Designacion
+from .seguimiento import Seguimiento
+from .licencia import Licencia
+from .asignacionFuncion import AsignacionFuncion
+from .estadisticaAsignatura import EstadisticaAsignatura

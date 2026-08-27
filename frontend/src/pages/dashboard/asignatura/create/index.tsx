@@ -55,6 +55,8 @@ const CrearAsignatura = () => {
   const [openAreaModal, setOpenAreaModal] = useState(false);
   const [nombre, setNombre] = useState("");
   const [codigo, setCodigo] = useState("");
+  const [codigoSiu, setCodigoSiu] = useState("");
+  const [conciliadaSiu, setConciliadaSiu] = useState("0");
   const [estado, setEstado] = useState("1");
   const [tipo, setTipo] = useState("Obligatoria");
   const [modulo, setModulo] = useState("");
@@ -157,6 +159,8 @@ const CrearAsignatura = () => {
       area: areaSeleccionada.id,
       departamento: areaSeleccionada.departamento,
       codigo: codigo.trim(),
+      codigo_siu: codigoSiu.trim() || null,
+      conciliada_siu: conciliadaSiu === "1",
       nombre: nombre.trim(),
       modulo: modulo.trim() || null,
       programa: programa.trim() || null,
@@ -239,6 +243,22 @@ const CrearAsignatura = () => {
             label="Código"
             value={codigo}
             onChange={(e) => setCodigo(e.target.value.toUpperCase())}
+          />
+          <FormField
+            label="Código SIU Guaraní"
+            value={codigoSiu}
+            onChange={(e) => setCodigoSiu(e.target.value.toUpperCase())}
+            placeholder="Ej. 15_E10"
+            helperText="Código en el sistema académico. Sin esto la asignatura no se puede cruzar con la matrícula."
+          />
+          <FormField
+            label="¿Conciliada con SIU?"
+            value={conciliadaSiu}
+            onChange={(e) => setConciliadaSiu(e.target.value)}
+            options={[
+              { value: "0", label: "No — revisar" },
+              { value: "1", label: "Sí — el nombre coincide" },
+            ]}
           />
         </FormSection>
 
