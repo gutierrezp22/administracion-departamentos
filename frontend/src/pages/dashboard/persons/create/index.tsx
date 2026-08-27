@@ -33,6 +33,12 @@ const CrearPersona = () => {
   const [interno, setInterno] = useState("");
   const [estado, setEstado] = useState("1");
   const [fechaNacimiento, setFechaNacimiento] = useState<dayjs.Dayjs | null>(null);
+  const [fechaIngreso, setFechaIngreso] = useState<dayjs.Dayjs | null>(null);
+  const [cuil, setCuil] = useState("");
+  const [sexo, setSexo] = useState("");
+  const [estadoAgente, setEstadoAgente] = useState("activo");
+  const [acoop, setAcoop] = useState("0");
+  const [observaciones, setObservaciones] = useState("");
   const [titulos, setTitulos] = useState<Titulo[]>([]);
   const [tituloId, setTituloId] = useState<number | "">("");
   const [modalVisible, setModalVisible] = useState(false);
@@ -91,6 +97,12 @@ const CrearPersona = () => {
       return;
     }
 
+    const cuilLimpio = cuil.replace(/\D/g, "");
+    if (cuilLimpio && cuilLimpio.length !== 11) {
+      handleOpenModal("Error", "El CUIL debe tener 11 dígitos.", () => {});
+      return;
+    }
+
     const nuevaPersona = {
       nombre: nombre.trim(),
       apellido: apellido.trim(),
@@ -102,6 +114,12 @@ const CrearPersona = () => {
       legajo: legajo.trim() || null,
       titulo: tituloId || null,
       fecha_nacimiento: formatFechaParaBackend(fechaNacimiento),
+      fecha_ingreso: formatFechaParaBackend(fechaIngreso),
+      cuil: cuil.replace(/\D/g, "") || null,
+      sexo: sexo || null,
+      estado_agente: estadoAgente,
+      acoop: acoop === "1",
+      observaciones: observaciones.trim() || null,
     };
 
     try {
@@ -137,10 +155,65 @@ const CrearPersona = () => {
             value={apellido}
             onChange={(e) => setApellido(capitalizeFirstLetter(e.target.value))}
           />
+          <FormField
+            label="CUIL"
+            value={cuil}
+            onChange={(e) => setCuil(e.target.value)}
+            placeholder="11 dígitos, sin guiones"
+            helperText="Clave de cruce con liquidación de haberes y SIU."
+          />
+          <FormField
+            label="Sexo"
+            value={sexo}
+            onChange={(e) => setSexo(e.target.value)}
+            options={[
+              { value: "", label: "(Sin informar)" },
+              { value: "M", label: "Masculino" },
+              { value: "F", label: "Femenino" },
+              { value: "X", label: "Otro / No informa" },
+            ]}
+          />
           <FormDatePicker
             label="Fecha de Nacimiento"
             value={fechaNacimiento}
             onChange={setFechaNacimiento}
+          />
+          <FormDatePicker
+            label="Fecha de Ingreso a la Universidad"
+            value={fechaIngreso}
+            onChange={setFechaIngreso}
+          />
+        </FormSection>
+
+        <FormSection title="Situación de revista">
+          <FormField
+            label="Situación del agente"
+            value={estadoAgente}
+            onChange={(e) => setEstadoAgente(e.target.value)}
+            options={[
+              { value: "activo", label: "Activo" },
+              { value: "licencia", label: "En licencia" },
+              { value: "jubilado", label: "Jubilado" },
+              { value: "renuncia", label: "Renunció" },
+              { value: "inactivo", label: "Inactivo" },
+            ]}
+            helperText="Distinto del Estado del registro: esto es la situación real del agente en la planta."
+          />
+          <FormField
+            label="Aporta a ACOOP"
+            value={acoop}
+            onChange={(e) => setAcoop(e.target.value)}
+            options={[
+              { value: "0", label: "No" },
+              { value: "1", label: "Sí" },
+            ]}
+          />
+          <FormField
+            label="Observaciones"
+            value={observaciones}
+            onChange={(e) => setObservaciones(e.target.value)}
+            multiline
+            rows={3}
           />
         </FormSection>
 

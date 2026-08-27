@@ -51,6 +51,8 @@ const EditarAsignatura: React.FC = () => {
   const [idarea, setIdarea] = useState<number>(0);
   const [nombre, setNombre] = useState("");
   const [codigo, setCodigo] = useState("");
+  const [codigoSiu, setCodigoSiu] = useState("");
+  const [conciliadaSiu, setConciliadaSiu] = useState("0");
   const [estado, setEstado] = useState("");
   const [tipo, setTipo] = useState("");
   const [modulo, setModulo] = useState("");
@@ -80,6 +82,8 @@ const EditarAsignatura: React.FC = () => {
       setIddepartamento(asignatura.departamento);
       setNombre(asignatura.nombre);
       setCodigo(asignatura.codigo);
+      setCodigoSiu(asignatura.codigo_siu ?? "");
+      setConciliadaSiu(asignatura.conciliada_siu ? "1" : "0");
       setEstado(String(asignatura.estado));
       setTipo(String(asignatura.tipo));
       setModulo(asignatura.modulo);
@@ -92,6 +96,8 @@ const EditarAsignatura: React.FC = () => {
       area: idarea,
       departamento: iddepartamento,
       codigo: codigo,
+      codigo_siu: codigoSiu.trim() || null,
+      conciliada_siu: conciliadaSiu === "1",
       nombre: nombre,
       modulo: modulo,
       programa: programa,
@@ -121,6 +127,22 @@ const EditarAsignatura: React.FC = () => {
             label="Código"
             value={codigo}
             onChange={(e) => setCodigo(e.target.value.toUpperCase())}
+          />
+          <FormField
+            label="Código SIU Guaraní"
+            value={codigoSiu}
+            onChange={(e) => setCodigoSiu(e.target.value.toUpperCase())}
+            placeholder="Ej. 15_E10"
+            helperText="Código en el sistema académico. Sin esto la asignatura no se puede cruzar con la matrícula."
+          />
+          <FormField
+            label="¿Conciliada con SIU?"
+            value={conciliadaSiu}
+            onChange={(e) => setConciliadaSiu(e.target.value)}
+            options={[
+              { value: "0", label: "No — revisar" },
+              { value: "1", label: "Sí — el nombre coincide" },
+            ]}
           />
         </FormSection>
 

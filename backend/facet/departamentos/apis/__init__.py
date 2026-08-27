@@ -19,6 +19,12 @@ from .cargoDepartamento import CargoDepartamentoViewSet
 from .cargo import CargoViewSet
 from .cargoHistorial import CargoHistorialViewSet
 from .operacionCargo import OperacionCargoViewSet
+from .designacion import DesignacionViewSet
+from .seguimiento import SeguimientoViewSet
+from .licencia import LicenciaViewSet
+from .asignacionFuncion import AsignacionFuncionViewSet
+from .estadisticaAsignatura import EstadisticaAsignaturaViewSet
+from .reportePlanta import ReportePlantaView
 from rest_framework.pagination import PageNumberPagination
 
 class StandardResultsSetPagination(PageNumberPagination):

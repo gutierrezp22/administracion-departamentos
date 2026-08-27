@@ -19,3 +19,8 @@ from .cargoDepartamento import CargoDepartamentoSerializer
 from .cargo import CargoSerializer
 from .cargoHistorial import CargoHistorialSerializer, CargoHistorialDetailSerializer
 from .operacionCargo import OperacionCargoSerializer, CargoMiniSerializer
+from .designacion import DesignacionSerializer
+from .seguimiento import SeguimientoSerializer
+from .licencia import LicenciaSerializer
+from .asignacionFuncion import AsignacionFuncionSerializer
+from .estadisticaAsignatura import EstadisticaAsignaturaSerializer
