@@ -33,3 +33,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# archivos de reglas para agentes, regenerados por `next dev`
+AGENTS.md
+CLAUDE.md
