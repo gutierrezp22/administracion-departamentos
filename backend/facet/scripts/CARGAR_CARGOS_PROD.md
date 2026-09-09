@@ -11,12 +11,17 @@ El script es idempotente: re-ejecutarlo no duplica datos.
 
 Las migraciones 0005→0010 (que crean las tablas Cargo, TipoCargo,
 CargoHistorial, OperacionCargo) deben aplicarse antes que el script de
-seed. Por eso configuramos **DOS** comandos:
+seed.
 
-**Pre-deployment Command:**
-```
-/opt/venv/bin/python manage.py migrate --noinput
-```
+> **Ya no hace falta configurar el migrate a mano.** El `Procfile` del
+> backend arranca con `start.sh`, que corre `migrate` y `collectstatic`
+> dentro del contenedor nuevo antes de levantar gunicorn.
+>
+> No usar el **Pre-deployment Command** para migrar: Coolify lo ejecuta en
+> el contenedor **viejo**, con el codigo anterior, asi que el deploy queda
+> en "Success" con la base sin migrar. Fue lo que paso con la migracion
+> `0013` y dejo los endpoints de persona / tipo-cargo / asignatura tirando
+> `column ... does not exist`.
 
 **Post-deployment Command:**
 ```

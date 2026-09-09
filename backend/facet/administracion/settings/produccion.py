@@ -2,7 +2,11 @@ import os
 from .base import *
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Con DEBUG=True cualquier 500 devuelve el traceback completo (settings,
+# variables locales, fragmentos de query) al navegador. Se deja apagado por
+# defecto; para diagnosticar algo puntual, DJANGO_DEBUG=1 en Coolify y
+# volver a apagarlo despues.
+DEBUG = os.environ.get("DJANGO_DEBUG", "").lower() in ("1", "true", "yes")
 
 allowed_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS")
 ALLOWED_HOSTS = allowed_hosts.split(',') if allowed_hosts else []

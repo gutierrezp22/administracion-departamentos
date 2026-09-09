@@ -1,2 +1,7 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# El arranque del contenedor depende de estos archivos: si se checkoutean con
+# CRLF, sh falla con "\r: not found".
+*.sh text eol=lf
+Procfile text eol=lf
