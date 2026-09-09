@@ -128,7 +128,6 @@ class MyTokenObtainPairView(TokenObtainPairView):
     """
     permission_classes = [AllowAny]  # Permite el acceso sin necesidad de autenticación
 
-    print("entra al token")
     serializer_class = MyTokenObtainPairSerializer
    
 class ValidateRecaptchaView(APIView):
