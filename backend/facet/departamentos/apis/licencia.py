@@ -3,7 +3,7 @@ from datetime import date
 from django.db.models import Q
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -15,7 +15,7 @@ from .pagination import StandardResultsSetPagination
 class LicenciaViewSet(viewsets.ModelViewSet):
     """CRUD de licencias docentes."""
 
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     queryset = Licencia.objects.all()
     serializer_class = LicenciaSerializer
     pagination_class = StandardResultsSetPagination

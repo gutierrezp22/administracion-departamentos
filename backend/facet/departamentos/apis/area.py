@@ -1,7 +1,7 @@
 from rest_framework import viewsets, filters, status
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from ..models import Area
@@ -13,7 +13,7 @@ class StandardResultsSetPagination(PageNumberPagination):
     max_page_size = 100
 
 class AreaViewSet(viewsets.ModelViewSet):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     queryset = Area.objects.select_related('departamento').filter(estado='1')  # Solo objetos activos por defecto
     serializer_class = AreaSerializer
     pagination_class = StandardResultsSetPagination

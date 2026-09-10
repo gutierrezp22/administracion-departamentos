@@ -1,6 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -17,7 +17,7 @@ class DesignacionViewSet(viewsets.ModelViewSet):
     estos registros.
     """
 
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     queryset = Designacion.objects.all()
     serializer_class = DesignacionSerializer
     pagination_class = StandardResultsSetPagination

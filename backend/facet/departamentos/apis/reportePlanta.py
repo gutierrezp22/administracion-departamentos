@@ -14,7 +14,7 @@ from collections import Counter, defaultdict
 from datetime import date, timedelta
 
 from django.db.models import Q
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -252,7 +252,7 @@ class ReportePlantaView(APIView):
       - horizonte_dias: int (default 365) — ventana de vencimientos próximos
     """
 
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         hoy = date.today()

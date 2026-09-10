@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import "./styles.css";
-import axios from "axios";
 import dayjs, { Dayjs } from "dayjs";
 import { useRouter } from "next/router";
 import DashboardMenu from "../../..";
 import BasicModal from "@/utils/modal";
 import withAuth from "../../../../../components/withAut";
-import { API_BASE_URL } from "../../../../../utils/config";
 import API from "../../../../../api/axiosConfig";
 import { parseFechaDDMMYYYY, formatFechaParaBackend } from "@/utils/dateHelpers";
 import {
@@ -60,8 +58,8 @@ const EditarDepartamentoJefe = () => {
     const fetchData = async () => {
       if (id) {
         try {
-          const response = await axios.get(
-            `${API_BASE_URL}/facet/jefe-departamento/${id}/obtener_detalle/`
+          const response = await API.get(
+            `/facet/jefe-departamento/${id}/obtener_detalle/`
           );
           const data = response.data;
 
