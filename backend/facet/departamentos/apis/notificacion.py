@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils.timezone import now
@@ -36,7 +36,7 @@ class NotificacionFilter(filters.FilterSet):
 class NotificacionViewSet(viewsets.ModelViewSet):
     queryset = Notificacion.objects.select_related('persona').all().order_by('-fecha_creacion')  
     serializer_class = NotificacionSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     pagination_class = NotificacionPagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = NotificacionFilter  

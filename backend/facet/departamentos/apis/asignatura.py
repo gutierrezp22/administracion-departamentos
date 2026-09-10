@@ -1,14 +1,14 @@
 from rest_framework import viewsets, filters, status
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter
 from ..models import Asignatura
 from ..serializers import AsignaturaSerializer
 from .pagination import StandardResultsSetPagination
 
 class AsignaturaViewSet(viewsets.ModelViewSet):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     queryset = Asignatura.objects.select_related('area', 'departamento').filter(estado='1')  # Solo objetos activos por defecto
     serializer_class = AsignaturaSerializer
     pagination_class = StandardResultsSetPagination

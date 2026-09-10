@@ -3,14 +3,14 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import viewsets, status
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from ..models import Jefe
 from ..serializers import JefeSerializer
 
 
 
 class JefeViewSet(viewsets.ModelViewSet):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     queryset = Jefe.objects.filter(estado='1')  # Solo objetos activos por defecto
     serializer_class = JefeSerializer
     filter_backends = [DjangoFilterBackend]

@@ -1,6 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -12,7 +12,7 @@ from .pagination import StandardResultsSetPagination
 class AsignacionFuncionViewSet(viewsets.ModelViewSet):
     """CRUD de asignaciones de funciones (laboratorios, gabinetes, etc.)."""
 
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     queryset = AsignacionFuncion.objects.all()
     serializer_class = AsignacionFuncionSerializer
     pagination_class = StandardResultsSetPagination
