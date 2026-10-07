@@ -60,8 +60,10 @@ class PasswordResetView(generics.CreateAPIView):
         # Formato query string: funciona con el frontend exportado estático
         # sin necesidad de rewrites del servidor (la ruta por path
         # /<uid>/<token>/ sigue soportada por compatibilidad).
-        base = reset if reset.endswith('/') else f"{reset}/"
-        reset_link = f"{base}?uid={uidb64}&token={token}"
+        # Sin barra final: el export genera login/reset-password.html y además
+        # un directorio login/reset-password/ (por [...params]) sin index.html,
+        # así que nginx responde 403 a /login/reset-password/.
+        reset_link = f"{reset.rstrip('/')}?uid={uidb64}&token={token}"
         email_subject = _('Restablecimiento de contraseña')
         email_message = render_to_string('password_reset_email.html', {'reset_link': reset_link})
         try:
